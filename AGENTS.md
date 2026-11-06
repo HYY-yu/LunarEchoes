@@ -10,3 +10,11 @@
 - 关键会话节点记录 Info，链路诊断记录 Debug，可恢复异常记录 Warn，错误记录 Error 并向用户反馈。
 - 修改输入输出行为时更新相应测试。提交交付前运行 npm run verify，再进行浏览器试玩。
 - 使用 .agents/skills/verify-lunar/SKILL.md 查看项目验证流程。
+
+## 团队协作
+
+- 主协调按 docs/team-workflow.md 使用 .codex/agents/ 角色池。
+- 六关目标和依赖见 docs/campaign-plan.md，每关 180–300 秒。
+- 一 Issue 一个 owner，每名写入者独立 worktree、分支和 PR。
+- 合并需要当前 head SHA 的独立领域验收和成功 CI。重大调整保留 PR，建立人类决策 Issue。
+- 不降低验收门槛，不擅自提高预算，不把角色配置当作已运行的后台服务。
