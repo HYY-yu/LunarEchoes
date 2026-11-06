@@ -19,7 +19,7 @@
 
 ## 分批任务与依赖
 
-以下为可转成 Issue 的任务清单，尚未创建远程 Issue。每项建立独立 owner、worktree、分支与 PR。
+以下任务按依赖转成 Issue；实时状态以 GitHub 为准。共享契约首项见 [Issue #1](https://github.com/HYY-yu/LunarEchoes/issues/1)，输入边界与验证样例见[六关数据契约](stage-contract.md)。契约 PR 合并才代表 A1 的数据契约部分完成，不代表模拟已接入或六关已经可玩。每项建立独立 owner、worktree、分支与 PR。
 
 | 批次与任务 | 依赖 | 主责角色 | 完成验收 |
 |---|---|---|---|
