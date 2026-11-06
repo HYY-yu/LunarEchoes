@@ -16,9 +16,15 @@ renderer 拥有一条 `{world, tick, x, y, animationTick}` 观测记录。只有
 
 ## 像素和官方参考
 
-imagegen skill 对既有 code-native 图形要求优先直接编辑代码。本次使用原像素源中的两种抬腿姿态，没有生成、下载或引入位图。代码姿态不替代最终浏览器验收。
+`621776d` 先形成了代码姿态候选。独立审查指出视觉流程尚缺实际官方画面观察及 imagegen 参考评审，随后由主协调补齐，作者再对参考与候选复核。这里记录真实的先后顺序，不把补验写成实现前已经完成的步骤。
 
-已搜索 [Brotato 官方 Steam 页面](https://store.steampowered.com/app/1942280/Brotato/) 与 [Vampire Survivors 官方 Steam 页面](https://store.steampowered.com/app/1794680/Vampire_Survivors/)，确认官方实机媒体入口。参考目标是把普通移动与攻击、受伤提示分开，而非复制其角色或界面。本次仅取得页面文字与媒体入口，未观察竞品逐帧动作，不将此写成已经完成的画面比较。游戏菜单、HUD 和触屏布局未改。
+主协调用 built-in imagegen 生成仅供预览的轮廓和动作参考。输入是生产图集的实际姿态裁图 `/private/tmp/lunar-heartbeat-20261106-1033/media/astronaut-code-poses.png`，约束白机甲、青面罩、深边与16格，仅底部腿靴交替支撑，躯干固定、不旋转或跳跃，不增加攻击或装备。输出位于 `/Users/feng/.codex/generated_images/01a1aa79-5590-7c13-9be6-42328193c376/exec-a3da7f55-c750-43c6-abfb-c65ccd96690b.png`。
+
+作者实际查看了输入裁图与生成参考。固定躯干和左右脚交替支撑符合候选的三姿态、四拍意图，因此保留代码姿态。生成图的柔光、更细密像素和较宽脚位不采用，避免改变现有16×16轮廓。参考只用于评审，没有复制进源码、dist 或运行时资源；既有 code-native 图形仍由像素字符串交付。
+
+官方来源包括已搜索的 [Brotato Steam 页面](https://store.steampowered.com/app/1942280/Brotato/) 与 [Vampire Survivors Steam 页面](https://store.steampowered.com/app/1794680/Vampire_Survivors/)。初次网页工具只取得文字和媒体入口，未成功观察画面。补验时，主协调在 Chrome 实际打开了 [Brotato 官方 CDN 实机截图](https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1942280/ss_d4b4c0b552e655169719e35c964765bd27d05900.1920x1080.jpg?t=1771429106)，浏览器证据为 `/private/tmp/lunar-heartbeat-20261106-1033/media/reference-brotato-official.png`，作者也实际查看了该证据。
+
+这张静态画面中，白色主角与厚描边在绿拾取物、亮伤害数字和敌群之间仍可辨识。本次沿用稳定上半身及简短腿部动作，不新增 HUD，也不复制任何角色或素材。静态截图不能证明竞品逐帧动作；Vampire Survivors 仍仅作为官方媒体入口记录。参考和生成概念都不替代本项目最终浏览器验收。
 
 ## 可复跑检查
 
@@ -44,4 +50,4 @@ node scripts/astronaut-audition.mjs
 
 状态中的 `observedPose`、`observedAlpha` 和 `observedY` 来自显式拦截生产 Canvas 的实际宇航员 `drawImage` 调用，不复制预期选帧算法。每次 render 前后比较完整 World。Step 控件先在运行状态采样实际渲染，再暂停，避免把从未绘制过的中间姿态当作已经显示的帧。
 
-最终 head 仍须由非作者在 1280×720 和 390×693 录制实际静止、移动、停止、冻结、受击、重开与回放，另在真实游戏操作并检查控制台。作者只运行代码、行为与预算检查，没有声称已观察到浏览器画面、实体手机帧率或本轮未改动的音频听感。
+最终 head 仍须由非作者在 1280×720 和 390×693 录制实际静止、移动、停止、冻结、受击、重开与回放，另在真实游戏操作并检查控制台。作者的参考评审与姿态裁图检查不代替这些交互和动画验收。作者未亲自驱动浏览器，不声明已通过连续运动、实体手机帧率或本轮未改动的音频听感。
