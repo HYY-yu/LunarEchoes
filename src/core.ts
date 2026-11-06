@@ -11,7 +11,7 @@ export type Enemy = { id: number; kind: EnemyKind; x: number; y: number; hp: num
 export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean };
 export type Crystal = { x: number; y: number; value: number };
 export type Fx = { x: number; y: number; kind: 'hit' | 'kill' | 'nova' | 'dash'; life: number; size: number };
-export type Event = 'shot' | 'hit' | 'kill' | 'pickup' | 'upgrade' | 'dash' | 'won' | 'lost' | 'boss';
+export type Event = 'enemy-hit' | 'shot' | 'hit' | 'kill' | 'pickup' | 'upgrade' | 'dash' | 'won' | 'lost' | 'boss';
 export type World = {
   seed: number; rng: number; tick: number; phase: Phase; nextId: number;
   player: { x: number; y: number; hp: number; maxHp: number; invincible: number; dashCooldown: number; dashTicks: number; dx: number; dy: number };
@@ -136,7 +136,7 @@ function step(world: World, input: Input): void {
   world.novaCooldown--;
   if (world.upgrades.nova > 0 && world.novaCooldown <= 0) {
     const radius = 95 + world.upgrades.nova * 18;
-    for (const enemy of world.enemies) if (distance(p.x, p.y, enemy.x, enemy.y) < radius) { enemy.hp -= 35 + world.upgrades.nova * 16; enemy.flash = 8; }
+    for (const enemy of world.enemies) if (distance(p.x, p.y, enemy.x, enemy.y) < radius) { enemy.hp -= 35 + world.upgrades.nova * 16; world.events.push('enemy-hit'); enemy.flash = 8; }
     world.effects.push({ x: p.x, y: p.y, kind: 'nova', life: 30, size: radius });
     world.novaCooldown = Math.max(90, 240 - world.upgrades.nova * 15);
   }
@@ -161,7 +161,7 @@ function step(world: World, input: Input): void {
       for (let i = 0; i < count; i++) {
         const a = world.tick * .055 + i * Math.PI * 2 / count;
         if (distance(enemy.x, enemy.y, p.x + Math.cos(a) * 58, p.y + Math.sin(a) * 58) < enemy.radius + 12) {
-          enemy.hp -= 1.3 + world.upgrades.orbit * .3; enemy.flash = 3;
+          enemy.hp -= 1.3 + world.upgrades.orbit * .3; world.events.push('enemy-hit'); enemy.flash = 3;
         }
       }
     }
@@ -173,7 +173,7 @@ function step(world: World, input: Input): void {
     } else {
       for (const enemy of world.enemies) {
         if (enemy.hp > 0 && distance(shot.x, shot.y, enemy.x, enemy.y) < enemy.radius + 5) {
-          enemy.hp -= shot.damage; enemy.flash = 6; shot.life = 0; break;
+          enemy.hp -= shot.damage; world.events.push('enemy-hit'); enemy.flash = 6; shot.life = 0; break;
         }
       }
     }
