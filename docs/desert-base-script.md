@@ -46,7 +46,7 @@
 | `objective` / `desert.av.objective` | 计划叙事节点 | 游戏 HUD 保留目标；闪烁阵列不遮挡敌人预警，目标无需听声音即可理解 | 计划，未验证 |
 | `radio.first-contact` / `desert.av.contact` | 计划叙事节点，无专用事件 | 敌人机械壳与发光组织可区分；无线电文字不占走位区 | 计划，未验证 |
 | `radio.telemetry` / `desert.av.telemetry` | 计划叙事节点，无专用事件 | 阵列灯序恢复；简短合成回执，不盖过攻击提示 | 计划，未验证 |
-| `boss` / `desert.av.boss` | 已有 `boss`，沙漠接入待实现 | 大轮廓收割机与清晰冲刺预警；已有低频 Boss 音色供评估 | 音色已有源码，沙漠外观与听感待验收 |
+| `boss` / `desert.av.boss` | 已有 `boss`，沙漠接入待实现 | 大轮廓收割机与既有放射弹幕的清晰攻击前摇预警；已有低频 Boss 音色供评估 | 音色已有源码，沙漠外观与听感待验收 |
 | `victory` / `desert.av.won` | 已有 `won` | 阵列信号发出、成功文字；单次合成胜利动机 | 事件已有，声音映射缺失 |
 | `defeat` / `desert.av.lost` | 已有 `lost` | 信号熄灭、失败文字；单次合成失败动机 | 事件已有，声音映射缺失 |
 | `next-clue` / `desert.av.handoff` | 计划胜利后的叙事节点 | 雨林回执，不提前展示月球源；提示音不能表示已解锁 | 计划，未验证 |
@@ -65,7 +65,7 @@
 | `desert.combat.pickup` | `pickup` | 拾取闪光与高音回执可辨识 | 已有音色，待实机验收 |
 | `desert.combat.dash` | `dash` | 冲刺轨迹、冷却可读；噪声不盖过受伤 | 已有特效与音色，待实机验收 |
 | `desert.combat.upgrade` | `upgrade` | 升级表现与恢复战斗无音符堆积 | 已有音色，待实机验收 |
-| `desert.combat.telegraph` | 渲染预警状态，无专用 Event | 冲刺与定向攻击提前量可见，色弱下依靠形状也能区分 | 预警表达须实机验收 |
+| `desert.combat.telegraph` | 渲染预警状态，无专用 Event | 既有定向射击与放射弹幕的攻击前摇预警可见，色弱下依靠形状也能区分；玩家冲刺冷却单独保持可读 | 预警表达须实机验收 |
 | `desert.ui.confirm`、`desert.ui.reject` | 计划 UI 行为，无 Core Event | 确认与拒绝有不同合成音和文字反馈 | 无声音映射 |
 | `desert.audio.lifecycle` | 静音、暂停、失焦、后台、重开、终局 | 静音无泄漏、恢复不追播、重开无重复音乐、终局音只一次 | 待试听与运行验证 |
 
