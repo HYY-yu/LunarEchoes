@@ -1,0 +1,53 @@
+{
+  "baseSha": "a7fb9cb332e6e4163984dfa6763e850c83031a72",
+  "runtimeSourceUnchanged": {
+    "act": true,
+    "begin": true,
+    "startReplay": true,
+    "showTitle": true,
+    "pause": true,
+    "button": true,
+    "handleKey": true,
+    "moveStick": true,
+    "frame": true
+  },
+  "testCount": 43,
+  "gzipBytes": 23972,
+  "budgetBytes": 153600,
+  "simulationChecksums": {
+    "208907": "d1326dd8",
+    "42": "c8b73f95",
+    "101": "22cc59b2"
+  },
+  "browser": "Chrome via extension",
+  "desktopCssAndPng": {
+    "width": 1280,
+    "height": 720
+  },
+  "narrowCssAndPng": {
+    "width": 390,
+    "height": 693
+  },
+  "realRun": {
+    "seed": 522104542,
+    "time": "01:01",
+    "phase": "lost",
+    "kills": 66,
+    "level": 2,
+    "replayVerified": true,
+    "checksum": "a9579683"
+  },
+  "consoleWarnOrError": [],
+  "media": {
+    "committedPngCount": 8,
+    "committedPngBytes": 324469,
+    "recording": "No screencast frames received; no video claimed"
+  },
+  "limits": [
+    "No actual victory screenshot",
+    "No physical mobile test",
+    "No FPS measurement",
+    "No new audio listening approval"
+  ],
+  "localEvidenceDirectory": "/private/tmp/lunar-ui16-evidence"
+}
