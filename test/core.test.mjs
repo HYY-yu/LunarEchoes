@@ -42,3 +42,14 @@ test('end of mission wins only after boss defeat', () => {
   const world = createWorld(1); world.tick = DURATION - 1; world.bossSpawned = true; world.bossKilled = true; dispatch(world, idle); assert.equal(world.phase.kind, 'won');
 });
 test('replay rejects incompatible versions', () => assert.throws(() => replay({ version: 'old', seed: 1, actions: [] }), /version/));
+test('enemy-hit is transient and emitted for bullet orbit and nova damage', () => {
+  for (const weapon of ['bullet', 'orbit', 'nova']) {
+    const world = createWorld(1); world.spawnCooldown = 999; world.fireCooldown = 999;
+    const x = weapon === 'orbit' ? world.player.x + 58 : world.player.x + 50;
+    world.enemies.push({ id: 1, kind: 'crawler', x, y: world.player.y, hp: 100, maxHp: 100, radius: 11, attack: 100, flash: 0 });
+    if (weapon === 'bullet') world.shots.push({ x, y: world.player.y, vx: 0, vy: 0, life: 10, damage: 5, hostile: false });
+    else world.upgrades[weapon] = 1;
+    dispatch(world, idle); assert(world.events.includes('enemy-hit'), weapon); assert(world.enemies[0].hp < 100, weapon);
+    const hash = checksum(world); world.events.length = 0; assert.equal(checksum(world), hash);
+  }
+});
