@@ -1,0 +1,18 @@
+import type { Upgrade } from './core.js';
+export type Language = 'zh' | 'en';
+const zh = {
+  name: '月面回响', subtitle: '守住最后一道月球信号。', mission: '静海基地 · 中继任务 07', start: '启动任务', replay: '回放上一局', replaying: '回放中', pause: '暂停', resume: '继续任务', restart: '重新部署', home: '返回基地', muted: '声音关', sound: '声音开', lang: 'EN', time: '信号同步', health: '装甲', level: '等级', kills: '击破', dash: '冲刺', ready: '就绪', upgrading: '选择技术升级', upgradeHint: '战斗已暂停。选择一个模块继续任务。', won: '信号已送达', lost: '信号中断', wonBody: '中继链路恢复。月球仍然听得见我们。', lostBody: '你的信号已存档。下一次部署会走得更远。', paused: '任务已暂停', controls: 'WASD / 方向键移动 · 空格冲刺 · P 暂停', touch: '左侧拖动移动 · 右侧冲刺', brief: '自动开火。收集能源，升级装备。坚持 3 分钟并击败收割者。', seed: '任务种子', boss: '收割者抵达', error: '系统异常，请刷新重试。', replayDone: '回放结束', replayVerified: '回放校验一致', replayFailed: '回放校验失败', noReplay: '完成一次任务即可回放', select: '装配模块', warning: '最终信号窗口开启', brand: 'LUNAR / RELAY', prototype: '月面行动 / 01', objective: '生存 03:00 · 击败收割者', recovered: '采集能源', replayEnd: '已到达录制终点', pausedHint: '深呼吸。月球会等你。'
+};
+const en: typeof zh = {
+  name: 'Lunar Relay', subtitle: 'Hold the last signal on the Moon.', mission: 'MARE TRANQUILLITATIS · RELAY 07', start: 'Begin mission', replay: 'Replay last run', replaying: 'Replay', pause: 'Pause', resume: 'Resume mission', restart: 'Redeploy', home: 'Return to base', muted: 'Sound off', sound: 'Sound on', lang: '中文', time: 'Signal sync', health: 'Armor', level: 'Level', kills: 'Kills', dash: 'Dash', ready: 'Ready', upgrading: 'Choose an upgrade', upgradeHint: 'Combat paused. Equip one module to continue.', won: 'Signal delivered', lost: 'Signal lost', wonBody: 'Relay restored. The Moon can still hear us.', lostBody: 'Your signal is archived. The next mission goes further.', paused: 'Mission paused', controls: 'WASD / Arrows to move · Space to dash · P to pause', touch: 'Drag left to move · Tap right to dash', brief: 'Weapons fire automatically. Collect energy and upgrade. Survive 3 minutes and defeat the Harvester.', seed: 'Mission seed', boss: 'Harvester incoming', error: 'System error. Refresh to retry.', replayDone: 'Replay complete', replayVerified: 'Replay checksum matched', replayFailed: 'Replay checksum mismatch', noReplay: 'Finish a mission to unlock replay', select: 'Equip module', warning: 'Final signal window open', brand: 'LUNAR / RELAY', prototype: 'LUNAR OPERATION / 01', objective: 'SURVIVE 03:00 · DEFEAT THE HARVESTER', recovered: 'Energy recovered', replayEnd: 'End of recording reached', pausedHint: 'Take a breath. The Moon can wait.'
+};
+export function dictionary(lang: Language) { return lang === 'zh' ? zh : en; }
+const upgradeText: Record<Upgrade, { zh: [string, string]; en: [string, string]; icon: string }> = {
+  pulse: { zh: ['脉冲步枪', '伤害与射速提升。高等级追加弹道。'], en: ['Pulse rifle', 'More damage and faster fire. Extra bolts at higher tiers.'], icon: '↗' },
+  orbit: { zh: ['轨道无人机', '环绕机体，持续切割靠近的敌人。'], en: ['Orbital drone', 'An orbiting drone cuts through nearby enemies.'], icon: '◎' },
+  nova: { zh: ['电磁新星', '周期性释放范围冲击，清除近身威胁。'], en: ['EMP nova', 'A periodic shockwave clears nearby threats.'], icon: '✳' },
+  boots: { zh: ['矢量推进器', '移动速度提升，更轻松穿过敌群。'], en: ['Vector thrusters', 'Move faster and slip between enemy formations.'], icon: '»' },
+  hull: { zh: ['复合装甲', '装甲上限 +25，立即修复 45 点。'], en: ['Composite armor', '+25 maximum armor and repair 45 immediately.'], icon: '◇' },
+  magnet: { zh: ['引力采集器', '扩大能源吸引范围，减少回头拾取。'], en: ['Gravity collector', 'Attract energy from a greater distance.'], icon: '⊕' }
+};
+export function upgradeLabel(id: Upgrade, lang: Language) { return { title: upgradeText[id][lang][0], description: upgradeText[id][lang][1], icon: upgradeText[id].icon }; }

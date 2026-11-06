@@ -1,0 +1,16 @@
+{
+  "name": "lunar-relay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "npm run build && node scripts/serve.mjs",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "check": "npm run build && node scripts/check.mjs",
+    "verify": "npm test && npm run check && node scripts/simulate.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
