@@ -5,6 +5,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   if (!context) throw new Error('Canvas 2D is unavailable');
   const ctx = context;
   const atlas = createAtlas();
+  let playerMotion: { world: World; tick: number; x: number; y: number; animationTick: number } | undefined;
   const terrain = document.createElement('canvas'); terrain.width = 256; terrain.height = 256;
   const ground = terrain.getContext('2d');
   if (!ground) throw new Error('Terrain canvas is unavailable');
@@ -37,6 +38,13 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     }
   }
   return function render(world: World, time: number, title = false) {
+    const p = world.player;
+    if (!playerMotion || playerMotion.world !== world || world.tick < playerMotion.tick) {
+      playerMotion = { world, tick: world.tick, x: p.x, y: p.y, animationTick: 0 };
+    } else if (world.tick > playerMotion.tick) {
+      if (world.phase.kind === 'running') playerMotion.animationTick = p.x !== playerMotion.x || p.y !== playerMotion.y ? world.tick : 0;
+      playerMotion.tick = world.tick; playerMotion.x = p.x; playerMotion.y = p.y;
+    }
     const width = Math.ceil(canvas.clientWidth / 2), height = Math.ceil(canvas.clientHeight / 2);
     if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
     ctx.imageSmoothingEnabled = false;
@@ -75,10 +83,9 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       ctx.fillRect(Math.round(shot.x) - 2, Math.round(shot.y) - 2, shot.hostile ? 5 : 3, shot.hostile ? 5 : 3);
       ctx.strokeStyle = shot.hostile ? '#dc916166' : '#8af5e5aa'; ctx.beginPath(); ctx.moveTo(shot.x, shot.y); ctx.lineTo(shot.x - shot.vx * 2, shot.y - shot.vy * 2); ctx.stroke();
     }
-    const p = world.player;
     ctx.fillStyle = '#1c344455'; ctx.beginPath(); ctx.ellipse(p.x + 3, p.y + 12, 12, 5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = p.invincible > 0 && world.tick % 6 < 3 ? .45 : 1;
-    atlas.draw(ctx, 'astronaut', p.x, p.y + (world.phase.kind === 'running' && world.tick % 18 < 9 ? -1 : 0), 1.7); ctx.globalAlpha = 1;
+    atlas.draw(ctx, 'astronaut', p.x, p.y, 1.7, playerMotion.animationTick); ctx.globalAlpha = 1;
     for (let i = 0; i < Math.min(4, world.upgrades.orbit); i++) {
       const angle = world.tick * .055 + i * Math.PI * 2 / Math.min(4, world.upgrades.orbit);
       const x = p.x + Math.cos(angle) * 58, y = p.y + Math.sin(angle) * 58;

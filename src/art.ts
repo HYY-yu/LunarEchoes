@@ -11,6 +11,9 @@ export type Sprite = 'astronaut' | 'crawler' | 'drone' | 'sentry' | 'boss' | 'cr
 const crawlerFrames = [sprites.crawler,
   [...sprites.crawler.slice(0, 11), '..DSD.DDDD.DSSD.', '...DDD......DDD.', ...sprites.crawler.slice(13)],
   [...sprites.crawler.slice(0, 11), '.DSSD.DDDD.DSD..', '.DDD......DDD...', ...sprites.crawler.slice(13)]];
+const astronautFrames = [sprites.astronaut,
+  [...sprites.astronaut.slice(0, 12), '...DSSDDWWD.....', '..DBBBDDSSD.....', '..DDDDDDBBBD....', '.......DDDDD....'],
+  [...sprites.astronaut.slice(0, 12), '...DWWDDSSD.....', '...DSSDDBBBD....', '..DBBBDDDDDD....', '..DDDDD.........']];
 export function createAtlas(): { canvas: HTMLCanvasElement; draw: (ctx: CanvasRenderingContext2D, name: Sprite, x: number, y: number, scale?: number, animationTick?: number) => void } {
   const canvas = document.createElement('canvas');
   const names = Object.keys(sprites);
@@ -18,7 +21,7 @@ export function createAtlas(): { canvas: HTMLCanvasElement; draw: (ctx: CanvasRe
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas 2D is unavailable');
   for (let i = 0; i < names.length; i++) {
-    const frames = names[i] === 'crawler' ? crawlerFrames : [sprites[names[i]]];
+    const frames = names[i] === 'crawler' ? crawlerFrames : names[i] === 'astronaut' ? astronautFrames : [sprites[names[i]]];
     for (const [frame, rows] of frames.entries()) for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) {
       const color = palette[rows[y][x]];
       if (color) { ctx.fillStyle = color; ctx.fillRect(i * 16 + x, frame * 16 + y, 1, 1); }
@@ -26,7 +29,7 @@ export function createAtlas(): { canvas: HTMLCanvasElement; draw: (ctx: CanvasRe
   }
   return { canvas, draw(target, name, x, y, scale = 1, animationTick = 0) {
     const beat = Math.floor(animationTick / 6) % 4;
-    const frame = name === 'crawler' ? beat === 1 ? 1 : beat === 3 ? 2 : 0 : 0;
+    const frame = name === 'crawler' || name === 'astronaut' ? beat === 1 ? 1 : beat === 3 ? 2 : 0 : 0;
     target.drawImage(canvas, names.indexOf(name) * 16, frame * 16, 16, 16, Math.round(x - 8 * scale), Math.round(y - 8 * scale), 16 * scale, 16 * scale);
   } };
 }
