@@ -66,7 +66,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         ctx.strokeStyle = '#ffd499'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.arc(enemy.x, enemy.y, enemy.radius + 10 + (36 - enemy.attack) / 3, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
       }
       ctx.globalAlpha = enemy.flash > 0 ? .45 : 1;
-      atlas.draw(ctx, enemy.kind, enemy.x, enemy.y + (enemy.kind === 'drone' ? Math.sin(time * .006 + enemy.id) * 3 - 5 : 0), scale);
+      atlas.draw(ctx, enemy.kind, enemy.x, enemy.y + (enemy.kind === 'drone' ? Math.sin(time * .006 + enemy.id) * 3 - 5 : 0), scale, world.tick + enemy.id * 7);
       ctx.globalAlpha = 1;
       if (enemy.kind === 'boss') { ctx.fillStyle = '#172c3d'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60, 3); ctx.fillStyle = '#f5ba78'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60 * Math.max(0, enemy.hp / enemy.maxHp), 3); }
     }

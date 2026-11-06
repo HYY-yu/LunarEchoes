@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="data:,">
+  <title>Crawler walk QA</title>
+  <style>
+    body{margin:0;background:#101c29;color:#e8eee7;font:14px system-ui;padding:16px;max-width:1000px}h1{font-size:22px;margin:0 0 8px}p{max-width:78ch}button,a{font:inherit;margin:4px;padding:8px;color:#101c29;background:#a9e4d4;border:0}a{display:inline-block}canvas{display:block;width:100%;image-rendering:pixelated;background:#273c4b}#scene{height:42vh;min-height:230px}#poses{height:auto}pre{white-space:pre-wrap;font-size:12px}.labels{display:flex;justify-content:space-around}.columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:600px){.columns{display:block}section{margin-top:12px}}
+  </style>
+</head>
+<body>
+  <h1>Crawler walk QA</h1>
+  <p>Developer fixture using production createAtlas, createRenderer and core dispatch. Invincible player; firing and spawning suppressed. This is animation evidence, not a balance or FPS test.</p>
+  <nav id="controls"></nav><a href="/game/">Open actual game</a>
+  <canvas id="scene" aria-label="Production renderer crawler scene"></canvas>
+  <div class="columns">
+    <section><h2>Three poses, four beats</h2><canvas id="poses" width="640" height="160" aria-label="Production atlas poses at normal and enlarged scale"></canvas><div class="labels"><span>tick 0</span><span>tick 6</span><span>tick 12</span><span>tick 18</span></div></section>
+    <section><h2>Live state</h2><pre id="status"></pre><pre id="errors" role="status"></pre></section>
+  </div>
+  <script type="module" src="/fixture.js"></script>
+</body>
+</html>

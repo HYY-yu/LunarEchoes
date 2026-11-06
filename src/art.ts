@@ -8,18 +8,25 @@ const sprites: Record<string, string[]> = {
   crystal: ['................','................','.......C........','......CCC.......','.....CCWCC......','....CCTWTCC.....','...CCTTWT TCC...'.replace(' ',''),'....CCTTTCC.....','.....CCTCC......','......CCC.......','.......T........','................','................','................','................','................']
 };
 export type Sprite = 'astronaut' | 'crawler' | 'drone' | 'sentry' | 'boss' | 'crystal';
-export function createAtlas(): { canvas: HTMLCanvasElement; draw: (ctx: CanvasRenderingContext2D, name: Sprite, x: number, y: number, scale?: number) => void } {
+const crawlerFrames = [sprites.crawler,
+  [...sprites.crawler.slice(0, 11), '..DSD.DDDD.DSSD.', '...DDD......DDD.', ...sprites.crawler.slice(13)],
+  [...sprites.crawler.slice(0, 11), '.DSSD.DDDD.DSD..', '.DDD......DDD...', ...sprites.crawler.slice(13)]];
+export function createAtlas(): { canvas: HTMLCanvasElement; draw: (ctx: CanvasRenderingContext2D, name: Sprite, x: number, y: number, scale?: number, animationTick?: number) => void } {
   const canvas = document.createElement('canvas');
   const names = Object.keys(sprites);
-  canvas.width = 16 * names.length; canvas.height = 16;
+  canvas.width = 16 * names.length; canvas.height = 48;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas 2D is unavailable');
   for (let i = 0; i < names.length; i++) {
-    const rows = sprites[names[i]];
-    for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) {
+    const frames = names[i] === 'crawler' ? crawlerFrames : [sprites[names[i]]];
+    for (const [frame, rows] of frames.entries()) for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) {
       const color = palette[rows[y][x]];
-      if (color) { ctx.fillStyle = color; ctx.fillRect(i * 16 + x, y, 1, 1); }
+      if (color) { ctx.fillStyle = color; ctx.fillRect(i * 16 + x, frame * 16 + y, 1, 1); }
     }
   }
-  return { canvas, draw(target, name, x, y, scale = 1) { target.drawImage(canvas, names.indexOf(name) * 16, 0, 16, 16, Math.round(x - 8 * scale), Math.round(y - 8 * scale), 16 * scale, 16 * scale); } };
+  return { canvas, draw(target, name, x, y, scale = 1, animationTick = 0) {
+    const beat = Math.floor(animationTick / 6) % 4;
+    const frame = name === 'crawler' ? beat === 1 ? 1 : beat === 3 ? 2 : 0 : 0;
+    target.drawImage(canvas, names.indexOf(name) * 16, frame * 16, 16, 16, Math.round(x - 8 * scale), Math.round(y - 8 * scale), 16 * scale, 16 * scale);
+  } };
 }
