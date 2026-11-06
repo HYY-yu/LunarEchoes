@@ -37,7 +37,7 @@
 - 每次准备写入先重新读取该 key。有效旧存档与会话进度取较高边界，避免常规重载导致回退。若发现坏数据或未知版本，停止自动写入并立即说明原因、请求确认重置。读取异常时进入会话未保存状态，不覆盖无法读取的原值。
 - 启动时发现坏数据或未知版本，先保持原 key 的原字符串不变，立即说明具体原因并请求确认重置，不等玩家自行寻找重置入口。不开放无法验证的进度。取消不写入、不清除原值，明确告知本次仅临时游玩、不能保存，并从第 1 关开始。若是在已有会话中发现异常，取消保留当前会话解锁。读取被浏览器禁止时进入会话模式，不尝试覆盖未知原值。
 - 进入上述保护状态后，本次会话的胜利也不得自动覆盖该 key。玩家可继续游玩，并按实际失败阶段看到“未保存”或“保存未确认”。刷新后只恢复当时可读取并通过验证的进度。写入后核对失败时，新增进度可能已经写入，但无法确认，不保证刷新可恢复。
-- 提供显式“重置本机进度”，先说明会删除旧进度并要求确认。确认后写入第 1 关的新格式并核对成功，才重置会话解锁并退出保护状态。重置在写入前失败时保留原字符串。若写入成功后核对失败，旧值可能已被替换，报告存储状态未知，不承诺旧字节仍在，也不盲目回滚。写操作失败时明确说明重置未完成，保留当前会话进度和保护状态。写入后核对失败或不一致时单独反馈旧数据可能已替换、当前会话保留、保护继续，不盲目回滚。取消不修改任何值，并告知本次临时游玩不能保存。只有写入并核对成功才显示重置成功。
+- 提供显式“重置本机进度”，先说明会删除旧进度并要求确认。确认后写入第 1 关的新格式并核对成功，才重置会话解锁并退出保护状态。重置在写入前失败时保留原字符串。若写入成功后核对失败，旧值可能已被替换，报告存储状态未知，不承诺旧字节仍在，也不盲目回滚。写操作失败时明确说明重置未完成，保留当前会话进度和保护状态。写入后核对失败或不一致时单独反馈旧数据可能已替换、当前会话保留、保护继续，不盲目回滚。坏数据或未知版本恢复流程中的取消不修改任何值，并告知本次临时游玩不能保存。该流程的失败反馈所述保护继续仅适用于已经进入保护的会话。有效存档下主动重置时取消保持原状态，不禁止原本正常的保存。只有写入并核对成功才显示重置成功。
 
 本机保存只承诺当前站点、浏览器与设备的进度，不保证浏览器清理或隐私模式结束后仍存在。多标签页没有原子比较写入能力，本方案不承诺并发游玩同步。后续实现必须验证顺序打开标签页不会覆盖较高的有效解锁；若要保证并发一致性，另提存储方案，不在本任务增加锁或数据库。
 
@@ -86,9 +86,9 @@
 | 损坏或无效数据 | 本机进度数据无效，原数据已保留。现在是否重置并从第 1 关开始？重置会删除旧进度，取消则本次临时游玩且不能保存。 | Local progress data is invalid. Existing data was kept. Reset now and start at stage 1? Resetting deletes previous progress. Cancel to play temporarily without saving. |
 | 未知存档版本 | 暂不支持此存档版本，原数据已保留。现在是否重置并从第 1 关开始？重置会删除旧进度，取消则本次临时游玩且不能保存。 | This save version is not supported. Existing data was kept. Reset now and start at stage 1? Resetting deletes previous progress. Cancel to play temporarily without saving. |
 | 重置前确认 | 重置会删除当前浏览器的旧解锁进度，并从第 1 关开始。是否继续？ | Resetting deletes this browser's previous unlock progress and starts at stage 1. Continue? |
-| 取消重置 | 原数据未修改。本次仅临时游玩，不能保存进度。 | Existing data was not changed. You can play temporarily, but progress cannot be saved this session. |
-| 重置写操作失败 | 重置未完成，当前会话进度已保留，保护状态继续。 | Reset was not completed. Current session progress was kept. Protection remains active. |
-| 重置写入后核对失败或不一致 | 无法确认重置结果，旧数据可能已替换。当前会话进度已保留，保护状态继续，不会自动回滚。 | Cannot confirm the reset result. Previous data may have been replaced. Current session progress was kept. Protection remains active. No automatic rollback will occur. |
+| 异常存档恢复时取消重置 | 原数据未修改。本次仅临时游玩，不能保存进度。 | Existing data was not changed. You can play temporarily, but progress cannot be saved this session. |
+| 异常存档恢复时重置写操作失败 | 重置未完成，当前会话进度已保留，保护状态继续。 | Reset was not completed. Current session progress was kept. Protection remains active. |
+| 异常存档恢复时重置写入后核对失败或不一致 | 无法确认重置结果，旧数据可能已替换。当前会话进度已保留，保护状态继续，不会自动回滚。 | Cannot confirm the reset result. Previous data may have been replaced. Current session progress was kept. Protection remains active. No automatic rollback will occur. |
 | 重置写入且核对成功 | 本机进度已重置，从第 1 关开始。 | Local progress was reset. Start at stage 1. |
 | 未解锁关卡 | 此关尚未解锁。 | This stage is locked. |
 | 已解锁但未实现 | 此关已解锁，但暂不可游玩。 | This stage is unlocked but not playable yet. |
@@ -115,10 +115,11 @@
 | 战斗中刷新、跳过剧情、切换语言、播放回放 | 不新增解锁；刷新不恢复战斗，回放不改存档原字符串 |
 | 畸形 JSON、错误字段类型、未知关卡、未知版本、多余字段 | 立即分别提示无效数据或未知版本并请求确认重置；确认前原字符串逐字不变，不自动覆盖或开放未知关卡 |
 | 读取、写入、保存后核对读取分别抛错 | 异常被记录且反馈；保留会话解锁，不显示保存成功。写入前失败保留原文，写入后核对失败或不一致报告“保存未确认”，不声称未保存或存储不可用，不盲目回滚 |
+| 有效存档下主动重置后取消 | 无写入、无清除；原会话、进度与正常保存能力均不变 |
 | 异常提示后取消重置 | 无写入、无清除；明确临时游玩不能保存，启动时从第 1 关开始，已有会话保留解锁；后续会话胜利不覆写 |
 | 异常提示后确认重置并写入、核对成功 | 此前不改会话解锁，成功后才重置为第 1 关并退出保护状态，显示重置成功 |
-| 重置写操作失败 | 当前会话保留、保护继续，显示重置未完成，不声称成功 |
-| 重置写入成功但核对失败或不一致 | 单列双语反馈旧数据可能已替换，当前会话保留、保护继续；不声称旧字节仍在、不自动回滚 |
+| 异常存档恢复时重置写操作失败 | 当前会话保留、保护继续，显示重置未完成，不声称成功 |
+| 异常存档恢复时重置写入成功但核对失败或不一致 | 单列双语反馈旧数据可能已替换，当前会话保留、保护继续；不声称旧字节仍在、不自动回滚 |
 | 页面开始后存档被换成较高有效进度或未知版本 | 下一次保存先读取；较高进度不回退，未知版本原文不被覆写 |
 | 已解锁但目录缺关或尚未实现 | 真实入关与回放均明确拒绝，不创建月面替代世界 |
 | 相同新录制与精确规则重放两次 | 初始构筑相同，动作顺序相同，终局与绑定校验一致 |
