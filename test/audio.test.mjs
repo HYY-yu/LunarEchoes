@@ -68,3 +68,23 @@ test('pending audio activation preserves the latest session pause state', async 
   assert.equal(synth.status.session, 'paused'); synth.play('shot'); assert.equal(synth.status.voices, 0);
   synth.setSession('running'); synth.play('shot'); assert.equal(synth.status.voices, 1); synth.reset();
 });
+test('first interaction and unmute confirmation activate before feedback', async () => {
+  const synth = new Synth(); assert.equal(synth.status.ready, false);
+  assert.equal(await synth.activate('ui-confirm'), true); assert.equal(synth.status.voices, 1);
+  synth.setMuted(true); assert.equal(await synth.activate('ui-confirm'), false); assert.equal(synth.status.voices, 0);
+  synth.setMuted(false); Context.latest.currentTime += 1;
+  assert.equal(await synth.activate('ui-confirm'), true); assert.equal(synth.status.voices, 1);
+  synth.reset(); synth.setSession('menu'); assert.equal(await synth.activate('ui-confirm'), true); assert.equal(synth.status.voices, 1); synth.reset();
+});
+test('a terminal transition invalidates pending button confirmation', async () => {
+  const synth = new Synth(); await synth.activate(); synth.setSession('running'); let resolve;
+  Context.latest.pending = new Promise(done => { resolve = done; });
+  const pending = synth.activate('ui-confirm'); synth.events(['won']);
+  const count = Context.latest.sources.length; resolve(); assert.equal(await pending, false);
+  assert.equal(Context.latest.sources.length, count); assert.equal(synth.status.voices, 4); synth.reset();
+});
+test('replay exhaustion retains terminal sound while a real menu change stops it', async () => {
+  const synth = new Synth(); await synth.activate(); synth.setSession('running'); synth.events(['lost']);
+  synth.setSession('terminal'); assert.equal(synth.status.voices, 3);
+  synth.setSession('menu'); assert.equal(synth.status.voices, 0); synth.reset();
+});

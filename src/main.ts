@@ -22,7 +22,7 @@ const coarse = matchMedia('(pointer: coarse)').matches;
 function text() { return dictionary(language); }
 function notify(message: string) { const node = element('notice'); node.textContent = message; node.classList.add('visible'); window.clearTimeout(noticeTimer); noticeTimer = window.setTimeout(() => node.classList.remove('visible'), 3500); }
 function fail(error: unknown) { log('error', 'runtime.failure', { message: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : '', seed: world.seed, tick: world.tick }); notify(text().error); }
-async function enableAudio() { try { return await synth.activate(); } catch (error) { log('error', 'audio.activation_failed', { error: String(error) }); notify(language === 'zh' ? '音频启动失败，游戏可继续。' : 'Audio unavailable. You can keep playing.'); return false; } }
+async function enableAudio(confirm = false) { try { return await synth.activate(confirm ? 'ui-confirm' : undefined); } catch (error) { log('error', 'audio.activation_failed', { error: String(error) }); notify(language === 'zh' ? '音频启动失败，游戏可继续。' : 'Audio unavailable. You can keep playing.'); return false; } }
 function act(action: Action, record = true) {
   if (record && screen === 'game') recording.actions.push(action);
   const before = world.phase.kind;
@@ -43,11 +43,11 @@ function act(action: Action, record = true) {
 function begin() {
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
   synth.reset(); world = createWorld(seedArray[0]); recording = { version: VERSION, seed: world.seed, actions: [] }; screen = 'game'; keys.clear(); stickX = 0; stickY = 0; dashPressed = false; accumulator = 0;
-  log('info', 'session.started', { seed: world.seed, version: VERSION }); void enableAudio(); updateUi(true);
+  log('info', 'session.started', { seed: world.seed, version: VERSION }); updateUi(true); void enableAudio();
 }
 function startReplay() {
   if (!lastRecording) return;
-  synth.reset(); world = createWorld(lastRecording.seed); replayIndex = 0; screen = 'replay'; accumulator = 0; keys.clear(); stickX = 0; stickY = 0; log('info', 'replay.started', { seed: world.seed, actions: lastRecording.actions.length }); void enableAudio(); updateUi(true);
+  synth.reset(); world = createWorld(lastRecording.seed); replayIndex = 0; screen = 'replay'; accumulator = 0; keys.clear(); stickX = 0; stickY = 0; log('info', 'replay.started', { seed: world.seed, actions: lastRecording.actions.length }); updateUi(true); void enableAudio();
 }
 function showTitle() { screen = 'title'; world = createWorld(208907); keys.clear(); synth.reset(); updateUi(true); void enableAudio(); }
 function pause() {
@@ -55,7 +55,7 @@ function pause() {
   if (world.phase.kind === 'running') act({ kind: 'pause' }); else if (world.phase.kind === 'paused') { act({ kind: 'resume' }); void enableAudio(); }
   keys.clear(); stickX = 0; stickY = 0;
 }
-function button(label: string, className: string, handler: () => void): HTMLButtonElement { const node = document.createElement('button'); node.textContent = label; node.className = className; node.onclick = () => { handler(); void enableAudio().then(activated => { if (activated) synth.play('ui-confirm'); }); }; return node; }
+function button(label: string, className: string, handler: () => void): HTMLButtonElement { const node = document.createElement('button'); node.textContent = label; node.className = className; node.onclick = () => { handler(); void enableAudio(true); }; return node; }
 function panel(title: string, subtitle: string): HTMLElement {
   const section = document.createElement('section'); section.className = 'modal result';
   const eyebrow = document.createElement('div'); eyebrow.className = 'eyebrow'; eyebrow.textContent = text().mission;
@@ -82,7 +82,7 @@ function updateUi(force = false) {
   const equipment = element('equipment'); equipment.replaceChildren();
   for (const id of ['pulse', 'orbit', 'nova'] satisfies Upgrade[]) if (world.upgrades[id]) { const node = document.createElement('span'); node.textContent = `${upgradeLabel(id, language).icon} ${world.upgrades[id]}`; node.title = upgradeLabel(id, language).title; equipment.append(node); }
   if (!force && signature === lastUi) return;
-  lastUi = signature; overlay.replaceChildren(); synth.setSession(screen === 'title' || screen === 'replay-end' ? 'menu' : world.phase.kind === 'won' || world.phase.kind === 'lost' ? 'terminal' : world.phase.kind);
+  lastUi = signature; overlay.replaceChildren(); synth.setSession(screen === 'title' ? 'menu' : world.phase.kind === 'won' || world.phase.kind === 'lost' ? 'terminal' : world.phase.kind);
   if (screen === 'title') {
     const intro = document.createElement('section'); intro.className = 'intro';
     intro.innerHTML = `<div class="eyebrow">${t.mission}</div><h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${t.brief}</p>`;
@@ -127,9 +127,9 @@ function handleKey(event: KeyboardEvent, down: boolean) {
 window.addEventListener('keydown', event => handleKey(event, true)); window.addEventListener('keyup', event => handleKey(event, false));
 window.addEventListener('blur', () => { keys.clear(); stickX = 0; stickY = 0; dashPressed = false; if (screen === 'game' && world.phase.kind === 'running') act({ kind: 'pause' }); });
 document.addEventListener('visibilitychange', () => { accumulator = 0; lastFrame = 0; synth.setHidden(document.hidden); if (document.hidden) { keys.clear(); stickX = 0; stickY = 0; dashPressed = false; if (screen === 'game' && world.phase.kind === 'running') act({ kind: 'pause' }); } else { updateUi(true); void enableAudio(); } });
-element('language').onclick = () => { language = language === 'zh' ? 'en' : 'zh'; document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en'; synth.play('ui-confirm'); updateUi(true); };
-element('sound').onclick = () => { synth.setMuted(!synth.muted); if (!synth.muted) void enableAudio(); updateUi(true); };
-element('pause').onclick = () => { if (screen === 'replay') showTitle(); else pause(); synth.play('ui-confirm'); };
+element('language').onclick = () => { language = language === 'zh' ? 'en' : 'zh'; document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en'; updateUi(true); void enableAudio(true); };
+element('sound').onclick = () => { synth.setMuted(!synth.muted); updateUi(true); if (!synth.muted) void enableAudio(true); };
+element('pause').onclick = () => { if (screen === 'replay') showTitle(); else pause(); void enableAudio(true); };
 const joystick = element('joystick'), stick = element('stick');
 function moveStick(event: PointerEvent) {
   const bounds = joystick.getBoundingClientRect(); const x = event.clientX - bounds.left - bounds.width / 2, y = event.clientY - bounds.top - bounds.height / 2;
