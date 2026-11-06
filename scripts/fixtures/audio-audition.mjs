@@ -37,9 +37,15 @@ control('controls', 'Export all cues WAV', async () => {
   function word(offset, value) { for (let i = 0; i < value.length; i++) view.setUint8(offset + i, value.charCodeAt(i)); }
   word(0, 'RIFF'); view.setUint32(4, bytes.byteLength - 8, true); word(8, 'WAVEfmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true); view.setUint32(24, rate, true); view.setUint32(28, rate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true); word(36, 'data'); view.setUint32(40, data.length * 2, true);
   for (let i = 0; i < data.length; i++) view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, data[i])) * 32767, true);
-  const url = URL.createObjectURL(new Blob([bytes], { type: 'audio/wav' })), link = document.createElement('a'); link.href = url; link.download = 'lunar-audio-cues.wav'; link.textContent = 'Download rendered WAV'; document.body.append(link); link.click();
+  const url = await new Promise((resolve, reject) => {
+    const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(new Blob([bytes], { type: 'audio/wav' }));
+  });
+  const preview = document.createElement('audio'); preview.controls = true; preview.src = url; preview.setAttribute('aria-label', 'Rendered audio cues preview');
+  const link = document.createElement('a'); link.href = url; link.download = 'lunar-audio-cues.wav'; link.textContent = 'Download rendered WAV (data URL)';
+  document.body.append(preview, link);
   report(names.map((cue, index) => `${(index * spacing + .1).toFixed(1)}s ${cue}`).join('\n'));
-  report(`PASS rendered same cue graph, ${buffer.duration.toFixed(1)}s mono WAV. Listen using the downloaded file.`);
+  report(`PASS rendered same cue graph, ${buffer.duration.toFixed(1)}s mono WAV. Use the visible audio player or click the data URL download link.`);
 });
 document.addEventListener('visibilitychange', async () => { synth.setHidden(document.hidden); if (!document.hidden) await synth.activate(); });
 window.addEventListener('error', event => report(`ERROR ${event.message}`));

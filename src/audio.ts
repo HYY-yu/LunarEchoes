@@ -32,6 +32,7 @@ export class Synth {
   private next = 0;
   private beat = 0;
   private generation = 0;
+  private operation = 0;
   private ready = false;
   private terminalPlayed = false;
   private session: AudioSession = 'menu';
@@ -46,17 +47,18 @@ export class Synth {
     if (!this.context) {
       this.context = new AudioContext(); this.master = this.context.createGain(); this.master.gain.value = .17; this.master.connect(this.context.destination);
     }
-    const generation = this.generation;
+    const generation = this.generation, operation = this.operation;
     await this.context.resume();
     if (generation !== this.generation || this.silent || this.hidden) return false;
     this.ready = true; this.next = this.context.currentTime + .05;
     if (!this.timer) this.timer = setInterval(() => this.schedule(), 70);
+    if (operation !== this.operation) return false;
     if (feedback) this.play(feedback);
     return true;
   }
   setSession(session: AudioSession) {
     if (session === this.session) return;
-    this.session = session; this.generation++;
+    this.session = session; this.operation++;
     this.stop(() => true);
     if (this.context) this.next = this.context.currentTime + .05;
   }

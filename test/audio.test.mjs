@@ -88,3 +88,10 @@ test('replay exhaustion retains terminal sound while a real menu change stops it
   synth.setSession('terminal'); assert.equal(synth.status.voices, 3);
   synth.setSession('menu'); assert.equal(synth.status.voices, 0); synth.reset();
 });
+test('pending device resume survives keyboard upgrade while stale UI feedback expires', async () => {
+  const synth = new Synth(); await synth.activate(); synth.setSession('upgrading'); synth.setHidden(true); synth.setHidden(false);
+  let resolve; Context.latest.pending = new Promise(done => { resolve = done; });
+  const pending = synth.activate('ui-confirm'); synth.setSession('running'); resolve();
+  assert.equal(await pending, false); assert.equal(synth.status.ready, true);
+  assert.equal(synth.status.voices, 0); synth.play('shot'); assert.equal(synth.status.voices, 1); synth.reset();
+});

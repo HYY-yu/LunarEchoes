@@ -44,7 +44,13 @@ node scripts/audio-audition.mjs
 1. 点击各 cue 按钮，试听全部十二种事件。won/lost 按钮会先重置以便重复试听。
 2. 点击 Run music，试听保留的多声部。Pause 应立即停止；Resume 不追播旧音符。继续用 Toggle mute、Toggle hidden、Restart 观察和听取相同行为。
 3. 点击 Run lifecycle checks。Results 显示六项 PASS/FAIL 及明确的听感限制。状态区显示 session、hidden、muted、ready、voices 与 generation。
-4. 点击 Export all cues WAV。浏览器真实离线音频引擎使用同一 cueGraph，导出单声道 WAV，按 Results 中每 1.6 秒的时间表试听。样本是 QA 产物，不是运行时音频。
+4. 点击 Export all cues WAV。浏览器真实离线音频引擎使用同一 cueGraph，生成单声道 WAV。页面显示原生 audio controls 与稳定 data URL 下载链接，点击链接导出，避免依赖 blob URL 或异步自动下载。按 Results 中每 1.6 秒的时间表试听。样本是 QA 产物，不是运行时音频。
 5. 切到别的标签页再返回，检查真实 visibilitychange 的停止与恢复。游戏还须实测暂停、升级、重开、回放、终局、声音与语言切换，以及桌面/窄屏截图与控制台。
 
 夹具的声音图所有权检查与假 WebAudio 测试不能证明无可闻泄漏、音色清晰或密集战斗平衡。作者没有浏览器控制权，本任务没有自行声称试听通过。当前 SHA 的浏览器截图、WAV、听感记录与独立领域验收由主协调补齐，缺少其中任一项不合并。
+
+## 设备恢复与交互有效期的反例
+
+之前两轮修复共同假设“设备 resume 与发起按钮的有效期可以共用 generation”。反例是在 upgrading 从后台恢复，设备 resume 尚未完成时使用数字键选择升级。升级改变交互状态，却仍需要同一个设备恢复完成。如果共用 generation，恢复会被丢弃且键盘路径没有再次激活，从而持续静默。
+
+先添加 `pending device resume survives keyboard upgrade while stale UI feedback expires` 回归测试，在 c35e88b 上真实得到 ready 的 false !== true。修复将设备 generation 与交互 operation 分开。菜单/战斗状态变更只作废旧交互反馈；后台、静音、重开仍作废设备激活。设备恢复完成可设 ready，但过期确认操作返回 false 且不播放声音。
