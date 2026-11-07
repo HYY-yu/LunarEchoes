@@ -54,3 +54,12 @@ PORT=4186 npm run dev
 ```
 
 `npm run verify` 通过 43 项测试，gzip 23,972 字节，预算 153,600 字节。种子 208907、42、101 的 checksum 分别为 `d1326dd8`、`c8b73f95`、`22cc59b2`，与改动前一致。离线模拟没有被用作浏览器 FPS 证据。提交后仍需独立作者以当前 head SHA 验收，不能把作者自测或本文当作合并批准。
+
+
+## 内联 favicon 修复
+
+稳定复现键为 `ui.resource.default-favicon-404`，继续跟踪于 Issue 16。协调者已通过 HTTP 核对，main `9ad6b6a` 与集成后 UI head `265fcd7` 都对浏览器默认请求 `/favicon.ico` 返回 404。两者的 index.html 和服务脚本一致，因此这是既有资源缺项。
+
+本次只在 HTML head 声明原创像素月牙与中继信号 SVG，采用正确 URL 编码的 `data:image/svg+xml`。没有位图、远程资源、JS 或运行时依赖，图标字节纳入现有 HTML 包体检查。HTML body、全部 JS 和 style.css 不变。
+
+作者重跑 `npm run verify`，51 项测试通过，gzip 24,669/153,600 字节。日志与全部 dist 文件的前后 SHA-256 分别保存于本地 `/private/tmp/lunar-ui16-evidence/favicon-verify.log` 和 `favicon-hash-comparison.json`。只有 index.html 哈希变化，HTML body 相同，SVG 解码后通过 XML 解析。浏览器由独立验收员在新 head 的新页面复核。此前截图与作者的无错误日志不代表本修复已通过浏览器验证。PR 保持 draft，独立视觉验收仍为 INCOMPLETE。
