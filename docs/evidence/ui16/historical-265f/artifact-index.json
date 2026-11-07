@@ -1,0 +1,83 @@
+{
+  "sourceHead": "265fcd72a1c51aaee636096f669a872c50988f17",
+  "images": [
+    {
+      "file": "desktop-loss-zh.png",
+      "sourceHead": "265fcd72a1c51aaee636096f669a872c50988f17",
+      "sourceFile": "/private/tmp/lunar-ui16-265f-evidence/desktop-loss-zh.png",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedPngSize": {
+        "width": 2560,
+        "height": 1440
+      },
+      "bytes": 756791,
+      "sha256": "23e76ce91149686c4c8dfb0fea608a65d95aee249c467d88344fd1a0fdd0000c"
+    },
+    {
+      "file": "desktop-loss-en.png",
+      "sourceHead": "265fcd72a1c51aaee636096f669a872c50988f17",
+      "sourceFile": "/private/tmp/lunar-ui16-265f-evidence/desktop-loss-en.png",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedPngSize": {
+        "width": 2560,
+        "height": 1440
+      },
+      "bytes": 766012,
+      "sha256": "c85075b0970cf616b4fe36ebaba249f9666272be7926e90ba90eeee213ecbf1d"
+    },
+    {
+      "file": "narrow-loss-zh.png",
+      "sourceHead": "265fcd72a1c51aaee636096f669a872c50988f17",
+      "sourceFile": "/private/tmp/lunar-ui16-265f-evidence/narrow-loss-zh.png",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedPngSize": {
+        "width": 780,
+        "height": 1386
+      },
+      "bytes": 225059,
+      "sha256": "f5603b4dba55989f7c18b5c7493bdce7fe81d64e1ff701bca7bfa26582373324"
+    },
+    {
+      "file": "narrow-loss-en.png",
+      "sourceHead": "265fcd72a1c51aaee636096f669a872c50988f17",
+      "sourceFile": "/private/tmp/lunar-ui16-265f-evidence/narrow-loss-en.png",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedPngSize": {
+        "width": 780,
+        "height": 1386
+      },
+      "bytes": 230904,
+      "sha256": "976a62595f0864881fa3f2426dc17824ca40e6e6a423207e704a2a6933379ad2"
+    },
+    {
+      "file": "narrow-replay-end-zh.png",
+      "sourceHead": "265fcd72a1c51aaee636096f669a872c50988f17",
+      "sourceFile": "/private/tmp/lunar-ui16-265f-evidence/narrow-replay-end-zh.png",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedPngSize": {
+        "width": 780,
+        "height": 1386
+      },
+      "bytes": 229883,
+      "sha256": "013b45cb44fb49e353d84d103f35a391fcf04ab7bcc64ab6537fd4be0688d259"
+    }
+  ],
+  "mapping": "../independent-32/version-map.json proves identical source/CSS/HTML body with 32eedec, not newly captured on 32eedec.",
+  "replayEndpointChecksum": "423e7a1b",
+  "sameRunAsCurrentVictory": false
+}

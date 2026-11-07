@@ -1,0 +1,643 @@
+{
+  "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+  "reviewer": "ui18_finish_verify",
+  "sourceDirectory": "/private/tmp/lunar-ui18-final-evidence",
+  "status": "PASS",
+  "scope": "Independent Issue16 UI visual and interaction acceptance on exact head; not campaign, audio listening, physical device or FPS acceptance.",
+  "images": [
+    {
+      "file": "desktop-zh-menu.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/desktop-zh-menu.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedSize": {
+        "width": 1216,
+        "height": 684
+      },
+      "outputScaleRelativeToCss": {
+        "x": 0.95,
+        "y": 0.95
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 40661,
+      "sha256": "78b92a42c015fad55115f502656e8c1fa954cf58bd9c459ddcdf4c28ff84b448"
+    },
+    {
+      "file": "desktop-en-menu.png",
+      "format": "PNG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/desktop-en-menu.png",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedSize": {
+        "width": 1280,
+        "height": 720
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 874820,
+      "sha256": "dcc615217c6d6013ee38043be685f6ab8b7900d20f1700f1ff03001a89e0c196"
+    },
+    {
+      "file": "phone-zh-menu.png",
+      "format": "PNG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-zh-menu.png",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 780,
+        "height": 1386
+      },
+      "outputScaleRelativeToCss": {
+        "x": 2.0,
+        "y": 2.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 1017823,
+      "sha256": "8165689f795495925cbc8a5263c597260795f750ccbebfca6cd118f7c8f94c03"
+    },
+    {
+      "file": "phone-en-menu.png",
+      "format": "PNG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-en-menu.png",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 780,
+        "height": 1386
+      },
+      "outputScaleRelativeToCss": {
+        "x": 2.0,
+        "y": 2.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 1033610,
+      "sha256": "538af9eb428eeb9802205b0d0125549c7933553163d58f8c3b1aa8c71694d34d"
+    },
+    {
+      "file": "desktop-zh-hud-final.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/desktop-zh-hud-final.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedSize": {
+        "width": 1216,
+        "height": 684
+      },
+      "outputScaleRelativeToCss": {
+        "x": 0.95,
+        "y": 0.95
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 61970,
+      "sha256": "60909b4066d199eb28642d23a27edf34c97f1c86c2c4e1790c82af000da709dc"
+    },
+    {
+      "file": "desktop-en-hud.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/desktop-en-hud.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedSize": {
+        "width": 1216,
+        "height": 684
+      },
+      "outputScaleRelativeToCss": {
+        "x": 0.95,
+        "y": 0.95
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 63840,
+      "sha256": "dde25d5978fb513dbf51c94368df82fa56b33433c5e06b70cff34de8a7bbc726"
+    },
+    {
+      "file": "phone-zh-hud.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-zh-hud.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 24811,
+      "sha256": "36ff9e5e11ee5537e3dde5c5e85d6795e51b26bc6085d1a470868cf32a4d5127"
+    },
+    {
+      "file": "phone-en-hud.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-en-hud.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 26260,
+      "sha256": "874a6594e75a1f46aeb28d58ae885788c2712c588dbbb9f6472923b2976d9d3d"
+    },
+    {
+      "file": "desktop-zh-upgrade.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/desktop-zh-upgrade.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedSize": {
+        "width": 1216,
+        "height": 684
+      },
+      "outputScaleRelativeToCss": {
+        "x": 0.95,
+        "y": 0.95
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 53966,
+      "sha256": "3aa7ff90bcfc7803b4bee62d25a61475ac0a5082856f4309069c99c47aff01a2"
+    },
+    {
+      "file": "desktop-en-upgrade.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/desktop-en-upgrade.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedSize": {
+        "width": 1216,
+        "height": 684
+      },
+      "outputScaleRelativeToCss": {
+        "x": 0.95,
+        "y": 0.95
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 59250,
+      "sha256": "53f56e05936bea84dcd7d028e933e027f77b9eb6840328fc17228b230c851743"
+    },
+    {
+      "file": "phone-zh-upgrade.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-zh-upgrade.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 31763,
+      "sha256": "2c9a3662bf97acc8b902086f7d3fa2e1ca59e36d9432e18697d2a76690798cf3"
+    },
+    {
+      "file": "phone-en-upgrade.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-en-upgrade.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 36823,
+      "sha256": "a36e8cd3ae04bc53f7c50eb8b8395d493363932f2eb83a35b50e71e2771965f0"
+    },
+    {
+      "file": "desktop-zh-pause.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/desktop-zh-pause.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedSize": {
+        "width": 1216,
+        "height": 684
+      },
+      "outputScaleRelativeToCss": {
+        "x": 0.95,
+        "y": 0.95
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 40217,
+      "sha256": "17bb4d36410b3dd985e15041f97d71ce7aa1fa12be1ac0148a07576171507bff"
+    },
+    {
+      "file": "desktop-en-pause.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/desktop-en-pause.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedSize": {
+        "width": 1216,
+        "height": 684
+      },
+      "outputScaleRelativeToCss": {
+        "x": 0.95,
+        "y": 0.95
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 46722,
+      "sha256": "441a0b62eacef872ed22bfb30aa4faec28ec7f904d1b4a848551c2a0232d4faf"
+    },
+    {
+      "file": "phone-zh-pause.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-zh-pause.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 21136,
+      "sha256": "52588194b3515232974d5459e77b552bba622069d3ce47f6563e9b180ca47112"
+    },
+    {
+      "file": "phone-en-pause-final.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-en-pause-final.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 23978,
+      "sha256": "7bdcf001d7871228e0e56711dbd62fb1a37bbbcfab2ee5ae919c0227309856eb"
+    },
+    {
+      "file": "desktop-zh-victory.png",
+      "format": "PNG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/desktop-zh-victory.png",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedSize": {
+        "width": 1280,
+        "height": 720
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 446236,
+      "sha256": "570b15159e246ac66b79bda2ef678c3d5df5a8e09789e2cdaa5d6ab22cf49acc"
+    },
+    {
+      "file": "desktop-en-victory.png",
+      "format": "PNG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/desktop-en-victory.png",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "encodedSize": {
+        "width": 1280,
+        "height": 720
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 448052,
+      "sha256": "4273520ad8c0d26db5d3a85e3b2984c9e8a4b809e8eb1f93bdbcded8fc8f3cc8"
+    },
+    {
+      "file": "phone-zh-victory.png",
+      "format": "PNG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-zh-victory.png",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 780,
+        "height": 1386
+      },
+      "outputScaleRelativeToCss": {
+        "x": 2.0,
+        "y": 2.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 232805,
+      "sha256": "ad10b75f3a8384ac9b30d11222699197ff36f6771d4d695f85da4523c203f943"
+    },
+    {
+      "file": "phone-en-victory.png",
+      "format": "PNG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-en-victory.png",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 780,
+        "height": 1386
+      },
+      "outputScaleRelativeToCss": {
+        "x": 2.0,
+        "y": 2.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 236577,
+      "sha256": "9bc12109c6dddd501646fc2793f1ca33b96368dde7b259df38ef23f47fa816f7"
+    },
+    {
+      "file": "phone-zh-stick-before.png",
+      "format": "PNG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-zh-stick-before.png",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 780,
+        "height": 1386
+      },
+      "outputScaleRelativeToCss": {
+        "x": 2.0,
+        "y": 2.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 240308,
+      "sha256": "1d1f2e3d474bf423792015669422577101a90c711ffab5c24156b7b0c82e00b5"
+    },
+    {
+      "file": "phone-zh-stick-after.png",
+      "format": "PNG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/phone-zh-stick-after.png",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 780,
+        "height": 1386
+      },
+      "outputScaleRelativeToCss": {
+        "x": 2.0,
+        "y": 2.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 242249,
+      "sha256": "e750f2298c561cca165d76c3bdac587d83ea1c957ad62eb42a83ae3cc8ad57c8"
+    },
+    {
+      "file": "motion-00.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/motion-00.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 24297,
+      "sha256": "04e73252e2498935480e72c51ddee9b890470a3dd3bf99418e36bfe6c48efe78"
+    },
+    {
+      "file": "motion-01.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/motion-01.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 23621,
+      "sha256": "7e0b4001ee8cb0e2f977c4baf30b83f50feeafb3f5a170861a8733cee3b93213"
+    },
+    {
+      "file": "motion-02.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/motion-02.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 23290,
+      "sha256": "04d984fbd2aee2f2dd5f3c789742758380f75b03186205fff7de1ef33fbdc171"
+    },
+    {
+      "file": "motion-03.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/motion-03.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 23642,
+      "sha256": "56d524e577cfc4ca53e1f745b030c6ab5668615ee74b01432b683712d90bbc03"
+    },
+    {
+      "file": "motion-04.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/motion-04.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 23356,
+      "sha256": "11253815e3d2e728c849a186af18380e4e0fac3f7d98ad62b6d72cbbb389bef8"
+    },
+    {
+      "file": "motion-05.jpg",
+      "format": "JPEG",
+      "sourceFile": "/private/tmp/lunar-ui18-final-evidence/motion-05.jpg",
+      "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+      "cssViewport": {
+        "width": 390,
+        "height": 693
+      },
+      "encodedSize": {
+        "width": 390,
+        "height": 693
+      },
+      "outputScaleRelativeToCss": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "browserDevicePixelRatio": null,
+      "devicePixelRatioNote": "PNG/JPEG scale is not an independent DPR reading",
+      "bytes": 23637,
+      "sha256": "70f67e209d34f3263e2607796a9656dccfc5682e2e1f2310a8e91c1e835ab915"
+    }
+  ],
+  "artifacts": [
+    "summary.json",
+    "notes.md",
+    "version-map.json",
+    "replay-end-ax.txt",
+    "console-final.json",
+    "raw-frame-manifest.json",
+    "root-motion-metadata.json",
+    "verify.log"
+  ],
+  "excludedLocalMedia": [
+    "rejected-*",
+    "native-console-final.jpg",
+    "root-motion-decoded-*",
+    "root-motion-sampled.mp4",
+    "root-motion.ffconcat"
+  ],
+  "note": "Original PNG/JPEG bytes only. The source summary and manifest also describe excluded local artifacts; those are not distributed in this directory."
+}

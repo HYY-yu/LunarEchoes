@@ -1,53 +1,487 @@
 {
-  "baseSha": "a7fb9cb332e6e4163984dfa6763e850c83031a72",
-  "runtimeSourceUnchanged": {
-    "act": true,
-    "begin": true,
-    "startReplay": true,
-    "showTitle": true,
-    "pause": true,
-    "button": true,
-    "handleKey": true,
-    "moveStick": true,
-    "frame": true
-  },
-  "testCount": 43,
-  "gzipBytes": 23972,
-  "budgetBytes": 153600,
-  "simulationChecksums": {
-    "208907": "d1326dd8",
-    "42": "c8b73f95",
-    "101": "22cc59b2"
-  },
-  "browser": "Chrome via extension",
-  "desktopCssAndPng": {
-    "width": 1280,
-    "height": 720
-  },
-  "narrowCssAndPng": {
-    "width": 390,
-    "height": 693
-  },
-  "realRun": {
-    "seed": 522104542,
-    "time": "01:01",
-    "phase": "lost",
-    "kills": 66,
-    "level": 2,
-    "replayVerified": true,
-    "checksum": "a9579683"
-  },
-  "consoleWarnOrError": [],
-  "media": {
-    "committedPngCount": 8,
-    "committedPngBytes": 324469,
-    "recording": "No screencast frames received; no video claimed"
-  },
-  "limits": [
-    "No actual victory screenshot",
-    "No physical mobile test",
-    "No FPS measurement",
-    "No new audio listening approval"
+  "head": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+  "reviewer": "ui18_finish_verify",
+  "origin": "independent temporary clone /private/tmp/lunar-ui18-final-verify",
+  "server": "http://127.0.0.1:4197",
+  "status": "PASS",
+  "passed": [
+    "New head loaded in Chrome; native Console 0 messages before play; tab warn/error logs empty",
+    "Source/style/body identity with 265f independently verified in version-map.json",
+    "390x693 Mobile mode reloaded before touch tests",
+    "Joystick right-side press 300ms moved fixed building/terrain left, saved before/after pair",
+    "Focused page, d held during real Dash button click100ms, immediate P; read-only DOM dash2.4 phasepaused",
+    "Natural victory seed1018780150,03:00,440kills,LV11,HP92/100",
+    "Victory report captured in zh/en at narrow and desktop sizes",
+    "Replay started from victory report; observed00:00 and seed1018780150",
+    "Read-only extension after native lock observed replay end: checksum matches lunar-1 8ad2f77c; HP92/100,03:00,440kills,LV11,seed1018780150",
+    "Menu/HUD/upgrade/pause/victory zh/en desktop and narrow matrix captured and visually checked",
+    "Final tab.dev.logs warn/error empty; native Console showed only task session Info events and No issues",
+    "Six original motion frames captured while running over2124ms; sampled MP4 reviewed from decoded first/last frames; HUD stable",
+    "Temporary device mode disabled and DevTools closed; CUA completion_summary sent"
   ],
-  "localEvidenceDirectory": "/private/tmp/lunar-ui16-evidence"
+  "pending": [],
+  "recordingAttempt": {
+    "call": "cua.getApp(/System/Applications/Utilities/Screenshot.app)",
+    "result": "Tool hung; aborted by user after872.5seconds; no recording observed or claimed"
+  },
+  "screenshots": [
+    {
+      "file": "desktop-en-hud.jpg",
+      "width": 1216,
+      "height": 684,
+      "bytes": 63840,
+      "sha256": "dde25d5978fb513dbf51c94368df82fa56b33433c5e06b70cff34de8a7bbc726",
+      "accepted": true
+    },
+    {
+      "file": "desktop-en-menu.png",
+      "width": 1280,
+      "height": 720,
+      "bytes": 874820,
+      "sha256": "dcc615217c6d6013ee38043be685f6ab8b7900d20f1700f1ff03001a89e0c196",
+      "accepted": true
+    },
+    {
+      "file": "desktop-en-pause.jpg",
+      "width": 1216,
+      "height": 684,
+      "bytes": 46722,
+      "sha256": "441a0b62eacef872ed22bfb30aa4faec28ec7f904d1b4a848551c2a0232d4faf",
+      "accepted": true
+    },
+    {
+      "file": "desktop-en-upgrade.jpg",
+      "width": 1216,
+      "height": 684,
+      "bytes": 59250,
+      "sha256": "53f56e05936bea84dcd7d028e933e027f77b9eb6840328fc17228b230c851743",
+      "accepted": true
+    },
+    {
+      "file": "desktop-en-victory.png",
+      "width": 1280,
+      "height": 720,
+      "bytes": 448052,
+      "sha256": "4273520ad8c0d26db5d3a85e3b2984c9e8a4b809e8eb1f93bdbcded8fc8f3cc8",
+      "accepted": true
+    },
+    {
+      "file": "desktop-zh-hud-final.jpg",
+      "width": 1216,
+      "height": 684,
+      "bytes": 61970,
+      "sha256": "60909b4066d199eb28642d23a27edf34c97f1c86c2c4e1790c82af000da709dc",
+      "accepted": true
+    },
+    {
+      "file": "desktop-zh-menu.jpg",
+      "width": 1216,
+      "height": 684,
+      "bytes": 40661,
+      "sha256": "78b92a42c015fad55115f502656e8c1fa954cf58bd9c459ddcdf4c28ff84b448",
+      "accepted": true
+    },
+    {
+      "file": "desktop-zh-pause.jpg",
+      "width": 1216,
+      "height": 684,
+      "bytes": 40217,
+      "sha256": "17bb4d36410b3dd985e15041f97d71ce7aa1fa12be1ac0148a07576171507bff",
+      "accepted": true
+    },
+    {
+      "file": "desktop-zh-upgrade.jpg",
+      "width": 1216,
+      "height": 684,
+      "bytes": 53966,
+      "sha256": "3aa7ff90bcfc7803b4bee62d25a61475ac0a5082856f4309069c99c47aff01a2",
+      "accepted": true
+    },
+    {
+      "file": "desktop-zh-victory.png",
+      "width": 1280,
+      "height": 720,
+      "bytes": 446236,
+      "sha256": "570b15159e246ac66b79bda2ef678c3d5df5a8e09789e2cdaa5d6ab22cf49acc",
+      "accepted": true
+    },
+    {
+      "file": "motion-00.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 24297,
+      "sha256": "04e73252e2498935480e72c51ddee9b890470a3dd3bf99418e36bfe6c48efe78",
+      "accepted": true
+    },
+    {
+      "file": "motion-01.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 23621,
+      "sha256": "7e0b4001ee8cb0e2f977c4baf30b83f50feeafb3f5a170861a8733cee3b93213",
+      "accepted": true
+    },
+    {
+      "file": "motion-02.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 23290,
+      "sha256": "04d984fbd2aee2f2dd5f3c789742758380f75b03186205fff7de1ef33fbdc171",
+      "accepted": true
+    },
+    {
+      "file": "motion-03.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 23642,
+      "sha256": "56d524e577cfc4ca53e1f745b030c6ab5668615ee74b01432b683712d90bbc03",
+      "accepted": true
+    },
+    {
+      "file": "motion-04.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 23356,
+      "sha256": "11253815e3d2e728c849a186af18380e4e0fac3f7d98ad62b6d72cbbb389bef8",
+      "accepted": true
+    },
+    {
+      "file": "motion-05.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 23637,
+      "sha256": "70f67e209d34f3263e2607796a9656dccfc5682e2e1f2310a8e91c1e835ab915",
+      "accepted": true
+    },
+    {
+      "file": "native-console-final.jpg",
+      "width": 1280,
+      "height": 1298,
+      "bytes": 267323,
+      "sha256": "5a46c2f07c3d897a50d791f49bd98a8e85af977d08cc86c9dc56ea4a7c03ef0b",
+      "accepted": true
+    },
+    {
+      "file": "phone-en-hud.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 26260,
+      "sha256": "874a6594e75a1f46aeb28d58ae885788c2712c588dbbb9f6472923b2976d9d3d",
+      "accepted": true
+    },
+    {
+      "file": "phone-en-menu.png",
+      "width": 780,
+      "height": 1386,
+      "bytes": 1033610,
+      "sha256": "538af9eb428eeb9802205b0d0125549c7933553163d58f8c3b1aa8c71694d34d",
+      "accepted": true
+    },
+    {
+      "file": "phone-en-pause-final.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 23978,
+      "sha256": "7bdcf001d7871228e0e56711dbd62fb1a37bbbcfab2ee5ae919c0227309856eb",
+      "accepted": true
+    },
+    {
+      "file": "phone-en-upgrade.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 36823,
+      "sha256": "a36e8cd3ae04bc53f7c50eb8b8395d493363932f2eb83a35b50e71e2771965f0",
+      "accepted": true
+    },
+    {
+      "file": "phone-en-victory.png",
+      "width": 780,
+      "height": 1386,
+      "bytes": 236577,
+      "sha256": "9bc12109c6dddd501646fc2793f1ca33b96368dde7b259df38ef23f47fa816f7",
+      "accepted": true
+    },
+    {
+      "file": "phone-zh-hud.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 24811,
+      "sha256": "36ff9e5e11ee5537e3dde5c5e85d6795e51b26bc6085d1a470868cf32a4d5127",
+      "accepted": true
+    },
+    {
+      "file": "phone-zh-menu.png",
+      "width": 780,
+      "height": 1386,
+      "bytes": 1017823,
+      "sha256": "8165689f795495925cbc8a5263c597260795f750ccbebfca6cd118f7c8f94c03",
+      "accepted": true
+    },
+    {
+      "file": "phone-zh-pause.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 21136,
+      "sha256": "52588194b3515232974d5459e77b552bba622069d3ce47f6563e9b180ca47112",
+      "accepted": true
+    },
+    {
+      "file": "phone-zh-stick-after.png",
+      "width": 780,
+      "height": 1386,
+      "bytes": 242249,
+      "sha256": "e750f2298c561cca165d76c3bdac587d83ea1c957ad62eb42a83ae3cc8ad57c8",
+      "accepted": true
+    },
+    {
+      "file": "phone-zh-stick-before.png",
+      "width": 780,
+      "height": 1386,
+      "bytes": 240308,
+      "sha256": "1d1f2e3d474bf423792015669422577101a90c711ffab5c24156b7b0c82e00b5",
+      "accepted": true
+    },
+    {
+      "file": "phone-zh-upgrade.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 31763,
+      "sha256": "2c9a3662bf97acc8b902086f7d3fa2e1ca59e36d9432e18697d2a76690798cf3",
+      "accepted": true
+    },
+    {
+      "file": "phone-zh-victory.png",
+      "width": 780,
+      "height": 1386,
+      "bytes": 232805,
+      "sha256": "ad10b75f3a8384ac9b30d11222699197ff36f6771d4d695f85da4523c203f943",
+      "accepted": true
+    },
+    {
+      "file": "rejected-desktop-zh-hud.jpg",
+      "width": 1216,
+      "height": 684,
+      "bytes": 40585,
+      "sha256": "93dba3fe9da33a7dcb2e711b4801d02f3f1846be5e282d3152414ccb4bbfbb84",
+      "accepted": false
+    },
+    {
+      "file": "rejected-mislabeled-pause-actually-zh.jpg",
+      "width": 390,
+      "height": 693,
+      "bytes": 21136,
+      "sha256": "52588194b3515232974d5459e77b552bba622069d3ce47f6563e9b180ca47112",
+      "accepted": false
+    },
+    {
+      "file": "root-motion-decoded-01.png",
+      "width": 390,
+      "height": 694,
+      "bytes": 172898,
+      "sha256": "95e439e56e0fe90e4a5d8fecabc6cf41e0b840dba74662b1d2c7f9dac71462d4",
+      "accepted": true
+    },
+    {
+      "file": "root-motion-decoded-02.png",
+      "width": 390,
+      "height": 694,
+      "bytes": 171924,
+      "sha256": "f8163cdd6a01546fdab5ff71eac2958b208b27beca808067a0b99326c6c0cba5",
+      "accepted": true
+    }
+  ],
+  "limits": [
+    "Physical phone, simultaneous two-finger input, other browsers and device FPS not tested",
+    "Audio implementation unchanged; no new audio listening acceptance claimed",
+    "Current-head victory replay endpoint observed by AX8ad2f77c; original task tab later expired, so no new endpoint PNG. Historical265f endpoint PNG is explicitly mapped by identical JS/CSS/body and is a different run/checksum",
+    "Desktop CSS viewport1280x720; DevTools PNG1280x720, raw tab screenshot JPEG1216x684 because Fit to window. Narrow CSS390x693; DevTools PNG780x1386, raw JPEG390x693",
+    "Motion video is actual sampled frames with true timestamps, no interpolation, one bottom black row for codec; no continuous recording or FPS assertion",
+    "rejected-desktop-zh-hud.jpg captured title after a native AX click missed; rejected-mislabeled-pause-actually-zh.jpg had wrong initial language filename. Both excluded from matrix and acceptance",
+    "Screenshot.app hung872.5s and Preview app timed out60.6s; both routes stopped, no recording produced. dataURL export policy rejected and stopped; successful byte transfer used only exact current task transcript local I/O"
+  ],
+  "externalBlocker": null,
+  "replay": {
+    "observed": "\u56de\u653e\u7ed3\u675f / \u56de\u653e\u6821\u9a8c\u4e00\u81f4 lunar-1 \u00b7 8ad2f77c",
+    "seed": 1018780150,
+    "checksum": "8ad2f77c",
+    "hp": "92/100",
+    "time": "03:00",
+    "kills": 440,
+    "level": 11,
+    "source": "cua.getTab exact existing URL read-only AX; no navigation or input"
+  },
+  "historicalEvidence": {
+    "head": "265fcd72a1c51aaee636096f669a872c50988f17",
+    "directory": "/private/tmp/lunar-ui16-265f-evidence",
+    "mapping": "JS/CSS/HTMLbody identical to32eedec by independent version-map.json; historical PNGs are not newly captured on32eedec",
+    "files": [
+      "desktop-loss-en.png",
+      "desktop-loss-zh.png",
+      "desktop-title-zh.png",
+      "narrow-loss-en.png",
+      "narrow-loss-zh.png",
+      "narrow-pause-zh.png",
+      "narrow-replay-40s.png",
+      "narrow-replay-end-zh.png",
+      "narrow-replay-zh.png",
+      "narrow-title-zh.png",
+      "narrow-upgrade-zh.png"
+    ]
+  },
+  "scope": "Independent Issue16 UI visual and interaction acceptance on exact head; not campaign, audio listening, physical device or FPS acceptance.",
+  "finalConsole": {
+    "warnError": [],
+    "native": "Only current task session.started/session.pause/session.resume/session.phase Info events visible. No warn/error markers, DevTools No issues.",
+    "image": "native-console-final.jpg",
+    "distribution": "local only; use structured console-final.json for repository evidence"
+  },
+  "matrix": {
+    "menu": {
+      "desktop-zh": "desktop-zh-menu.jpg",
+      "desktop-en": "desktop-en-menu.png",
+      "narrow-zh": "phone-zh-menu.png",
+      "narrow-en": "phone-en-menu.png"
+    },
+    "hud": {
+      "desktop-zh": "desktop-zh-hud-final.jpg",
+      "desktop-en": "desktop-en-hud.jpg",
+      "narrow-zh": "phone-zh-hud.jpg",
+      "narrow-en": "phone-en-hud.jpg"
+    },
+    "upgrade": {
+      "desktop-zh": "desktop-zh-upgrade.jpg",
+      "desktop-en": "desktop-en-upgrade.jpg",
+      "narrow-zh": "phone-zh-upgrade.jpg",
+      "narrow-en": "phone-en-upgrade.jpg"
+    },
+    "pause": {
+      "desktop-zh": "desktop-zh-pause.jpg",
+      "desktop-en": "desktop-en-pause.jpg",
+      "narrow-zh": "phone-zh-pause.jpg",
+      "narrow-en": "phone-en-pause-final.jpg"
+    },
+    "victory": {
+      "desktop-zh": "desktop-zh-victory.png",
+      "desktop-en": "desktop-en-victory.png",
+      "narrow-zh": "phone-zh-victory.png",
+      "narrow-en": "phone-en-victory.png"
+    },
+    "failure": {
+      "desktop-zh": "/private/tmp/lunar-ui16-265f-evidence/desktop-loss-zh.png",
+      "desktop-en": "/private/tmp/lunar-ui16-265f-evidence/desktop-loss-en.png",
+      "narrow-zh": "/private/tmp/lunar-ui16-265f-evidence/narrow-loss-zh.png",
+      "narrow-en": "/private/tmp/lunar-ui16-265f-evidence/narrow-loss-en.png"
+    },
+    "replay": {
+      "currentHead": "replay-end-ax.txt: checksum8ad2f77c, actual complete victory replay",
+      "historicalLayout": "/private/tmp/lunar-ui16-265f-evidence/narrow-replay-end-zh.png:265f,checksum423e7a1b; different run, JS/CSS/body identical mapping only"
+    }
+  },
+  "motion": {
+    "file": "root-motion-sampled.mp4",
+    "metadata": "root-motion-metadata.json",
+    "originalFrames": "motion-00.jpg through motion-05.jpg",
+    "spanMs": 2124,
+    "sampleIntervalsMs": [
+      420,
+      442,
+      432,
+      415,
+      415
+    ],
+    "review": "All6 original frames and decoded first/last video frames inspected; actual camera/terrain motion, shot and kills1to3 observed, HUD anchors stable. Not continuous high-frame-rate recording or FPS measurement."
+  },
+  "verify": {
+    "command": "npm run verify",
+    "cwd": "/private/tmp/lunar-ui18-final-verify",
+    "exitCode": 0,
+    "tests": 51,
+    "passed": 51,
+    "failed": 0,
+    "gzipBytes": 24669,
+    "budgetBytes": 153600,
+    "checksums": {
+      "208907": "d1326dd8",
+      "42": "c8b73f95",
+      "101": "22cc59b2"
+    },
+    "log": "verify.log"
+  },
+  "sourceReport": "independent-32/summary.json",
+  "artifactIndex": "independent-32/artifact-index.json",
+  "historicalIndependentEvidence": "historical-265f/artifact-index.json",
+  "historicalAuthorEvidence": {
+    "sourceHead": "a9b6d3b08fb3f59c4e66ab93218ca20bf18fd1d0",
+    "baseSha": "a7fb9cb332e6e4163984dfa6763e850c83031a72",
+    "runtimeSourceUnchanged": {
+      "act": true,
+      "begin": true,
+      "startReplay": true,
+      "showTitle": true,
+      "pause": true,
+      "button": true,
+      "handleKey": true,
+      "moveStick": true,
+      "frame": true
+    },
+    "testCount": 43,
+    "gzipBytes": 23972,
+    "budgetBytes": 153600,
+    "simulationChecksums": {
+      "208907": "d1326dd8",
+      "42": "c8b73f95",
+      "101": "22cc59b2"
+    },
+    "browser": "Chrome via extension",
+    "desktopCssAndPng": {
+      "width": 1280,
+      "height": 720
+    },
+    "narrowCssAndPng": {
+      "width": 390,
+      "height": 693
+    },
+    "realRun": {
+      "seed": 522104542,
+      "time": "01:01",
+      "phase": "lost",
+      "kills": 66,
+      "level": 2,
+      "replayVerified": true,
+      "checksum": "a9579683"
+    },
+    "consoleWarnOrError": [],
+    "media": {
+      "committedPngCount": 8,
+      "committedPngBytes": 324469,
+      "recording": "No screencast frames received; no video claimed"
+    },
+    "limits": [
+      "No actual victory screenshot",
+      "No physical mobile test",
+      "No FPS measurement",
+      "No new audio listening approval"
+    ],
+    "localEvidenceDirectory": "/private/tmp/lunar-ui16-evidence"
+  },
+  "currentBuildVerification": {
+    "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+    "baseHead": "9ad6b6a8e437b55147b7b123f43c61f1076f28dc",
+    "testCount": 51,
+    "gzipBytes": 24669,
+    "budgetBytes": 153600,
+    "simulationChecksums": {
+      "208907": "d1326dd8",
+      "42": "c8b73f95",
+      "101": "22cc59b2"
+    },
+    "ci": {
+      "runId": 42359793779,
+      "name": "Verify",
+      "runNumber": 30,
+      "conclusion": "success",
+      "url": "https://github.com/HYY-yu/LunarEchoes/actions/runs/42359793779"
+    }
+  },
+  "documentationCommitAcceptance": "Independent PASS applies to sourceHead 32eedec only; no independent PASS asserted for the later documentation commit."
 }
