@@ -1,0 +1,7 @@
+{
+  "head": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+  "warnError": [],
+  "native": "Only current task session.started/session.pause/session.resume/session.phase Info events visible. No warn/error markers, DevTools No issues.",
+  "image": "native-console-final.jpg",
+  "distribution": "local only; use structured console-final.json for repository evidence"
+}

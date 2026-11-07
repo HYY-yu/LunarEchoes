@@ -1,0 +1,48 @@
+{
+  "sourceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+  "sourceFiles": [
+    "motion-00.jpg",
+    "motion-01.jpg",
+    "motion-02.jpg",
+    "motion-03.jpg",
+    "motion-04.jpg",
+    "motion-05.jpg"
+  ],
+  "captureStartsMs": [
+    1794060983527,
+    1794060983947,
+    1794060984389,
+    1794060984821,
+    1794060985236,
+    1794060985651
+  ],
+  "observedSpanMs": 2124,
+  "sampleIntervalMs": [
+    420,
+    442,
+    432,
+    415,
+    415
+  ],
+  "sourceDimensions": [
+    390,
+    693
+  ],
+  "encoding": "Original sampled frames in timestamp order, variable frame rate, no interpolation; one black bottom row pads odd height to694 for yuv420p. MP4 timestamps quantized to ffconcat image timebase. Not a browser FPS measurement or continuous screen recording.",
+  "ffprobe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "width": 390,
+        "height": 694,
+        "duration": "2.160000",
+        "nb_frames": "6"
+      }
+    ],
+    "format": {
+      "duration": "2.160000",
+      "size": "109293"
+    }
+  }
+}

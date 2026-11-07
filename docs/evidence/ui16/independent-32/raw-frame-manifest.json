@@ -1,0 +1,362 @@
+[
+  {
+    "task": "ui18-finish-verify",
+    "frame": "phone-zh-pause",
+    "start": 1794060950092,
+    "end": 1794060950115,
+    "bytes": 21136,
+    "fnv32": "3d4ae326",
+    "state": {
+      "languageButton": "EN",
+      "phase": "paused",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "phone-zh-pause.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "52588194b3515232974d5459e77b552bba622069d3ce47f6563e9b180ca47112"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "phone-en-pause-final",
+    "start": 1794060955542,
+    "end": 1794060955571,
+    "bytes": 23978,
+    "fnv32": "bd41bee5",
+    "state": {
+      "languageButton": "中文",
+      "phase": "paused",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "phone-en-pause-final.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "7bdcf001d7871228e0e56711dbd62fb1a37bbbcfab2ee5ae919c0227309856eb"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "phone-zh-hud",
+    "start": 1794060961174,
+    "end": 1794060961200,
+    "bytes": 24811,
+    "fnv32": "c066f45e",
+    "state": {
+      "languageButton": "EN",
+      "phase": "running",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "phone-zh-hud.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "36ff9e5e11ee5537e3dde5c5e85d6795e51b26bc6085d1a470868cf32a4d5127"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "motion-00",
+    "start": 1794060983527,
+    "end": 1794060983554,
+    "bytes": 24297,
+    "fnv32": "1053a928",
+    "state": {
+      "languageButton": "EN",
+      "phase": "running",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "motion-00.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "04e73252e2498935480e72c51ddee9b890470a3dd3bf99418e36bfe6c48efe78"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "motion-01",
+    "start": 1794060983947,
+    "end": 1794060983988,
+    "bytes": 23621,
+    "fnv32": "2c5e0cd1",
+    "state": {
+      "languageButton": "EN",
+      "phase": "running",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "motion-01.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "7e0b4001ee8cb0e2f977c4baf30b83f50feeafb3f5a170861a8733cee3b93213"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "motion-02",
+    "start": 1794060984389,
+    "end": 1794060984423,
+    "bytes": 23290,
+    "fnv32": "9d1af052",
+    "state": {
+      "languageButton": "EN",
+      "phase": "running",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "motion-02.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "04d984fbd2aee2f2dd5f3c789742758380f75b03186205fff7de1ef33fbdc171"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "motion-03",
+    "start": 1794060984821,
+    "end": 1794060984850,
+    "bytes": 23642,
+    "fnv32": "ab2a1ea3",
+    "state": {
+      "languageButton": "EN",
+      "phase": "running",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "motion-03.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "56d524e577cfc4ca53e1f745b030c6ab5668615ee74b01432b683712d90bbc03"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "motion-04",
+    "start": 1794060985236,
+    "end": 1794060985263,
+    "bytes": 23356,
+    "fnv32": "a89c0de8",
+    "state": {
+      "languageButton": "EN",
+      "phase": "running",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "motion-04.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "11253815e3d2e728c849a186af18380e4e0fac3f7d98ad62b6d72cbbb389bef8"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "motion-05",
+    "start": 1794060985651,
+    "end": 1794060985675,
+    "bytes": 23637,
+    "fnv32": "be11b63d",
+    "state": {
+      "languageButton": "EN",
+      "phase": "running",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "motion-05.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "70f67e209d34f3263e2607796a9656dccfc5682e2e1f2310a8e91c1e835ab915"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "phone-zh-upgrade",
+    "start": 1794061065439,
+    "end": 1794061065475,
+    "bytes": 31763,
+    "fnv32": "b7419609",
+    "state": {
+      "languageButton": "EN",
+      "phase": "upgrading",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "phone-zh-upgrade.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "2c9a3662bf97acc8b902086f7d3fa2e1ca59e36d9432e18697d2a76690798cf3"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "phone-en-upgrade",
+    "start": 1794061070549,
+    "end": 1794061070580,
+    "bytes": 36823,
+    "fnv32": "f2ae10fb",
+    "state": {
+      "languageButton": "中文",
+      "phase": "upgrading",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "phone-en-upgrade.jpg",
+    "pixelWidth": 390,
+    "pixelHeight": 693,
+    "sha256": "a36e8cd3ae04bc53f7c50eb8b8395d493363932f2eb83a35b50e71e2771965f0"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "desktop-en-upgrade",
+    "start": 1794061090382,
+    "end": 1794061090423,
+    "bytes": 59250,
+    "fnv32": "d609f226",
+    "state": {
+      "languageButton": "中文",
+      "phase": "upgrading",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "desktop-en-upgrade.jpg",
+    "pixelWidth": 1216,
+    "pixelHeight": 684,
+    "sha256": "53f56e05936bea84dcd7d028e933e027f77b9eb6840328fc17228b230c851743"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "desktop-zh-upgrade",
+    "start": 1794061109349,
+    "end": 1794061109390,
+    "bytes": 53966,
+    "fnv32": "581a1b22",
+    "state": {
+      "languageButton": "EN",
+      "phase": "upgrading",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "desktop-zh-upgrade.jpg",
+    "pixelWidth": 1216,
+    "pixelHeight": 684,
+    "sha256": "3aa7ff90bcfc7803b4bee62d25a61475ac0a5082856f4309069c99c47aff01a2"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "desktop-zh-menu",
+    "start": 1794061116233,
+    "end": 1794061116274,
+    "bytes": 40661,
+    "fnv32": "3087a39c",
+    "state": {
+      "languageButton": "EN",
+      "phase": "running",
+      "screen": "title"
+    },
+    "accepted": true,
+    "file": "desktop-zh-menu.jpg",
+    "pixelWidth": 1216,
+    "pixelHeight": 684,
+    "sha256": "78b92a42c015fad55115f502656e8c1fa954cf58bd9c459ddcdf4c28ff84b448"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "desktop-zh-hud",
+    "start": 1794061117102,
+    "end": 1794061117139,
+    "bytes": 40585,
+    "fnv32": "b4fbdc34",
+    "state": {
+      "languageButton": "EN",
+      "phase": "running",
+      "screen": "title"
+    },
+    "accepted": false,
+    "file": "rejected-desktop-zh-hud.jpg",
+    "pixelWidth": 1216,
+    "pixelHeight": 684,
+    "sha256": "93dba3fe9da33a7dcb2e711b4801d02f3f1846be5e282d3152414ccb4bbfbb84"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "desktop-zh-hud-final",
+    "start": 1794061131924,
+    "end": 1794061131960,
+    "bytes": 61970,
+    "fnv32": "c56df195",
+    "state": {
+      "languageButton": "EN",
+      "phase": "running",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "desktop-zh-hud-final.jpg",
+    "pixelWidth": 1216,
+    "pixelHeight": 684,
+    "sha256": "60909b4066d199eb28642d23a27edf34c97f1c86c2c4e1790c82af000da709dc"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "desktop-zh-pause",
+    "start": 1794061138728,
+    "end": 1794061138761,
+    "bytes": 40217,
+    "fnv32": "a733b6ef",
+    "state": {
+      "languageButton": "EN",
+      "phase": "paused",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "desktop-zh-pause.jpg",
+    "pixelWidth": 1216,
+    "pixelHeight": 684,
+    "sha256": "17bb4d36410b3dd985e15041f97d71ce7aa1fa12be1ac0148a07576171507bff"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "desktop-en-pause",
+    "start": 1794061163990,
+    "end": 1794061164025,
+    "bytes": 46722,
+    "fnv32": "2b013398",
+    "state": {
+      "languageButton": "中文",
+      "phase": "paused",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "desktop-en-pause.jpg",
+    "pixelWidth": 1216,
+    "pixelHeight": 684,
+    "sha256": "441a0b62eacef872ed22bfb30aa4faec28ec7f904d1b4a848551c2a0232d4faf"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "desktop-en-hud",
+    "start": 1794061164782,
+    "end": 1794061164811,
+    "bytes": 63840,
+    "fnv32": "ab012974",
+    "state": {
+      "languageButton": "中文",
+      "phase": "running",
+      "screen": "game"
+    },
+    "accepted": true,
+    "file": "desktop-en-hud.jpg",
+    "pixelWidth": 1216,
+    "pixelHeight": 684,
+    "sha256": "dde25d5978fb513dbf51c94368df82fa56b33433c5e06b70cff34de8a7bbc726"
+  },
+  {
+    "task": "ui18-finish-verify",
+    "frame": "native-console-final",
+    "start": 1794061227274,
+    "end": 1794061227274,
+    "bytes": 267323,
+    "fnv32": "f635f088",
+    "state": {
+      "screen": "console",
+      "phase": "paused",
+      "languageButton": "n/a"
+    },
+    "accepted": true,
+    "file": "native-console-final.jpg",
+    "pixelWidth": 1280,
+    "pixelHeight": 1298,
+    "sha256": "5a46c2f07c3d897a50d791f49bd98a8e85af977d08cc86c9dc56ea4a7c03ef0b"
+  }
+]

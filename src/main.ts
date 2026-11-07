@@ -58,7 +58,7 @@ function pause() {
 function button(label: string, className: string, handler: () => void): HTMLButtonElement { const node = document.createElement('button'); node.textContent = label; node.className = className; node.onclick = () => { handler(); void enableAudio(true); }; return node; }
 function panel(title: string, subtitle: string): HTMLElement {
   const section = document.createElement('section'); section.className = 'modal result';
-  const eyebrow = document.createElement('div'); eyebrow.className = 'eyebrow'; eyebrow.textContent = text().mission;
+  const eyebrow = document.createElement('div'); eyebrow.className = 'eyebrow'; eyebrow.textContent = world.phase.kind === 'won' || world.phase.kind === 'lost' ? text().report : text().mission;
   const heading = document.createElement('h2'); heading.textContent = title;
   const description = document.createElement('p'); description.textContent = subtitle;
   section.append(eyebrow, heading, description); overlay.append(section); return section;
@@ -66,6 +66,7 @@ function panel(title: string, subtitle: string): HTMLElement {
 function formatTime(ticks: number) { const seconds = Math.floor(ticks / HZ); return `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`; }
 function updateUi(force = false) {
   const t = text();
+  document.body.dataset.screen = screen; document.body.dataset.phase = world.phase.kind;
   canvasNode.setAttribute('aria-label', language === 'zh' ? '月球战场' : 'Lunar battlefield');
   const signature = `${screen}|${world.phase.kind}|${language}|${synth.muted}`;
   element('sound').textContent = synth.muted ? t.muted : t.sound;
@@ -80,13 +81,13 @@ function updateUi(force = false) {
   element('dash').textContent = world.player.dashCooldown > 0 ? (world.player.dashCooldown / HZ).toFixed(1) : t.dash;
   element('footer-left').textContent = screen === 'title' ? t.prototype : `${t.seed} ${world.seed} · ${screen === 'replay' ? t.replaying : t.objective}`;
   const equipment = element('equipment'); equipment.replaceChildren();
-  for (const id of ['pulse', 'orbit', 'nova'] satisfies Upgrade[]) if (world.upgrades[id]) { const node = document.createElement('span'); node.textContent = `${upgradeLabel(id, language).icon} ${world.upgrades[id]}`; node.title = upgradeLabel(id, language).title; equipment.append(node); }
+  for (const id of ['pulse', 'orbit', 'nova'] satisfies Upgrade[]) if (world.upgrades[id]) { const node = document.createElement('span'); node.innerHTML = `<i class="module-icon icon-${id}" aria-hidden="true"></i><span>LV ${world.upgrades[id]}</span>`; node.title = upgradeLabel(id, language).title; node.setAttribute('aria-label', `${node.title} · LV ${world.upgrades[id]}`); equipment.append(node); }
   if (!force && signature === lastUi) return;
   lastUi = signature; overlay.replaceChildren(); synth.setSession(screen === 'title' ? 'menu' : world.phase.kind === 'won' || world.phase.kind === 'lost' ? 'terminal' : world.phase.kind);
   if (screen === 'title') {
     const intro = document.createElement('section'); intro.className = 'intro';
     intro.innerHTML = `<div class="eyebrow">${t.mission}</div><h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${t.brief}</p>`;
-    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(button(`${t.start} ↗`, 'primary', begin));
+    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(button(t.start, 'primary', begin));
     const replayButton = button(t.replay, 'secondary', startReplay); replayButton.disabled = !lastRecording; actions.append(replayButton); intro.append(actions);
     const controls = document.createElement('p'); controls.className = 'controls'; controls.innerHTML = `<span class="desktop">${t.controls}</span><span class="mobile">${t.touch}</span>`; intro.append(controls);
     const stamp = document.createElement('div'); stamp.className = 'mission-stamp'; stamp.innerHTML = `<strong>03<span>:</span>00<small> MIN</small></strong>MARE TRANQUILLITATIS<br>25°51′24″ N / 00°36′50″ E`;
@@ -102,7 +103,7 @@ function updateUi(force = false) {
     const grid = document.createElement('div'); grid.className = 'upgrade-grid';
     for (const [index, id] of world.phase.offers.entries()) {
       const label = upgradeLabel(id, language); const node = button('', 'upgrade', () => act({ kind: 'choose', upgrade: id }));
-      node.innerHTML = `<b>${label.icon}</b><strong>${label.title}</strong><p>${label.description}</p><small>0${index + 1} / ${t.select} · LV ${world.upgrades[id] + 1}</small>`; grid.append(node);
+      node.innerHTML = `<b class="module-icon icon-${id}" aria-hidden="true"></b><strong>${label.title}</strong><p>${label.description}</p><small><span class="option-key">0${index + 1} / ${t.select}</span><span class="upgrade-level">LV ${world.upgrades[id]} → <em>LV ${world.upgrades[id] + 1}</em></span></small>`; grid.append(node);
     }
     section.append(grid); return;
   }

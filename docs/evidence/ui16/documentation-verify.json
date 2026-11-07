@@ -1,0 +1,25 @@
+{
+  "runtimeReferenceHead": "32eedecd1af8117a66e3a117f070290b63a6ad8b",
+  "command": "npm run verify",
+  "testCount": 51,
+  "passed": 51,
+  "failed": 0,
+  "gzipBytes": 24669,
+  "budgetBytes": 153600,
+  "runtimeFileSha256": {
+    "index.html": "a07a1cd7aa1ac343c63eb96212e59f707043c40008b36ec8a8a8cd5fff4b027c",
+    "logger.js": "bc17b67fd97f29e5017b45bbff4af8257f1d8df69e265415fffc342ea32cefc7",
+    "core.js": "554af795df89136216bb9c83b78089d3a25108ce352517e698e3d80b3255bed4",
+    "render.js": "cc815742b33da07bd5a859e56249c3d2dec3dd9d3e61bc21e5301c1bc32717cd",
+    "main.js": "088a8f53c586169ee13fd9672aedbd6f66126ea2316ed998f963347b58b112bc",
+    "progress.js": "ef214e51ba01735b484a9be64ca6d3192cdd34cbf6f2ad1940a621986e916996",
+    "audio.js": "46c5a5d771595a0ad7f4ee6513f32fca9c82f8625337d0b7d4d56eaf7e5c8ab8",
+    "style.css": "b57e90028a538c5d0b9e57691f9469d18f27f515d2ee83dc3cd22f4118cf573c",
+    "stage-contract.js": "43b623992f7fcf57e4434ed2c638a6607afbd175de61c4d3d0430ceedf810594",
+    "art.js": "7c2599408fe6ce61590ee08c3fac9cbd28b1305d106e8cb4a200bcf18d822909",
+    "i18n.js": "a41dbc15586797ab1a467e044668fb6611b10a75dc5841259a973b701c4a7429"
+  },
+  "runtimeIdentical": true,
+  "changedPathsScope": "docs only",
+  "independentAcceptance": "Source head 32eedec has independent UI PASS. This documentation-only commit has no newly asserted independent verdict."
+}
