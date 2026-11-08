@@ -4,10 +4,14 @@ import { createRenderer } from '../dist/render.js';
 import { createWorld, dispatch } from '../dist/core.js';
 
 function scene(t) {
-  const pixels = [], arcs = [];
+  const pixels = [], arcs = [], hits = [];
   const context = {
     fillStyle: '', globalAlpha: 1,
-    fillRect(x, y, width, height) { if (this.fillStyle === '#50d9ee' || this.fillStyle === '#d9fff2') pixels.push({ x, y, width, height, color: this.fillStyle, alpha: this.globalAlpha }); },
+    fillRect(x, y, width, height) {
+      const pixel = { x, y, width, height, color: this.fillStyle, alpha: this.globalAlpha };
+      if (this.fillStyle === '#50d9ee' || this.fillStyle === '#d9fff2') pixels.push(pixel);
+      if (this.fillStyle === '#f2a177') hits.push(pixel);
+    },
     arc(...args) { arcs.push(args); },
     createPattern() { return '#707c80'; }, createRadialGradient() { return { addColorStop() {} }; },
     drawImage() {}, ellipse() {}, save() {}, restore() {}, scale() {}, translate() {}, beginPath() {}, fill() {}, stroke() {}, strokeRect() {}, setLineDash() {}, moveTo() {}, lineTo() {}
@@ -18,12 +22,12 @@ function scene(t) {
   t.after(() => { if (previous === undefined) delete globalThis.document; else globalThis.document = previous; });
   const render = createRenderer(canvas), world = createWorld(42);
   world.fireCooldown = 100000; world.spawnCooldown = 100000;
-  function draw(time = 0) {
-    pixels.length = 0; arcs.length = 0;
-    const before = structuredClone(world); render(world, time); assert.deepEqual(world, before);
+  function draw(time = 0, renderedWorld = world) {
+    pixels.length = 0; arcs.length = 0; hits.length = 0;
+    const before = structuredClone(renderedWorld); render(renderedWorld, time); assert.deepEqual(renderedWorld, before);
     return structuredClone(pixels);
   }
-  return { world, draw, arcs };
+  return { world, draw, arcs, hits };
 }
 
 test('nova has distinct expanding and dissolving pixel frames inside its existing radius', t => {
@@ -62,14 +66,25 @@ test('nova freezes through pause upgrade and terminal states and repeats after r
   for (let i = 0; i < 29; i++) dispatch(world, { kind: 'tick', input: { x: 0, y: 0, dash: false } });
   assert.equal(world.effects.filter(fx => fx.kind === 'nova').length, 0);
   assert.equal(draw().length, 0);
-  world.effects = [{ x: 750, y: 750, kind: 'nova', life: 29, size: 113 }];
-  assert.deepEqual(draw(), ignition);
+  const restarted = createWorld(42);
+  restarted.upgrades.nova = 1; restarted.fireCooldown = 100000; restarted.spawnCooldown = 100000;
+  dispatch(restarted, { kind: 'tick', input: { x: 0, y: 0, dash: false } });
+  assert.notEqual(restarted, world);
+  assert.deepEqual(draw(999999, restarted), ignition);
 });
 
 test('nova leaves enemy danger telegraphs and non nova effects intact', t => {
-  const { world, draw, arcs } = scene(t);
+  const { world, draw, arcs, hits } = scene(t);
   world.enemies = [{ id: 1, kind: 'sentry', x: 820, y: 750, hp: 100, maxHp: 100, radius: 11, attack: 24, flash: 0 }];
-  world.effects = [{ x: 750, y: 750, kind: 'nova', life: 17, size: 113 }, { x: 740, y: 750, kind: 'hit', life: 10, size: 18 }];
+  world.effects = [{ x: 740, y: 750, kind: 'hit', life: 10, size: 18 }];
+  draw();
+  const hitOnly = structuredClone(hits), telegraph = structuredClone(arcs);
+  assert.equal(hitOnly.length, 6);
+  assert(hitOnly.every(pixel => pixel.width === 2 && pixel.height === 2 && pixel.alpha === 10 / 15));
+  assert(telegraph.some(arc => arc[0] === 820 && arc[2] === 25));
+  world.effects.push({ x: 750, y: 750, kind: 'nova', life: 17, size: 113 });
   assert(draw().length > 0);
   assert(arcs.some(arc => arc[0] === 820 && arc[2] === 25));
+  assert.deepEqual(hits, hitOnly);
+  assert.deepEqual(arcs, telegraph);
 });
