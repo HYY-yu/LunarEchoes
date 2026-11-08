@@ -71,6 +71,20 @@ test('built opening contains exactly canonical entries and escapes closing scrip
   for (const invalid of [null, catalog.slice(1), catalog.map((entry, i) => i ? entry : { ...entry, en: '' })]) assert.throws(() => embedDesertOpening('', invalid));
   assert.throws(() => embedDesertOpening('', catalog), /anchor/);
 });
+test('embedded opening preserves replacement tokens as literal story text', () => {
+  const anchor = '<script id="desert-opening" type="application/json"></script>';
+  for (const token of ['$$', '$&', '$`', "$'", '$1', '$<name>']) {
+    const changed = structuredClone(catalog);
+    changed[0].en = `Signal ${token} received`;
+    changed[1].zh = `目标 ${token} 已接收`;
+    const output = embedDesertOpening(`before${anchor}after`, changed);
+    const content = JSON.parse(output.match(/json">([^]*?)<\/script>/)[1]);
+    assert.equal(content.opening.en, changed[0].en);
+    assert.equal(content.objective.zh, changed[1].zh);
+    assert.ok(output.startsWith('before<script'));
+    assert.ok(output.endsWith('</script>after'));
+  }
+});
 test('actual main keeps World, RNG and recording frozen through opening and preserves text, scroll and focus', () => {
   const app = harness(); const preview = app.snapshot(); app.click('启动任务');
   assert.equal(app.snapshot().screen, 'opening'); assert.equal(app.seedCalls, 0);

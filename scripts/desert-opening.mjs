@@ -8,5 +8,5 @@ export function embedDesertOpening(html, catalog) {
   const content = JSON.stringify({ opening: select('opening'), objective: select('objective') }).replaceAll('<', '\\u003c');
   const anchor = '<script id="desert-opening" type="application/json"></script>';
   if (!html.includes(anchor)) throw new Error('Missing desert opening content anchor');
-  return html.replace(anchor, `<script id="desert-opening" type="application/json">${content}</script>`);
+  return html.replace(anchor, () => `<script id="desert-opening" type="application/json">${content}</script>`);
 }
