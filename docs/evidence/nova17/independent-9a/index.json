@@ -1,0 +1,76 @@
+{
+  "subjectHead": "9a3521dda5b559dbacffb842ccbeafd3ad9e7ae4",
+  "visualStatus": "source-runtime-supplemental-pass-see-original-reports",
+  "artifacts": [
+    {
+      "file": "nova17-balance-9a-verify.log",
+      "kind": "original-command-output",
+      "source": "/private/tmp/nova17-balance-9a-verify.log",
+      "bytes": 5593,
+      "sha256": "84a8864d1fea3033e5aea1d5264553011eebd9f7a9c22d28b955c883e076ef09"
+    },
+    {
+      "file": "nova17-balance-baseline-verify.log",
+      "kind": "original-command-output",
+      "source": "/private/tmp/nova17-balance-baseline-verify.log",
+      "bytes": 5304,
+      "sha256": "fa672b6a8f65221728eff0e2cf4bf0689b923d349b96266c2f67448d93131238"
+    },
+    {
+      "file": "nova17-mutation-hit.log",
+      "kind": "original-command-output",
+      "source": "/private/tmp/nova17-mutation-hit.log",
+      "bytes": 926,
+      "sha256": "316902cfd93ae90c229f35db0d223a12b4182b3855705073d88fbdb7ca41f6f7"
+    },
+    {
+      "file": "nova17-mutation-restart.log",
+      "kind": "original-command-output",
+      "source": "/private/tmp/nova17-mutation-restart.log",
+      "bytes": 50863,
+      "sha256": "3425879ba8dd92ffeaa61776d074b8cca5f020fe6c5016a047c4b7811020b39d"
+    },
+    {
+      "file": "nova17-paired-transcribed.txt",
+      "kind": "tool-output-transcription",
+      "source": "/private/tmp/nova17-paired-transcribed.txt",
+      "bytes": 1438,
+      "sha256": "990696993fd00fb40958a7ee9c82f94ddb6312976913747b4fe6d07cd77e862c"
+    },
+    {
+      "file": "nova17-runtime-remote-transcribed.txt",
+      "kind": "tool-output-transcription",
+      "source": "/private/tmp/nova17-runtime-remote-transcribed.txt",
+      "bytes": 712,
+      "sha256": "d77575cd84cbe255b1deafaa706448172057a84f115d3999887d6b7188902cc9"
+    },
+    {
+      "file": "served-runtime-4174.json",
+      "kind": "runtime-identity-proof",
+      "source": "/private/tmp/lunar-heartbeat-20261108-0102/served-runtime-4174.json",
+      "bytes": 3264,
+      "sha256": "be43e2560be73d81269ab1b975057ae2a238ab46592dfae2e1f72624464a4092"
+    },
+    {
+      "file": "served-runtime-4176.json",
+      "kind": "runtime-identity-proof",
+      "source": "/private/tmp/lunar-heartbeat-20261108-0102/served-runtime-4176.json",
+      "bytes": 2944,
+      "sha256": "623fd45ae0a77ca35f7502fc471b4493d303901df7338c4fcbb5c7da3fb5ab00"
+    },
+    {
+      "file": "runtime-manifest-9a.json",
+      "kind": "runtime-identity-proof",
+      "source": "/private/tmp/lunar-heartbeat-20261108-0102/runtime-manifest-9a.json",
+      "bytes": 1009,
+      "sha256": "25268ac875727f457d964c6edd9477dcec66f2c93177ab6f1787375beac80311"
+    },
+    {
+      "file": "remote-final-observation.json",
+      "kind": "coordinator-observation",
+      "source": "/private/tmp/lunar-heartbeat-20261108-0102/remote-final-observation.json",
+      "bytes": 434,
+      "sha256": "932a9ddf96f512a4e57e68a88c97250648677abf63c2e0a467d79509d629fc8f"
+    }
+  ]
+}

@@ -1,0 +1,2178 @@
+{
+  "verdict": "INCOMPLETE",
+  "candidate_sha": "9a3521dda5b559dbacffb842ccbeafd3ad9e7ae4",
+  "played_runtime": "35c1c01631ebe49fc5e0f3ff52b09f9742f05e2c",
+  "runtime_mapping": "Independent builds compared with diff -qr; all dist files matched. Root verified 4174 served runtime against candidate build.",
+  "served_runtime_evidence": "/private/tmp/lunar-heartbeat-20261108-0102/served-runtime-4174.json",
+  "capture": "Chrome screenshots are nonuniform samples, not video or FPS measurements. Exact source capture times were not recorded.",
+  "desktop": "1280x720 natural seed 3165727511, selected nova at 00:20, sampled 00:35–00:36",
+  "narrow": "390x693 replay of same natural game, sampled 00:31–00:33",
+  "crowd": "1280x720 natural seed 3690896236, sampled 01:10–01:12",
+  "replay_checksum": "lunar-1 · 38332144",
+  "console_warn_error": [],
+  "incomplete": [
+    "Pause while nova remains visible",
+    "Simultaneous dense enemy group and danger telegraph with nova",
+    "Dynamic smoothness and frame rate",
+    "Physical touch device",
+    "Audio listening"
+  ],
+  "recommended_originals": [
+    "desktop-15.jpg",
+    "desktop-21.jpg",
+    "desktop-28.jpg",
+    "narrow-replay-16.jpg"
+  ],
+  "frames": [
+    {
+      "file": "desktop-00.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "6c7b3c7a01a6bed6e9f93d280243f90d30ebc9af2a2361c2fa6fc8959a347769",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-01.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "d118a009cb7f4ee5c8370ae727ab4a67d81be5113097f31a5e984f59193c2249",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-02.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "7e63aaa8f4167410188b0b8d2c686273e7212c922e8f3ad1e51cac86e0b302af",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-03.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "bc3e8cac57c587489125bbd311b34430557588cd5b7880d1724ed42269c4a870",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-04.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "49aca522f34db207429583c779dbe9bcf07fa4ca199715d7d14b7d7424bacdb2",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-05.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "c7b1403f5d4e6bfd9bc830c95b15f8680a1218d3a96d6dd454d0aeca697950ee",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-06.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "afd651efc0735cf83046ac5d71670ce86941d047169001ca171dde0873a99293",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-07.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "3a89d4a9a652e6083662b4d2c3d2a0c0fae68c2c0f33a11c94878392dc7a3da3",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-08.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "1bb319c962d6fdb5d77dc1787fba4cd6da139ad700f907570bc82a8493d77cc6",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-09.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "4f2efd5db0d34761e34c3f29ade8d91ad38f62cb80faba59d278c77a12d0b669",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-10.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "a19def4b2a1a5ad0f7b9a2b34b5136237eb2e2a4e7e8fe08005b8570f8479356",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-11.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "1c348fcd76f11725a2ffd95b0e19305a4d8d5b7d5882a4a73522791b5a7c2bb5",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-12.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "71cd180c0310bc4645c950e77af90d12ab717d7b67fdfc82950b30afe31233d9",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-13.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "d6a158152f06896f814773062e1866e0ad2914b184786234677b37e3667b5d1e",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-14.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "298cf4a3de1cdd67848dbc5c4cc62682e8e7efc3c0b91510b973f076ca65330f",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-15.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "ba7d3da1e5ffc0f4a8e802352605cfbea9d490263d9990dc412b713397613460",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-16.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "2b877a0c0674a0425e412cce7f74a02f57b68ae954275e8ae131fa037e7ddd87",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-17.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "e65d13b2d97deee9b94f2fcf48d5bced4f62bbe7ee4457d48e06a2b644fb8a0d",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-18.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "fc58caa2665acc4bce88ffcb40865e3e50d0010af3a15c4fa97d3f660876b3fb",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-19.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "08868ccaab12286ecb308ac21b87e655a1c9c6f03662153bec3b66f16d012298",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-20.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "41223b00c811b1c32dca182f8d7c8e7f1da6524b99114cda47cf457bff27816c",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-21.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "ee17b16efab3adbe47ff0df6217b3c890f881681b4a9682702ba1d87fd14e6e2",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-22.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "c94051e74b12193706b4446197260c89b110f86a7698451511286db852ebc935",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-23.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "ab2287f0381d367cc8fbf82a06537e08df832669b1a465c49fe1ed85acaeae0b",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-24.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "5a3ce730ba1232d568e5c18e75bda45e7973b8e9218b15841a8e2ceec5e892ee",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-25.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "81ea1e2cf83a1651e0f0d0fc4cf569505e2f49d3002c7b4ebed393a02c86b107",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-26.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "678ad8cb0d67114d677b8433652eb784a9d7ffeed02e4b3b653c174d97fcaf02",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-27.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "738a86b726a146a5f3265eddbe74f98d970ac5417043492691309081697b3434",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-28.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "07deaad37c193056c183b2bfb8f04cac2f360571a054c818488c58c574f825d5",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-29.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "c7d53dcfd0cbfdad4eeb6dd8a98b904df6404a77046268504b79be91f027525e",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-30.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "d6cff900c2608a1016bee154cdb94f748a2485646d881a1497d724f7bbaadd7d",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-31.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "16910bf29ac1cbc70dbda5df64d1a6c33062ddb12b4cf7bd64bc3853e507ca4c",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-32.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "553c16b4c7253d584528007f71049a29091d0faa5622d37cedc457c1cc9236a2",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-33.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "ce97c501452a69de42049211edc75887a8b84214f0c3646b6fd70538aaf62329",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "desktop-34.jpg",
+      "group": "desktop",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "5ed3a56c4bdab066eb5447bb7b0fbf322c9fcbe4ff2b37ff7b5a099c359484c7",
+      "source_time": "unknown",
+      "game_time_observed": "00:35–00:36"
+    },
+    {
+      "file": "narrow-replay-00.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "5929c8f8bc3bb09beb4108a235fc53bc4651399576000f6066a03088875f7883",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-01.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "0d545523b04da52c1e5c89e71698b19d5a60b8250c9e03877ce840b964aba74c",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-02.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "a9bee296f8d7f3f3bc7951f561465dd390f0dcabda840bffcd49807115fde6d7",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-03.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "1dd65a94255bc6961875bd4cdf66e5f8c0ac0b39875095c497d6d4e2910e4c7f",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-04.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "6394a0763cbe9429b84c4eaea211412e434f4ebdb5ff6a9206d978cc2cbafc76",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-05.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "1925aaaf98f4979688a3c023ec3247d1874d080a1afe6a17d9f8b7349b4290e8",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-06.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "4b2e8f51ae2fb37087e59b6aab155546731dbf7f7fb42b86f65df4e478a1fdbb",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-07.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "cc13c818ab16e43d85e86426f610079dd360cc0714646b1747501d31095ccdca",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-08.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "ff0a84bf542d716b0226a024015d151c5cd5ee1bc3d67ab92f76c3fb767efb6f",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-09.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "fde573b7d81d7374ba2e11aa541fdca5c2b751854fd4c26b596571f2bbfa6cd1",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-10.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "f5466b4da449496197fb1fb94f19faa9ead7f6171809e432c95566193d459dea",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-11.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "0057c4d715c144ba7bd06e8d39355d6d18103cc775da34148a4ab30e0b14ada8",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-12.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "f72b7353fd21cdc452d084814ccb126a96cc424f6b3949033a672f4adaf21370",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-13.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "a84cf5e18029e2987e3b5b2d5e7a32453278e447d6b7f2749a8085ed517af01f",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-14.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "c6330912e8ddeb684312a5de96a4104fa675907879d0ceaabcf198bf8726490d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-15.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "2795c711d5f391fa5369366253061b15a49cd3562f001cd593708816f7cf3ddc",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-16.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "bd042275fef329eda13007d5813684873f51cba491b0d95c8fe4a3bcadc2baea",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-17.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "bbbce0ad6c289d518105af3e1c16352b0cdcea7a21d16301c97d7926f1274606",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-18.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "3022a3fed0170fbb10446820ef5ad114336475798e14b06baf6065797ee1d7d8",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-19.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "8617bef44bc4ce9a7b2304ba82e5c6c646077652ba1e3e2d46cd41531ca7623b",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-20.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "be6b6a4ee3ef0bebc8eca56ab769627c7859a2602a9965ddc3eec50391dd29e0",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-21.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "1788dfaf3241b8714a77a8047f8f7bc501c2f35706c28d1b3d45ce96ef7fe448",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-22.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "d1bc6d89cb21ef002b79b45e3a2af05bd6032fe8fa66e07f04b3ab3996660672",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-23.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "1f88e205e8008c4a3dbb2c0c80378325dcaf7b0bd0f5103b43490595af882f86",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-24.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "7b5b5e5f3b90b42a37bc137d48dff8c1bfbd13897f3f1818f6f2d063eb00665d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-25.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "1a4ad95b1287ebfee6942233deecb92847a2e5a92d0258585fa39e6495ee9419",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-26.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "cb4c080822b2a08cd8642529988efee5d8d83b7feb261c3132ae428f4de4c1a7",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-27.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "0fe14ba5652779a7c9961f14ddaf458d37be3e8c9235fd26102116ca715f251d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-28.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "6b991af07007fd7e81c22a8514c0658399f42875c560c50a9fcffbd50f230a95",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-29.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "9b686fd1d981cbf7c56ca6f481a62fff9e09aba8a43673a3abc238d69bddc358",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-30.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "39ce3adea695286d90fd678361133785422c6aaf6bbccffe5b293aa63616d49b",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-31.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "180e24743b57816463b79f32d08ae7cccdc23dedc1909e2ef10f2d2e4a68b601",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-32.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "b871d87980348695f6899fab3c2fb5c3b1f1fe28bd66f29cfc4bc0bf382c76ad",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-33.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "74c329222d5dd24476cfbaa77e4b414aa29d6575ae9069d786539881fa912997",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-34.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "7fc65e8da5598437a99dc61d36be0b9cfd5692cedafb510940fc03ff7364774d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-35.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "a595d504e3e347de46799f3ff41e594d9c4cc277c0dcab7d9d4e3744621f381e",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-36.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "aea3046acb6ac7ae03380b4180e09b2c6d3dbca612f311fe2528aeb25cfeb93d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-37.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "5040808bbcb2866fb2439568d48254c98c71b14cb711c35c8abc04cc24fb11c5",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-38.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "106e76d2b3326dc0be8096c41fe1e1203726616dd1b035b03e83d0302bdc950e",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-39.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "13f52312c34a1d2a921957df2616ed533af922c7a52c9ba15dce552442737304",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-40.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "9b2ed17318f9e24f086542aa09ad68f8e633409bc5c3262aa03d7cde8739c1bc",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-41.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "dd92a4b10e3fb22e7873404cdd471ceb46e41e8fb6d108660c18d0d90b385fd1",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-42.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "97541de2f508d93321587372f34caf540264716dd303f6679c08dc36b63820cf",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-43.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "706618d2eb7ea056b037a24d5bdb2076c09f11e2fca884e53b75325e5fd67cb4",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-44.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "7d001e5df982a1f58bc009dce632817277f74086c450f83108255adc8811cbfa",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-45.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "3040bd40fce9cf2f46267303ea51f7046faf9ebbe441e8adc3716d2c57ea2c63",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-46.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "cef13dc2c9e0c69235c57c314a9a6824e06dcd1c1d86a07988e11cb7e0769c9a",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-47.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "6d0ccc0548731f3010a31bb1b994c6c871a7e175fb2608b3c8077fe429aa3b15",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-48.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "5395daa001d0d4dd609627fe3824487ead8832185796e2973e46fcfd4dfad8a0",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-49.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "6297dfddf2690f00b5af955c882b19ee4e479f730129d8cc32f813d88c92a28e",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-50.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "e338c6ae9ca4ca71f8846b1c38fc06bcbec6a6c39acce408a3b1d61a021b0943",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-51.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "7f9f7428d828c1661247ad34fc5d72998dbb91c3d7c3dd85ada9087e15d7f480",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-52.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "ce67b2821e0fa7aa5d1dd0d18bceed01217c0d0e110e7d5afc67939af24a1e8b",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-53.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "481d915d09f6ee86c87b5b553c8fff71fa6d0132a5be9171b3354243f634fc7d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-54.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "35cf8bacb2d3b696ae7ad9bb12abe939d744d09ce4186ab5c2c3363200162f84",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-55.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "e66f5b38c5a5f12549e811972227b8c235f4dcb909d59e9f4a87eda7164cb9fa",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-56.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "ce9cb0667dbae214ca61a672c521ca360f865524b18199e0d0a53c81a5f8523d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-57.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "4a5795e8b3fac4f4a68156f3986235182d523f52fef72383ed99127ec6ee98e3",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-58.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "a0f05c031a887197f331481fc2240fb1b461b0c410846e3954b6ce3eec885982",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-59.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "b4daa633d4a331936136380a3556c54c0dae93ff32b65ff602bbdd12ffad2ca5",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-60.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "b228fac1cee124087643fcb7a704be105e48cbef3c909f0ca8db6eb6c506dfa1",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-61.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "cc5191c512c8a60abebe6cd052c6e4bf7c8ae8646767bc8cc90b668bcddf9977",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-62.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "79bf7be3846d42e3079d496350eadc4a6c0540bd8e6a14b8247d1a51542cf4b7",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-63.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "38a76bcb218adb46e33353c704ae278ed21df95a7f04d75370bec4947d195766",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-64.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "af46c840dc36d358175504e338f9c9737e6438da24bfe2b7dbf20b8d346ea0b0",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-65.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "a195421980cb2226dfa7a7261df5eebfae314272ae39a7c2cfea52cbc68a2b07",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-66.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "e476f37b860f0904f5e980afb2326e410c8b9d3bc8bfc94db82b741ff9c039d0",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-67.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "44988bfe443ba2971aba45ce6562779c38b4c2f4443641015378fdf536bdb4b3",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-68.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "bce59579d2b8e0debcc30453f5ed87d3e4c7ce2ab2bde9051220d51d47cd7d9e",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-69.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "1900ba534fc07bccb97295ef5c8eca4d81cb77bbdacfacae02f547e5d50971d4",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-70.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "758a814ccd67810db926bf8fb68f70a75027d3d82443194bda20861ea5f63149",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-71.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "c7fba5a402c74e99cb3beeee1b73c722f72726259519ecdd6c993552bfe5cd04",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-72.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "66b249df91ff22d862553158b4f978551db334d4954237e7fe85c7ee890dc44a",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-73.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "1d4cf259b86f1f034a1359301e940e413a6f900de0d73d056ace84f223857a5d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-74.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "c2109af00b589dab3fe8768a4bac8925406d58c0b194ff9b7935b7c5deaf9637",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-75.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "cabd5e91f10e3786a8a9fa9711201ce5c3ff2ba7279d03814d1526c6c3fe288d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-76.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "e863efdfb4ed76b0f481bbb35e783e0c302878493ec068d83ef446c8d440457d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-77.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "d7b014730f32f4f4288f30a2948ef4e2969eca44e03c88aaf29aae06e587b0a0",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-78.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "245047ef2294e42094c98c340628621612ff156f36f2e2a8000f47cb3b535b4d",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "narrow-replay-79.jpg",
+      "group": "narrow-replay",
+      "width": 390,
+      "height": 693,
+      "format": "JPEG",
+      "sha256": "88af8b51f9f436e8c8cd6dea698ab12a981381e9aaee61acdd3ca2e2bd5fb5f4",
+      "source_time": "unknown",
+      "game_time_observed": "00:31–00:33"
+    },
+    {
+      "file": "active-crowd-00.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "6f6fe266d4e4b4c009fbac7a1b900d83a9e2caf0b7e9a655c45698bc734ef9b2",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-01.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "3b89c77024b6a0923e319ec3558041d1c0c5997bf6eb23f9426700d39d6fc3b6",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-02.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "b9842ac15aaa8c77be5830d4ba48c90e3ea5fb76645b780ec007cdc762342b3c",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-03.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "471660063b7e9cb8856cef7b2abf240ce05527ed1e2beb36524b737a779bb7c1",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-04.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "611c3f1fd3585f92d9150a439e28c6741bdc07f74bc92bf1ddb013f9e9df4f70",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-05.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "102898ee1665dfa1742997f9ad7a76b2dc47309083543f4a4d82e82d90604388",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-06.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "803787c8dd3fcbbc519aa3517ddfcd917ab518c7d896d346b38f8ab753427717",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-07.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "90f55bc7baf0063cf8e0f160a28e52757cec133252644740933b0f8a53b40120",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-08.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "5ba3578d67da1fec602656e9d99925e905cd4c2a43f558babda489ce29c3d11b",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-09.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "a6593803701d731aba19b3bdbbf7b421062ae6cfe726d0acff56e49e048c6f74",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-10.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "341da7cd5310ed67946ba081e4ce8b10b37655ca80b1542a5d0e0243dab8750d",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-11.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "5f0dd5fc233c2a5af46323744d62df4800a72ac683a74a5c3b4146040e3654e6",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-12.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "4eea1fdf7fa43cbc98ddf401aab5e2da65662e16db7c549962c734e4d41863e5",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-13.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "06960433a9535b69bcd84d1edecab5632b1317ad280b44ea57d181be67c9f49b",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-14.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "6c7aec1761d70e85d3ae1c07f2b1bfb8c07ddba5be9fa99ed6cb7c1f069813a0",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-15.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "7c8143c98c57b32925c7e1dc753c35bf63ae75556e67ff28118a8ddae49d6985",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-16.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "88d000670ba1d17dfd307ccce86347f7b25449f596f9cb8724a3c57cd16b54ef",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-17.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "aa46e1ec5185440c44174da781ad9ed164deb0229c49a328176d35e27ff964bf",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-18.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "17a944bd0908c35fb0cee19bb772defc697914b3993680b77d05362d58f8450d",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-19.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "581d00c689b6bc11495dca760b893c84a066bff5699a5b7bb82f55be6ff42f54",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-20.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "2e408c1099f0b01b388f26a6e629966ad81df27d83c73b0c97111da8697314c6",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-21.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "43d4772efe06341992769ffc264de9f815e471c73868ad1ed412511df36d8614",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-22.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "588b543623a173467069ac2b05fe8edd8aef93255dec049903e1279879a0bbe1",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-23.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "bbf92db537a161947736c4045efef055ddedd4a8bb35da3e1f670a6cfeb6fb40",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-24.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "1df8174a5eb97d754952e99a3b1115f476f8f863ab29e410385c9d0cbcede1db",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-25.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "4e40626b345b0d00a6059264fe539227b02c6e6844bc104d9603035006085a69",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-26.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "720c0d8a170c51d8eab6622aa8b5ef5ea1f8b1900e70a9e92cd2379385c613b3",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-27.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "a3af9c8b148ce337cbc13eca4597eaab5b9fb5e56b19bd8cc3773db58790b8a6",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-28.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "0ee8c665a792b17e800c10bb8fb9c4350f0b8b3cdc66381c82af38b465d070e2",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-29.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "1220dcbc89e2190b25333124fc0decf1535523590c1f8da4a8262f4fd26ddd3e",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-30.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "4a4e34be99b42c88a6470188ef79395ed9d4bd8fedfe9c3a3550e586ffba797f",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-31.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "16c1d33d0f3633a9a4b1178f227d5b0945a0eff61ca72206c233caf55e312c0f",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-32.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "28f4780c2ffdf867a1d6fce0a445eb90bbf5843c836a5f119c5235550321c5c7",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-33.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "cb424c7397a55947a5908feb74f3fec7e6c43f510a81207289612e1d9456dfd5",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-34.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "da509a2d820c304b5484cb319cb93e19051ff50b2bbcbf1032cc764d5d497df3",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-35.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "7129e6eb3529aac9cdf856b6d55310acc80e3408c65879da2a3ff0007833a346",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-36.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "a2a9a58a7255b4f4f77fa82ea7a98481037a07277bed26edfeb6c5b4fdd3e340",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-37.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "17146ca1b16ee0bfd061d464477c67dbd2acdc1258db081891bb8b5202687232",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-38.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "32680ff9d1d4a31f8dc122fd1a862f7a65206dda18f15f2f37b75c1eba2351d5",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-39.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "da055bd1e2005a1181a8882688fbe783754fb2576c13dbd2b8bb022af329ab3a",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-40.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "1d9cb9b6a8a60baa7724719cf305a56195368b0ea3b05fe778c98994f9924c99",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-41.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "d2aed8dded72a81a14fba202d27dbd30fc8ab3981273b2ebe157f521640757c0",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-42.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "6856550e1373b68697cc357f218fd785d5e649c9693b10ba7cfcd88d4ff9b3c7",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-43.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "8426d8740c38fb64837560864c0a35412fa5565774a4f47dab8c95866b87a26a",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-44.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "45906f5182ea3e09aafe188a2084f68dd16d548f9e93f0282299a68e7e806bd4",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-45.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "e83a8bfe69a580b11b32262b173a1f63fa95adee6ecdf760f9748cf333a06b98",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-46.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "a86cde3f30babe40cd102462faf97de3b68924f9084ea1cafc3eb8e9191bb1ec",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-47.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "0cbf25947a6a6f29d6f33e36a6669cf18f6a7d6498b199e27049d5660412926b",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-48.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "4c5baa17ab9dc1c4535d4ae8bb8f759501c17ad4840361087825240d215e6e56",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-49.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "85ddcebe0fc504007704b4b4ccf9ad03cb53b3d4ec09620a7a903366c80eb74c",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-50.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "a8989f7366eb9b53889bbe18d5cb63a1743b4a76a2b0b09b56b9b71bd5030d2a",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-51.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "77443a76d244b3578e185a01a5a617f7d7d351df68d9d8515ea18ddb3f512182",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-52.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "948680288deec83c0f7b20590d556a5b519f1d7c198a13b507950452382d57bf",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-53.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "675cb1910d6c028e38ba26866cbd7a2bc898b86f888a4c6cc6f4760e473da887",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-54.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "7e68ac0989059ec17292882bfa6bec62cdd4145b2b5a77b0f9a13fd0fb018b52",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-55.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "99527e9d8a1e6ee7aa60e6f7779e39465e59783b24a0a5b8fa776bcfa2d57336",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-56.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "08dd30c5705b352a8fcf15ae2c29cb7bd184a8f7dce0bfa29ba7bb5d95a9d559",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-57.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "e218319974c19d6509c4954ad2afba65a9cff38b4569cb34b123d7e48c0607b1",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-58.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "19886547d37e7ed7ecbeb4260c2539b712020a4cb0718a78351ba1aad65d18e7",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-59.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "e852ff83160df76c9ec62187c76e0d11de770ebf9d93b1778b20cd89e1168e09",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-60.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "dc6e1cd46527f3268529db091cd8f40c49c87a8439e998517e16c4dd785e1338",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-61.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "4ba7693449a03d0f1e5309c600d2c6a5930db297bfc7a4ae29a24e93583b7a66",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-62.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "c92c966fdf4a7eb8198698d6a0737bd2603e08f4ed5aebff3e4d1bf8712341bf",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-63.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "ddaeaa5efd5bec9c198756727a71c4dbc75c81a71ccc2dd8f8a7b99b2a1ff80a",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-64.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "b362cf050f0beba949c1f9bb0badc7bb607738c9f42627784f0109ff0be4e81a",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-65.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "339c9ca5e4d55797a84100065a4f9a1d68c2085a792d7a772c177a05541630c2",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-66.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "a351d3d919e552c9584f2552332b57ebb64b5aff1f47c74b38667c63cd1884c7",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-67.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "8baf65cf1251e2a89b15bc9b33a5aa7108e55010a4d7e980a9c1b97bc71bcd93",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-68.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "2743d00200eb2d489ab518160dbe471f9394ed92c47a58b205515f5cdf23d0f7",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-69.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "7e7182108ee8b13a516ca275c9e5bd525a15765de3bf6196650b1dd92eccfb80",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-70.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "7b09b805327f0fb22451a8c0a9d241893a1c541fc340a43b08de5aceb24ccb37",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-71.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "b6382232b60e83eba03b1bae2c94dc8e48e07b3f3e4635bd426c2fa40ee7ef1e",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-72.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "9e4fed57f270443915fa124de0c3e5c4207a27e54f88fa190daa43df0bc832a5",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-73.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "0bcc10e6e017d41ebdeedecc8fba68a94cde7d1b49c371a8af50f62e601e8f84",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-74.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "dcde62f98d5edd8f95239c1904abe0c4de2023377588f2fa12f20443195bfa37",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-75.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "e75e93b43f4932280cd05d586ae4d92d77510d1e62320f31120741f990abcd20",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-76.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "2a32c9a1f708a1407886663532decdd5d20a3af899fd39fda3583e5ae929cdc8",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-77.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "aa418d4f233de724d12f4854be8fd6646d3044bf6174b4dc45751b80bd9860d0",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-78.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "1cf750c80ccd974ff70245c54399c39b0b402bdd13a6b01a24c1060c644e546c",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-79.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "a96c5a5880834a57b11ff01ec7c77d42a98ff0d708406698f1cc7b711d3f83c3",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-80.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "9d31cdbaa23afeddcdb1d654a03cfef972c3b5bd36069ca7bbc82903f6b1cecc",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-81.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "2c6037d12764455086a26b26a169522c524a115298143e0535b9edc2ebd4fc2d",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-82.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "3bec1c4c6ecbd5e6d2b6607635261947ec4d9215e93db2a930c01d9076c4b624",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-83.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "f0395341042878e596810ac802a08c64b9c41e640a9b79e81e3124ae391a0312",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-84.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "7528b2bf31b3d7d2cede81934ffd367628b454eccd1a916ba9683d4e3d1f1a71",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-85.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "0041b9ae14a38e20dceb52091646285cafe51fb53dd73de35b3be2728c0165d0",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-86.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "91b2a741afa4006737eaf6c68fc5970aad5534bf4c28aeca48dee20957ee8ffd",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-87.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "6c99056731e2e7caf78f2ce2b287eb6b37a18118bd1f26557bc77b9c1d2c2826",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-88.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "b893d8c23fb26b30eed81067467e0a7ca5be4013f9c566fafb9588ddf939ccfe",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-89.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "0ed689432cbba2a426d5baaaf8168eeedbd10f2388431e708c0cdfa6709b3d0f",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-90.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "f884d782ca76c1b2ff3ed23e5668dc30a9437b0422f00f97c0a148a990a1593e",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-91.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "19f2385ed755bdb2f654cd1455115fe45660bbbbca4d829f2596080c9f22b381",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-92.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "7720874b2f94a15f169d0f8d41498737af13bb4bbf90fdac86ee0f1dd2f3dfa5",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-93.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "2fb42dbc86f7df56720bb55b2ccb2143b9dde7f46be89791f5453efbdf8d3f0a",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-94.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "875d59cc8bb83f15e1f4dcd6b84ee1ff8ec8643917aa9a44a227be8c089e3017",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-95.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "c1c9990123485be23846c8a03a78969cdd444d3a2e1ede625599fa18886c41d0",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-96.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "62ef2c0c904e5f01aa3cbc0ec68063215a387f3159bb461dd6395fb313d24116",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-97.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "7c141eaa0d1bff22d9f5d081037a5f7b532ea18c00818307dbc5a8f3d153174d",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-98.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "a8aae50eb0f7b21bc727ab0103062d1ca60c93b96de8fd3fa1f65f66fb276568",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    },
+    {
+      "file": "active-crowd-99.jpg",
+      "group": "active-crowd",
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "24447f5b2e3fa6f9dc362f3d3bbd7b3a498617e8ce0305838500a88743a93f57",
+      "source_time": "unknown",
+      "game_time_observed": "01:10–01:12"
+    }
+  ]
+}

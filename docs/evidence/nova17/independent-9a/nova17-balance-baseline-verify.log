@@ -1,0 +1,118 @@
+
+> lunar-relay@0.1.0 verify
+> npm test && npm run check && node scripts/simulate.mjs
+
+
+> lunar-relay@0.1.0 test
+> npm run build && node --test test/*.test.mjs
+
+
+> lunar-relay@0.1.0 build
+> node scripts/build.mjs
+
+✔ mute and hidden create no sources, cancel active and future voices (1.383917ms)
+✔ pause cancels battle while feedback and exactly one outcome remain possible (0.16375ms)
+✔ duplicate cues throttle and polyphony stays bounded (0.139791ms)
+✔ pending activation cannot revive muted hidden or restarted generation (0.138042ms)
+✔ music retains bass and percussion and resume never catches up stale beats (0.466084ms)
+✔ mode transitions cancel old feedback but same mode preserves its own cue (0.088958ms)
+✔ pending audio activation preserves the latest session pause state (0.082833ms)
+✔ first interaction and unmute confirmation activate before feedback (0.139958ms)
+✔ a terminal transition invalidates pending button confirmation (0.09ms)
+✔ replay exhaustion retains terminal sound while a real menu change stops it (0.094459ms)
+✔ pending device resume survives keyboard upgrade while stale UI feedback expires (0.378791ms)
+✔ same seed and inputs reproduce the complete state (9.082959ms)
+✔ pause freezes simulation and resume continues (0.405458ms)
+✔ upgrade freezes combat and can only be selected once (0.275166ms)
+✔ death is terminal and emits a single outcome (0.222083ms)
+✔ fresh deployment clears all previous combat state (0.587625ms)
+✔ input is finite, normalized and diagonal speed is limited (0.749084ms)
+✔ corner spawns cannot overlap the player (0.234ms)
+✔ end of mission wins only after boss defeat (0.127125ms)
+✔ replay rejects incompatible versions (0.449833ms)
+✔ enemy-hit is transient and emitted for bullet orbit and nova damage (0.214667ms)
+✔ legacy sprite pixels remain unchanged and crawler has three contained leg poses (4.677666ms)
+✔ crawler animation uses simulation ticks, freezes with combat and leaves all World data unchanged (1.826459ms)
+✔ walk phases retain hurt alpha and other enemies telegraphs (1.037333ms)
+✔ astronaut preserves its torso and palette across three contained leg poses (2.196ms)
+✔ astronaut walks only after observed movement, remains stable within one tick and stops at idle (2.691667ms)
+✔ astronaut freezes its selected pose through pause upgrade and terminal states (0.88375ms)
+✔ astronaut sampling resets on world replacement and rewind, and handles skipped ticks without history guesses (0.441833ms)
+✔ astronaut boundary input stays idle and preserves hurt alpha and shadow anchor (0.334959ms)
+✔ canonical desert script has eight ordered bilingual beats and victory-only rainforest handoff (1.8105ms)
+✔ catalog rejects malformed roots, entries, duplicate IDs, missing beats and reordering (0.455333ms)
+✔ every beat rejects wrong stage and missing or blank locales (3.43775ms)
+✔ defeat cannot route to success and only victory can carry the planned handoff (0.537125ms)
+✔ CLI reports structured success and file loading errors (67.9595ms)
+✔ all six known stage boundaries round trip without implying playable content (1.629958ms)
+✔ encoding emits only the canonical two fields and does not mutate its input (0.604125ms)
+✔ only raw null is missing; empty strings and malformed JSON are rejected verbatim (0.276333ms)
+✔ JSON root types cannot become valid or missing progress (0.264125ms)
+✔ missing or incorrectly typed versions are distinct from unsupported integer versions (0.31725ms)
+✔ v1 requires exactly its two fields (0.164833ms)
+✔ stage IDs require exact known strings without coercion or fallback (0.220125ms)
+✔ mixed errors obey documented priority and preserve every raw character (0.08225ms)
+✔ two stage samples load with distinct maps and complete bilingual story (0.838ms)
+✔ complete campaigns require all six stages in their canonical order (1.11675ms)
+✔ unknown, duplicate, unordered and missing stage references do not fall back (0.174958ms)
+✔ duration rejects noninteger, nonfinite and out-of-range input (0.196333ms)
+✔ wave schedule bounds and references are validated (0.383834ms)
+✔ boss must reference the existing boss kind and appear before stage end (0.208584ms)
+✔ each story beat requires nonblank Chinese and English strings (1.33375ms)
+✔ malformed roots, nested objects and sparse arrays are rejected (0.18525ms)
+✔ parsed catalog owns deeply immutable data isolated from its input (0.162416ms)
+ℹ tests 51
+ℹ suites 0
+ℹ pass 51
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 129.396625
+
+> lunar-relay@0.1.0 check
+> npm run build && node scripts/check.mjs
+
+
+> lunar-relay@0.1.0 build
+> node scripts/build.mjs
+
+{
+  event: 'check.complete',
+  gzipBytes: 24669,
+  budgetBytes: 153600,
+  passed: true
+}
+{
+  event: 'simulation.finished',
+  seed: 208907,
+  phase: 'won',
+  seconds: 180,
+  kills: 432,
+  level: 12,
+  hp: 100,
+  bossKilled: true,
+  checksum: 'd1326dd8'
+}
+{
+  event: 'simulation.finished',
+  seed: 42,
+  phase: 'won',
+  seconds: 180,
+  kills: 438,
+  level: 12,
+  hp: 100,
+  bossKilled: true,
+  checksum: 'c8b73f95'
+}
+{
+  event: 'simulation.finished',
+  seed: 101,
+  phase: 'won',
+  seconds: 180,
+  kills: 430,
+  level: 12,
+  hp: 100,
+  bossKilled: true,
+  checksum: '22cc59b2'
+}

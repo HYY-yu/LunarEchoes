@@ -22,6 +22,27 @@ Issue [17](https://github.com/HYY-yu/LunarEchoes/issues/17) 只改变既有电�
 
 [原始帧与时间记录](evidence/nova17/capture.md)是实际游戏截图。概念图未充作最终证据。
 
-## 剩余门槛
+## 独立验收与证据范围
 
-作者尚未捕捉带新星的暂停瞬间、完整点火段或密集敌群危险预警同屏。终局回放、当前head独立视觉验收与CI仍需完成。窄屏为桌面Chrome视口验证，不代表真实手机或触摸设备验收。未测量浏览器FPS，也未作性能数字承诺。音频代码未改，此任务没有新增听感PASS。
+以下独立结论针对源运行时 `9a3521dda5b559dbacffb842ccbeafd3ad9e7ae4`。证据归档提交只改 docs，新 head 仍须由非作者复核全部 11 个运行时资源同一性、完整 verify 和 CI；作者不将旧结论写成新 head 的独立 PASS。
+
+独立数值验收完整 verify 为 54 项测试通过，gzip 25073 / 153600 字节。两项测试缺口通过真实故障注入验证：删除 hit 绘制触发断言失败，破坏全新会话一致性触发重开断言失败。原始验证和预期失败日志见[数值证据](evidence/nova17/independent-9a/README.md)，原字节、来源与 SHA-256 见[索引](evidence/nova17/independent-9a/index.json)。十种子单机器人配对结果和先前构建比较是明确标注的转录，不是原始 stdout，也不代表人工胜率或浏览器性能。
+
+第一位非作者 Terra 的[原报告](evidence/nova17/independent-visual/notes.md)保持 INCOMPLETE。第二位非作者 Astra 的[定向原报告](evidence/nova17/targeted-visual/targeted-verdict.md)仅对三个缺项给出 PASS。主协调核看冻结两图和密集代表帧，并运行本地 `check-evidence.py`，187 张原图的摘要、连续事件和冻结 ROI 检查通过。下表汇合两次独立观察，不改写原报告。
+
+| 覆盖项 | 独立观察与边界 |
+|---|---|
+| 桌面与窄屏 | Terra 在 Chrome 1280×720 自然种子 3165727511 取得 Nova。390×693 是同一自然局的真实回放，非实体手机或触控验收。另一个自然种子 3690896236 记录周围敌群。精选[桌面扩散](evidence/nova17/independent-visual/desktop-15.jpg)、[碎裂](evidence/nova17/independent-visual/desktop-21.jpg)、[淡出](evidence/nova17/independent-visual/desktop-28.jpg)和[窄屏碎裂](evidence/nova17/independent-visual/narrow-replay-16.jpg)。精确采样时刻 unknown，不将不等间隔样帧称为录屏。 |
+| 失败与回放 | Terra 观察自然局 00:58 失败，回放校验一致 `lunar-1 · 38332144`。 |
+| 新星暂停与恢复 | Astra 自然种子 1336822959，Mac Chrome 1280×1177。暂停时 [freeze-0000](evidence/nova17/targeted-visual/freeze-0000.jpg) 与 [freeze-0001](evidence/nova17/targeted-visual/freeze-0001.jpg) 相隔 20.006 秒，HUD 同为 00:40，面板上下可见电弧 ROI 逐像素相同。[恢复片段](evidence/nova17/targeted-visual/thaw.mp4)显示继续碎裂并消失。 |
+| 密集敌群与危险预警 | Astra 同一自然局 01:06 的[原始代表帧](evidence/nova17/targeted-visual/dense-burst-0030.jpg)可见约 12 个完整或部分敌人、2 处橙色预警及弹丸，角色、HUD 和新星可辨。数目来自截图人工计数。[连续上下文](evidence/nova17/targeted-visual/dense-burst.mp4)保留该场景。 |
+| 实际动态 | Astra 使用真实 CDP screencast 连续事件，记录 timestamp 与 monotonicTimestamp。[完整脉冲查看副本](evidence/nova17/targeted-visual/full-burst.mp4)及密集片段显示点火、扩张、碎裂、消失。独立验收在 Chrome 确认原速播放、无播放器错误；没有可见卡死或突兀截断。 |
+| 控制台 | 两次独立验收的 warn/error 查询均为空。 |
+
+Terra [完整索引](evidence/nova17/independent-visual/summary.json)列出本地 215 帧，仓库只保存其中四张原图。Astra [原始清单](evidence/nova17/targeted-visual/raw-manifest.json)列出本地 187 张原图，仓库只保存精选 11 张。两份清单均包含未入仓库的本地图，不能将完整清单当作全部原图已归档。复制文件的实际尺寸、来源、字节数和 SHA-256 分别见 [Terra 归档索引](evidence/nova17/independent-visual/archive-index.json)与 [Astra 归档索引](evidence/nova17/targeted-visual/archive-index.json)。所有原 JPG 均按原字节复制。
+
+三个 MP4 是原时间戳 VFR 查看副本，不是原始 JPG。时间量化为 1 毫秒，无插帧、无变速，底部补 1 像素以兼容 H.264，输出 1280×1178。它们仅用于 docs 验收，不进入 dist 或运行时资源预算。未复制暂停面板遮挡电弧的辅助片。原报告中的 `check-evidence.py` 和 `make-video.py` 命令只适用于 `/private/tmp/nova17-targeted-evidence` 的完整本地证据集；仓库精选集不包含这些脚本或全部原帧。完整连续子段与冻结检查由独立报告及主协调本地复核记录证明。
+
+## 交付限制
+
+本次没有浏览器设备 FPS 或帧时间性能测量。截图或视频编码帧率不等于设备性能。没有实体手机、真实触控或新增音频听感 PASS。音频代码未改。最终 docs-only head 的独立运行时同一性、verify 与 CI 由主协调另行验收，满足门槛前保持 draft，不合并。
