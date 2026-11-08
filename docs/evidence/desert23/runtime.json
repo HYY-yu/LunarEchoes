@@ -1,0 +1,99 @@
+{
+  "sourceCommit": "58693dba1dce18a03c0f7f0807253f4091386b42",
+  "base": "2b9b3d149fc1c800b44ad594671f1b5a0183c554",
+  "unchangedOriginalRuntime": [
+    {
+      "file": "art.js",
+      "sha256": "7c2599408fe6ce61590ee08c3fac9cbd28b1305d106e8cb4a200bcf18d822909",
+      "sameAsBase": true
+    },
+    {
+      "file": "audio.js",
+      "sha256": "46c5a5d771595a0ad7f4ee6513f32fca9c82f8625337d0b7d4d56eaf7e5c8ab8",
+      "sameAsBase": true
+    },
+    {
+      "file": "core.js",
+      "sha256": "2cffc39071185c911954a0cf35c709fb2cddc4de792fce14176a67d03cbccb6c",
+      "sameAsBase": true
+    },
+    {
+      "file": "i18n.js",
+      "sha256": "a41dbc15586797ab1a467e044668fb6611b10a75dc5841259a973b701c4a7429",
+      "sameAsBase": true
+    },
+    {
+      "file": "index.html",
+      "sha256": "a07a1cd7aa1ac343c63eb96212e59f707043c40008b36ec8a8a8cd5fff4b027c",
+      "sameAsBase": true
+    },
+    {
+      "file": "logger.js",
+      "sha256": "bc17b67fd97f29e5017b45bbff4af8257f1d8df69e265415fffc342ea32cefc7",
+      "sameAsBase": true
+    },
+    {
+      "file": "main.js",
+      "sha256": "dfb448949a4d713028bf06b3ca20c7a46f5c1b930a788c3b391fa4417bf39604",
+      "sameAsBase": true
+    },
+    {
+      "file": "progress.js",
+      "sha256": "ef214e51ba01735b484a9be64ca6d3192cdd34cbf6f2ad1940a621986e916996",
+      "sameAsBase": true
+    },
+    {
+      "file": "render.js",
+      "sha256": "58a032cdd3c3e025c50182e55e5ad539385aa4b8268112a93cc1126d6eedbe16",
+      "sameAsBase": true
+    },
+    {
+      "file": "stage-contract.js",
+      "sha256": "43b623992f7fcf57e4434ed2c638a6607afbd175de61c4d3d0430ceedf810594",
+      "sameAsBase": true
+    },
+    {
+      "file": "style.css",
+      "sha256": "b57e90028a538c5d0b9e57691f9469d18f27f515d2ee83dc3cd22f4118cf573c",
+      "sameAsBase": true
+    }
+  ],
+  "resources": [
+    {
+      "file": "src/desert-scene.ts",
+      "sha256": "5ab94fb825cb6b11859fb917dac200122840e332a20dd98eea48f52509c069a8",
+      "bytes": 6346,
+      "gzipBytes": 2154
+    },
+    {
+      "file": "dist/desert-scene.js",
+      "sha256": "7de943ddee11824eac65daa35b99bab5bf40cfaaea29c018b4f685f0f3aafd08",
+      "bytes": 6513,
+      "gzipBytes": 2078
+    },
+    {
+      "file": "scripts/desert-audition.mjs",
+      "sha256": "3c0850b7ee5440f2a9a7bbd36e0508c195baaa0152b0789162055cb3b64b6f3f",
+      "bytes": 1368,
+      "gzipBytes": 623
+    },
+    {
+      "file": "scripts/fixtures/desert-audition.html",
+      "sha256": "36b70481b99db748c8f423b38025426d30107773486844d467d172404bc0a033",
+      "bytes": 2231,
+      "gzipBytes": 1138
+    },
+    {
+      "file": "scripts/fixtures/desert-audition.mjs",
+      "sha256": "a002f6c3d8d8864e808a36cbfffdc313fa94455c0b30dae393ec884ddc49de7a",
+      "bytes": 3700,
+      "gzipBytes": 1608
+    },
+    {
+      "file": "content/desert-base.story.json",
+      "sha256": "bead99b5ca8511a8ecb82c7c5932eccd2c937fde751ff6ce157158cea29a917e",
+      "bytes": 2652,
+      "gzipBytes": 1170
+    }
+  ]
+}

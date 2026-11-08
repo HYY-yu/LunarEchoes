@@ -1,0 +1,146 @@
+[
+  {
+    "file": "opening-desktop-zh.jpg",
+    "sha256": "a65e01c006d0274a9cc4f269960bf05e3e4d63cdbe21f53ac6fda7bf468be9da",
+    "bytes": 39772,
+    "sourceLine": 354,
+    "scene": "opening",
+    "viewport": [
+      1280,
+      720
+    ],
+    "language": "zh"
+  },
+  {
+    "file": "victory-desktop-zh.jpg",
+    "sha256": "6971a8d4ee13c5f2a418bd5df1589f2cf26337e8fb0030e41383e0e3c95b5889",
+    "bytes": 40694,
+    "sourceLine": 354,
+    "scene": "victory",
+    "viewport": [
+      1280,
+      720
+    ],
+    "language": "zh"
+  },
+  {
+    "file": "defeat-desktop-zh.jpg",
+    "sha256": "f7176f41edad726c60d552f36d3653fab28ba52f52d8fc7ef5d90bbf26bf4c90",
+    "bytes": 34493,
+    "sourceLine": 354,
+    "scene": "defeat",
+    "viewport": [
+      1280,
+      720
+    ],
+    "language": "zh"
+  },
+  {
+    "file": "defeat-desktop-en.jpg",
+    "sha256": "f8b7a978937f2c19b2036b31003ee11acf8a956e0bb2d2ffbbf3592f4dae9688",
+    "bytes": 39401,
+    "sourceLine": 361,
+    "scene": "defeat",
+    "viewport": [
+      1280,
+      720
+    ],
+    "language": "en"
+  },
+  {
+    "file": "victory-desktop-en.jpg",
+    "sha256": "716171550094492a23060a2bda3f6b50a8007ddea3d52598c45ff0220d6a479d",
+    "bytes": 44755,
+    "sourceLine": 361,
+    "scene": "victory",
+    "viewport": [
+      1280,
+      720
+    ],
+    "language": "en"
+  },
+  {
+    "file": "opening-desktop-en.jpg",
+    "sha256": "d3bf6365290e14df3b8b267585675bee2d7801f44faa396529ef36243d710f8d",
+    "bytes": 42178,
+    "sourceLine": 361,
+    "scene": "opening",
+    "viewport": [
+      1280,
+      720
+    ],
+    "language": "en"
+  },
+  {
+    "file": "opening-narrow-en.jpg",
+    "sha256": "46f86a05bc0301fa11b52cc63b73fd4c350ce672455250e10a036d5782909dd9",
+    "bytes": 27543,
+    "sourceLine": 361,
+    "scene": "opening",
+    "viewport": [
+      390,
+      693
+    ],
+    "language": "en"
+  },
+  {
+    "file": "victory-narrow-en.jpg",
+    "sha256": "69dba509b4379f824f6c3e90b3390047c79c69c184c484063e6c8c9399bc76cd",
+    "bytes": 28571,
+    "sourceLine": 368,
+    "scene": "victory",
+    "viewport": [
+      390,
+      693
+    ],
+    "language": "en"
+  },
+  {
+    "file": "defeat-narrow-en.jpg",
+    "sha256": "ce0fe63bd5a602e47d0de5fa7cd23c899430b6b4d78ca8f793b47bedf69e8a6f",
+    "bytes": 25571,
+    "sourceLine": 368,
+    "scene": "defeat",
+    "viewport": [
+      390,
+      693
+    ],
+    "language": "en"
+  },
+  {
+    "file": "defeat-narrow-zh.jpg",
+    "sha256": "7d1b878fee60c751b27cfc4f0f3cc0b22a3a7a8c323acf2f49b9704ac572e4f0",
+    "bytes": 19750,
+    "sourceLine": 368,
+    "scene": "defeat",
+    "viewport": [
+      390,
+      693
+    ],
+    "language": "zh"
+  },
+  {
+    "file": "victory-narrow-zh.jpg",
+    "sha256": "551bc4384d120ead121c4ad7549ebe9cc845cf22b4420365855919307b2cd690",
+    "bytes": 23706,
+    "sourceLine": 368,
+    "scene": "victory",
+    "viewport": [
+      390,
+      693
+    ],
+    "language": "zh"
+  },
+  {
+    "file": "opening-narrow-zh.jpg",
+    "sha256": "c9dfd692974c6f48dc491dec2fe46a69f233cf424e78090f384da6291b4dac6e",
+    "bytes": 23730,
+    "sourceLine": 368,
+    "scene": "opening",
+    "viewport": [
+      390,
+      693
+    ],
+    "language": "zh"
+  }
+]
