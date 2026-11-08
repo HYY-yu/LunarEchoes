@@ -94,7 +94,30 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     for (const effect of world.effects) {
       ctx.globalAlpha = Math.min(1, effect.life / 15);
       ctx.strokeStyle = effect.kind === 'hit' ? '#f2a177' : '#b5ffe5'; ctx.fillStyle = ctx.strokeStyle;
-      if (effect.kind === 'nova') { ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(effect.x, effect.y, effect.size * (1 - effect.life / 35), 0, Math.PI * 2); ctx.stroke(); ctx.lineWidth = 1; }
+      if (effect.kind === 'nova') {
+        const frame = Math.floor((30 - effect.life) / 2);
+        const progress = Math.min(1, (frame * 2 + 1) / 30);
+        const radius = effect.size * (.14 + .82 * (1 - (1 - progress) ** 2));
+        const fragments = effect.life > 16 ? 11 : Math.max(1, Math.ceil(effect.life * 11 / 16));
+        for (let segment = 0; segment < 64; segment++) {
+          if (segment * 7 % 11 >= fragments) continue;
+          const angle = segment * Math.PI / 32;
+          const nextAngle = (segment + 1) * Math.PI / 32;
+          const reach = radius - (segment * 5 % 9);
+          const nextReach = radius - ((segment + 1) * 5 % 9);
+          const x = Math.cos(angle) * reach, y = Math.sin(angle) * reach;
+          const nextX = Math.cos(nextAngle) * nextReach, nextY = Math.sin(nextAngle) * nextReach;
+          for (let point = 0; point < 4; point++) {
+            const px = Math.round(effect.x + x + (nextX - x) * point / 4);
+            const py = Math.round(effect.y + y + (nextY - y) * point / 4);
+            const spark = effect.life >= 27 && segment % 16 === 0;
+            const size = spark ? 3 : 2;
+            if (Math.max((px - effect.x) ** 2, (px + size - effect.x) ** 2) + Math.max((py - effect.y) ** 2, (py + size - effect.y) ** 2) > effect.size ** 2) continue;
+            ctx.fillStyle = spark || segment % 8 === 0 && point < 2 ? '#d9fff2' : '#50d9ee';
+            ctx.fillRect(px, py, size, size);
+          }
+        }
+      }
       else for (let i = 0; i < 6; i++) { const a = i * 1.047 + effect.x; const d = (25 - effect.life) * .7; ctx.fillRect(effect.x + Math.cos(a) * d, effect.y + Math.sin(a) * d, 2, 2); }
     }
     ctx.globalAlpha = 1; ctx.restore();

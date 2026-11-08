@@ -1,0 +1,90 @@
+{
+  "sourceHead": "9a3521dda5b559dbacffb842ccbeafd3ad9e7ae4",
+  "archivedFiles": [
+    {
+      "file": "summary.json",
+      "source": "/private/tmp/nova17-independent-evidence/summary.json",
+      "bytes": 66959,
+      "sha256": "9486094e6d76b6bea6b8875cd92735efcce6b05b78894f43b48165c2eec17be2"
+    },
+    {
+      "file": "notes.md",
+      "source": "/private/tmp/nova17-independent-evidence/notes.md",
+      "bytes": 1781,
+      "sha256": "fa36eddf66b3cd5fa18cc6eb34d80b62bc2c16c02c2e11c2a24c34aa776f97ce"
+    },
+    {
+      "file": "desktop-15.jpg",
+      "source": "/private/tmp/nova17-independent-evidence/desktop-15.jpg",
+      "bytes": 72393,
+      "sha256": "ba7d3da1e5ffc0f4a8e802352605cfbea9d490263d9990dc412b713397613460",
+      "width": 1280,
+      "height": 720,
+      "capture": {
+        "file": "desktop-15.jpg",
+        "group": "desktop",
+        "width": 1280,
+        "height": 720,
+        "format": "JPEG",
+        "sha256": "ba7d3da1e5ffc0f4a8e802352605cfbea9d490263d9990dc412b713397613460",
+        "source_time": "unknown",
+        "game_time_observed": "00:35–00:36"
+      }
+    },
+    {
+      "file": "desktop-21.jpg",
+      "source": "/private/tmp/nova17-independent-evidence/desktop-21.jpg",
+      "bytes": 73601,
+      "sha256": "ee17b16efab3adbe47ff0df6217b3c890f881681b4a9682702ba1d87fd14e6e2",
+      "width": 1280,
+      "height": 720,
+      "capture": {
+        "file": "desktop-21.jpg",
+        "group": "desktop",
+        "width": 1280,
+        "height": 720,
+        "format": "JPEG",
+        "sha256": "ee17b16efab3adbe47ff0df6217b3c890f881681b4a9682702ba1d87fd14e6e2",
+        "source_time": "unknown",
+        "game_time_observed": "00:35–00:36"
+      }
+    },
+    {
+      "file": "desktop-28.jpg",
+      "source": "/private/tmp/nova17-independent-evidence/desktop-28.jpg",
+      "bytes": 69230,
+      "sha256": "07deaad37c193056c183b2bfb8f04cac2f360571a054c818488c58c574f825d5",
+      "width": 1280,
+      "height": 720,
+      "capture": {
+        "file": "desktop-28.jpg",
+        "group": "desktop",
+        "width": 1280,
+        "height": 720,
+        "format": "JPEG",
+        "sha256": "07deaad37c193056c183b2bfb8f04cac2f360571a054c818488c58c574f825d5",
+        "source_time": "unknown",
+        "game_time_observed": "00:35–00:36"
+      }
+    },
+    {
+      "file": "narrow-replay-16.jpg",
+      "source": "/private/tmp/nova17-independent-evidence/narrow-replay-16.jpg",
+      "bytes": 24477,
+      "sha256": "bd042275fef329eda13007d5813684873f51cba491b0d95c8fe4a3bcadc2baea",
+      "width": 390,
+      "height": 693,
+      "capture": {
+        "file": "narrow-replay-16.jpg",
+        "group": "narrow-replay",
+        "width": 390,
+        "height": 693,
+        "format": "JPEG",
+        "sha256": "bd042275fef329eda13007d5813684873f51cba491b0d95c8fe4a3bcadc2baea",
+        "source_time": "unknown",
+        "game_time_observed": "00:31–00:33"
+      }
+    }
+  ],
+  "completeOriginalFrameSetInRepository": false
+}

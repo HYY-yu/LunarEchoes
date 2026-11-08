@@ -1,0 +1,85 @@
+{
+  "observedAt": "2026-11-08T01:28:01.967274+00:00",
+  "head": "9a3521dda5b559dbacffb842ccbeafd3ad9e7ae4",
+  "server": "http://127.0.0.1:4176",
+  "files": [
+    {
+      "file": "art.js",
+      "status": 200,
+      "expected": "7c2599408fe6ce61590ee08c3fac9cbd28b1305d106e8cb4a200bcf18d822909",
+      "actual": "7c2599408fe6ce61590ee08c3fac9cbd28b1305d106e8cb4a200bcf18d822909",
+      "equal": true
+    },
+    {
+      "file": "audio.js",
+      "status": 200,
+      "expected": "46c5a5d771595a0ad7f4ee6513f32fca9c82f8625337d0b7d4d56eaf7e5c8ab8",
+      "actual": "46c5a5d771595a0ad7f4ee6513f32fca9c82f8625337d0b7d4d56eaf7e5c8ab8",
+      "equal": true
+    },
+    {
+      "file": "core.js",
+      "status": 200,
+      "expected": "554af795df89136216bb9c83b78089d3a25108ce352517e698e3d80b3255bed4",
+      "actual": "554af795df89136216bb9c83b78089d3a25108ce352517e698e3d80b3255bed4",
+      "equal": true
+    },
+    {
+      "file": "i18n.js",
+      "status": 200,
+      "expected": "a41dbc15586797ab1a467e044668fb6611b10a75dc5841259a973b701c4a7429",
+      "actual": "a41dbc15586797ab1a467e044668fb6611b10a75dc5841259a973b701c4a7429",
+      "equal": true
+    },
+    {
+      "file": "index.html",
+      "status": 200,
+      "expected": "a07a1cd7aa1ac343c63eb96212e59f707043c40008b36ec8a8a8cd5fff4b027c",
+      "actual": "a07a1cd7aa1ac343c63eb96212e59f707043c40008b36ec8a8a8cd5fff4b027c",
+      "equal": true
+    },
+    {
+      "file": "logger.js",
+      "status": 200,
+      "expected": "bc17b67fd97f29e5017b45bbff4af8257f1d8df69e265415fffc342ea32cefc7",
+      "actual": "bc17b67fd97f29e5017b45bbff4af8257f1d8df69e265415fffc342ea32cefc7",
+      "equal": true
+    },
+    {
+      "file": "main.js",
+      "status": 200,
+      "expected": "088a8f53c586169ee13fd9672aedbd6f66126ea2316ed998f963347b58b112bc",
+      "actual": "088a8f53c586169ee13fd9672aedbd6f66126ea2316ed998f963347b58b112bc",
+      "equal": true
+    },
+    {
+      "file": "progress.js",
+      "status": 200,
+      "expected": "ef214e51ba01735b484a9be64ca6d3192cdd34cbf6f2ad1940a621986e916996",
+      "actual": "ef214e51ba01735b484a9be64ca6d3192cdd34cbf6f2ad1940a621986e916996",
+      "equal": true
+    },
+    {
+      "file": "render.js",
+      "status": 200,
+      "expected": "58a032cdd3c3e025c50182e55e5ad539385aa4b8268112a93cc1126d6eedbe16",
+      "actual": "58a032cdd3c3e025c50182e55e5ad539385aa4b8268112a93cc1126d6eedbe16",
+      "equal": true
+    },
+    {
+      "file": "stage-contract.js",
+      "status": 200,
+      "expected": "43b623992f7fcf57e4434ed2c638a6607afbd175de61c4d3d0430ceedf810594",
+      "actual": "43b623992f7fcf57e4434ed2c638a6607afbd175de61c4d3d0430ceedf810594",
+      "equal": true
+    },
+    {
+      "file": "style.css",
+      "status": 200,
+      "expected": "b57e90028a538c5d0b9e57691f9469d18f27f515d2ee83dc3cd22f4118cf573c",
+      "actual": "b57e90028a538c5d0b9e57691f9469d18f27f515d2ee83dc3cd22f4118cf573c",
+      "equal": true
+    }
+  ],
+  "allEqual": true
+}

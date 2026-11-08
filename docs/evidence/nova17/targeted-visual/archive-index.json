@@ -1,0 +1,373 @@
+{
+  "sourceHead": "9a3521dda5b559dbacffb842ccbeafd3ad9e7ae4",
+  "archivedFiles": [
+    {
+      "file": "targeted-verdict.md",
+      "source": "/private/tmp/nova17-targeted-evidence/targeted-verdict.md",
+      "bytes": 4415,
+      "sha256": "222058865194f90428bb437160594106baeb93f60544800102a1d980964ad39d"
+    },
+    {
+      "file": "raw-manifest.json",
+      "source": "/private/tmp/nova17-targeted-evidence/raw-manifest.json",
+      "bytes": 96814,
+      "sha256": "2080b8d2a9e718b7ec6ffb380e60aced037083fe9718d2c24f17606299c8f73c"
+    },
+    {
+      "file": "runtime-manifest.json",
+      "source": "/private/tmp/nova17-targeted-evidence/runtime-manifest.json",
+      "bytes": 1461,
+      "sha256": "be351c2a0e00a2839e6eb49b5cf04a67117a6c698add121088e8e8a7ac1a5eac"
+    },
+    {
+      "file": "freeze-0000.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/freeze-0000.jpg",
+      "bytes": 56120,
+      "sha256": "9e9bf5b8d08f0ffaacafa4c12455c435b5fcac14c212abcea1bd7a4a102967bb",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "freeze",
+        "index": 0,
+        "utc": "2026-11-08T01:31:19.790Z",
+        "phase": "paused",
+        "hud": "00:40",
+        "seed": 1336822959,
+        "file": "freeze-0000.jpg",
+        "bytes": 56120,
+        "sha256": "9e9bf5b8d08f0ffaacafa4c12455c435b5fcac14c212abcea1bd7a4a102967bb",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "freeze-0001.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/freeze-0001.jpg",
+      "bytes": 56098,
+      "sha256": "ce6817a98dddd99d85e5cc01e6da2785620c85e676c620d622b627168acc6f7a",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "freeze",
+        "index": 1,
+        "utc": "2026-11-08T01:31:39.796Z",
+        "phase": "paused",
+        "hud": "00:40",
+        "seed": 1336822959,
+        "file": "freeze-0001.jpg",
+        "bytes": 56098,
+        "sha256": "ce6817a98dddd99d85e5cc01e6da2785620c85e676c620d622b627168acc6f7a",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "full-burst-0270.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/full-burst-0270.jpg",
+      "bytes": 113537,
+      "sha256": "133d45be1b6b7f02b1b66da12178e6186aaf3fa77fd12f4bfd5a23bb212ee82b",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "full-burst",
+        "index": 270,
+        "sequence": 335,
+        "metadata": {
+          "deviceHeight": 1177,
+          "deviceWidth": 1280,
+          "monotonicTimestamp": 861867.556804,
+          "offsetTop": 0,
+          "pageScaleFactor": 1,
+          "scrollOffsetX": 0,
+          "scrollOffsetY": 0,
+          "timestamp": 1794101351.482829
+        },
+        "file": "full-burst-0270.jpg",
+        "bytes": 113537,
+        "sha256": "133d45be1b6b7f02b1b66da12178e6186aaf3fa77fd12f4bfd5a23bb212ee82b",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "full-burst-0284.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/full-burst-0284.jpg",
+      "bytes": 118469,
+      "sha256": "16ae74922d3a3b627a8a711878dd1a3824221f4f6846f084213c2d5196545539",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "full-burst",
+        "index": 284,
+        "sequence": 349,
+        "metadata": {
+          "deviceHeight": 1177,
+          "deviceWidth": 1280,
+          "monotonicTimestamp": 861867.743275,
+          "offsetTop": 0,
+          "pageScaleFactor": 1,
+          "scrollOffsetX": 0,
+          "scrollOffsetY": 0,
+          "timestamp": 1794101351.6693
+        },
+        "file": "full-burst-0284.jpg",
+        "bytes": 118469,
+        "sha256": "16ae74922d3a3b627a8a711878dd1a3824221f4f6846f084213c2d5196545539",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "full-burst-0296.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/full-burst-0296.jpg",
+      "bytes": 120954,
+      "sha256": "af664b144e8fa79512a669e1a7028ea2b647e583ee5228dc74a49d4a0943d7e2",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "full-burst",
+        "index": 296,
+        "sequence": 361,
+        "metadata": {
+          "deviceHeight": 1177,
+          "deviceWidth": 1280,
+          "monotonicTimestamp": 861867.904051,
+          "offsetTop": 0,
+          "pageScaleFactor": 1,
+          "scrollOffsetX": 0,
+          "scrollOffsetY": 0,
+          "timestamp": 1794101351.830076
+        },
+        "file": "full-burst-0296.jpg",
+        "bytes": 120954,
+        "sha256": "af664b144e8fa79512a669e1a7028ea2b647e583ee5228dc74a49d4a0943d7e2",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "full-burst-0314.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/full-burst-0314.jpg",
+      "bytes": 114287,
+      "sha256": "1b6f904d0fdbe9cf20005de922a5d0b4f982001ae85db9a327311eb445232311",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "full-burst",
+        "index": 314,
+        "sequence": 379,
+        "metadata": {
+          "deviceHeight": 1177,
+          "deviceWidth": 1280,
+          "monotonicTimestamp": 861868.14317,
+          "offsetTop": 0,
+          "pageScaleFactor": 1,
+          "scrollOffsetX": 0,
+          "scrollOffsetY": 0,
+          "timestamp": 1794101352.069197
+        },
+        "file": "full-burst-0314.jpg",
+        "bytes": 114287,
+        "sha256": "1b6f904d0fdbe9cf20005de922a5d0b4f982001ae85db9a327311eb445232311",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "full-burst-0324.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/full-burst-0324.jpg",
+      "bytes": 114472,
+      "sha256": "8ef521c531f2736e081876045b074b25eb9ab54eff33b237e98003cccbbb91d9",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "full-burst",
+        "index": 324,
+        "sequence": 389,
+        "metadata": {
+          "deviceHeight": 1177,
+          "deviceWidth": 1280,
+          "monotonicTimestamp": 861868.277541,
+          "offsetTop": 0,
+          "pageScaleFactor": 1,
+          "scrollOffsetX": 0,
+          "scrollOffsetY": 0,
+          "timestamp": 1794101352.203568
+        },
+        "file": "full-burst-0324.jpg",
+        "bytes": 114472,
+        "sha256": "8ef521c531f2736e081876045b074b25eb9ab54eff33b237e98003cccbbb91d9",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "dense-burst-0030.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/dense-burst-0030.jpg",
+      "bytes": 126730,
+      "sha256": "8fe8ae39807126bd3b30215aa98dfecda5455462826fa39412fad2d65c171f0e",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "dense-burst",
+        "index": 30,
+        "sequence": 718,
+        "metadata": {
+          "deviceHeight": 1177,
+          "deviceWidth": 1280,
+          "monotonicTimestamp": 862210.407253,
+          "offsetTop": 0,
+          "pageScaleFactor": 1,
+          "scrollOffsetX": 0,
+          "scrollOffsetY": 0,
+          "timestamp": 1794101694.334621
+        },
+        "file": "dense-burst-0030.jpg",
+        "bytes": 126730,
+        "sha256": "8fe8ae39807126bd3b30215aa98dfecda5455462826fa39412fad2d65c171f0e",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "thaw-0001.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/thaw-0001.jpg",
+      "bytes": 118556,
+      "sha256": "83f54debeb4c7cd39d8e8d67665523b2dca0777236983f22e9134fe131d7c279",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "thaw",
+        "index": 1,
+        "sequence": 600,
+        "metadata": {
+          "deviceHeight": 1177,
+          "deviceWidth": 1280,
+          "monotonicTimestamp": 862015.927252,
+          "offsetTop": 0,
+          "pageScaleFactor": 1,
+          "scrollOffsetX": 0,
+          "scrollOffsetY": 0,
+          "timestamp": 1794101499.853858
+        },
+        "file": "thaw-0001.jpg",
+        "bytes": 118556,
+        "sha256": "83f54debeb4c7cd39d8e8d67665523b2dca0777236983f22e9134fe131d7c279",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "thaw-0015.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/thaw-0015.jpg",
+      "bytes": 113516,
+      "sha256": "c9823f9da1530a9df7903a3111b37bf03879b4529c16abdf960c5b76c111bf43",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "thaw",
+        "index": 15,
+        "sequence": 614,
+        "metadata": {
+          "deviceHeight": 1177,
+          "deviceWidth": 1280,
+          "monotonicTimestamp": 862016.112613,
+          "offsetTop": 0,
+          "pageScaleFactor": 1,
+          "scrollOffsetX": 0,
+          "scrollOffsetY": 0,
+          "timestamp": 1794101500.03922
+        },
+        "file": "thaw-0015.jpg",
+        "bytes": 113516,
+        "sha256": "c9823f9da1530a9df7903a3111b37bf03879b4529c16abdf960c5b76c111bf43",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "thaw-0029.jpg",
+      "source": "/private/tmp/nova17-targeted-evidence/thaw-0029.jpg",
+      "bytes": 113367,
+      "sha256": "3a1cd28241c71f13423c817caeea30390f92e843828cc2a95112343fb4bdef1e",
+      "width": 1280,
+      "height": 1177,
+      "capture": {
+        "group": "thaw",
+        "index": 29,
+        "sequence": 628,
+        "metadata": {
+          "deviceHeight": 1177,
+          "deviceWidth": 1280,
+          "monotonicTimestamp": 862016.298895,
+          "offsetTop": 0,
+          "pageScaleFactor": 1,
+          "scrollOffsetX": 0,
+          "scrollOffsetY": 0,
+          "timestamp": 1794101500.225502
+        },
+        "file": "thaw-0029.jpg",
+        "bytes": 113367,
+        "sha256": "3a1cd28241c71f13423c817caeea30390f92e843828cc2a95112343fb4bdef1e",
+        "dimensions": [
+          1280,
+          1177
+        ]
+      }
+    },
+    {
+      "file": "full-burst.mp4",
+      "source": "/private/tmp/nova17-targeted-evidence/full-burst.mp4",
+      "bytes": 666479,
+      "sha256": "d0ce25e2889d5e9a284fda5e730bb17ad30a6eb3d1d13ed8a2c715c46abe79cd",
+      "kind": "VFR viewing copy",
+      "dimensions": [
+        1280,
+        1178
+      ]
+    },
+    {
+      "file": "dense-burst.mp4",
+      "source": "/private/tmp/nova17-targeted-evidence/dense-burst.mp4",
+      "bytes": 945621,
+      "sha256": "375562932cde4f1263669e7ad6b1fff61c7afd060b2cae4274b838459116c93c",
+      "kind": "VFR viewing copy",
+      "dimensions": [
+        1280,
+        1178
+      ]
+    },
+    {
+      "file": "thaw.mp4",
+      "source": "/private/tmp/nova17-targeted-evidence/thaw.mp4",
+      "bytes": 164104,
+      "sha256": "f6bf547d7aad5dc837ea1d5ecbb9185eff7789b5cbf872bc4d052a61e2691471",
+      "kind": "VFR viewing copy",
+      "dimensions": [
+        1280,
+        1178
+      ]
+    }
+  ],
+  "completeOriginalFrameSetInRepository": false
+}

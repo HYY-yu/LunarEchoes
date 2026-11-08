@@ -1,0 +1,12 @@
+Transcribed from this verifier's two tool outputs, not original redirected stdout.
+Baseline a9d10e6 and candidate 35c1c01 produced the following identical output for each seed. Candidate 9a3521d has an identical dist build to 35c1c01. Strategy: scripts/simulate.mjs play(seed), single input bot. Failures: 0 of 10 per version.
+{"seed":1,"phase":"won","seconds":180,"kills":427,"level":12,"hp":125,"bossKilled":true,"checksum":"4ddb53ed"}
+{"seed":2,"phase":"won","seconds":180,"kills":433,"level":12,"hp":125,"bossKilled":true,"checksum":"6b601fc1"}
+{"seed":3,"phase":"won","seconds":180,"kills":423,"level":12,"hp":150,"bossKilled":true,"checksum":"484355e3"}
+{"seed":4,"phase":"won","seconds":180,"kills":420,"level":12,"hp":125,"bossKilled":true,"checksum":"619cac63"}
+{"seed":5,"phase":"won","seconds":180,"kills":427,"level":13,"hp":100,"bossKilled":true,"checksum":"8340da11"}
+{"seed":6,"phase":"won","seconds":180,"kills":432,"level":12,"hp":100,"bossKilled":true,"checksum":"4f80ee50"}
+{"seed":7,"phase":"won","seconds":180,"kills":436,"level":13,"hp":100,"bossKilled":true,"checksum":"c0bcd478"}
+{"seed":8,"phase":"won","seconds":180,"kills":429,"level":13,"hp":100,"bossKilled":true,"checksum":"486db497"}
+{"seed":9,"phase":"won","seconds":180,"kills":443,"level":12,"hp":100,"bossKilled":true,"checksum":"1aa993b1"}
+{"seed":10,"phase":"won","seconds":180,"kills":398,"level":12,"hp":125,"bossKilled":true,"checksum":"41514e2a"}

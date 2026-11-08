@@ -1,0 +1,15 @@
+{
+  "observedAt": "2026-11-08T01:21:49.194498+00:00",
+  "head": "9a3521dda5b559dbacffb842ccbeafd3ad9e7ae4",
+  "base": "a9d10e6e65c91f539a840366e0a3b9cf00af9a06",
+  "draft": true,
+  "auto_merge": null,
+  "ci": 42433738444,
+  "conclusion": "success",
+  "raw": [
+    "pr21-raw-final.json",
+    "ci21-raw-final.json",
+    "pr18-raw-landed.json"
+  ],
+  "previousSnapshot": "remote-evidence.json was earlier observation, not current head"
+}
