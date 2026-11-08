@@ -5,6 +5,11 @@ export type CampaignProgress = Readonly<{
   highestUnlockedStageId: StageId;
 }>;
 
+export type ProgressTransition =
+  | Readonly<{ kind: 'locked' }>
+  | Readonly<{ kind: 'unchanged' }>
+  | Readonly<{ kind: 'advanced'; progress: CampaignProgress }>;
+
 export type ProgressRejectionReason = 'invalid_json' | 'invalid_type'
   | 'invalid_version' | 'unknown_version' | 'invalid_fields' | 'unknown_stage';
 
@@ -44,4 +49,28 @@ export function decodeProgress(raw: string | null): ProgressDecodeResult {
 
 export function encodeProgress(progress: CampaignProgress): string {
   return JSON.stringify({ version: 1, highestUnlockedStageId: progress.highestUnlockedStageId });
+}
+
+export function createInitialProgress(): CampaignProgress {
+  return Object.freeze({ version: 1, highestUnlockedStageId: STAGE_ORDER[0] });
+}
+
+export function isStageUnlocked(input: Readonly<{ progress: CampaignProgress; stageId: StageId }>): boolean {
+  return STAGE_ORDER.indexOf(input.stageId) <= STAGE_ORDER.indexOf(input.progress.highestUnlockedStageId);
+}
+
+export function applyStageResult(input: Readonly<{
+  progress: CampaignProgress;
+  stageId: StageId;
+  source: 'live' | 'replay';
+  outcome: 'won' | 'lost';
+}>): ProgressTransition {
+  const { progress, stageId, source, outcome } = input;
+  if (source !== 'live' && source !== 'replay') throw new TypeError('Invalid stage result source');
+  if (outcome !== 'won' && outcome !== 'lost') throw new TypeError('Invalid stage result outcome');
+  if (!isStageUnlocked({ progress, stageId })) return { kind: 'locked' };
+  if (source !== 'live' || outcome !== 'won') return { kind: 'unchanged' };
+  const nextStageId = STAGE_ORDER[STAGE_ORDER.indexOf(stageId) + 1];
+  if (nextStageId === undefined || isStageUnlocked({ progress, stageId: nextStageId })) return { kind: 'unchanged' };
+  return { kind: 'advanced', progress: Object.freeze({ version: 1, highestUnlockedStageId: nextStageId }) };
 }
