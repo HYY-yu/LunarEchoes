@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="data:,">
+  <title>沙漠基地 · 剧情画预览</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#101c29;color:#e8eee7;font:16px/1.6 system-ui,sans-serif}main{max-width:1000px;margin:0 auto;padding:24px 20px}header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid #536974;padding-bottom:12px}h1{font-size:20px;letter-spacing:2px;margin:0}#scope{color:#84959d;font-size:12px;margin:0}nav{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}button{background:transparent;color:#e8eee7;border:1px solid #536974;padding:8px 12px;font:inherit;cursor:pointer}button[aria-pressed=true]{background:#7de4db;color:#101c29;border-color:#7de4db}button:focus-visible{outline:2px solid #f3b76b;outline-offset:3px}#language{margin-left:auto}figure{margin:24px 0 0}canvas{display:block;image-rendering:pixelated;max-width:none;margin:auto}figcaption{max-width:74ch;margin:24px auto 0;border-left:3px solid #f3b76b;padding-left:16px}#heading{font-size:24px;letter-spacing:2px;margin:0 0 8px}#text{margin:0}#error{color:#f3b76b}footer{color:#84959d;font-size:12px;margin-top:24px;letter-spacing:1px}@media(max-width:600px){main{padding:16px}header{display:block}#scope{margin-top:6px}button{padding:7px 10px;font-size:14px}#language{margin-left:0}figure{margin-top:20px}#heading{font-size:22px}figcaption{margin-top:20px}footer{margin-top:20px}}
+  </style>
+</head>
+<body>
+  <main>
+    <header><h1 id="title">沙漠基地</h1><p id="scope">剧情画预览 · 未接入关卡</p></header>
+    <nav aria-label="场景预览"><button data-scene="opening">开场</button><button data-scene="victory">胜利</button><button data-scene="defeat">失败</button><button id="language">English</button></nav>
+    <figure><canvas id="scene" width="320" height="180" role="img"></canvas><figcaption><h2 id="heading"></h2><p id="text"></p></figcaption></figure>
+    <p id="error" role="alert"></p><footer id="chapter">01 / 06 · 地球防卫部队</footer>
+  </main>
+  <script type="module" src="/fixture.js"></script>
+</body>
+</html>
