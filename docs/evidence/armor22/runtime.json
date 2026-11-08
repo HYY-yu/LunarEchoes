@@ -1,0 +1,65 @@
+{
+  "sourceCommit": "249b8817b623722e11c9d5b53ef6ec3a00b8aa3a",
+  "runtime": [
+    {
+      "file": "art.js",
+      "bytes": 4066,
+      "sha256": "7c2599408fe6ce61590ee08c3fac9cbd28b1305d106e8cb4a200bcf18d822909"
+    },
+    {
+      "file": "audio.js",
+      "bytes": 8148,
+      "sha256": "46c5a5d771595a0ad7f4ee6513f32fca9c82f8625337d0b7d4d56eaf7e5c8ab8"
+    },
+    {
+      "file": "core.js",
+      "bytes": 11720,
+      "sha256": "f72e42fc4c3b5ad1b2fccd47d495790d4f7048d6bfa96f0f180fb43acb77d038"
+    },
+    {
+      "file": "desert-scene.js",
+      "bytes": 6513,
+      "sha256": "7de943ddee11824eac65daa35b99bab5bf40cfaaea29c018b4f685f0f3aafd08"
+    },
+    {
+      "file": "i18n.js",
+      "bytes": 4535,
+      "sha256": "acd35ce11d98620af38acc5e7e1f2f2c02c08fc5246e43f15ec9f6ef2b9e36d6"
+    },
+    {
+      "file": "index.html",
+      "bytes": 1949,
+      "sha256": "178ea4200aa38438d4ab68ea874de147dae99979a5eed95afd83c52bc73ca42e"
+    },
+    {
+      "file": "logger.js",
+      "bytes": 287,
+      "sha256": "bc17b67fd97f29e5017b45bbff4af8257f1d8df69e265415fffc342ea32cefc7"
+    },
+    {
+      "file": "main.js",
+      "bytes": 18075,
+      "sha256": "822edf57a7b3345955a9e674756d8877d46458596fd359bfef23779ebaed297a"
+    },
+    {
+      "file": "progress.js",
+      "bytes": 2514,
+      "sha256": "90917ab5fc67cd09c88a81fb4533375a698d43cc822b1ad0216e24e29c7a7317"
+    },
+    {
+      "file": "render.js",
+      "bytes": 12111,
+      "sha256": "58a032cdd3c3e025c50182e55e5ad539385aa4b8268112a93cc1126d6eedbe16"
+    },
+    {
+      "file": "stage-contract.js",
+      "bytes": 6799,
+      "sha256": "43b623992f7fcf57e4434ed2c638a6607afbd175de61c4d3d0430ceedf810594"
+    },
+    {
+      "file": "style.css",
+      "bytes": 15372,
+      "sha256": "b5f2fae5a4570a059da2472807b91f72663f7e12e89b5ba33f1cd1b5ca4c884e"
+    }
+  ]
+}

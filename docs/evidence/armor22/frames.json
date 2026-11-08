@@ -1,0 +1,299 @@
+[
+  {
+    "file": "frame-1064-1.jpg",
+    "sha256": "0bb205fa9877a547a62799da0e3ee93221a904794b4b93b6a6cb2c46d4727d3d",
+    "bytes": 41540,
+    "sourceLine": 1064,
+    "imageInResult": 1,
+    "markers": [
+      "initial-desktop-zh"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1085-1.jpg",
+    "sha256": "9c82a95e0fe92413d59b68dae3ec5770ef2c23afec192b5803144649f11f6f3f",
+    "bytes": 41540,
+    "sourceLine": 1085,
+    "imageInResult": 1,
+    "markers": [
+      "natural-hit-desktop-zh"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1120-1.jpg",
+    "sha256": "1c21fa71ac7e75accc599aef45588c82c90f9cc1d48cdafc9f4b4ed56e500748",
+    "bytes": 59009,
+    "sourceLine": 1120,
+    "imageInResult": 1,
+    "markers": [
+      "natural-contact-observation"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1127-1.jpg",
+    "sha256": "360409f966bff54c4015d40d32175d81462670ef94af1f7ed7395d086de30fcd",
+    "bytes": 41965,
+    "sourceLine": 1127,
+    "imageInResult": 1,
+    "markers": [
+      "natural-seven-to-six"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1150-1.jpg",
+    "sha256": "efd0d41242b6288e608400eb04919187db259486e29cf43bbacb8f9b7e0b1cac",
+    "bytes": 58693,
+    "sourceLine": 1150,
+    "imageInResult": 1,
+    "markers": [
+      "hull-before-natural"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1150-2.jpg",
+    "sha256": "18adbd9ab8a71aba4123d2c20836e7f0785e1cf1b2cd92821e68d556e8d0b6cc",
+    "bytes": 63618,
+    "sourceLine": 1150,
+    "imageInResult": 2,
+    "markers": [
+      "hull-before-natural"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1159-1.jpg",
+    "sha256": "a127af775bf319f8f1a7cd0de1450a11cffb42f6518cfba184fa4f7b366b01eb",
+    "bytes": 46079,
+    "sourceLine": 1159,
+    "imageInResult": 1,
+    "markers": [
+      "hull-after-natural-desktop-en",
+      "hull-after-natural-narrow-en"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1159-2.jpg",
+    "sha256": "b47bdfe74a844efcd4df098f43ee993f281ec8c46df0322603b938f61bd5c1c5",
+    "bytes": 23353,
+    "sourceLine": 1159,
+    "imageInResult": 2,
+    "markers": [
+      "hull-after-natural-desktop-en",
+      "hull-after-natural-narrow-en"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1176-1.jpg",
+    "sha256": "bd215db99a8116de80081794d4d42c91beb1d79c6625efbb7ee986e4c47a84d5",
+    "bytes": 20893,
+    "sourceLine": 1176,
+    "imageInResult": 1,
+    "markers": [
+      "hull-after-natural-narrow-zh"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1194-1.jpg",
+    "sha256": "fe0bf8a0f7547dfe5e0be3dad015df06afc5a0f98dcb49ab5254a58ef9258672",
+    "bytes": 25156,
+    "sourceLine": 1194,
+    "imageInResult": 1,
+    "markers": [
+      "natural-terminal-narrow-zh"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1230-1.jpg",
+    "sha256": "f438b1aa3ea29854c7647f8bb2ca5ad02abf726b2750adc8dc543df8d7d2cb7e",
+    "bytes": 20567,
+    "sourceLine": 1230,
+    "imageInResult": 1,
+    "markers": [
+      "natural-replay-matched"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1235-1.jpg",
+    "sha256": "fc1483d7704f8b38481b2f49c412e392f78d6a5cdb4fe1bd339d040c54e8a412",
+    "bytes": 20310,
+    "sourceLine": 1235,
+    "imageInResult": 1,
+    "markers": [
+      "restart-narrow-zh"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1235-2.jpg",
+    "sha256": "a9406645c68867e7edb0e042e19195eb01a9e32656ad965a8588814bef44e1c3",
+    "bytes": 22944,
+    "sourceLine": 1235,
+    "imageInResult": 2,
+    "markers": [
+      "restart-narrow-zh"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1252-1.jpg",
+    "sha256": "9a24137e2fcb6b7eca924793fe6e7c3b4335b7386edeff969057dd53adf2bc04",
+    "bytes": 24535,
+    "sourceLine": 1252,
+    "imageInResult": 1,
+    "markers": [
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-geometry"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1252-2.jpg",
+    "sha256": "d5ae177f2d14a565168fa9886a54b074b68f588892f0a8f4a4ac6e908a99c157",
+    "bytes": 25556,
+    "sourceLine": 1252,
+    "imageInResult": 2,
+    "markers": [
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-geometry"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1252-3.jpg",
+    "sha256": "36897e8822dd8f7907f2054df709f84c4b4f16af35e4e135d64fe37419fd7edb",
+    "bytes": 24295,
+    "sourceLine": 1252,
+    "imageInResult": 3,
+    "markers": [
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-geometry"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1252-4.jpg",
+    "sha256": "2374d8ce904f8078d064d3df9f169ae2cde8952f90e7cce3094c5352dc43a1d5",
+    "bytes": 24935,
+    "sourceLine": 1252,
+    "imageInResult": 4,
+    "markers": [
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-geometry"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1252-5.jpg",
+    "sha256": "6132c478528531840c7ac76ba2e9966fff63788795c350c5c4bfe5f9301e60c6",
+    "bytes": 18123,
+    "sourceLine": 1252,
+    "imageInResult": 5,
+    "markers": [
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-geometry"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1252-6.jpg",
+    "sha256": "e44cb4d95b72b476e828e298d90fc1723e831c1f7266a6fc03af9d9c7b475c0c",
+    "bytes": 18572,
+    "sourceLine": 1252,
+    "imageInResult": 6,
+    "markers": [
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-geometry"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1252-7.jpg",
+    "sha256": "ad8b0093fa9497747ce93192efd4761378b9d54a5790a6b93b6fda70f543393b",
+    "bytes": 17913,
+    "sourceLine": 1252,
+    "imageInResult": 7,
+    "markers": [
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-geometry"
+    ],
+    "originalUnmodified": true
+  },
+  {
+    "file": "frame-1252-8.jpg",
+    "sha256": "b9e9aa56bddb383ec7396d2264cd39af302048961e86cd4c5df494b7b50e2141",
+    "bytes": 18342,
+    "sourceLine": 1252,
+    "imageInResult": 8,
+    "markers": [
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-stress-frame",
+      "layout-geometry"
+    ],
+    "originalUnmodified": true
+  }
+]

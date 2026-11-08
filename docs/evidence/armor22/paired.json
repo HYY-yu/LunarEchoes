@@ -1,0 +1,546 @@
+{
+  "groups": [
+    {
+      "strategy": "stationary",
+      "preference": "attack",
+      "runs": 9,
+      "baselineWins": 0,
+      "candidateWins": 0,
+      "winToLoss": 0,
+      "lossToWin": 0
+    },
+    {
+      "strategy": "stationary",
+      "preference": "hull",
+      "runs": 9,
+      "baselineWins": 0,
+      "candidateWins": 0,
+      "winToLoss": 0,
+      "lossToWin": 0
+    },
+    {
+      "strategy": "novice",
+      "preference": "attack",
+      "runs": 9,
+      "baselineWins": 5,
+      "candidateWins": 5,
+      "winToLoss": 0,
+      "lossToWin": 0
+    },
+    {
+      "strategy": "novice",
+      "preference": "hull",
+      "runs": 9,
+      "baselineWins": 6,
+      "candidateWins": 6,
+      "winToLoss": 0,
+      "lossToWin": 0
+    },
+    {
+      "strategy": "skilled",
+      "preference": "attack",
+      "runs": 9,
+      "baselineWins": 9,
+      "candidateWins": 9,
+      "winToLoss": 0,
+      "lossToWin": 0
+    },
+    {
+      "strategy": "skilled",
+      "preference": "hull",
+      "runs": 9,
+      "baselineWins": 6,
+      "candidateWins": 6,
+      "winToLoss": 0,
+      "lossToWin": 0
+    }
+  ],
+  "rows": [
+    {
+      "seed": 208907,
+      "strategy": "stationary",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 61.36666666666667,
+      "afterSeconds": 64.06666666666666
+    },
+    {
+      "seed": 42,
+      "strategy": "stationary",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 54.483333333333334,
+      "afterSeconds": 55.96666666666667
+    },
+    {
+      "seed": 101,
+      "strategy": "stationary",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 53.016666666666666,
+      "afterSeconds": 55.53333333333333
+    },
+    {
+      "seed": 1,
+      "strategy": "stationary",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 59.31666666666667,
+      "afterSeconds": 61.583333333333336
+    },
+    {
+      "seed": 2,
+      "strategy": "stationary",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 53.96666666666667,
+      "afterSeconds": 55.166666666666664
+    },
+    {
+      "seed": 3,
+      "strategy": "stationary",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 53.833333333333336,
+      "afterSeconds": 55.53333333333333
+    },
+    {
+      "seed": 4,
+      "strategy": "stationary",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 50.6,
+      "afterSeconds": 51.733333333333334
+    },
+    {
+      "seed": 5,
+      "strategy": "stationary",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 55.61666666666667,
+      "afterSeconds": 57.06666666666667
+    },
+    {
+      "seed": 6,
+      "strategy": "stationary",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 56.6,
+      "afterSeconds": 57.9
+    },
+    {
+      "seed": 208907,
+      "strategy": "stationary",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 61.36666666666667,
+      "afterSeconds": 64.06666666666666
+    },
+    {
+      "seed": 42,
+      "strategy": "stationary",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 54.483333333333334,
+      "afterSeconds": 55.96666666666667
+    },
+    {
+      "seed": 101,
+      "strategy": "stationary",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 53.016666666666666,
+      "afterSeconds": 55.53333333333333
+    },
+    {
+      "seed": 1,
+      "strategy": "stationary",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 59.31666666666667,
+      "afterSeconds": 61.583333333333336
+    },
+    {
+      "seed": 2,
+      "strategy": "stationary",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 53.96666666666667,
+      "afterSeconds": 55.166666666666664
+    },
+    {
+      "seed": 3,
+      "strategy": "stationary",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 53.833333333333336,
+      "afterSeconds": 55.53333333333333
+    },
+    {
+      "seed": 4,
+      "strategy": "stationary",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 50.6,
+      "afterSeconds": 51.733333333333334
+    },
+    {
+      "seed": 5,
+      "strategy": "stationary",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 55.61666666666667,
+      "afterSeconds": 57.06666666666667
+    },
+    {
+      "seed": 6,
+      "strategy": "stationary",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 56.6,
+      "afterSeconds": 57.9
+    },
+    {
+      "seed": 208907,
+      "strategy": "novice",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 152.11666666666667,
+      "afterSeconds": 155.9
+    },
+    {
+      "seed": 42,
+      "strategy": "novice",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 163.8,
+      "afterSeconds": 175.55
+    },
+    {
+      "seed": 101,
+      "strategy": "novice",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 101,
+      "afterSeconds": 117.35
+    },
+    {
+      "seed": 1,
+      "strategy": "novice",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 2,
+      "strategy": "novice",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 3,
+      "strategy": "novice",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 4,
+      "strategy": "novice",
+      "preference": "attack",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 155.45,
+      "afterSeconds": 158.51666666666668
+    },
+    {
+      "seed": 5,
+      "strategy": "novice",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 6,
+      "strategy": "novice",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 208907,
+      "strategy": "novice",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 126.11666666666666,
+      "afterSeconds": 131.3
+    },
+    {
+      "seed": 42,
+      "strategy": "novice",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 101,
+      "strategy": "novice",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 162.01666666666668,
+      "afterSeconds": 166.31666666666666
+    },
+    {
+      "seed": 1,
+      "strategy": "novice",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 2,
+      "strategy": "novice",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 3,
+      "strategy": "novice",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 4,
+      "strategy": "novice",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 170.6,
+      "afterSeconds": 173.96666666666667
+    },
+    {
+      "seed": 5,
+      "strategy": "novice",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 6,
+      "strategy": "novice",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 208907,
+      "strategy": "skilled",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 42,
+      "strategy": "skilled",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 101,
+      "strategy": "skilled",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 1,
+      "strategy": "skilled",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 2,
+      "strategy": "skilled",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 3,
+      "strategy": "skilled",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 4,
+      "strategy": "skilled",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 5,
+      "strategy": "skilled",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 6,
+      "strategy": "skilled",
+      "preference": "attack",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 208907,
+      "strategy": "skilled",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 42,
+      "strategy": "skilled",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 101,
+      "strategy": "skilled",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 1,
+      "strategy": "skilled",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 2,
+      "strategy": "skilled",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 3,
+      "strategy": "skilled",
+      "preference": "hull",
+      "before": "lost",
+      "after": "lost",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 4,
+      "strategy": "skilled",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 5,
+      "strategy": "skilled",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    },
+    {
+      "seed": 6,
+      "strategy": "skilled",
+      "preference": "hull",
+      "before": "won",
+      "after": "won",
+      "beforeSeconds": 180,
+      "afterSeconds": 180
+    }
+  ]
+}

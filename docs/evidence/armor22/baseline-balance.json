@@ -1,0 +1,3105 @@
+{
+  "identity": {
+    "head": "3d5ab48a2b0b9981f14aaf18a2ab24e17e0c8d7e",
+    "sourceDirty": false,
+    "version": "lunar-1",
+    "coreSha256": "2cffc39071185c911954a0cf35c709fb2cddc4de792fce14176a67d03cbccb6c",
+    "strategySha256": "f5b4842c84e98a8ba3e890b4cee46a275915d520c732702e934c190c85bbe1d5",
+    "node": "24.21.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "scope": "prototype paired seeds and same adaptive algorithms, not identical action recordings"
+  },
+  "summary": {
+    "runs": 54,
+    "won": 26,
+    "lost": 28,
+    "timeouts": 0,
+    "errors": 0,
+    "replayFailures": 0,
+    "maximumHull": 7,
+    "maximumCapacityCells": null
+  },
+  "rows": [
+    {
+      "seed": 208907,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3682,
+      "combatSeconds": 61.36666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 106,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 62,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3682,
+      "actionsSha256": "8eb4112c8bca0adab2fe78d41f782d1196c604914fcfd003b8168d7ca488cb6c",
+      "checksum": "b6214204",
+      "replayMatch": true
+    },
+    {
+      "seed": 42,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3269,
+      "combatSeconds": 54.483333333333334,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 105,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 57,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3269,
+      "actionsSha256": "2b47ab28a2dbc5e6025ac7e5325d55e6d365840685b53c6fd66620e5aa1f87fa",
+      "checksum": "4aa995e2",
+      "replayMatch": true
+    },
+    {
+      "seed": 101,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3181,
+      "combatSeconds": 53.016666666666666,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 105,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 51,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3181,
+      "actionsSha256": "edcada80aeccb38779da3b4879c12d0dab1e1f78b767432d094fc788db248339",
+      "checksum": "793a2081",
+      "replayMatch": true
+    },
+    {
+      "seed": 1,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3559,
+      "combatSeconds": 59.31666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 104,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 60,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3559,
+      "actionsSha256": "ab5dcc38276f4e03fd56a192e075a3781672f2e647dece687a631dbd3af69ae5",
+      "checksum": "00ecc9b0",
+      "replayMatch": true
+    },
+    {
+      "seed": 2,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3238,
+      "combatSeconds": 53.96666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 105,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 2,
+      "kills": 54,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [
+        {
+          "tick": 3079,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 3239,
+      "actionsSha256": "ac5a324381c1d4a32647e92519770b39051dee46f7942582b6bce709eedea6b7",
+      "checksum": "36148f2a",
+      "replayMatch": true
+    },
+    {
+      "seed": 3,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3230,
+      "combatSeconds": 53.833333333333336,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 104,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 54,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3230,
+      "actionsSha256": "8b4542e0e4f06b747ef0e5416e0b80daf849ea6194ad877383bd6c24a4792edc",
+      "checksum": "0e4865f9",
+      "replayMatch": true
+    },
+    {
+      "seed": 4,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3036,
+      "combatSeconds": 50.6,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 105,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 48,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3036,
+      "actionsSha256": "933c0d8d7a716ed9559a2762f4dbd22090a4ae436e6356ff6b2aa28a245ad1a1",
+      "checksum": "8305b5ed",
+      "replayMatch": true
+    },
+    {
+      "seed": 5,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3337,
+      "combatSeconds": 55.61666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 106,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 54,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3337,
+      "actionsSha256": "81a6cb90795509a5e81b6cfdc5dd8cbc44c0bb252cfd64caad093e21702c284e",
+      "checksum": "0ae96ca9",
+      "replayMatch": true
+    },
+    {
+      "seed": 6,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3396,
+      "combatSeconds": 56.6,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 106,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 58,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3396,
+      "actionsSha256": "b9e420a34480390f90d4efcc18705da1cd410e491fbbb84cdb29464a99952feb",
+      "checksum": "dfda0f4e",
+      "replayMatch": true
+    },
+    {
+      "seed": 208907,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3682,
+      "combatSeconds": 61.36666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 106,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 62,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3682,
+      "actionsSha256": "8eb4112c8bca0adab2fe78d41f782d1196c604914fcfd003b8168d7ca488cb6c",
+      "checksum": "b6214204",
+      "replayMatch": true
+    },
+    {
+      "seed": 42,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3269,
+      "combatSeconds": 54.483333333333334,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 105,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 57,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3269,
+      "actionsSha256": "2b47ab28a2dbc5e6025ac7e5325d55e6d365840685b53c6fd66620e5aa1f87fa",
+      "checksum": "4aa995e2",
+      "replayMatch": true
+    },
+    {
+      "seed": 101,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3181,
+      "combatSeconds": 53.016666666666666,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 105,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 51,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3181,
+      "actionsSha256": "edcada80aeccb38779da3b4879c12d0dab1e1f78b767432d094fc788db248339",
+      "checksum": "793a2081",
+      "replayMatch": true
+    },
+    {
+      "seed": 1,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3559,
+      "combatSeconds": 59.31666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 104,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 60,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3559,
+      "actionsSha256": "ab5dcc38276f4e03fd56a192e075a3781672f2e647dece687a631dbd3af69ae5",
+      "checksum": "00ecc9b0",
+      "replayMatch": true
+    },
+    {
+      "seed": 2,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3238,
+      "combatSeconds": 53.96666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 105,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 2,
+      "kills": 54,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [
+        {
+          "tick": 3079,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 3239,
+      "actionsSha256": "ac5a324381c1d4a32647e92519770b39051dee46f7942582b6bce709eedea6b7",
+      "checksum": "36148f2a",
+      "replayMatch": true
+    },
+    {
+      "seed": 3,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3230,
+      "combatSeconds": 53.833333333333336,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 104,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 54,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3230,
+      "actionsSha256": "8b4542e0e4f06b747ef0e5416e0b80daf849ea6194ad877383bd6c24a4792edc",
+      "checksum": "0e4865f9",
+      "replayMatch": true
+    },
+    {
+      "seed": 4,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3036,
+      "combatSeconds": 50.6,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 105,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 48,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3036,
+      "actionsSha256": "933c0d8d7a716ed9559a2762f4dbd22090a4ae436e6356ff6b2aa28a245ad1a1",
+      "checksum": "8305b5ed",
+      "replayMatch": true
+    },
+    {
+      "seed": 5,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3337,
+      "combatSeconds": 55.61666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 106,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 54,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3337,
+      "actionsSha256": "81a6cb90795509a5e81b6cfdc5dd8cbc44c0bb252cfd64caad093e21702c284e",
+      "checksum": "0ae96ca9",
+      "replayMatch": true
+    },
+    {
+      "seed": 6,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3396,
+      "combatSeconds": 56.6,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 106,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 1,
+      "kills": 58,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3396,
+      "actionsSha256": "b9e420a34480390f90d4efcc18705da1cd410e491fbbb84cdb29464a99952feb",
+      "checksum": "dfda0f4e",
+      "replayMatch": true
+    },
+    {
+      "seed": 208907,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 9127,
+      "combatSeconds": 152.11666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 12,
+      "actualRawDamage": 133,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 11,
+      "kills": 285,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9071,
+      "upgrades": [
+        {
+          "tick": 713,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1317,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1995,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2618,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 3319,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4304,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5181,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5934,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7062,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8213,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 9137,
+      "actionsSha256": "185fb024340d24e5ca49797977435f848a1f34da2bf075586b1d0106a15d8799",
+      "checksum": "beed3fcc",
+      "replayMatch": true
+    },
+    {
+      "seed": 42,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 9828,
+      "combatSeconds": 163.8,
+      "storySeconds": 0,
+      "acceptedHits": 14,
+      "actualRawDamage": 160,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 125,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 342,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8683,
+      "upgrades": [
+        {
+          "tick": 599,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1131,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1813,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2444,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3081,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4054,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5241,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 6233,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7203,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8343,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 9191,
+          "upgrade": "nova"
+        }
+      ],
+      "actionCount": 9839,
+      "actionsSha256": "21d49a3a4090dfa50c73324a4f3752e9e2b96ffd7ee9adab88127f4d0e73ebe7",
+      "checksum": "eab53330",
+      "replayMatch": true
+    },
+    {
+      "seed": 101,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 6060,
+      "combatSeconds": 101,
+      "storySeconds": 0,
+      "acceptedHits": 12,
+      "actualRawDamage": 140,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 125,
+      "capacityCells": null,
+      "level": 8,
+      "kills": 123,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [
+        {
+          "tick": 662,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1210,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1758,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2475,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3052,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4018,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 5007,
+          "upgrade": "nova"
+        }
+      ],
+      "actionCount": 6067,
+      "actionsSha256": "b39802b338d0abb29be69297951c1ae085de0628606fb8e94990f61a5748dc7e",
+      "checksum": "8a56a5dd",
+      "replayMatch": true
+    },
+    {
+      "seed": 1,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 9,
+      "actualRawDamage": 108,
+      "damageCells": null,
+      "hp": 33,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 13,
+      "kills": 440,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8600,
+      "upgrades": [
+        {
+          "tick": 591,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1159,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 1638,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2400,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 3082,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3879,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4763,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6054,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7279,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 8612,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 9485,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 10278,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10812,
+      "actionsSha256": "da25ea0cea28c361633c155d98b425572100e1bdf77d32d2cf112c4a3501bd00",
+      "checksum": "7a9842b3",
+      "replayMatch": true
+    },
+    {
+      "seed": 2,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 3,
+      "actualRawDamage": 36,
+      "damageCells": null,
+      "hp": 83,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 427,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8523,
+      "upgrades": [
+        {
+          "tick": 751,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1212,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1916,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2541,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3346,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4341,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5791,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7066,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7933,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8727,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 9835,
+          "upgrade": "orbit"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "be7117966134758c7dec9adf022767d3ffb81bd4dc0b07bd418fb81d4fd427fe",
+      "checksum": "2aa6d2ca",
+      "replayMatch": true
+    },
+    {
+      "seed": 3,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 6,
+      "actualRawDamage": 72,
+      "damageCells": null,
+      "hp": 38,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 13,
+      "kills": 423,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9450,
+      "upgrades": [
+        {
+          "tick": 765,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1189,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 1797,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 2405,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3155,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4018,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 4952,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 5969,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7381,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8399,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 9459,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 10229,
+          "upgrade": "orbit"
+        }
+      ],
+      "actionCount": 10812,
+      "actionsSha256": "cc6a4085ce1b3e703ef47780bf5b2938d2b0f294e585adf0f6be6a6392a68465",
+      "checksum": "f68675dc",
+      "replayMatch": true
+    },
+    {
+      "seed": 4,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 9327,
+      "combatSeconds": 155.45,
+      "storySeconds": 0,
+      "acceptedHits": 12,
+      "actualRawDamage": 140,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 11,
+      "kills": 301,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8730,
+      "upgrades": [
+        {
+          "tick": 511,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 1149,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1637,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2384,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 3128,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4023,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4914,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6066,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 7082,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8533,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 9337,
+      "actionsSha256": "b240b295132349ae8473aa6d4339f4f80a816422c4075be3af12266b34df9ea8",
+      "checksum": "2038b260",
+      "replayMatch": true
+    },
+    {
+      "seed": 5,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 2,
+      "actualRawDamage": 24,
+      "damageCells": null,
+      "hp": 125,
+      "maxHp": 125,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 437,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8589,
+      "upgrades": [
+        {
+          "tick": 518,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1180,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1987,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2377,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3390,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4486,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5352,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6622,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7682,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 8600,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 9917,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "ea1015527ab98aad0edd21293ec31f78c995fa81eb2b43f8368a3020fd69c2ff",
+      "checksum": "8e0f8c7e",
+      "replayMatch": true
+    },
+    {
+      "seed": 6,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 6,
+      "actualRawDamage": 72,
+      "damageCells": null,
+      "hp": 72,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 13,
+      "kills": 431,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9419,
+      "upgrades": [
+        {
+          "tick": 622,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1160,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1818,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2689,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 3481,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4291,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 5324,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6343,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7563,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8692,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 9543,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 10476,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10812,
+      "actionsSha256": "296e3b8d1c02d4f4fd7edcca133bac9fce53626b70e4202eae1e48da0e1092db",
+      "checksum": "8b6a479b",
+      "replayMatch": true
+    },
+    {
+      "seed": 208907,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 7567,
+      "combatSeconds": 126.11666666666666,
+      "storySeconds": 0,
+      "acceptedHits": 19,
+      "actualRawDamage": 220,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 175,
+      "capacityCells": null,
+      "level": 9,
+      "kills": 174,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [
+        {
+          "tick": 713,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1317,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1995,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2618,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3319,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4304,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5161,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6494,
+          "upgrade": "orbit"
+        }
+      ],
+      "actionCount": 7575,
+      "actionsSha256": "da8963b48adf1867ca386177b178992a496f9833cabf96dc82c29025f9a0da93",
+      "checksum": "04e662dd",
+      "replayMatch": true
+    },
+    {
+      "seed": 42,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 5,
+      "actualRawDamage": 60,
+      "damageCells": null,
+      "hp": 175,
+      "maxHp": 175,
+      "capacityCells": null,
+      "level": 13,
+      "kills": 428,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9258,
+      "upgrades": [
+        {
+          "tick": 599,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1131,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1871,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2571,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3189,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 4154,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5221,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 6361,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7365,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8643,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9624,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 10672,
+          "upgrade": "orbit"
+        }
+      ],
+      "actionCount": 10812,
+      "actionsSha256": "35eee14ebbb399bc861fe074f4ae3bdb0ae0bf1dbb46c86301b107c263992730",
+      "checksum": "a4edb52a",
+      "replayMatch": true
+    },
+    {
+      "seed": 101,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 9721,
+      "combatSeconds": 162.01666666666668,
+      "storySeconds": 0,
+      "acceptedHits": 29,
+      "actualRawDamage": 346,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 250,
+      "capacityCells": null,
+      "level": 11,
+      "kills": 282,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9569,
+      "upgrades": [
+        {
+          "tick": 662,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1210,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1758,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2475,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3052,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4018,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 5093,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 6345,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7595,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9018,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 9731,
+      "actionsSha256": "4c957718d02d04f6cd8a40fde6e53669b677202cf5a72d15bc4b54bdbd24b1ce",
+      "checksum": "8d02c593",
+      "replayMatch": true
+    },
+    {
+      "seed": 1,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 20,
+      "actualRawDamage": 240,
+      "damageCells": null,
+      "hp": 99,
+      "maxHp": 275,
+      "capacityCells": null,
+      "level": 13,
+      "kills": 411,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9177,
+      "upgrades": [
+        {
+          "tick": 591,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1109,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2029,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2691,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3614,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4091,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 5115,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6138,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7342,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8613,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 9522,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 10401,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10812,
+      "actionsSha256": "df5f3470968ef25af8f9f87c5580cdfd2f8489b3b3098c76563ed02f20d1ce48",
+      "checksum": "9fa67bd5",
+      "replayMatch": true
+    },
+    {
+      "seed": 2,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 22,
+      "actualRawDamage": 260,
+      "damageCells": null,
+      "hp": 19,
+      "maxHp": 250,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 412,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9423,
+      "upgrades": [
+        {
+          "tick": 751,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1212,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1916,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2522,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3325,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4105,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5430,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6544,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7529,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 8804,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 9715,
+          "upgrade": "nova"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "99f9665eed558c51e5a45eca1eefdd1924bfd0eae1b598f8f3e84b05cbf44adc",
+      "checksum": "e204717b",
+      "replayMatch": true
+    },
+    {
+      "seed": 3,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 17,
+      "actualRawDamage": 217,
+      "damageCells": null,
+      "hp": 137,
+      "maxHp": 250,
+      "capacityCells": null,
+      "level": 13,
+      "kills": 422,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9213,
+      "upgrades": [
+        {
+          "tick": 765,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1203,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 1810,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2495,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3400,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3962,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 5041,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6296,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7221,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8225,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9224,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 10240,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10812,
+      "actionsSha256": "45085da92517a38d17056cd86f1fa2630f39cddc5652e1ccc8236f10ab575a41",
+      "checksum": "5cf7ec8c",
+      "replayMatch": true
+    },
+    {
+      "seed": 4,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 10236,
+      "combatSeconds": 170.6,
+      "storySeconds": 0,
+      "acceptedHits": 30,
+      "actualRawDamage": 354,
+      "damageCells": null,
+      "hp": 0,
+      "maxHp": 250,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 355,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9664,
+      "upgrades": [
+        {
+          "tick": 511,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1149,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1637,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2384,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 3128,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4023,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4929,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6289,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7239,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 8290,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9592,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10247,
+      "actionsSha256": "403ec20f60688a577301cd260a7482f57aebbb05e1d3d708758ee3572260c7ff",
+      "checksum": "4b834c2a",
+      "replayMatch": true
+    },
+    {
+      "seed": 5,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 19,
+      "actualRawDamage": 224,
+      "damageCells": null,
+      "hp": 131,
+      "maxHp": 250,
+      "capacityCells": null,
+      "level": 13,
+      "kills": 408,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8812,
+      "upgrades": [
+        {
+          "tick": 518,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1159,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1736,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2389,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3178,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4083,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4923,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5963,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7019,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 8072,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9363,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 10247,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10812,
+      "actionsSha256": "0691dcf6259252607c56a1f608ad929361fd635180506f580d538d1e0aadca49",
+      "checksum": "4fb13566",
+      "replayMatch": true
+    },
+    {
+      "seed": 6,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 18,
+      "actualRawDamage": 216,
+      "damageCells": null,
+      "hp": 103,
+      "maxHp": 225,
+      "capacityCells": null,
+      "level": 13,
+      "kills": 412,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9153,
+      "upgrades": [
+        {
+          "tick": 622,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1160,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1818,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2657,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 3431,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4209,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 5285,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6081,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7251,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 8556,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 9500,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 10534,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10812,
+      "actionsSha256": "8ed2ab30a3650a47730e16fc699bcae94821f76a7f77aea8bc766a38301edbef",
+      "checksum": "cd9f8f53",
+      "replayMatch": true
+    },
+    {
+      "seed": 208907,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 100,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 432,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8464,
+      "upgrades": [
+        {
+          "tick": 850,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1192,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1749,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2646,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3166,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3863,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4905,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 6239,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7671,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8509,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 9596,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "38a5819097be4d565a052c0c6da0bcb3b12af1ca2201736fb9a71cfc3f7f7181",
+      "checksum": "d1326dd8",
+      "replayMatch": true
+    },
+    {
+      "seed": 42,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 100,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 438,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9770,
+      "upgrades": [
+        {
+          "tick": 586,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1029,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1794,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2368,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 3106,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4055,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5270,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6147,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7880,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8691,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 9789,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "ffd6e8dbdccc4aa7d0ad82df3d1ad2147c5d051184c88953025438d41306bef4",
+      "checksum": "c8b73f95",
+      "replayMatch": true
+    },
+    {
+      "seed": 101,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 100,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 430,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8529,
+      "upgrades": [
+        {
+          "tick": 608,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1140,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 1752,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2527,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3056,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4165,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 5063,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 6090,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7371,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8643,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 9842,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "b599edece3a4da3b038e9677d61dcabedde3a369572bbf34edf5a6fe99239603",
+      "checksum": "22cc59b2",
+      "replayMatch": true
+    },
+    {
+      "seed": 1,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 125,
+      "maxHp": 125,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 427,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9577,
+      "upgrades": [
+        {
+          "tick": 526,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1127,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 1677,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2426,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 3281,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4273,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 5231,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6068,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7338,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8637,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 10059,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "c9749cc36b5ff78197bfed33568a836c6e6bac71404a45cded3cde05867de9f4",
+      "checksum": "4ddb53ed",
+      "replayMatch": true
+    },
+    {
+      "seed": 2,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 125,
+      "maxHp": 125,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 433,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8523,
+      "upgrades": [
+        {
+          "tick": 655,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1127,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 1614,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2654,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3255,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4108,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5151,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 6508,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 7806,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8693,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 9567,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "b258abe72a2824f8c7d955028c1134423b8c68fb1be4bd5ded976bd532d3edc7",
+      "checksum": "6b601fc1",
+      "replayMatch": true
+    },
+    {
+      "seed": 3,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 150,
+      "maxHp": 150,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 423,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8903,
+      "upgrades": [
+        {
+          "tick": 661,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1106,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1731,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2342,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3335,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4261,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 5320,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6514,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8017,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 8967,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 10038,
+          "upgrade": "nova"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "e61caff8abd6b2a50f181a20950406adcb4be6f3f0171141e88414fbbdee616d",
+      "checksum": "484355e3",
+      "replayMatch": true
+    },
+    {
+      "seed": 4,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 125,
+      "maxHp": 125,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 420,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9924,
+      "upgrades": [
+        {
+          "tick": 551,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1062,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1615,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2497,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2971,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3661,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4730,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6355,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7776,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8897,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 9986,
+          "upgrade": "orbit"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "faeefd6ab7463944a304d33adfc5efd11197c91bccbfaab304ef1db59435217c",
+      "checksum": "619cac63",
+      "replayMatch": true
+    },
+    {
+      "seed": 5,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 100,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 13,
+      "kills": 427,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8641,
+      "upgrades": [
+        {
+          "tick": 552,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1211,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1654,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 2380,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3413,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 4182,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4979,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 6195,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7076,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8365,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 9461,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 10636,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10812,
+      "actionsSha256": "1d146d9439adee234bf3df1c3905404d159f83d9ff9cc9af94bfa7c810785abf",
+      "checksum": "8340da11",
+      "replayMatch": true
+    },
+    {
+      "seed": 6,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 100,
+      "maxHp": 100,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 432,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8770,
+      "upgrades": [
+        {
+          "tick": 629,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1076,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1742,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2547,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3266,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4169,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5309,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6653,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 7971,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 9074,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 10537,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "cb3e3f9dc6db4b7364dc046617abfb92fdee30f427f91b5b9797904a02fd6f6b",
+      "checksum": "4f80ee50",
+      "replayMatch": true
+    },
+    {
+      "seed": 208907,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 1,
+      "actualRawDamage": 12,
+      "damageCells": null,
+      "hp": 214,
+      "maxHp": 225,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 410,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 10125,
+      "upgrades": [
+        {
+          "tick": 850,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1192,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1749,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2646,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3166,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3884,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4894,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6010,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7265,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8723,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9548,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "6b825e3c21d27625a4fb1d05230efeb412ca03d27da17bb3e78261d8dfccea19",
+      "checksum": "daa1b9e3",
+      "replayMatch": true
+    },
+    {
+      "seed": 42,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 1,
+      "actualRawDamage": 12,
+      "damageCells": null,
+      "hp": 225,
+      "maxHp": 225,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 382,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 10355,
+      "upgrades": [
+        {
+          "tick": 586,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1029,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1794,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2368,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 3106,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4199,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 5386,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 6408,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7225,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 8489,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 10128,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "d4e06bf2adac35a425b997eefd74546efcadecdeb1db2e029c2399279a8a6005",
+      "checksum": "afd36462",
+      "replayMatch": true
+    },
+    {
+      "seed": 101,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 250,
+      "maxHp": 250,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 390,
+      "bossSpawned": true,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [
+        {
+          "tick": 608,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1140,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 1752,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2527,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3086,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4107,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 5210,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6169,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7221,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8559,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 10124,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "6ad9fa5c496fb688d6c04564e999b7ff9784abc6f7af291d3efedffbbc62637e",
+      "checksum": "ef4eb06f",
+      "replayMatch": true
+    },
+    {
+      "seed": 1,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 4,
+      "actualRawDamage": 48,
+      "damageCells": null,
+      "hp": 179,
+      "maxHp": 200,
+      "capacityCells": null,
+      "level": 11,
+      "kills": 354,
+      "bossSpawned": true,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [
+        {
+          "tick": 526,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1084,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1698,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2469,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3379,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4600,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5946,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7448,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8472,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 10250,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10810,
+      "actionsSha256": "002b86af67bba52f63f2cec2dae5c7b8fcb71b51fedf68356a24efdc437b0a90",
+      "checksum": "bc7afdc9",
+      "replayMatch": true
+    },
+    {
+      "seed": 2,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 2,
+      "actualRawDamage": 24,
+      "damageCells": null,
+      "hp": 250,
+      "maxHp": 250,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 413,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9840,
+      "upgrades": [
+        {
+          "tick": 655,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1127,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1614,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2493,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3218,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4107,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5286,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6503,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 7666,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 9123,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 10295,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "98e723da7b6556af032b0b1aac114623792281af581260f8abf262d6e9274728",
+      "checksum": "54f34c54",
+      "replayMatch": true
+    },
+    {
+      "seed": 3,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 275,
+      "maxHp": 275,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 397,
+      "bossSpawned": true,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [
+        {
+          "tick": 661,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1106,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1731,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2342,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3335,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4311,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 5332,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6591,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7786,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8884,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 10543,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "662b42b0225c9329757969bd586aae713ddd8f23368e0334f2a546554f684685",
+      "checksum": "675c02a8",
+      "replayMatch": true
+    },
+    {
+      "seed": 4,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 1,
+      "actualRawDamage": 12,
+      "damageCells": null,
+      "hp": 275,
+      "maxHp": 275,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 399,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9273,
+      "upgrades": [
+        {
+          "tick": 551,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1062,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1615,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2497,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2971,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3695,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4794,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 5753,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7068,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 8898,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9964,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "56126769695537ca772af03c9e1d276160825b13c22b364ada001312f4ce8022",
+      "checksum": "365ca990",
+      "replayMatch": true
+    },
+    {
+      "seed": 5,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 200,
+      "maxHp": 200,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 429,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8741,
+      "upgrades": [
+        {
+          "tick": 552,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1219,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1657,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2216,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 3144,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4040,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4902,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5928,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7301,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8488,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9857,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "fe9ec840e52df641b8465b4bdc1b5646dd20249271148901b8601a51c8b2dabe",
+      "checksum": "026322c2",
+      "replayMatch": true
+    },
+    {
+      "seed": 6,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": null,
+      "hp": 200,
+      "maxHp": 200,
+      "capacityCells": null,
+      "level": 12,
+      "kills": 427,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8812,
+      "upgrades": [
+        {
+          "tick": 629,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1076,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1742,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 2547,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3266,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4169,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 5302,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6576,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7509,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8759,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 9810,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "04647e4e91477d64daee85c6db6be39f5d485c7d542f8d662079b9641842c617",
+      "checksum": "d63339ca",
+      "replayMatch": true
+    }
+  ]
+}
