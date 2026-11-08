@@ -1,4 +1,4 @@
-import { createWorld, dispatch, checksum, VERSION, HZ, DURATION, type World, type Action, type Recording, type Upgrade } from './core.js';
+import { createWorld, dispatch, checksum, VERSION, HZ, DURATION, UPGRADE_ORDER, type World, type Action, type Recording } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
 import { dictionary, upgradeLabel, type Language } from './i18n.js';
@@ -81,7 +81,7 @@ function updateUi(force = false) {
   element('dash').textContent = world.player.dashCooldown > 0 ? (world.player.dashCooldown / HZ).toFixed(1) : t.dash;
   element('footer-left').textContent = screen === 'title' ? t.prototype : `${t.seed} ${world.seed} · ${screen === 'replay' ? t.replaying : t.objective}`;
   const equipment = element('equipment'); equipment.replaceChildren();
-  for (const id of ['pulse', 'orbit', 'nova'] satisfies Upgrade[]) if (world.upgrades[id]) { const node = document.createElement('span'); node.innerHTML = `<i class="module-icon icon-${id}" aria-hidden="true"></i><span>LV ${world.upgrades[id]}</span>`; node.title = upgradeLabel(id, language).title; node.setAttribute('aria-label', `${node.title} · LV ${world.upgrades[id]}`); equipment.append(node); }
+  for (const id of UPGRADE_ORDER) if (world.upgrades[id] > 0) { const node = document.createElement('span'); node.innerHTML = `<i class="module-icon icon-${id}" aria-hidden="true"></i><span>LV ${world.upgrades[id]}</span>`; node.title = upgradeLabel(id, language).title; node.setAttribute('aria-label', `${node.title} · LV ${world.upgrades[id]}`); equipment.append(node); }
   if (!force && signature === lastUi) return;
   lastUi = signature; overlay.replaceChildren(); synth.setSession(screen === 'title' ? 'menu' : world.phase.kind === 'won' || world.phase.kind === 'lost' ? 'terminal' : world.phase.kind);
   if (screen === 'title') {

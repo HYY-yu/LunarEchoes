@@ -1,0 +1,147 @@
+{
+  "sourceHead": "9a76818256736afe220dbd0b235d59adf2600494",
+  "fixture": "Node only. Eight threshold-triggered upgrades with idle ticks and first-offer choices.",
+  "results": [
+    {
+      "seed": 208907,
+      "offers": [
+        [
+          "boots",
+          "hull",
+          "pulse"
+        ],
+        [
+          "magnet",
+          "orbit",
+          "pulse"
+        ],
+        [
+          "orbit",
+          "nova",
+          "boots"
+        ],
+        [
+          "orbit",
+          "hull",
+          "nova"
+        ],
+        [
+          "orbit",
+          "magnet",
+          "boots"
+        ],
+        [
+          "hull",
+          "magnet",
+          "pulse"
+        ],
+        [
+          "orbit",
+          "nova",
+          "hull"
+        ],
+        [
+          "boots",
+          "nova",
+          "magnet"
+        ]
+      ],
+      "checksum": "ee1abd22",
+      "rng": 4106181247
+    },
+    {
+      "seed": 42,
+      "offers": [
+        [
+          "pulse",
+          "hull",
+          "orbit"
+        ],
+        [
+          "magnet",
+          "hull",
+          "orbit"
+        ],
+        [
+          "magnet",
+          "nova",
+          "boots"
+        ],
+        [
+          "orbit",
+          "hull",
+          "magnet"
+        ],
+        [
+          "hull",
+          "orbit",
+          "nova"
+        ],
+        [
+          "orbit",
+          "pulse",
+          "nova"
+        ],
+        [
+          "hull",
+          "boots",
+          "magnet"
+        ],
+        [
+          "boots",
+          "nova",
+          "hull"
+        ]
+      ],
+      "checksum": "b8eff599",
+      "rng": 2452169066
+    },
+    {
+      "seed": 101,
+      "offers": [
+        [
+          "pulse",
+          "boots",
+          "nova"
+        ],
+        [
+          "magnet",
+          "hull",
+          "pulse"
+        ],
+        [
+          "boots",
+          "hull",
+          "nova"
+        ],
+        [
+          "nova",
+          "hull",
+          "orbit"
+        ],
+        [
+          "orbit",
+          "magnet",
+          "boots"
+        ],
+        [
+          "hull",
+          "pulse",
+          "nova"
+        ],
+        [
+          "magnet",
+          "nova",
+          "pulse"
+        ],
+        [
+          "orbit",
+          "hull",
+          "boots"
+        ]
+      ],
+      "checksum": "51f5d2aa",
+      "rng": 3119817404
+    }
+  ]
+}

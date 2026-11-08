@@ -1,0 +1,408 @@
+{
+  "EQUIPMENT22_LOGS": [
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:14:55.368Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:15:32.591Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:15:41.321Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:15:41.321Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:15:41.334Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:15:41.334Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:16:32.564Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:16:32.578Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:16:32.578Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:16:41.301Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:16:41.301Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:17:02.322Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:17:18.238Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:17:18.238Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:17:38.564Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:17:45.411Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:17:45.411Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:17:55.531Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:18:04.179Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:18:04.179Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:18:09.337Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:18:23.930Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:18:23.930Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:18:23.935Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:18:23.935Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:18:52.266Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:18:52.266Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:19:12.630Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:19:27.121Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:19:27.121Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:19:38.974Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:19:52.663Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:19:52.663Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:01.172Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:01.172Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:16.498Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:16.523Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:16.523Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:16.523Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:16.523Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:37.518Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:37.534Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:37.534Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:57.847Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:57.873Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:20:57.873Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:07.984Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:07.998Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:07.998Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:13.161Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:13.174Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:13.174Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:13.174Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:13.174Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:13.174Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:13.174Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:33.542Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:33.555Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:33.555Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:45.386Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:45.400Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:45.401Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:53.897Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    },
+    {
+      "level": "info",
+      "message": "Object",
+      "timestamp": "2026-11-08T03:21:53.923Z",
+      "url": "http://127.0.0.1:4182/logger.js"
+    }
+  ],
+  "EQUIPMENT22_ERRORS": [],
+  "EQUIPMENT22_HANDOFF": {
+    "tabId": "1375938227",
+    "url": "http://127.0.0.1:4182/",
+    "state": {
+      "clock": "01:06",
+      "equipment": [
+        "脉冲步枪 · LV 1",
+        "轨道无人机 · LV 1",
+        "电磁新星 · LV 1",
+        "矢量推进器 · LV 1",
+        "复合装甲 · LV 1",
+        "引力采集器 · LV 1"
+      ],
+      "footer": "任务种子 2742612319 · 生存 03:00 · 击败收割者",
+      "phase": "paused",
+      "screen": "game"
+    },
+    "errors": []
+  }
+}

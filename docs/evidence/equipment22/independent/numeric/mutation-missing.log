@@ -1,0 +1,68 @@
+✖ upgrade catalog matches every world upgrade exactly once in offer order (0.87675ms)
+✖ external mutation is rejected and offers preserve the catalog and baseline simulation (0.579875ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 45.36325
+
+✖ failing tests:
+
+test at ../equipment22-mutation-missing/test/upgrade-catalog.test.mjs:9:1
+✖ upgrade catalog matches every world upgrade exactly once in offer order (0.87675ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'pulse',
+      'orbit',
+      'nova',
+      'boots',
+      'hull',
+  -   'magnet'
+    ]
+  
+      at TestContext.<anonymous> (file:///private/tmp/equipment22-mutation-missing/test/upgrade-catalog.test.mjs:10:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'pulse', 'orbit', 'nova', 'boots', 'hull' ],
+    expected: [ 'pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at ../equipment22-mutation-missing/test/upgrade-catalog.test.mjs:15:1
+✖ external mutation is rejected and offers preserve the catalog and baseline simulation (0.579875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'pulse',
+      'orbit',
+      'nova',
+      'boots',
+      'hull',
+  -   'magnet'
+    ]
+  
+      at TestContext.<anonymous> (file:///private/tmp/equipment22-mutation-missing/test/upgrade-catalog.test.mjs:30:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'pulse', 'orbit', 'nova', 'boots', 'hull' ],
+    expected: [ 'pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

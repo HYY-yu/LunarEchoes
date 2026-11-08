@@ -1,0 +1,87 @@
+{
+  "checkedAt": "2026-11-08",
+  "method": "SHA256 and bytes match source frames.json; archive/source bytes compared directly; dimensions read with macOS sips.",
+  "frames": [
+    {
+      "file": "frame-line213.jpg",
+      "sourceLine": 213,
+      "sha256": "146a2d1c99b69040f7be38755541a4130ab133075f754238f372496b89ba6fd0",
+      "bytes": 24319,
+      "width": 390,
+      "height": 693,
+      "sourceAndArchiveBytesEqual": true
+    },
+    {
+      "file": "frame-line224.jpg",
+      "sourceLine": 224,
+      "sha256": "bd62596a191d861c24b9bb267476a1437c851872aa7a045ca3df46922921d44f",
+      "bytes": 24500,
+      "width": 390,
+      "height": 693,
+      "sourceAndArchiveBytesEqual": true
+    },
+    {
+      "file": "frame-line255.jpg",
+      "sourceLine": 255,
+      "sha256": "66c7340b9ab99e7d7813c41595020e2138fa8f28e0b71480d17bd5fac17028fb",
+      "bytes": 26107,
+      "width": 390,
+      "height": 693,
+      "sourceAndArchiveBytesEqual": true
+    },
+    {
+      "file": "frame-line287.jpg",
+      "sourceLine": 287,
+      "sha256": "d997e6069d82a7d85866708a631fdcecb0cd513bb001084fcd8729c39ba3946a",
+      "bytes": 28149,
+      "width": 390,
+      "height": 693,
+      "sourceAndArchiveBytesEqual": true
+    },
+    {
+      "file": "frame-line362.jpg",
+      "sourceLine": 362,
+      "sha256": "18cf3ebd3d52fe75cc9b1639ba15df90579b5d34280cb277adfe44e0e6f4c913",
+      "bytes": 24323,
+      "width": 390,
+      "height": 693,
+      "sourceAndArchiveBytesEqual": true
+    },
+    {
+      "file": "frame-line369.jpg",
+      "sourceLine": 369,
+      "sha256": "4f587002d153676be3ac36248039c3ad905399909be1c9d4bcd177ef9796c41e",
+      "bytes": 24386,
+      "width": 390,
+      "height": 693,
+      "sourceAndArchiveBytesEqual": true
+    },
+    {
+      "file": "frame-line387.jpg",
+      "sourceLine": 387,
+      "sha256": "b9cb84c534d69fe685eda0e87e9ece22aeec00ef7ca8580bc610c62014b45597",
+      "bytes": 24327,
+      "width": 390,
+      "height": 693,
+      "sourceAndArchiveBytesEqual": true
+    },
+    {
+      "file": "frame-line394.jpg",
+      "sourceLine": 394,
+      "sha256": "0734513547de3717a1d9e41cd32518e00af970ae95c19581d68388258906aa1e",
+      "bytes": 21013,
+      "width": 390,
+      "height": 693,
+      "sourceAndArchiveBytesEqual": true
+    },
+    {
+      "file": "frame-line492.jpg",
+      "sourceLine": 492,
+      "sha256": "993fb27253bd786eebec3693fda262ec26fa89c4db4c945804dc45920381af85",
+      "bytes": 20388,
+      "width": 390,
+      "height": 693,
+      "sourceAndArchiveBytesEqual": true
+    }
+  ]
+}

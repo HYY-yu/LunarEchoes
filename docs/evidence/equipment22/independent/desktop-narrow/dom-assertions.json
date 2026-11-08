@@ -1,0 +1,30 @@
+[
+  {
+    "name": "six-desktop-en",
+    "sixUnique": true,
+    "labelsMatch": true,
+    "noClipIncludingShadow": true,
+    "noCardOverlapIncludingShadow": true
+  },
+  {
+    "name": "six-desktop-zh",
+    "sixUnique": true,
+    "labelsMatch": true,
+    "noClipIncludingShadow": true,
+    "noCardOverlapIncludingShadow": true
+  },
+  {
+    "name": "six-narrow-zh",
+    "sixUnique": true,
+    "labelsMatch": true,
+    "noClipIncludingShadow": true,
+    "noCardOverlapIncludingShadow": true
+  },
+  {
+    "name": "six-narrow-en",
+    "sixUnique": true,
+    "labelsMatch": true,
+    "noClipIncludingShadow": true,
+    "noCardOverlapIncludingShadow": true
+  }
+]

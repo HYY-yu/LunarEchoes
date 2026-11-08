@@ -1,0 +1,25 @@
+file:///private/tmp/lunar-equipment22/test/upgrade-catalog.test.mjs:4
+import { createWorld, dispatch, checksum, UPGRADE_ORDER } from '../dist/core.js';
+                                          ^^^^^^^^^^^^^
+SyntaxError: The requested module '../dist/core.js' does not provide an export named 'UPGRADE_ORDER'
+    at #asyncInstantiate (node:internal/modules/esm/module_job:455:21)
+    at async ModuleJob.run (node:internal/modules/esm/module_job:553:5)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.21.0
+✖ test/upgrade-catalog.test.mjs (36.600458ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 40.18475
+
+✖ failing tests:
+
+test at test/upgrade-catalog.test.mjs:1:1
+✖ test/upgrade-catalog.test.mjs (36.600458ms)
+  'test failed'

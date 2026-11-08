@@ -20,7 +20,7 @@ export type World = {
   fireCooldown: number; novaCooldown: number; spawnCooldown: number; bossSpawned: boolean; bossKilled: boolean;
 };
 export type Recording = { version: string; seed: number; actions: Action[] };
-const upgrades: Upgrade[] = ['pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet'];
+export const UPGRADE_ORDER: readonly Upgrade[] = Object.freeze<Upgrade[]>(['pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet']);
 export function createWorld(seed: number): World {
   return { seed: seed >>> 0, rng: (seed >>> 0) || 1, tick: 0, phase: { kind: 'running' }, nextId: 1,
     player: { x: ARENA / 2, y: ARENA / 2, hp: 100, maxHp: 100, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
@@ -66,7 +66,7 @@ function damagePlayer(world: World, damage: number): void {
   if (p.hp === 0) { world.phase = { kind: 'lost' }; world.events.push('lost'); }
 }
 function offers(world: World): Upgrade[] {
-  const pool = [...upgrades];
+  const pool = [...UPGRADE_ORDER];
   const result: Upgrade[] = [];
   while (result.length < 3) result.push(pool.splice(Math.floor(random(world) * pool.length), 1)[0]);
   return result;

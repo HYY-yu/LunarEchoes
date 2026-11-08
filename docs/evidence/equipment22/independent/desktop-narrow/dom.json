@@ -1,0 +1,830 @@
+[
+  {
+    "name": "six-desktop-en",
+    "data": {
+      "equipment": [
+        {
+          "aria": "Pulse rifle · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 24,
+            "right": 73,
+            "top": 597,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "Pulse rifle"
+        },
+        {
+          "aria": "Orbital drone · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 80,
+            "right": 129,
+            "top": 597,
+            "width": 49,
+            "x": 80,
+            "y": 597
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "Orbital drone"
+        },
+        {
+          "aria": "EMP nova · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 136,
+            "right": 185,
+            "top": 597,
+            "width": 49,
+            "x": 136,
+            "y": 597
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "EMP nova"
+        },
+        {
+          "aria": "Vector thrusters · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 192,
+            "right": 241,
+            "top": 597,
+            "width": 49,
+            "x": 192,
+            "y": 597
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "Vector thrusters"
+        },
+        {
+          "aria": "Composite armor · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 248,
+            "right": 297,
+            "top": 597,
+            "width": 49,
+            "x": 248,
+            "y": 597
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "Composite armor"
+        },
+        {
+          "aria": "Gravity collector · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 304,
+            "right": 353,
+            "top": 597,
+            "width": 49,
+            "x": 304,
+            "y": 597
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "Gravity collector"
+        }
+      ],
+      "groups": [
+        {
+          "cls": "",
+          "id": "game",
+          "rect": {
+            "bottom": 720,
+            "height": 720,
+            "left": 0,
+            "right": 1280,
+            "top": 0,
+            "width": 1280,
+            "x": 0,
+            "y": 0
+          },
+          "tag": "CANVAS",
+          "text": ""
+        },
+        {
+          "cls": "",
+          "id": "sound",
+          "rect": {
+            "bottom": 64,
+            "height": 44,
+            "left": 994.296875,
+            "right": 1073.28125,
+            "top": 20,
+            "width": 78.984375,
+            "x": 994.296875,
+            "y": 20
+          },
+          "tag": "BUTTON",
+          "text": "Sound on"
+        },
+        {
+          "cls": "",
+          "id": "language",
+          "rect": {
+            "bottom": 64,
+            "height": 44,
+            "left": 1081.28125,
+            "right": 1129.28125,
+            "top": 20,
+            "width": 48,
+            "x": 1081.28125,
+            "y": 20
+          },
+          "tag": "BUTTON",
+          "text": "中文"
+        },
+        {
+          "cls": "",
+          "id": "pause",
+          "rect": {
+            "bottom": 64,
+            "height": 44,
+            "left": 1137.28125,
+            "right": 1256,
+            "top": 20,
+            "width": 118.71875,
+            "x": 1137.28125,
+            "y": 20
+          },
+          "tag": "BUTTON",
+          "text": "Resume mission"
+        },
+        {
+          "cls": "primary",
+          "id": "",
+          "rect": {
+            "bottom": 459.59375,
+            "height": 48,
+            "left": 379,
+            "right": 556.859375,
+            "top": 411.59375,
+            "width": 177.859375,
+            "x": 379,
+            "y": 411.59375
+          },
+          "tag": "BUTTON",
+          "text": "Resume mission"
+        },
+        {
+          "cls": "",
+          "id": "dash",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          },
+          "tag": "BUTTON",
+          "text": "Dash"
+        }
+      ],
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    }
+  },
+  {
+    "name": "six-desktop-zh",
+    "data": {
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 24,
+            "right": 73,
+            "top": 597,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        },
+        {
+          "aria": "轨道无人机 · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 80,
+            "right": 129,
+            "top": 597,
+            "width": 49,
+            "x": 80,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "轨道无人机"
+        },
+        {
+          "aria": "电磁新星 · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 136,
+            "right": 185,
+            "top": 597,
+            "width": 49,
+            "x": 136,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "电磁新星"
+        },
+        {
+          "aria": "矢量推进器 · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 192,
+            "right": 241,
+            "top": 597,
+            "width": 49,
+            "x": 192,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "矢量推进器"
+        },
+        {
+          "aria": "复合装甲 · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 248,
+            "right": 297,
+            "top": 597,
+            "width": 49,
+            "x": 248,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "复合装甲"
+        },
+        {
+          "aria": "引力采集器 · LV 1",
+          "rect": {
+            "bottom": 654,
+            "height": 57,
+            "left": 304,
+            "right": 353,
+            "top": 597,
+            "width": 49,
+            "x": 304,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "引力采集器"
+        }
+      ],
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    }
+  },
+  {
+    "name": "six-narrow-zh",
+    "data": {
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 14,
+            "right": 54,
+            "top": 146,
+            "width": 40,
+            "x": 14,
+            "y": 146
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        },
+        {
+          "aria": "轨道无人机 · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 59,
+            "right": 99,
+            "top": 146,
+            "width": 40,
+            "x": 59,
+            "y": 146
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "轨道无人机"
+        },
+        {
+          "aria": "电磁新星 · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 104,
+            "right": 144,
+            "top": 146,
+            "width": 40,
+            "x": 104,
+            "y": 146
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "电磁新星"
+        },
+        {
+          "aria": "矢量推进器 · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 149,
+            "right": 189,
+            "top": 146,
+            "width": 40,
+            "x": 149,
+            "y": 146
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "矢量推进器"
+        },
+        {
+          "aria": "复合装甲 · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 194,
+            "right": 234,
+            "top": 146,
+            "width": 40,
+            "x": 194,
+            "y": 146
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "复合装甲"
+        },
+        {
+          "aria": "引力采集器 · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 239,
+            "right": 279,
+            "top": 146,
+            "width": 40,
+            "x": 239,
+            "y": 146
+          },
+          "shadow": "rgb(5, 15, 23) 3px 3px 0px 0px",
+          "text": "LV 1",
+          "title": "引力采集器"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "game",
+          "rect": {
+            "bottom": 693,
+            "height": 693,
+            "left": 0,
+            "right": 390,
+            "top": 0,
+            "width": 390,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "sound",
+          "rect": {
+            "bottom": 58,
+            "height": 44,
+            "left": 210,
+            "right": 260,
+            "top": 14,
+            "width": 50,
+            "x": 210,
+            "y": 14
+          }
+        },
+        {
+          "id": "language",
+          "rect": {
+            "bottom": 58,
+            "height": 44,
+            "left": 266,
+            "right": 310,
+            "top": 14,
+            "width": 44,
+            "x": 266,
+            "y": 14
+          }
+        },
+        {
+          "id": "pause",
+          "rect": {
+            "bottom": 58,
+            "height": 44,
+            "left": 316,
+            "right": 376,
+            "top": 14,
+            "width": 60,
+            "x": 316,
+            "y": 14
+          }
+        },
+        {
+          "id": "hud",
+          "rect": {
+            "bottom": 693,
+            "height": 693,
+            "left": 0,
+            "right": 390,
+            "top": 0,
+            "width": 390,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "health-label",
+          "rect": {
+            "bottom": 90,
+            "height": 13,
+            "left": 25,
+            "right": 146,
+            "top": 77,
+            "width": 121,
+            "x": 25,
+            "y": 77
+          }
+        },
+        {
+          "id": "health-fill",
+          "rect": {
+            "bottom": 104,
+            "height": 7,
+            "left": 27,
+            "right": 81.28125,
+            "top": 97,
+            "width": 54.28125,
+            "x": 27,
+            "y": 97
+          }
+        },
+        {
+          "id": "health-value",
+          "rect": {
+            "bottom": 128,
+            "height": 11,
+            "left": 25,
+            "right": 73.171875,
+            "top": 117,
+            "width": 48.171875,
+            "x": 25,
+            "y": 117
+          }
+        },
+        {
+          "id": "time-label",
+          "rect": {
+            "bottom": 89,
+            "height": 13,
+            "left": 281,
+            "right": 368,
+            "top": 76,
+            "width": 87,
+            "x": 281,
+            "y": 76
+          }
+        },
+        {
+          "id": "clock",
+          "rect": {
+            "bottom": 117,
+            "height": 25,
+            "left": 281,
+            "right": 368,
+            "top": 92,
+            "width": 87,
+            "x": 281,
+            "y": 92
+          }
+        },
+        {
+          "id": "sync-fill",
+          "rect": {
+            "bottom": 123,
+            "height": 3,
+            "left": 281,
+            "right": 316.28125,
+            "top": 120,
+            "width": 35.28125,
+            "x": 281,
+            "y": 120
+          }
+        },
+        {
+          "id": "level",
+          "rect": {
+            "bottom": 605,
+            "height": 13,
+            "left": 323.125,
+            "right": 365,
+            "top": 592,
+            "width": 41.875,
+            "x": 323.125,
+            "y": 592
+          }
+        },
+        {
+          "id": "kills",
+          "rect": {
+            "bottom": 634,
+            "height": 24,
+            "left": 300.28125,
+            "right": 365,
+            "top": 610,
+            "width": 64.71875,
+            "x": 300.28125,
+            "y": 610
+          }
+        },
+        {
+          "id": "xp-fill",
+          "rect": {
+            "bottom": 693,
+            "height": 5,
+            "left": 0,
+            "right": 150,
+            "top": 688,
+            "width": 150,
+            "x": 0,
+            "y": 688
+          }
+        },
+        {
+          "id": "equipment",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 14,
+            "right": 279,
+            "top": 146,
+            "width": 265,
+            "x": 14,
+            "y": 146
+          }
+        },
+        {
+          "id": "overlay",
+          "rect": {
+            "bottom": 693,
+            "height": 693,
+            "left": 0,
+            "right": 390,
+            "top": 0,
+            "width": 390,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "notice",
+          "rect": {
+            "bottom": 166,
+            "height": 24,
+            "left": 179,
+            "right": 211,
+            "top": 142,
+            "width": 32,
+            "x": 179,
+            "y": 142
+          }
+        },
+        {
+          "id": "touch",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "joystick",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "stick",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "dash",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "footer-left",
+          "rect": {
+            "bottom": 678,
+            "height": 11,
+            "left": 14,
+            "right": 207.96875,
+            "top": 667,
+            "width": 193.96875,
+            "x": 14,
+            "y": 667
+          }
+        },
+        {
+          "id": "footer-right",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+            "width": 0,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "codex-agent-overlay-root",
+          "rect": {
+            "bottom": 0,
+            "height": 0,
+            "left": 0,
+            "right": 390,
+            "top": 0,
+            "width": 390,
+            "x": 0,
+            "y": 0
+          }
+        }
+      ],
+      "viewport": {
+        "height": 693,
+        "width": 390
+      }
+    }
+  },
+  {
+    "name": "six-narrow-en",
+    "data": {
+      "equipment": [
+        {
+          "aria": "Pulse rifle · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 14,
+            "right": 54,
+            "top": 146,
+            "width": 40,
+            "x": 14,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "Pulse rifle"
+        },
+        {
+          "aria": "Orbital drone · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 59,
+            "right": 99,
+            "top": 146,
+            "width": 40,
+            "x": 59,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "Orbital drone"
+        },
+        {
+          "aria": "EMP nova · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 104,
+            "right": 144,
+            "top": 146,
+            "width": 40,
+            "x": 104,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "EMP nova"
+        },
+        {
+          "aria": "Vector thrusters · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 149,
+            "right": 189,
+            "top": 146,
+            "width": 40,
+            "x": 149,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "Vector thrusters"
+        },
+        {
+          "aria": "Composite armor · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 194,
+            "right": 234,
+            "top": 146,
+            "width": 40,
+            "x": 194,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "Composite armor"
+        },
+        {
+          "aria": "Gravity collector · LV 1",
+          "rect": {
+            "bottom": 193,
+            "height": 47,
+            "left": 239,
+            "right": 279,
+            "top": 146,
+            "width": 40,
+            "x": 239,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "Gravity collector"
+        }
+      ],
+      "viewport": {
+        "height": 693,
+        "width": 390
+      }
+    }
+  }
+]

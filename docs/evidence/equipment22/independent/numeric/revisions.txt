@@ -1,0 +1,5 @@
+local_head cb82545471ea75181ce07dde37d5e36dbd42ea5b
+remote_pr24_head cb82545471ea75181ce07dde37d5e36dbd42ea5b
+remote_pr24_base 9a76818256736afe220dbd0b235d59adf2600494
+remote_source GitHub connector get_pr_info 2026-11-08
+node v24.21.0
