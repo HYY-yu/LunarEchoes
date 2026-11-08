@@ -50,7 +50,7 @@ Model the Domain 原则用于区分局中缓冲和完整终局录制。Type Syst
 
 ## 复跑
 
-在仓库中构建原始基线并重捕动作。
+在原 Mac 捕获环境中可构建原始基线并重捕动作。跨平台不要求重捕文件或历史终局 checksum 相同，应使用已保存动作执行同平台旧新引擎对照。浅仓库取固定基线与 CI 修复见[同平台基线说明](evidence/desert34/ci-fix.md)。
 
 ```sh
 mkdir -p /tmp/lunar-desert-baseline
@@ -68,6 +68,6 @@ node scripts/audio-differential.mjs
 node scripts/crawler-differential.mjs "$(git rev-parse HEAD)"
 ```
 
-基线捕获为 3 seeds × stationary/novice/skilled × attack/hull，18 例与 141580 动作。配对 6 胜、12 负，全部胜局 180 秒，失败未过滤。静止两种偏好没有升级，因此动作重复。每例终局纯重放两次，总计 36 次。这是行为保持证据，不是玩家胜率目标或六关平衡证明。
+以下统计是原 Mac 捕获及其同平台验证观测，不是跨平台结果承诺。基线捕获为 3 seeds × stationary/novice/skilled × attack/hull，18 例与 141580 动作。配对 6 胜、12 负，全部胜局 180 秒，失败未过滤。静止两种偏好没有升级，因此动作重复。每例终局纯重放两次，总计 36 次。这是行为保持证据，不是玩家胜率目标或六关平衡证明。
 
 证据中 sourceDirty 明确标记作者工作树运行。独立验收必须读取 PR 当前 head，不能用作者日志替代。没有测量浏览器 FPS、帧时间、掉帧或内存，目标设备性能未验收。没有改动音频，不声明新听感。

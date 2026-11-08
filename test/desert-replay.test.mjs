@@ -6,9 +6,19 @@ import { createWorld, dispatch, checksum, finalChecksum, finishRecording, startR
 import { DESERT_CONTEXT, stageRules } from '../dist/stage-rules.js';
 import { STAGE_ORDER } from '../dist/stage-contract.js';
 import { dictionary } from '../dist/i18n.js';
+import { loadCoreRevision } from '../scripts/load-core-revision.mjs';
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
 const request = seed => ({ ...DESERT_CONTEXT, seed });
 const captured = JSON.parse(gunzipSync(readFileSync(new URL('../docs/evidence/desert34/baseline-actions.json.gz', import.meta.url))));
+assert.equal(captured.baseline, 'bde5936d13d6890a72d24d36bb0039e48e36df44');
+const { core: baseline } = await loadCoreRevision(captured.baseline);
+function assertSameBattle(before, after, label) {
+  const { context, ...battle } = after;
+  assert.deepEqual(battle, before, label);
+  assert.equal(JSON.stringify(battle), JSON.stringify(before), label);
+  assert.equal(JSON.stringify({ ...battle, events: [] }), JSON.stringify({ ...before, events: [] }), label);
+  assert.equal(checksum(after), baseline.checksum(before), label);
+}
 const sample = captured.cases.find(row => row.seed === 42 && row.strategy === 'skilled' && row.preference === 'attack');
 const terminal = createWorld(request(sample.seed));
 for (const action of sample.recording.actions) dispatch(terminal, action);
@@ -26,13 +36,35 @@ test('only the implemented desert context builds a world and its identity cannot
   for (const seed of [-1, 4294967296, .5, NaN, Infinity, '42', null]) rejects(() => createWorld(request(seed)), 'invalid-data');
   for (const input of [null, 42, {}, { ...request(42), rules: { durationTicks: 1 } }]) rejects(() => createWorld(input), 'invalid-data');
 });
-test('the real desert run retains 180 seconds, one Boss at 140 seconds and identical raw checksum', () => {
+test('the real desert run matches the frozen engine on this platform at every captured action', () => {
   assert.equal(terminal.phase.kind, 'won'); assert.equal(terminal.tick, 180 * HZ);
-  assert.equal(checksum(terminal), sample.checksum);
-  const world = createWorld(request(42)); const bossTicks = [];
-  for (const action of sample.recording.actions) { dispatch(world, action); if (world.events.includes('boss')) bossTicks.push(world.tick); }
+  const before = baseline.createWorld(sample.seed), world = createWorld(request(sample.seed)), bossTicks = [];
+  assertSameBattle(before, world, 'initial state');
+  for (const [index, action] of sample.recording.actions.entries()) {
+    baseline.dispatch(before, action); dispatch(world, action);
+    assertSameBattle(before, world, `captured action ${index}`);
+    if (world.events.includes('boss')) bossTicks.push(world.tick);
+  }
+  assert.deepEqual(world, terminal);
+  assert.equal(world.phase.kind, before.phase.kind); assert.equal(world.tick, before.tick);
   assert.deepEqual(bossTicks, [140 * HZ]);
   assert.equal(stageRules(world.context).durationTicks, world.tick);
+});
+test('the same-platform regression oracle rejects battle mutations and serialization drift', () => {
+  const before = baseline.createWorld(42), after = createWorld(request(42));
+  baseline.dispatch(before, idle); dispatch(after, idle);
+  assertSameBattle(before, after, 'unchanged engine');
+  for (const mutate of [
+    world => { world.player.x += .125; },
+    world => { world.player.hp -= 10; },
+    world => { world.rng ^= 1; },
+    world => { world.events.push('hit'); },
+    world => { world.tick++; },
+    world => { const seed = world.seed; delete world.seed; world.seed = seed; }
+  ]) {
+    const changed = structuredClone(after); mutate(changed);
+    assert.throws(() => assertSameBattle(before, changed, 'mutated engine'), assert.AssertionError);
+  }
 });
 test('actual movement and spawning consume the controlled arena and Boss may exceed the ordinary enemy cap', () => {
   const world = createWorld(request(1)), arena = stageRules(world.context).arenaSize;

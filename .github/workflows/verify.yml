@@ -18,6 +18,12 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           persist-credentials: false
+          fetch-depth: 2
+      - name: Ensure the frozen battle baseline is available
+        run: |
+          if ! git cat-file -e bde5936d13d6890a72d24d36bb0039e48e36df44:src/core.ts; then
+            git fetch --no-tags --depth=1 origin bde5936d13d6890a72d24d36bb0039e48e36df44
+          fi
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: '24'

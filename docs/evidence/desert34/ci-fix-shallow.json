@@ -1,0 +1,23 @@
+{
+  "fixtureDirectory": "/private/tmp/desert35-shallow-_j9syrh_",
+  "syntheticMerge": "add95f47ddfc900f0e181820e1cceed3e8fcf444",
+  "candidateTree": "780cd1e8c35b14f542ab0d7ce5cca958d9bf9e14",
+  "baseline": "bde5936d13d6890a72d24d36bb0039e48e36df44",
+  "depth2IsShallow": true,
+  "depth2BaselineFound": true,
+  "depth2VerifyExit": 0,
+  "depth1BaselineExit": 128,
+  "depth1Error": "fatal: path 'src/core.ts' exists on disk, but not in 'bde5936d13d6890a72d24d36bb0039e48e36df44'",
+  "runtimeUnmodified": true,
+  "futureDirectory": "/private/tmp/desert35-shallow-_j9syrh_/future-depth2",
+  "futureHead": "f01e2b442839e088c8e3ddda63425eb2eaaa1a36",
+  "futureDepth": 2,
+  "futureMissingOracleTestExit": 1,
+  "futureOrigin": "git@github.com:HYY-yu/LunarEchoes.git",
+  "fetchFailureExit": 128,
+  "fetchFailureOutput": "fatal: path 'src/core.ts' exists on disk, but not in 'bde5936d13d6890a72d24d36bb0039e48e36df44'\nfatal: '/private/tmp/desert35-no-such-origin' does not appear to be a git repository\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.\n",
+  "futureGithubFetchExit": 0,
+  "futureVerifyExit": 0,
+  "futureTests": 101,
+  "futureStillShallow": true
+}
