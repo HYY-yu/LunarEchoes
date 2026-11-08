@@ -1,4 +1,5 @@
-import { createWorld, dispatch, checksum, VERSION, HZ, DURATION, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording } from './core.js';
+import { DESERT_CONTEXT, stageRules, SimulationError } from './stage-rules.js';
+import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
 import { dictionary, upgradeLabel, type Language } from './i18n.js';
@@ -9,11 +10,12 @@ if (!(canvasNode instanceof HTMLCanvasElement)) throw new Error('Game canvas is 
 const render = createRenderer(canvasNode), synth = new Synth();
 const overlay = element('overlay'), hud = element('hud'), touch = element('touch');
 let language: Language = 'zh';
-let world: World = createWorld(208907);
+let world: World = createWorld({ ...DESERT_CONTEXT, seed: 208907 });
 let screen: 'title' | 'game' | 'replay' | 'replay-end' = 'title';
-let recording: Recording = { version: VERSION, seed: world.seed, actions: [] };
+let recording: ActionBuffer = startRecording(world);
 let lastRecording: Recording | null = null;
-let lastChecksum = '';
+let playingRecording: Recording | null = null;
+let replayVerified = false;
 let replayIndex = 0;
 let accumulator = 0, lastFrame = 0, lastUi = '', noticeTimer = 0;
 const armorNode = element('armor-cells');
@@ -35,8 +37,8 @@ function act(action: Action, record = true) {
   if (before !== world.phase.kind) {
     log('info', 'session.phase', { seed: world.seed, tick: world.tick, before, phase: world.phase.kind });
     if (screen === 'game' && (world.phase.kind === 'won' || world.phase.kind === 'lost')) {
-      lastRecording = { ...recording, actions: [...recording.actions] }; lastChecksum = checksum(world);
-      log('info', 'session.finished', { seed: world.seed, tick: world.tick, outcome: world.phase.kind, checksum: lastChecksum, kills: world.kills });
+      lastRecording = finishRecording(world, recording.actions);
+      log('info', 'session.finished', { seed: world.seed, tick: world.tick, outcome: world.phase.kind, checksum: lastRecording.finalChecksum, ...world.context, kills: world.kills });
     }
     updateUi(true);
   }
@@ -45,20 +47,33 @@ function act(action: Action, record = true) {
 }
 function begin() {
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
-  synth.reset(); world = createWorld(seedArray[0]); recording = { version: VERSION, seed: world.seed, actions: [] }; screen = 'game'; keys.clear(); stickX = 0; stickY = 0; dashPressed = false; accumulator = 0;
-  log('info', 'session.started', { seed: world.seed, version: VERSION }); updateUi(true); void enableAudio();
+  const nextWorld = createWorld({ ...DESERT_CONTEXT, seed: seedArray[0] });
+  synth.reset(); world = nextWorld; recording = startRecording(world); playingRecording = null; screen = 'game'; keys.clear(); stickX = 0; stickY = 0; dashPressed = false; accumulator = 0;
+  log('info', 'session.started', { seed: world.seed, version: VERSION, ...world.context }); updateUi(true); void enableAudio();
+}
+function replayFailure(error: unknown) {
+  if (!(error instanceof SimulationError)) { fail(error); return; }
+  const code = error.code;
+  const terminal = code === 'checksum-mismatch' || code === 'nonterminal-replay' || code === 'incomplete-replay';
+  log(terminal ? 'error' : 'warn', 'replay.rejected', { code, version: VERSION, ...world.context, seed: world.seed, actions: playingRecording?.actions.length ?? lastRecording?.actions.length ?? 0, expected: playingRecording?.finalChecksum, actual: terminal ? finalChecksum(world) : undefined });
+  const t = text();
+  notify(code === 'incompatible-version' ? t.replayVersion : code === 'unavailable-stage' ? t.replayStage : code === 'incompatible-rules' ? t.replayRules : terminal ? t.replayFailed : t.replayInvalid);
 }
 function startReplay() {
   if (!lastRecording) return;
-  synth.reset(); world = createWorld(lastRecording.seed); replayIndex = 0; screen = 'replay'; accumulator = 0; keys.clear(); stickX = 0; stickY = 0; log('info', 'replay.started', { seed: world.seed, actions: lastRecording.actions.length }); updateUi(true); void enableAudio();
+  try {
+    const next = prepareReplay(lastRecording);
+    synth.reset(); world = next.world; playingRecording = next.recording; replayIndex = 0; replayVerified = false; screen = 'replay'; accumulator = 0; keys.clear(); stickX = 0; stickY = 0; dashPressed = false;
+    log('info', 'replay.started', { version: VERSION, ...world.context, seed: world.seed, actions: playingRecording.actions.length }); updateUi(true); void enableAudio();
+  } catch (error) { replayFailure(error); }
 }
-function showTitle() { screen = 'title'; world = createWorld(208907); keys.clear(); synth.reset(); updateUi(true); void enableAudio(); }
+function showTitle() { screen = 'title'; playingRecording = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); keys.clear(); synth.reset(); updateUi(true); void enableAudio(); }
 function pause() {
   if (screen !== 'game') return;
   if (world.phase.kind === 'running') act({ kind: 'pause' }); else if (world.phase.kind === 'paused') { act({ kind: 'resume' }); void enableAudio(); }
   keys.clear(); stickX = 0; stickY = 0;
 }
-function button(label: string, className: string, handler: () => void): HTMLButtonElement { const node = document.createElement('button'); node.textContent = label; node.className = className; node.onclick = () => { handler(); void enableAudio(true); }; return node; }
+function button(label: string, className: string, handler: () => void): HTMLButtonElement { const node = document.createElement('button'); node.textContent = label; node.className = className; node.onclick = () => { try { handler(); void enableAudio(true); } catch (error) { fail(error); } }; return node; }
 function panel(title: string, subtitle: string): HTMLElement {
   const section = document.createElement('section'); section.className = 'modal result';
   const eyebrow = document.createElement('div'); eyebrow.className = 'eyebrow'; eyebrow.textContent = world.phase.kind === 'won' || world.phase.kind === 'lost' ? text().report : text().mission;
@@ -83,19 +98,20 @@ function updateArmor() {
 function updateUi(force = false) {
   const t = text();
   document.body.dataset.screen = screen; document.body.dataset.phase = world.phase.kind;
-  canvasNode.setAttribute('aria-label', language === 'zh' ? '月球战场' : 'Lunar battlefield');
+  canvasNode.setAttribute('aria-label', t.battlefield);
   const signature = `${screen}|${world.phase.kind}|${language}|${synth.muted}`;
+  element('footer-right').textContent = t.pendingContent;
   element('sound').textContent = synth.muted ? t.muted : t.sound;
   element('language').textContent = t.lang; element('pause').textContent = screen === 'replay' ? t.home : world.phase.kind === 'paused' ? t.resume : t.pause;
   element('pause').hidden = screen !== 'replay' && (screen !== 'game' || world.phase.kind !== 'running' && world.phase.kind !== 'paused');
   hud.hidden = screen === 'title'; touch.hidden = !coarse || screen !== 'game' || world.phase.kind !== 'running';
   element('health-label').textContent = t.health; element('time-label').textContent = screen === 'replay' ? t.replaying : t.time;
   updateArmor();
-  element('clock').textContent = formatTime(world.tick); element('sync-fill').style.width = `${Math.min(100, world.tick / DURATION * 100)}%`;
+  element('clock').textContent = formatTime(world.tick); element('sync-fill').style.width = `${Math.min(100, world.tick / stageRules(world.context).durationTicks * 100)}%`;
   element('level').textContent = `${t.level} ${world.level.toString().padStart(2, '0')}`; element('kills').textContent = `${world.kills} ${t.kills}`;
   element('xp-fill').style.width = `${Math.min(100, world.xp / world.threshold * 100)}%`;
   element('dash').textContent = world.player.dashCooldown > 0 ? (world.player.dashCooldown / HZ).toFixed(1) : t.dash;
-  element('footer-left').textContent = screen === 'title' ? t.prototype : `${t.seed} ${world.seed} · ${screen === 'replay' ? t.replaying : t.objective}`;
+  element('footer-left').textContent = screen === 'title' ? t.prototype : `${t.prototype} · ${t.seed} ${world.seed} · ${screen === 'replay' ? t.replaying : t.objective}`;
   const equipment = element('equipment'); equipment.replaceChildren();
   for (const id of UPGRADE_ORDER) if (world.upgrades[id] > 0) { const node = document.createElement('span'); node.innerHTML = `<i class="module-icon icon-${id}" aria-hidden="true"></i><span>LV ${world.upgrades[id]}</span>`; node.title = upgradeLabel(id, language).title; node.setAttribute('aria-label', `${node.title} · LV ${world.upgrades[id]}`); equipment.append(node); }
   if (!force && signature === lastUi) return;
@@ -106,12 +122,12 @@ function updateUi(force = false) {
     const actions = document.createElement('div'); actions.className = 'actions'; actions.append(button(t.start, 'primary', begin));
     const replayButton = button(t.replay, 'secondary', startReplay); replayButton.disabled = !lastRecording; actions.append(replayButton); intro.append(actions);
     const controls = document.createElement('p'); controls.className = 'controls'; controls.innerHTML = `<span class="desktop">${t.controls}</span><span class="mobile">${t.touch}</span>`; intro.append(controls);
-    const stamp = document.createElement('div'); stamp.className = 'mission-stamp'; stamp.innerHTML = `<strong>03<span>:</span>00<small> MIN</small></strong>MARE TRANQUILLITATIS<br>25°51′24″ N / 00°36′50″ E`;
+    const stamp = document.createElement('div'); stamp.className = 'mission-stamp'; stamp.innerHTML = `<strong>${formatTime(stageRules(world.context).durationTicks)}<small> MIN</small></strong>${t.mission}<br>${t.pendingContent}`;
     overlay.append(intro, stamp); return;
   }
   if (screen === 'replay-end') {
-    const section = panel(t.replayDone, checksum(world) === lastChecksum ? t.replayVerified : t.replayFailed);
-    const details = document.createElement('p'); details.className = 'checksum'; details.textContent = `${VERSION} · ${checksum(world)}`; section.append(details, button(t.home, 'primary', showTitle)); return;
+    const section = panel(t.replayDone, replayVerified ? t.replayVerified : t.replayFailed);
+    const details = document.createElement('p'); details.className = 'checksum'; details.textContent = `${VERSION} · ${finalChecksum(world)}`; section.append(details, button(t.home, 'primary', showTitle)); return;
   }
   if (screen === 'replay') return;
   if (world.phase.kind === 'upgrading') {
@@ -166,12 +182,18 @@ function frame(now: number) {
       let steps = 0;
       while (accumulator >= 1 / HZ && steps++ < 8) {
         accumulator -= 1 / HZ;
-        if (screen === 'replay' && lastRecording) {
-          let action = lastRecording.actions[replayIndex++];
-          while (action && action.kind !== 'tick') { act(action, false); action = lastRecording.actions[replayIndex++]; }
-          if (action) act(action, false);
-          else {
-            screen = 'replay-end'; const actual = checksum(world); log(actual === lastChecksum ? 'info' : 'error', 'replay.finished', { seed: world.seed, expected: lastChecksum, actual }); updateUi(true); break;
+        if (screen === 'replay' && playingRecording) {
+          while (replayIndex < playingRecording.actions.length) {
+            const action = playingRecording.actions[replayIndex++]; act(action, false);
+            if (action.kind === 'tick') break;
+          }
+          if (replayIndex === playingRecording.actions.length) {
+            screen = 'replay-end';
+            try {
+              verifyReplay(world, playingRecording, replayIndex); replayVerified = true;
+              log('info', 'replay.finished', { version: VERSION, ...world.context, seed: world.seed, actions: replayIndex, expected: playingRecording.finalChecksum, actual: finalChecksum(world) });
+            } catch (error) { replayVerified = false; replayFailure(error); }
+            updateUi(true); break;
           }
         } else if (screen === 'game' && world.phase.kind === 'running') {
           const x = (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + stickX;

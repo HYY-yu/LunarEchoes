@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ARMOR_RULES, createWorld, dispatch, replay, checksum, VERSION, HZ } from '../dist/core.js';
+import { ARMOR_RULES, createWorld, dispatch, replay, checksum, parseActionBuffer, VERSION, HZ } from '../dist/core.js';
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
-function quiet() { const world = createWorld(42); world.spawnCooldown = 99999; world.fireCooldown = 99999; return world; }
+function quiet() { const world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 }); world.spawnCooldown = 99999; world.fireCooldown = 99999; return world; }
 function enemy(world, kind = 'crawler') { return { id: world.nextId++, kind, x: world.player.x, y: world.player.y, hp: 1000, maxHp: 1000, radius: 27, attack: 999, flash: 0 }; }
 function shot(world) { return { x: world.player.x, y: world.player.y, vx: 0, vy: 0, life: 10, damage: ARMOR_RULES.hpPerCell, hostile: true }; }
 test('all accepted contact and projectile damage consumes exactly one armor cell', () => {
@@ -52,13 +52,15 @@ test('hull adds two cells and repairs at most four without duplicate or invalid 
   }
 });
 test('normal actions keep both armor values in whole cells and candidate replays reject old rules', () => {
-  const world = createWorld(42), recording = { version: VERSION, seed: 42, actions: [] };
+  const world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 }), recording = { version: VERSION, stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42, actions: [] };
   for (let i = 0; i < HZ * 40 && !['lost', 'won'].includes(world.phase.kind); i++) {
     const action = world.phase.kind === 'upgrading' ? { kind: 'choose', upgrade: world.phase.offers.includes('hull') ? 'hull' : world.phase.offers[0] } : { kind: 'tick', input: { x: Math.cos(world.tick / 90), y: Math.sin(world.tick / 90), dash: world.tick % 150 === 0 } };
     recording.actions.push(action); dispatch(world, action);
     assert.equal(world.player.hp % ARMOR_RULES.hpPerCell, 0); assert.equal(world.player.maxHp % ARMOR_RULES.hpPerCell, 0); assert(world.player.hp >= 0 && world.player.hp <= world.player.maxHp);
   }
-  assert.equal(checksum(replay(recording)), checksum(world));
-  for (const version of ['lunar-1', 'lunar-2', 'unknown']) assert.throws(() => replay({ ...recording, version }), /version mismatch/);
-  assert.equal(VERSION, 'lunar-armor-1'); assert.equal(Object.isFrozen(ARMOR_RULES), true);
+  const buffer = parseActionBuffer(recording), repeated = createWorld({ stageId: buffer.stageId, rulesVersion: buffer.rulesVersion, seed: buffer.seed });
+  for (const action of buffer.actions) dispatch(repeated, action);
+  assert.equal(checksum(repeated), checksum(world));
+  for (const version of ['lunar-1', 'lunar-armor-1', 'unknown']) assert.throws(() => replay({ ...recording, version }), /version mismatch/);
+  assert.equal(VERSION, 'lunar-2'); assert.equal(Object.isFrozen(ARMOR_RULES), true);
 });

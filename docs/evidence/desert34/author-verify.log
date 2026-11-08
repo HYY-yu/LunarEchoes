@@ -1,0 +1,167 @@
+
+> lunar-relay@0.1.0 verify
+> npm test && npm run check && node scripts/simulate.mjs
+
+
+> lunar-relay@0.1.0 test
+> npm run build && node --test test/*.test.mjs
+
+
+> lunar-relay@0.1.0 build
+> node scripts/build.mjs
+
+✔ balance driver records actual input replay and integer candidate armor without filtering failures (381.672708ms)
+✔ all accepted contact and projectile damage consumes exactly one armor cell (0.874916ms)
+✔ invincibility and dash keep their existing decrement-before-contact boundaries (0.245292ms)
+✔ the final cell produces one terminal loss and no further simulation (0.096ms)
+✔ passive repair is one capped whole cell at the global thirty-second boundary (0.0745ms)
+✔ repair still precedes accepted damage and can cancel its net tick change (0.063459ms)
+✔ hull adds two cells and repairs at most four without duplicate or invalid selection (0.081209ms)
+✔ normal actions keep both armor values in whole cells and candidate replays reject old rules (35.514959ms)
+✔ mute and hidden create no sources, cancel active and future voices (1.989792ms)
+✔ pause cancels battle while feedback and exactly one outcome remain possible (0.174584ms)
+✔ duplicate cues throttle and polyphony stays bounded (0.178125ms)
+✔ pending activation cannot revive muted hidden or restarted generation (0.156167ms)
+✔ music retains bass and percussion and resume never catches up stale beats (0.466625ms)
+✔ mode transitions cancel old feedback but same mode preserves its own cue (0.091917ms)
+✔ pending audio activation preserves the latest session pause state (0.197583ms)
+✔ first interaction and unmute confirmation activate before feedback (0.3125ms)
+✔ a terminal transition invalidates pending button confirmation (0.257208ms)
+✔ replay exhaustion retains terminal sound while a real menu change stops it (0.230042ms)
+✔ pending device resume survives keyboard upgrade while stale UI feedback expires (0.100292ms)
+✔ same seed and inputs reproduce the complete state (23.905375ms)
+✔ pause freezes simulation and resume continues (0.154042ms)
+✔ upgrade freezes combat and can only be selected once (0.253042ms)
+✔ death is terminal and emits a single outcome (0.882916ms)
+✔ fresh deployment clears all previous combat state (1.037042ms)
+✔ input is finite, normalized and diagonal speed is limited (0.430666ms)
+✔ corner spawns cannot overlap the player (0.131916ms)
+✔ end of mission wins only after boss defeat (0.05175ms)
+✔ replay rejects incompatible versions (0.076834ms)
+✔ enemy-hit is transient and emitted for bullet orbit and nova damage (0.798125ms)
+✔ legacy sprite pixels remain unchanged and crawler has three contained leg poses (4.967792ms)
+✔ crawler animation uses simulation ticks, freezes with combat and leaves all World data unchanged (4.361ms)
+✔ walk phases retain hurt alpha and other enemies telegraphs (1.408291ms)
+✔ astronaut preserves its torso and palette across three contained leg poses (4.580584ms)
+✔ astronaut walks only after observed movement, remains stable within one tick and stops at idle (6.534209ms)
+✔ astronaut freezes its selected pose through pause upgrade and terminal states (2.589375ms)
+✔ astronaut sampling resets on world replacement and rewind, and handles skipped ticks without history guesses (1.656625ms)
+✔ astronaut boundary input stays idle and preserves hurt alpha and shadow anchor (0.825459ms)
+✔ only the implemented desert context builds a world and its identity cannot drift (1.315833ms)
+✔ the real desert run retains 180 seconds, one Boss at 140 seconds and identical raw checksum (53.394208ms)
+✔ actual movement and spawning consume the controlled arena and Boss may exceed the ordinary enemy cap (0.47475ms)
+✔ full recordings have six fields and replay twice through the shared validated factory (150.569709ms)
+✔ context final hash uses the approved fixed array and original event-free battle state (0.553458ms)
+✔ pending buffers cannot become terminal recordings and copies isolate action mutation (10.967333ms)
+✔ all structure and compatibility errors reject before the current world is replaced (14.848333ms)
+✔ valid out-of-range vectors keep normalizeInput semantics and altered battle actions fail final verification (97.034416ms)
+✔ fresh world and recording reset every build field after a real terminal run (0.128458ms)
+✔ both languages distinguish compatibility failures and unfinished desert content (0.178208ms)
+✔ desert illustrations cover their pixel frame, remain deterministic and distinguish outcomes (22.375375ms)
+✔ desert illustration leaves the caller drawing state intact (3.475458ms)
+✔ canonical desert script has eight ordered bilingual beats and victory-only rainforest handoff (1.637708ms)
+✔ catalog rejects malformed roots, entries, duplicate IDs, missing beats and reordering (0.49275ms)
+✔ every beat rejects wrong stage and missing or blank locales (3.133166ms)
+✔ defeat cannot route to success and only victory can carry the planned handoff (0.288916ms)
+✔ CLI reports structured success and file loading errors (109.112667ms)
+✔ nova has distinct expanding and dissolving pixel frames inside its existing radius (24.645209ms)
+✔ nova freezes through pause upgrade and terminal states and repeats after restart (9.182625ms)
+✔ nova leaves enemy danger telegraphs and non nova effects intact (1.028875ms)
+✔ new progress is a frozen first-stage snapshot without a persisted write (2.021125ms)
+✔ each known progress boundary unlocks exactly its ordered prefix (1.0375ms)
+✔ all progress, stage, source and outcome combinations enforce one adjacent grant (11.86175ms)
+✔ a full campaign advances in order and duplicate or old wins cannot chain grants (0.588583ms)
+✔ unknown or missing source and outcome are rejected rather than treated as victory (0.341958ms)
+✔ new snapshots preserve the two-field codec and rejected raw input remains rejected (1.301208ms)
+✔ opening absent or valid progress only reads and exposes immutable snapshots (1.123625ms)
+✔ rejected saves preserve exact bytes, request immediate recovery and block future automatic writes (0.338875ms)
+✔ successful advanced persistence uses preflight, write, exact readback and skips duplicate or older results (0.18175ms)
+✔ a newer valid disk boundary is retained in both session and storage across sequential sessions (0.075542ms)
+✔ save preflight rejects replacement bad data before writing and retains the in-session advancement (0.102541ms)
+✔ load and save preflight read failures retain the original exception and protect against writes (0.1015ms)
+✔ a write error keeps the advance, does not roll back and permits only a genuinely newer retry (0.081125ms)
+✔ post-write failures and every unequal readback are uncertain without rollback or inferred protection (0.128334ms)
+✔ cancelled or invalid reset makes no storage call and does not change ready or protected state (0.099041ms)
+✔ confirmed reset rereads, overwrites even an unsupported save, verifies, then resets and unprotects (0.128834ms)
+✔ each reset failure stage preserves the prior session and protection and never rolls back (0.149167ms)
+✔ injected caller objects and previously exposed snapshots cannot mutate retained progress (0.507917ms)
+✔ all six known stage boundaries round trip without implying playable content (4.947667ms)
+✔ encoding emits only the canonical two fields and does not mutate its input (0.858208ms)
+✔ only raw null is missing; empty strings and malformed JSON are rejected verbatim (1.43725ms)
+✔ JSON root types cannot become valid or missing progress (0.304917ms)
+✔ missing or incorrectly typed versions are distinct from unsupported integer versions (0.157042ms)
+✔ v1 requires exactly its two fields (0.293417ms)
+✔ stage IDs require exact known strings without coercion or fallback (0.24ms)
+✔ mixed errors obey documented priority and preserve every raw character (0.187959ms)
+✔ the fixed diagnostic prefix uses real dispatch and repeated captures match (13.223542ms)
+✔ comparison identifies the first changed state field and its saved double bits (6.891958ms)
+✔ comparison rejects mismatched core, actions, Node and corrupted frames (16.859333ms)
+✔ comparison rejects malformed World structures even when their checksum is recomputed (76.366708ms)
+✔ valid state differences remain diagnosable without matching local values or entity counts (15.94675ms)
+✔ CLI fails on missing files, malformed arguments and the wrong required Node (138.304917ms)
+✔ two stage samples load with distinct maps and complete bilingual story (1.703209ms)
+✔ complete campaigns require all six stages in their canonical order (1.817875ms)
+✔ unknown, duplicate, unordered and missing stage references do not fall back (0.242583ms)
+✔ duration rejects noninteger, nonfinite and out-of-range input (0.462625ms)
+✔ wave schedule bounds and references are validated (0.964959ms)
+✔ boss must reference the existing boss kind and appear before stage end (0.404417ms)
+✔ each story beat requires nonblank Chinese and English strings (4.744042ms)
+✔ malformed roots, nested objects and sparse arrays are rejected (0.552417ms)
+✔ parsed catalog owns deeply immutable data isolated from its input (0.176125ms)
+✔ upgrade catalog matches every world upgrade exactly once in offer order (1.528042ms)
+✔ external mutation is rejected and offers preserve the catalog and baseline simulation (6.167667ms)
+ℹ tests 100
+ℹ suites 0
+ℹ pass 100
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 607.4765
+
+> lunar-relay@0.1.0 check
+> npm run build && node scripts/check.mjs
+
+
+> lunar-relay@0.1.0 build
+> node scripts/build.mjs
+
+{
+  event: 'check.complete',
+  gzipBytes: 31050,
+  budgetBytes: 153600,
+  passed: true
+}
+{
+  event: 'simulation.finished',
+  seed: 208907,
+  phase: 'won',
+  seconds: 180,
+  kills: 432,
+  level: 12,
+  hp: 100,
+  bossKilled: true,
+  checksum: '6d37c8d2'
+}
+{
+  event: 'simulation.finished',
+  seed: 42,
+  phase: 'won',
+  seconds: 180,
+  kills: 438,
+  level: 12,
+  hp: 100,
+  bossKilled: true,
+  checksum: 'ff94b04b'
+}
+{
+  event: 'simulation.finished',
+  seed: 101,
+  phase: 'won',
+  seconds: 180,
+  kills: 430,
+  level: 12,
+  hp: 100,
+  bossKilled: true,
+  checksum: 'c71d5dc4'
+}

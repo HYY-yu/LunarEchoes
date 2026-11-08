@@ -1,9 +1,11 @@
+import { DESERT_CONTEXT, stageRules } from '../dist/stage-rules.js';
+const DURATION = stageRules(DESERT_CONTEXT).durationTicks;
 import assert from 'node:assert/strict';
-import { createWorld, dispatch, replay, checksum, VERSION, DURATION } from '../dist/core.js';
+import { createWorld, dispatch, replay, checksum, startRecording, finishRecording } from '../dist/core.js';
 export function play(seed) {
-  const world = createWorld(seed);
-  const recording = { version: VERSION, seed, actions: [] };
-  function act(action) { recording.actions.push(action); dispatch(world, action); }
+  const world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: seed });
+  const buffer = startRecording(world);
+  function act(action) { buffer.actions.push(action); dispatch(world, action); }
   let iterations = 0;
   while (world.phase.kind !== 'won' && world.phase.kind !== 'lost' && iterations++ < DURATION * 2) {
     if (world.phase.kind === 'upgrading') {
@@ -35,6 +37,7 @@ export function play(seed) {
     assert(Number.isFinite(p.x) && Number.isFinite(p.y));
     assert(world.enemies.length <= 180);
   }
+  const recording = finishRecording(world, buffer.actions);
   assert.equal(checksum(replay(recording)), checksum(world));
   return { world, recording };
 }

@@ -8,7 +8,7 @@ for (const [index, tick] of [0, 6, 12, 18].entries()) { atlas.draw(poses, 'crawl
 let world, playing = false, accumulator = 0, last = 0, unchanged = true, lastEvents = [];
 function report(error) { document.getElementById('errors').textContent += `${String(error)}\n`; console.error({ event: 'crawler_audition.failure', error: String(error) }); }
 function reset() {
-  world = createWorld(42); world.fireCooldown = 1000000; world.spawnCooldown = 1000000; world.bossSpawned = true; world.player.invincible = 1000000;
+  world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 }); world.fireCooldown = 1000000; world.spawnCooldown = 1000000; world.bossSpawned = true; world.player.invincible = 1000000;
   world.enemies = [
     { id: 1, kind: 'crawler', x: 680, y: 715, hp: 10000, maxHp: 10000, radius: 11, attack: 1000, flash: 0 },
     { id: 2, kind: 'crawler', x: 805, y: 790, hp: 10000, maxHp: 10000, radius: 11, attack: 1000, flash: 0 },

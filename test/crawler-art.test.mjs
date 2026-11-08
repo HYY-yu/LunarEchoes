@@ -1,9 +1,11 @@
+import { DESERT_CONTEXT, stageRules } from '../dist/stage-rules.js';
+const ARENA = stageRules(DESERT_CONTEXT).arenaSize;
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createAtlas } from '../dist/art.js';
 import { createRenderer } from '../dist/render.js';
-import { ARENA, createWorld, dispatch } from '../dist/core.js';
+import { createWorld, dispatch } from '../dist/core.js';
 
 class Canvas {
   width = 0; height = 0; clientWidth = 1280; clientHeight = 720; pixels = new Map(); calls = []; arcs = []; ellipses = [];
@@ -56,7 +58,7 @@ test('legacy sprite pixels remain unchanged and crawler has three contained leg 
 function enemy(id, kind, x) { return { id, kind, x, y: 750, hp: 100, maxHp: 100, radius: 11, attack: 24, flash: 0 }; }
 function crawlerCall(canvas) { return canvas.calls.find(call => call.args[1] === 16); }
 test('crawler animation uses simulation ticks, freezes with combat and leaves all World data unchanged', t => {
-  environment(t); const canvas = new Canvas(), render = createRenderer(canvas), world = createWorld(42);
+  environment(t); const canvas = new Canvas(), render = createRenderer(canvas), world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 });
   world.enemies = [enemy(1, 'crawler', 690), enemy(2, 'sentry', 820)]; world.fireCooldown = 1000; world.spawnCooldown = 1000;
   function draw(time) { canvas.calls.length = 0; const before = structuredClone(world); render(world, time); assert.deepEqual(world, before); return crawlerCall(canvas); }
   const first = draw(0); assert.equal(draw(5000).args[2], first.args[2]);
@@ -68,11 +70,11 @@ test('crawler animation uses simulation ticks, freezes with combat and leaves al
   for (const phase of [{ kind: 'upgrading', offers: ['pulse'] }, { kind: 'won' }, { kind: 'lost' }]) {
     world.phase = phase; const frozen = draw(13000); dispatch(world, { kind: 'tick', input: { x: 0, y: 0, dash: false } }); assert.equal(draw(20000).args[2], frozen.args[2]);
   }
-  const restarted = createWorld(42); restarted.enemies = [enemy(1, 'crawler', 690)];
+  const restarted = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 }); restarted.enemies = [enemy(1, 'crawler', 690)];
   canvas.calls.length = 0; render(restarted, 99999); assert.equal(crawlerCall(canvas).args[2], first.args[2]);
 });
 test('walk phases retain hurt alpha and other enemies telegraphs', t => {
-  environment(t); const canvas = new Canvas(), render = createRenderer(canvas), world = createWorld(42);
+  environment(t); const canvas = new Canvas(), render = createRenderer(canvas), world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 });
   world.enemies = [enemy(1, 'crawler', 690), enemy(2, 'sentry', 820)];
   for (const tick of [0, 6, 12, 18]) {
     world.tick = tick; world.enemies[0].flash = 6; canvas.calls.length = 0; canvas.arcs.length = 0; render(world, 0);
@@ -93,7 +95,7 @@ test('astronaut preserves its torso and palette across three contained leg poses
 });
 function astronautScene(t) {
   environment(t); const canvas = new Canvas(), render = createRenderer(canvas);
-  function fresh() { const world = createWorld(42); world.fireCooldown = 1000000; world.spawnCooldown = 1000000; return world; }
+  function fresh() { const world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 }); world.fireCooldown = 1000000; world.spawnCooldown = 1000000; return world; }
   function draw(world, time = 0) {
     canvas.calls.length = 0; canvas.ellipses.length = 0;
     const before = structuredClone(world); render(world, time); assert.deepEqual(world, before);

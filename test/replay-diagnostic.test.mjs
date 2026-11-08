@@ -5,15 +5,17 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { checksum, replay } from '../dist/core.js';
+import { checksum, createWorld, dispatch, replay } from '../dist/core.js';
 import { captureTrace, compareTraces } from '../scripts/replay-diagnostic.mjs';
 
 const prefix = JSON.parse(await readFile(new URL('../scripts/fixtures/checksum-prefix.json', import.meta.url), 'utf8'));
 
-test('the fixed diagnostic prefix uses real replay and repeated captures match', async () => {
+test('the fixed diagnostic prefix uses real dispatch and repeated captures match', async () => {
   const first = await captureTrace(prefix), second = await captureTrace(prefix);
   assert.equal(first.frames.length, 91);
-  assert.equal(first.frames.at(-1).checksum, checksum(replay(prefix)));
+  const world = createWorld({ stageId: prefix.stageId, rulesVersion: prefix.rulesVersion, seed: prefix.seed }); for (const action of prefix.actions) dispatch(world, action);
+  assert.equal(first.frames.at(-1).checksum, checksum(world));
+  assert.throws(() => replay(prefix), error => error.code === 'invalid-data');
   assert.ok(first.frames[45].world.enemies.length > 0);
   assert.ok(first.frames.some(frame => frame.world.shots.length > 0));
   assert.equal(compareTraces(first, second).result, 'same');
@@ -36,6 +38,8 @@ test('comparison rejects mismatched core, actions, Node and corrupted frames', a
   const first = await captureTrace(prefix);
   const otherCore = structuredClone(first); otherCore.coreSha256 = '0'.repeat(64);
   assert.throws(() => compareTraces(first, otherCore), /different core builds/);
+  const otherRules = structuredClone(first); otherRules.rulesSha256 = '0'.repeat(64);
+  assert.throws(() => compareTraces(first, otherRules), /different rules builds/);
   const otherInput = structuredClone(first); otherInput.recording.actions[0].input.x = 0;
   otherInput.recordingSha256 = createHash('sha256').update(JSON.stringify(otherInput.recording)).digest('hex');
   assert.throws(() => compareTraces(first, otherInput), /different action recordings/);
@@ -62,7 +66,11 @@ test('comparison rejects malformed World structures even when their checksum is 
     world => { world.phase = { kind: 'upgrading', offers: ['unknown'] }; },
     world => { world.bossKilled = 'false'; },
     world => { world.events = ['shot']; },
-    world => { world.extra = 1; }
+    world => { world.extra = 1; },
+    world => { world.context.stageId = 'lunar-echoes'; },
+    world => { world.context.rulesVersion = 'wrong'; },
+    world => { world.context.extra = 1; },
+    world => { world.seed = 42; }
   ];
   for (const mutate of mutations) {
     const broken = structuredClone(trace);

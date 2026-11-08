@@ -1,4 +1,5 @@
-import { ARENA, type World } from './core.js';
+import { stageRules } from './stage-rules.js';
+import { type World } from './core.js';
 import { createAtlas } from './art.js';
 export function createRenderer(canvas: HTMLCanvasElement) {
   const context = canvas.getContext('2d', { alpha: false });
@@ -38,7 +39,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     }
   }
   return function render(world: World, time: number, title = false) {
-    const p = world.player;
+    const p = world.player, arena = stageRules(world.context).arenaSize;
     if (!playerMotion || playerMotion.world !== world || world.tick < playerMotion.tick) {
       playerMotion = { world, tick: world.tick, x: p.x, y: p.y, animationTick: 0 };
     } else if (world.tick > playerMotion.tick) {
@@ -57,9 +58,9 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     const pattern = ctx.createPattern(terrain, 'repeat');
     ctx.fillStyle = pattern ?? '#707c80'; ctx.fillRect(cameraX - vw, cameraY - vh, vw * 2, vh * 2);
     ctx.strokeStyle = '#91a9a155'; ctx.lineWidth = 1;
-    for (let x = 0; x < ARENA; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ARENA); ctx.stroke(); }
-    for (let y = 0; y < ARENA; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(ARENA, y); ctx.stroke(); }
-    ctx.strokeStyle = '#a5c5b844'; ctx.setLineDash([5, 7]); ctx.strokeRect(36, 36, ARENA - 72, ARENA - 72); ctx.setLineDash([]);
+    for (let x = 0; x < arena; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, arena); ctx.stroke(); }
+    for (let y = 0; y < arena; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(arena, y); ctx.stroke(); }
+    ctx.strokeStyle = '#a5c5b844'; ctx.setLineDash([5, 7]); ctx.strokeRect(36, 36, arena - 72, arena - 72); ctx.setLineDash([]);
     for (const [x, y] of [[500, 430], [930, 920], [300, 1030], [1170, 330]]) { structure(x, y, 0); structure(x + 105, y + 8, 1); }
     ctx.fillStyle = '#475e60'; ctx.fillRect(638, 617, 134, 106); ctx.fillStyle = '#9ea9a0'; ctx.fillRect(640, 610, 130, 100);
     ctx.strokeStyle = '#657d7c'; ctx.strokeRect(648, 618, 114, 84);

@@ -1,6 +1,6 @@
 # 六关数据契约
 
-此契约为 [Issue #1](https://github.com/HYY-yu/LunarEchoes/issues/1) 提供独立于浏览器的输入边界和可运行样例。当前游戏仍运行既有月面原型。本模块没有被 `main.ts`、模拟、渲染或音频导入，也没有实现六关地图或战役流程。
+此契约为 [Issue #1](https://github.com/HYY-yu/LunarEchoes/issues/1) 提供独立于浏览器的输入边界和可运行样例。当前真实入口仅运行[沙漠战斗测试](desert-simulation.md)，其独立受控规则完整沿用既有原型。本模块没有被 `main.ts`、模拟、渲染或音频导入，也没有实现六关地图或战役流程。
 
 ## 使用
 
@@ -35,7 +35,7 @@ const seconds = desert.durationSeconds;
 
 pstack 设计探索比较了静态有序目录与分离的 manifest、定义注册表。采用单一有序数组，避免在当前小范围契约里增加第二套索引和引用层。吸收另一方案的引用检查和输入隔离。若未来确有独立可下载地图与内容清单，再在对应任务中验证是否需要 manifest。
 
-既有 `DURATION`、`ARENA`、敌潮时序、`VERSION`、`World`、`Recording` 与 checksum 均保持不变。此模块导入的 `EnemyKind` 仅为编译期类型，不让内容解析反向改变模拟。
+本契约最初交付时，既有 `DURATION`、`ARENA`、敌潮时序、`VERSION`、`World`、`Recording` 与 checksum 均保持不变。后续 Issue #34 的运行接入见[沙漠战斗接入](desert-simulation.md)，本样例不提供生产规则。此模块导入的 `EnemyKind` 仅为编译期类型，不让内容解析反向改变模拟。
 
 ## 验证
 

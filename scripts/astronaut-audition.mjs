@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 const routes = new Map([
   ['/', ['scripts/fixtures/astronaut-audition.html', 'text/html; charset=utf-8']],
   ['/fixture.js', ['scripts/fixtures/astronaut-audition.mjs', 'text/javascript']],
-  ...['main', 'art', 'render', 'core', 'audio', 'i18n', 'logger'].map(name => [`/${name}.js`, [`dist/${name}.js`, 'text/javascript']]),
+  ...['main', 'art', 'render', 'core', 'stage-rules', 'audio', 'i18n', 'logger'].map(name => [`/${name}.js`, [`dist/${name}.js`, 'text/javascript']]),
   ['/style.css', ['dist/style.css', 'text/css']],
   ['/game/', ['dist/index.html', 'text/html; charset=utf-8']]
 ]);

@@ -1,0 +1,8 @@
+what	why	evidence	result
+Freeze exact baseline actions before edits	Adaptive algorithms alone do not prove same-input preservation	baseline-actions.json.gz from bde5936d13d6890a72d24d36bb0039e48e36df44; capture command repeated byte-identical	18 cases and 141580 actions
+Choose immutable world.context	Avoid rule/identity mismatch and duplicated configurable state	Two structural candidates and independent Terra high judge; each 9/10	B with A consumption and timing constraints
+Keep raw battle checksum byte semantics	Issue14 preserves old state values before contextual wrapper	Coordinator clarified context excluded, original fields plus events empty retained; per-action JSON equality lever	No old golden changes
+Treat short trajectories as buffers	90-action diagnostics and partial tests are not terminal replays	parseActionBuffer plus factory and dispatch; full parser rejects missing finalChecksum	Old assertions retained with explicit prefix path
+Recapture diagnostic trace	Core and rules imports changed, old trace belongs to old build	Actual Node24.21.0 capture into desert34 path	Only CI expected path changes; original identities and schema guards retained
+Remove remaining static lunar footer	Actual Chrome showed incorrect static SEA OF TRANQUILITY despite dynamic desert title	Author local UI observation	Minimal index identity/description migration; no art or stylesheet edits
+Stop App control fallback	Root supplied prior privacy-review route restriction	author-browser.md	Partial self-check only; independent current-head browser gate pending

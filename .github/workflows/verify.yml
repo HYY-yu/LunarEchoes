@@ -30,4 +30,4 @@ jobs:
       - name: Compare the fixed diagnostic prefix at Node 24.21.0
         run: |
           node scripts/replay-diagnostic.mjs capture /tmp/lunar-checksum-trace.json 24.21.0
-          node scripts/replay-diagnostic.mjs compare docs/evidence/armor22/macos-node24.21.0.json /tmp/lunar-checksum-trace.json
+          node scripts/replay-diagnostic.mjs compare docs/evidence/desert34/macos-node24.21.0.json /tmp/lunar-checksum-trace.json

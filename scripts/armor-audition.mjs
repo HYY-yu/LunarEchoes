@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-const routes = new Map([['/', ['scripts/fixtures/armor-audition.html', 'text/html; charset=utf-8']], ['/fixture.js', ['scripts/fixtures/armor-audition.mjs', 'text/javascript']], ['/style.css', ['dist/style.css', 'text/css']], ['/core.js', ['dist/core.js', 'text/javascript']], ['/i18n.js', ['dist/i18n.js', 'text/javascript']]]);
+const routes = new Map([['/', ['scripts/fixtures/armor-audition.html', 'text/html; charset=utf-8']], ['/fixture.js', ['scripts/fixtures/armor-audition.mjs', 'text/javascript']], ['/style.css', ['dist/style.css', 'text/css']], ['/core.js', ['dist/core.js', 'text/javascript']], ['/stage-rules.js', ['dist/stage-rules.js', 'text/javascript']], ['/i18n.js', ['dist/i18n.js', 'text/javascript']]]);
 const server = createServer(async (request, response) => {
   const route = routes.get(request.url);
   if (!route) { response.writeHead(404); response.end('Not found'); return; }
