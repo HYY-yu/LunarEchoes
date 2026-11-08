@@ -1,0 +1,1006 @@
+[
+  {
+    "frame": "before-boots-missing",
+    "bytes": 54537,
+    "file": "before-boots-missing.jpg",
+    "pixels": [
+      1280,
+      1177
+    ],
+    "sha256": "668a61196ae3f05af692400ad74151fa5985039e9013d90d3a6dad34e00eeadf"
+  },
+  {
+    "frame": "initial-pulse-only",
+    "bytes": 41360,
+    "fnv32": "0052e086",
+    "state": {
+      "clock": "00:00",
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        }
+      ],
+      "footer": "任务种子 4142556147 · 生存 03:00 · 击败收割者",
+      "overlay": "静海基地 · 中继任务 07任务已暂停深呼吸。月球会等你。继续任务",
+      "phase": "paused",
+      "screen": "game",
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    },
+    "file": "initial-pulse-only.jpg",
+    "pixels": [
+      1280,
+      720
+    ],
+    "sha256": "df56f594afdd3ac5652c3bd8db6c4f65c4701b7e08408cbeb70e87e891b0ec44"
+  },
+  {
+    "frame": "four-slots-before-repeat",
+    "bytes": 60428,
+    "fnv32": "b72b2c69",
+    "state": {
+      "clock": "00:56",
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        },
+        {
+          "aria": "矢量推进器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 80,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "矢量推进器"
+        },
+        {
+          "aria": "复合装甲 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 136,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "复合装甲"
+        },
+        {
+          "aria": "引力采集器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 192,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "引力采集器"
+        }
+      ],
+      "footer": "任务种子 4142556147 · 生存 03:00 · 击败收割者",
+      "overlay": "静海基地 · 中继任务 07选择技术升级战斗已暂停。选择一个模块继续任务。引力采集器扩大能源吸引范围，减少回头拾取。01 / 装配模块LV 1 → LV 2复合装甲装甲上限 +25，立即修复 45 点。02 / 装配模块LV 1 → LV 2矢量推进器移动速度提升，更轻松穿过敌群。03 / 装配模块LV 1 → LV 2",
+      "phase": "upgrading",
+      "screen": "game",
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    },
+    "file": "four-slots-before-repeat.jpg",
+    "pixels": [
+      1280,
+      720
+    ],
+    "sha256": "0ce20cd685ffa0d2028a93b8dbff5e0bc3838d2156781b552e0d045d83708435"
+  },
+  {
+    "frame": "four-slots-hull-level2",
+    "bytes": 43234,
+    "fnv32": "f5e3feaa",
+    "state": {
+      "clock": "00:56",
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        },
+        {
+          "aria": "矢量推进器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 80,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "矢量推进器"
+        },
+        {
+          "aria": "复合装甲 · LV 2",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 136,
+            "y": 597
+          },
+          "text": "LV 2",
+          "title": "复合装甲"
+        },
+        {
+          "aria": "引力采集器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 192,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "引力采集器"
+        }
+      ],
+      "footer": "任务种子 4142556147 · 生存 03:00 · 击败收割者",
+      "overlay": "静海基地 · 中继任务 07任务已暂停深呼吸。月球会等你。继续任务",
+      "phase": "paused",
+      "screen": "game",
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    },
+    "file": "four-slots-hull-level2.jpg",
+    "pixels": [
+      1280,
+      720
+    ],
+    "sha256": "3df2fca9234b306b75e98a484674bd526c2e6a7eee77b8680f92571b42716903"
+  },
+  {
+    "frame": "first-run-terminal-five-types",
+    "bytes": 51890,
+    "fnv32": "bcfbbc7c",
+    "state": {
+      "clock": "01:37",
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        },
+        {
+          "aria": "电磁新星 · LV 2",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 80,
+            "y": 597
+          },
+          "text": "LV 2",
+          "title": "电磁新星"
+        },
+        {
+          "aria": "矢量推进器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 136,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "矢量推进器"
+        },
+        {
+          "aria": "复合装甲 · LV 2",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 192,
+            "y": 597
+          },
+          "text": "LV 2",
+          "title": "复合装甲"
+        },
+        {
+          "aria": "引力采集器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 248,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "引力采集器"
+        }
+      ],
+      "footer": "任务种子 4142556147 · 生存 03:00 · 击败收割者",
+      "overlay": "任务报告 / MISSION REPORT信号中断你的信号已存档。下一次部署会走得更远。信号同步01:37击破117等级7重新部署回放上一局",
+      "phase": "lost",
+      "screen": "game",
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    },
+    "file": "first-run-terminal-five-types.jpg",
+    "pixels": [
+      1280,
+      720
+    ],
+    "sha256": "179b29cfffdc2da71c6cbc9fb8cda669d587765d2d72c99fe2f0d21f9ad6d777"
+  },
+  {
+    "frame": "first-run-replay-verified",
+    "bytes": 46130,
+    "fnv32": "a986d42b",
+    "state": {
+      "clock": "01:37",
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        },
+        {
+          "aria": "电磁新星 · LV 2",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 80,
+            "y": 597
+          },
+          "text": "LV 2",
+          "title": "电磁新星"
+        },
+        {
+          "aria": "矢量推进器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 136,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "矢量推进器"
+        },
+        {
+          "aria": "复合装甲 · LV 2",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 192,
+            "y": 597
+          },
+          "text": "LV 2",
+          "title": "复合装甲"
+        },
+        {
+          "aria": "引力采集器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 248,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "引力采集器"
+        }
+      ],
+      "footer": "任务种子 4142556147 · 生存 03:00 · 击败收割者",
+      "overlay": "任务报告 / MISSION REPORT回放结束回放校验一致lunar-1 · d11d19cf返回基地",
+      "phase": "lost",
+      "screen": "replay-end",
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    },
+    "file": "first-run-replay-verified.jpg",
+    "pixels": [
+      1280,
+      720
+    ],
+    "sha256": "db5c148f840c6d318b30f33c91d1e7ad42339dbdb25f7d9826844e5073ae8fb3"
+  },
+  {
+    "frame": "restart-clears-upgrades",
+    "bytes": 41423,
+    "fnv32": "30149145",
+    "state": {
+      "clock": "00:00",
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        }
+      ],
+      "footer": "任务种子 2742612319 · 生存 03:00 · 击败收割者",
+      "overlay": "静海基地 · 中继任务 07任务已暂停深呼吸。月球会等你。继续任务",
+      "phase": "paused",
+      "screen": "game",
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    },
+    "file": "restart-clears-upgrades.jpg",
+    "pixels": [
+      1280,
+      720
+    ],
+    "sha256": "151eb740a9b028039e749b1c2b4dd7820eb59b6ce9dcbb6cc117c461455cfb15"
+  },
+  {
+    "frame": "all-six-desktop-zh-paused",
+    "bytes": 45134,
+    "fnv32": "1d9f1051",
+    "state": {
+      "clock": "01:05",
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        },
+        {
+          "aria": "轨道无人机 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 80,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "轨道无人机"
+        },
+        {
+          "aria": "电磁新星 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 136,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "电磁新星"
+        },
+        {
+          "aria": "矢量推进器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 192,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "矢量推进器"
+        },
+        {
+          "aria": "复合装甲 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 248,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "复合装甲"
+        },
+        {
+          "aria": "引力采集器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 304,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "引力采集器"
+        }
+      ],
+      "footer": "任务种子 2742612319 · 生存 03:00 · 击败收割者",
+      "overlay": "静海基地 · 中继任务 07任务已暂停深呼吸。月球会等你。继续任务",
+      "phase": "paused",
+      "screen": "game",
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    },
+    "file": "all-six-desktop-zh-paused.jpg",
+    "pixels": [
+      1280,
+      720
+    ],
+    "sha256": "cc1b8bda80dd0b68ea3c50bd91c5c1f1e22095606eb9632ff0894b936dfdfa89"
+  },
+  {
+    "frame": "all-six-desktop-en-paused",
+    "bytes": 49869,
+    "fnv32": "60cfa91d",
+    "state": {
+      "clock": "01:05",
+      "equipment": [
+        {
+          "aria": "Pulse rifle · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "Pulse rifle"
+        },
+        {
+          "aria": "Orbital drone · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 80,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "Orbital drone"
+        },
+        {
+          "aria": "EMP nova · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 136,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "EMP nova"
+        },
+        {
+          "aria": "Vector thrusters · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 192,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "Vector thrusters"
+        },
+        {
+          "aria": "Composite armor · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 248,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "Composite armor"
+        },
+        {
+          "aria": "Gravity collector · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 304,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "Gravity collector"
+        }
+      ],
+      "footer": "Mission seed 2742612319 · SURVIVE 03:00 · DEFEAT THE HARVESTER",
+      "overlay": "MARE TRANQUILLITATIS · RELAY 07Mission pausedTake a breath. The Moon can wait.Resume mission",
+      "phase": "paused",
+      "screen": "game",
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    },
+    "file": "all-six-desktop-en-paused.jpg",
+    "pixels": [
+      1280,
+      720
+    ],
+    "sha256": "5a4dfd28600a64be896c52b02d568801543f987b8a7615ae9351be529e5a7925"
+  },
+  {
+    "frame": "all-six-desktop-en-running",
+    "bytes": 77952,
+    "fnv32": "6731e69d",
+    "state": {
+      "clock": "01:05",
+      "equipment": [
+        {
+          "aria": "Pulse rifle · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "Pulse rifle"
+        },
+        {
+          "aria": "Orbital drone · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 80,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "Orbital drone"
+        },
+        {
+          "aria": "EMP nova · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 136,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "EMP nova"
+        },
+        {
+          "aria": "Vector thrusters · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 192,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "Vector thrusters"
+        },
+        {
+          "aria": "Composite armor · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 248,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "Composite armor"
+        },
+        {
+          "aria": "Gravity collector · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 304,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "Gravity collector"
+        }
+      ],
+      "footer": "Mission seed 2742612319 · SURVIVE 03:00 · DEFEAT THE HARVESTER",
+      "overlay": "",
+      "phase": "running",
+      "screen": "game",
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    },
+    "file": "all-six-desktop-en-running.jpg",
+    "pixels": [
+      1280,
+      720
+    ],
+    "sha256": "fff0d3cf607938ff820808363a51408239bc1be3db8c6ebddd202a14dc89273f"
+  },
+  {
+    "frame": "all-six-narrow-en-paused",
+    "bytes": 25649,
+    "fnv32": "e55110f7",
+    "state": {
+      "clock": "01:05",
+      "equipment": [
+        {
+          "aria": "Pulse rifle · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 14,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "Pulse rifle"
+        },
+        {
+          "aria": "Orbital drone · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 59,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "Orbital drone"
+        },
+        {
+          "aria": "EMP nova · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 104,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "EMP nova"
+        },
+        {
+          "aria": "Vector thrusters · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 149,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "Vector thrusters"
+        },
+        {
+          "aria": "Composite armor · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 194,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "Composite armor"
+        },
+        {
+          "aria": "Gravity collector · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 239,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "Gravity collector"
+        }
+      ],
+      "footer": "Mission seed 2742612319 · SURVIVE 03:00 · DEFEAT THE HARVESTER",
+      "overlay": "MARE TRANQUILLITATIS · RELAY 07Mission pausedTake a breath. The Moon can wait.Resume mission",
+      "phase": "paused",
+      "screen": "game",
+      "viewport": {
+        "height": 693,
+        "width": 390
+      }
+    },
+    "file": "all-six-narrow-en-paused.jpg",
+    "pixels": [
+      390,
+      693
+    ],
+    "sha256": "dc63b83b51f276bab2be00d0b3c9a29f5f1c3d2e30cff6b40914ba5b2761d0a3"
+  },
+  {
+    "frame": "all-six-narrow-zh-paused",
+    "bytes": 23070,
+    "fnv32": "38903826",
+    "state": {
+      "clock": "01:05",
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 14,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        },
+        {
+          "aria": "轨道无人机 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 59,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "轨道无人机"
+        },
+        {
+          "aria": "电磁新星 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 104,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "电磁新星"
+        },
+        {
+          "aria": "矢量推进器 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 149,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "矢量推进器"
+        },
+        {
+          "aria": "复合装甲 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 194,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "复合装甲"
+        },
+        {
+          "aria": "引力采集器 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 239,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "引力采集器"
+        }
+      ],
+      "footer": "任务种子 2742612319 · 生存 03:00 · 击败收割者",
+      "overlay": "静海基地 · 中继任务 07任务已暂停深呼吸。月球会等你。继续任务",
+      "phase": "paused",
+      "screen": "game",
+      "viewport": {
+        "height": 693,
+        "width": 390
+      }
+    },
+    "file": "all-six-narrow-zh-paused.jpg",
+    "pixels": [
+      390,
+      693
+    ],
+    "sha256": "299d57d7a801db3e48ffa786f14088a9ec2a2d6e425f1964c3c06fd8ddd028e6"
+  },
+  {
+    "frame": "all-six-narrow-zh-running",
+    "bytes": 28037,
+    "fnv32": "c16b8dab",
+    "state": {
+      "clock": "01:05",
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 14,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        },
+        {
+          "aria": "轨道无人机 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 59,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "轨道无人机"
+        },
+        {
+          "aria": "电磁新星 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 104,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "电磁新星"
+        },
+        {
+          "aria": "矢量推进器 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 149,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "矢量推进器"
+        },
+        {
+          "aria": "复合装甲 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 194,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "复合装甲"
+        },
+        {
+          "aria": "引力采集器 · LV 1",
+          "box": {
+            "height": 47,
+            "width": 40,
+            "x": 239,
+            "y": 146
+          },
+          "text": "LV 1",
+          "title": "引力采集器"
+        }
+      ],
+      "footer": "任务种子 2742612319 · 生存 03:00 · 击败收割者",
+      "overlay": "",
+      "phase": "running",
+      "screen": "game",
+      "viewport": {
+        "height": 693,
+        "width": 390
+      }
+    },
+    "file": "all-six-narrow-zh-running.jpg",
+    "pixels": [
+      390,
+      693
+    ],
+    "sha256": "540dc3e00a23bdc12ac12c1da5c2a7e4e5aa5878a9b92e62d0bab5adf6265488"
+  },
+  {
+    "frame": "all-six-desktop-zh-running",
+    "bytes": 72388,
+    "fnv32": "888ba842",
+    "state": {
+      "clock": "01:05",
+      "equipment": [
+        {
+          "aria": "脉冲步枪 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 24,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "脉冲步枪"
+        },
+        {
+          "aria": "轨道无人机 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 80,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "轨道无人机"
+        },
+        {
+          "aria": "电磁新星 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 136,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "电磁新星"
+        },
+        {
+          "aria": "矢量推进器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 192,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "矢量推进器"
+        },
+        {
+          "aria": "复合装甲 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 248,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "复合装甲"
+        },
+        {
+          "aria": "引力采集器 · LV 1",
+          "box": {
+            "height": 57,
+            "width": 49,
+            "x": 304,
+            "y": 597
+          },
+          "text": "LV 1",
+          "title": "引力采集器"
+        }
+      ],
+      "footer": "任务种子 2742612319 · 生存 03:00 · 击败收割者",
+      "overlay": "",
+      "phase": "running",
+      "screen": "game",
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      }
+    },
+    "file": "all-six-desktop-zh-running.jpg",
+    "pixels": [
+      1280,
+      720
+    ],
+    "sha256": "d1fb5216e32091c1a57275b76218d2e58693053360ee30a3dae1cae9e6ae358f"
+  }
+]

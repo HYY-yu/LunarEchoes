@@ -1,0 +1,22 @@
+{
+  "base": "9a76818256736afe220dbd0b235d59adf2600494",
+  "origin": "http://127.0.0.1:4182",
+  "files": [
+    {
+      "path": "src/core.ts",
+      "sha256": "f050719fda40e1e40c6b20561d98bc982ffd027beef761a462769b3283cc3d2a"
+    },
+    {
+      "path": "src/main.ts",
+      "sha256": "344b3595144fdb0739f4dcfcca8fc1df8a04c268ecbdaa4ab09b618de26d96d8"
+    },
+    {
+      "path": "dist/core.js",
+      "sha256": "2cffc39071185c911954a0cf35c709fb2cddc4de792fce14176a67d03cbccb6c"
+    },
+    {
+      "path": "dist/main.js",
+      "sha256": "dfb448949a4d713028bf06b3ca20c7a46f5c1b930a788c3b391fa4417bf39604"
+    }
+  ]
+}
