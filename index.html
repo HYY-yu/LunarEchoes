@@ -5,7 +5,7 @@
 <canvas id="game" aria-label="月球战场"></canvas>
 <div class="scanlines"></div>
 <header><a class="wordmark" href="/">LUNAR<span>/</span>RELAY<i>07</i></a><nav><button id="sound"></button><button id="language">EN</button><button id="pause" hidden></button></nav></header>
-<div id="hud" hidden><div class="hud-left"><div class="eyebrow" id="health-label"></div><div class="health-track"><div id="health-fill"></div></div><span id="health-value"></span></div><div class="timer"><span id="time-label"></span><strong id="clock">00:00</strong><div class="sync-track"><div id="sync-fill"></div></div></div><div class="hud-right"><span id="level"></span><strong id="kills"></strong></div><div class="xp-track"><div id="xp-fill"></div></div><div id="equipment"></div></div>
+<div id="hud" hidden><div class="hud-left"><div class="eyebrow" id="health-label"></div><div id="armor-cells" role="meter" aria-labelledby="health-label" aria-valuemin="0"></div></div><div class="timer"><span id="time-label"></span><strong id="clock">00:00</strong><div class="sync-track"><div id="sync-fill"></div></div></div><div class="hud-right"><span id="level"></span><strong id="kills"></strong></div><div class="xp-track"><div id="xp-fill"></div></div><div id="equipment"></div></div>
 <div id="overlay"></div>
 <div id="notice" role="status" aria-live="polite"></div>
 <div id="touch" hidden><div id="joystick"><span id="stick"></span></div><button id="dash"></button></div>

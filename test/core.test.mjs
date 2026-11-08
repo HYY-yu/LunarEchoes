@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createWorld, dispatch, checksum, replay, VERSION, normalizeInput, DURATION } from '../dist/core.js';
+import { createWorld, dispatch, checksum, replay, VERSION, normalizeInput, DURATION, ARMOR_RULES } from '../dist/core.js';
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
 test('same seed and inputs reproduce the complete state', () => {
   const record = { version: VERSION, seed: 42, actions: Array.from({ length: 600 }, (_, i) => ({ kind: 'tick', input: { x: Math.cos(i / 120), y: Math.sin(i / 120), dash: i % 160 === 0 } })) };
@@ -19,7 +19,7 @@ test('upgrade freezes combat and can only be selected once', () => {
   assert.equal(world.upgrades[id], previous + 1); assert.equal(world.phase.kind, 'running');
 });
 test('death is terminal and emits a single outcome', () => {
-  const world = createWorld(1); world.player.hp = 1;
+  const world = createWorld(1); world.player.hp = ARMOR_RULES.hpPerCell;
   world.enemies.push({ id: 1, kind: 'crawler', x: world.player.x, y: world.player.y, hp: 100, maxHp: 100, radius: 11, attack: 100, flash: 0 });
   dispatch(world, idle); assert.equal(world.phase.kind, 'lost'); assert.equal(world.events.filter(event => event === 'lost').length, 1);
   const tick = world.tick; dispatch(world, idle); assert.equal(world.tick, tick); assert.equal(world.events.length, 0);

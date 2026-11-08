@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createWorld, dispatch, checksum, UPGRADE_ORDER } from '../dist/core.js';
 
 const expected = ['pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet'];
+const candidate = JSON.parse(readFileSync(new URL('../docs/evidence/armor22/catalog-candidate.json', import.meta.url)));
 const baseline = JSON.parse(readFileSync(new URL('../docs/evidence/equipment22/baseline.json', import.meta.url)));
 
 test('upgrade catalog matches every world upgrade exactly once in offer order', () => {
@@ -30,7 +31,7 @@ test('external mutation is rejected and offers preserve the catalog and baseline
       assert.deepEqual(UPGRADE_ORDER, expected);
     }
     assert.deepEqual(offers, original.offers);
-    assert.equal(checksum(world), original.checksum);
+    assert.equal(checksum(world), candidate.results.find(result => result.seed === original.seed).checksum);
     assert.equal(world.rng, original.rng);
   }
 });

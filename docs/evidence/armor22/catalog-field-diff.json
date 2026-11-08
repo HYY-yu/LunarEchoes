@@ -1,0 +1,277 @@
+{
+  "baseline": "3d5ab48a2b0b9981f14aaf18a2ab24e17e0c8d7e",
+  "candidateSource": "249b8817b623722e11c9d5b53ef6ec3a00b8aa3a",
+  "changes": [
+    {
+      "seed": 208907,
+      "round": 6,
+      "key": "player",
+      "before": {
+        "x": 750,
+        "y": 750,
+        "hp": 125,
+        "maxHp": 125,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      },
+      "after": {
+        "x": 750,
+        "y": 750,
+        "hp": 120,
+        "maxHp": 120,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      }
+    },
+    {
+      "seed": 208907,
+      "round": 7,
+      "key": "player",
+      "before": {
+        "x": 750,
+        "y": 750,
+        "hp": 125,
+        "maxHp": 125,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      },
+      "after": {
+        "x": 750,
+        "y": 750,
+        "hp": 120,
+        "maxHp": 120,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      }
+    },
+    {
+      "seed": 208907,
+      "round": 8,
+      "key": "player",
+      "before": {
+        "x": 750,
+        "y": 750,
+        "hp": 125,
+        "maxHp": 125,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      },
+      "after": {
+        "x": 750,
+        "y": 750,
+        "hp": 120,
+        "maxHp": 120,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      }
+    },
+    {
+      "seed": 42,
+      "round": 5,
+      "key": "player",
+      "before": {
+        "x": 750,
+        "y": 750,
+        "hp": 125,
+        "maxHp": 125,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      },
+      "after": {
+        "x": 750,
+        "y": 750,
+        "hp": 120,
+        "maxHp": 120,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      }
+    },
+    {
+      "seed": 42,
+      "round": 6,
+      "key": "player",
+      "before": {
+        "x": 750,
+        "y": 750,
+        "hp": 125,
+        "maxHp": 125,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      },
+      "after": {
+        "x": 750,
+        "y": 750,
+        "hp": 120,
+        "maxHp": 120,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      }
+    },
+    {
+      "seed": 42,
+      "round": 7,
+      "key": "player",
+      "before": {
+        "x": 750,
+        "y": 750,
+        "hp": 150,
+        "maxHp": 150,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      },
+      "after": {
+        "x": 750,
+        "y": 750,
+        "hp": 140,
+        "maxHp": 140,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      }
+    },
+    {
+      "seed": 42,
+      "round": 8,
+      "key": "player",
+      "before": {
+        "x": 750,
+        "y": 750,
+        "hp": 150,
+        "maxHp": 150,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      },
+      "after": {
+        "x": 750,
+        "y": 750,
+        "hp": 140,
+        "maxHp": 140,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      }
+    },
+    {
+      "seed": 101,
+      "round": 6,
+      "key": "player",
+      "before": {
+        "x": 750,
+        "y": 750,
+        "hp": 125,
+        "maxHp": 125,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      },
+      "after": {
+        "x": 750,
+        "y": 750,
+        "hp": 120,
+        "maxHp": 120,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      }
+    },
+    {
+      "seed": 101,
+      "round": 7,
+      "key": "player",
+      "before": {
+        "x": 750,
+        "y": 750,
+        "hp": 125,
+        "maxHp": 125,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      },
+      "after": {
+        "x": 750,
+        "y": 750,
+        "hp": 120,
+        "maxHp": 120,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      }
+    },
+    {
+      "seed": 101,
+      "round": 8,
+      "key": "player",
+      "before": {
+        "x": 750,
+        "y": 750,
+        "hp": 125,
+        "maxHp": 125,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      },
+      "after": {
+        "x": 750,
+        "y": 750,
+        "hp": 120,
+        "maxHp": 120,
+        "invincible": 0,
+        "dashCooldown": 0,
+        "dashTicks": 0,
+        "dx": 1,
+        "dy": 0
+      }
+    }
+  ],
+  "scope": "same eight synthetic upgrade actions; only player HP/maxHp differ; offers and RNG retained by tests"
+}

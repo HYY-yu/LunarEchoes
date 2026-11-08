@@ -1,0 +1,52 @@
+{
+  "event": "armor.capacity.derived_bound",
+  "head": "3d5ab48a2b0b9981f14aaf18a2ab24e17e0c8d7e",
+  "sourceSha256": "f050719fda40e1e40c6b20561d98bc982ffd027beef761a462769b3283cc3d2a",
+  "rows": [
+    {
+      "ticks": 10800,
+      "normalSpawnBound": 449,
+      "mandatoryEarlySpawns": 32,
+      "xpBound": 1303,
+      "upgradeBound": 15,
+      "spent": 1035,
+      "nextThreshold": 277,
+      "nextTotal": 1312,
+      "armorCellsBound": 40
+    },
+    {
+      "ticks": 18000,
+      "normalSpawnBound": 1003,
+      "mandatoryEarlySpawns": 32,
+      "xpBound": 2965,
+      "upgradeBound": 19,
+      "spent": 2619,
+      "nextThreshold": 662,
+      "nextTotal": 3281,
+      "armorCellsBound": 48
+    },
+    {
+      "ticks": 10819,
+      "normalSpawnBound": 451,
+      "mandatoryEarlySpawns": 32,
+      "xpBound": 1309,
+      "upgradeBound": 15,
+      "spent": 1035,
+      "nextThreshold": 277,
+      "nextTotal": 1312,
+      "armorCellsBound": 40
+    },
+    {
+      "ticks": 10815,
+      "normalSpawnBound": 450,
+      "mandatoryEarlySpawns": 32,
+      "xpBound": 1306,
+      "upgradeBound": 15,
+      "spent": 1035,
+      "nextThreshold": 277,
+      "nextTotal": 1312,
+      "armorCellsBound": 40
+    }
+  ],
+  "scope": "mathematical upper bounds from pinned source, not observed attainable maxima or layout measurements"
+}

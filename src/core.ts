@@ -1,5 +1,6 @@
-export const VERSION = 'lunar-1';
+export const VERSION = 'lunar-armor-1';
 export const HZ = 60;
+export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 10, hullCapacityCells: 2, hullRepairCells: 4, repairEveryTicks: HZ * 30 });
 export const DURATION = HZ * 180;
 export const ARENA = 1500;
 export type Upgrade = 'pulse' | 'orbit' | 'nova' | 'boots' | 'hull' | 'magnet';
@@ -23,7 +24,7 @@ export type Recording = { version: string; seed: number; actions: Action[] };
 export const UPGRADE_ORDER: readonly Upgrade[] = Object.freeze<Upgrade[]>(['pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet']);
 export function createWorld(seed: number): World {
   return { seed: seed >>> 0, rng: (seed >>> 0) || 1, tick: 0, phase: { kind: 'running' }, nextId: 1,
-    player: { x: ARENA / 2, y: ARENA / 2, hp: 100, maxHp: 100, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
+    player: { x: ARENA / 2, y: ARENA / 2, hp: ARMOR_RULES.initialCells * ARMOR_RULES.hpPerCell, maxHp: ARMOR_RULES.initialCells * ARMOR_RULES.hpPerCell, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
     enemies: [], shots: [], crystals: [], effects: [], events: [], level: 1, xp: 0, threshold: 5, kills: 0,
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
 }
@@ -56,10 +57,10 @@ function kill(world: World, enemy: Enemy): void {
   world.events.push('kill');
   if (enemy.kind === 'boss') world.bossKilled = true;
 }
-function damagePlayer(world: World, damage: number): void {
+function damagePlayer(world: World): void {
   const p = world.player;
   if (p.invincible > 0 || p.dashTicks > 0) return;
-  p.hp = Math.max(0, p.hp - damage);
+  p.hp = Math.max(0, p.hp - ARMOR_RULES.hpPerCell);
   p.invincible = 60;
   world.events.push('hit');
   world.effects.push({ x: p.x, y: p.y, kind: 'hit', life: 20, size: 18 });
@@ -84,7 +85,7 @@ export function dispatch(world: World, action: Action): void {
   if (action.kind === 'choose') {
     if (world.phase.kind !== 'upgrading' || !world.phase.offers.includes(action.upgrade)) return;
     world.upgrades[action.upgrade]++;
-    if (action.upgrade === 'hull') { world.player.maxHp += 25; world.player.hp = Math.min(world.player.maxHp, world.player.hp + 45); }
+    if (action.upgrade === 'hull') { world.player.maxHp += ARMOR_RULES.hullCapacityCells * ARMOR_RULES.hpPerCell; world.player.hp = Math.min(world.player.maxHp, world.player.hp + ARMOR_RULES.hullRepairCells * ARMOR_RULES.hpPerCell); }
     world.phase = { kind: 'running' };
     world.events.push('upgrade');
     return;
@@ -107,7 +108,7 @@ function step(world: World, input: Input): void {
     if (world.tick % 2 === 0) world.effects.push({ x: p.x, y: p.y, kind: 'dash', life: 16, size: 10 });
   } else { p.x = clamp(p.x + input.x * speed); p.y = clamp(p.y + input.y * speed); }
   if (input.x !== 0 || input.y !== 0) { p.dx = input.x; p.dy = input.y; }
-  if (world.tick % 180 === 0) p.hp = Math.min(p.maxHp, p.hp + 1);
+  if (world.tick % ARMOR_RULES.repairEveryTicks === 0) p.hp = Math.min(p.maxHp, p.hp + ARMOR_RULES.hpPerCell);
   world.spawnCooldown--;
   if (world.spawnCooldown <= 0 && world.enemies.length < 180) {
     const t = world.tick / HZ;
@@ -151,11 +152,11 @@ function step(world: World, input: Input): void {
       const count = enemy.kind === 'boss' ? 12 : 1;
       for (let i = 0; i < count; i++) {
         const a = count === 1 ? angle : i / count * Math.PI * 2 + world.tick * .01;
-        world.shots.push({ x: enemy.x, y: enemy.y, vx: Math.cos(a) * 2.2, vy: Math.sin(a) * 2.2, life: 220, damage: 12, hostile: true });
+        world.shots.push({ x: enemy.x, y: enemy.y, vx: Math.cos(a) * 2.2, vy: Math.sin(a) * 2.2, life: 220, damage: ARMOR_RULES.hpPerCell, hostile: true });
       }
       enemy.attack = enemy.kind === 'boss' ? 135 : 180;
     }
-    if (d < enemy.radius + 10) damagePlayer(world, enemy.kind === 'boss' ? 25 : 8);
+    if (d < enemy.radius + 10) damagePlayer(world);
     if (world.upgrades.orbit > 0) {
       const count = Math.min(4, world.upgrades.orbit);
       for (let i = 0; i < count; i++) {
@@ -169,7 +170,7 @@ function step(world: World, input: Input): void {
   for (const shot of world.shots) {
     shot.x += shot.vx; shot.y += shot.vy; shot.life--;
     if (shot.hostile) {
-      if (distance(shot.x, shot.y, p.x, p.y) < 12) { damagePlayer(world, shot.damage); shot.life = 0; }
+      if (distance(shot.x, shot.y, p.x, p.y) < 12) { damagePlayer(world); shot.life = 0; }
     } else {
       for (const enemy of world.enemies) {
         if (enemy.hp > 0 && distance(shot.x, shot.y, enemy.x, enemy.y) < enemy.radius + 5) {

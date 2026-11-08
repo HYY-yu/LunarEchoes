@@ -10,7 +10,7 @@
 npm ci
 npm run build
 node scripts/replay-diagnostic.mjs capture /tmp/lunar-local-trace.json 24.21.0
-node scripts/replay-diagnostic.mjs compare docs/evidence/checksum26/macos-node24.21.0.json /tmp/lunar-local-trace.json
+node scripts/replay-diagnostic.mjs compare docs/evidence/armor22/macos-node24.21.0.json /tmp/lunar-local-trace.json
 ```
 
 `scripts/fixtures/checksum-prefix.json` 是合成的固定输入前缀。seed 为 208907，90 条动作中前 45 条沿 x 轴、后 45 条沿 y 轴，全部不冲刺。输入不依赖 World、机器人或三角函数。它采用既有 `lunar-1` 动作形状，但没有终局，不是用户从游戏导出的完整录制。
@@ -39,3 +39,7 @@ node scripts/replay-diagnostic.mjs compare docs/evidence/checksum26/macos-node24
 Verify 的原 Node 24、`npm ci` 和 `npm run verify` 保持原样。后面仅复用已有固定 SHA 的 setup-node action 切到 24.21.0，捕获上述固定前缀并与本机 trace 比较。没有新增权限、服务、artifact 上传或第三方依赖。CI 日志会打印实际环境和输入摘要，不能仅凭 workflow 配置声称统一了 Node。
 
 本机与 Linux 的实际配对结果须以当前 head 的成功 CI 日志和独立复核为准。即使短前缀匹配，也不能据此关闭 Issue #26 或解释 180 秒终局差异；若需扩大录制或改变游戏 checksum 语义，应另行提出有证据的后续任务。
+
+## 待人类决定的装甲候选
+
+本分支候选 VERSION 为 `lunar-armor-1`，当前固定前缀只更新版本字段，90 个动作保持原样。当前命令与 CI 使用 `docs/evidence/armor22/macos-node24.21.0.json`，该文件从实际候选 core 完整重新捕获。上文 checksum26 原始 trace 与基线信息保留为 lunar-1 历史，不冒充当前构建；比较器继续拒绝跨 core、录制或 Node 身份。新格子数值与兼容标签未获人类批准，PR 不合并，也不据此宣称解决 Issue26 原终局差异。
