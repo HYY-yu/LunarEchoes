@@ -24,3 +24,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run verify
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24.21.0'
+      - name: Compare the fixed diagnostic prefix at Node 24.21.0
+        run: |
+          node scripts/replay-diagnostic.mjs capture /tmp/lunar-checksum-trace.json 24.21.0
+          node scripts/replay-diagnostic.mjs compare docs/evidence/checksum26/macos-node24.21.0.json /tmp/lunar-checksum-trace.json
