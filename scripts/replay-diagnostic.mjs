@@ -1,7 +1,8 @@
+import { resolveStage } from '../dist/stage-rules.js';
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { createWorld, dispatch, checksum, VERSION, UPGRADE_ORDER } from '../dist/core.js';
+import { createWorld, dispatch, checksum, parseActionBuffer, UPGRADE_ORDER } from '../dist/core.js';
 
 const digest = value => createHash('sha256').update(value).digest('hex');
 const inputDigest = recording => digest(JSON.stringify(recording));
@@ -19,7 +20,9 @@ function variant(value, choices, path) {
 }
 
 function worldInput(world) {
-  numericRecord(world, '$', ['seed', 'rng', 'tick', 'nextId', 'level', 'xp', 'threshold', 'kills', 'fireCooldown', 'novaCooldown', 'spawnCooldown'], ['phase', 'player', 'enemies', 'shots', 'crystals', 'effects', 'events', 'upgrades', 'bossSpawned', 'bossKilled']);
+  numericRecord(world, '$', ['seed', 'rng', 'tick', 'nextId', 'level', 'xp', 'threshold', 'kills', 'fireCooldown', 'novaCooldown', 'spawnCooldown'], ['context', 'phase', 'player', 'enemies', 'shots', 'crystals', 'effects', 'events', 'upgrades', 'bossSpawned', 'bossKilled']);
+  numericRecord(world.context, '$.context', [], ['stageId', 'rulesVersion']);
+  try { resolveStage(world.context.stageId, world.context.rulesVersion); } catch { throw new Error('Invalid World context'); }
   for (const key of ['bossSpawned', 'bossKilled']) if (typeof world[key] !== 'boolean') throw new Error(`Invalid World boolean at $.${key}`);
   numericRecord(world.player, '$.player', ['x', 'y', 'hp', 'maxHp', 'invincible', 'dashCooldown', 'dashTicks', 'dx', 'dy']);
   const upgrades = UPGRADE_ORDER;
@@ -51,7 +54,7 @@ function worldInput(world) {
 }
 
 function recordingInput(value) {
-  if (!object(value) || value.version !== VERSION || !Number.isInteger(value.seed) || value.seed < 0 || value.seed > 4294967295) throw new Error('Invalid diagnostic recording');
+  value = parseActionBuffer(value);
   if (!Array.isArray(value.actions) || value.actions.length < 1 || value.actions.length > 90) throw new Error('Diagnostic prefix must contain 1 to 90 actions');
   for (const action of value.actions) {
     if (!object(action) || action.kind !== 'tick' || !object(action.input)) throw new Error('Diagnostic prefix supports only tick actions');
@@ -63,7 +66,7 @@ function recordingInput(value) {
 
 export async function captureTrace(input) {
   const recording = recordingInput(input);
-  const world = createWorld(recording.seed);
+  const world = createWorld({ stageId: recording.stageId, rulesVersion: recording.rulesVersion, seed: recording.seed });
   const frames = [];
   function snapshot(actionIndex) {
     frames.push({ actionIndex, checksum: checksum(world), world: JSON.parse(JSON.stringify({ ...world, events: [] })) });
@@ -71,23 +74,26 @@ export async function captureTrace(input) {
   snapshot(0);
   for (const [index, action] of recording.actions.entries()) { dispatch(world, action); snapshot(index + 1); }
   return {
-    format: 'checksum-prefix-trace-1',
+    format: 'checksum-prefix-trace-2',
     environment: { node: process.versions.node, v8: process.versions.v8, platform: process.platform, arch: process.arch },
     coreSha256: digest(await readFile(new URL('../dist/core.js', import.meta.url))),
+    rulesSha256: digest(await readFile(new URL('../dist/stage-rules.js', import.meta.url))),
     recordingSha256: inputDigest(recording), recording, frames
   };
 }
 
 function traceInput(value) {
-  if (!object(value) || value.format !== 'checksum-prefix-trace-1' || !object(value.environment)) throw new Error('Invalid diagnostic trace');
+  if (!object(value) || value.format !== 'checksum-prefix-trace-2' || !object(value.environment)) throw new Error('Invalid diagnostic trace');
   for (const key of ['node', 'v8', 'platform', 'arch']) if (typeof value.environment[key] !== 'string' || !value.environment[key]) throw new Error(`Missing trace environment ${key}`);
   if (!/^[0-9a-f]{64}$/.test(value.coreSha256)) throw new Error('Invalid core digest');
+  if (!/^[0-9a-f]{64}$/.test(value.rulesSha256)) throw new Error('Invalid rules digest');
   const recording = recordingInput(value.recording);
   if (inputDigest(recording) !== value.recordingSha256) throw new Error('Trace recording digest is invalid');
   if (!Array.isArray(value.frames) || value.frames.length !== recording.actions.length + 1) throw new Error('Trace frame count is invalid');
   for (const [index, frame] of value.frames.entries()) {
     if (!object(frame) || frame.actionIndex !== index || !object(frame.world) || !Number.isInteger(frame.world.tick) || frame.world.tick < 0) throw new Error(`Invalid trace frame ${index}`);
     worldInput(frame.world);
+    if (frame.world.context.stageId !== recording.stageId || frame.world.context.rulesVersion !== recording.rulesVersion || frame.world.seed !== recording.seed) throw new Error(`Invalid World recording context at ${index}`);
     if (checksum(frame.world) !== frame.checksum) throw new Error(`Trace frame checksum is invalid at ${index}`);
   }
   return value;
@@ -115,6 +121,7 @@ function difference(left, right, path = '$') {
 export function compareTraces(leftInput, rightInput) {
   const left = traceInput(leftInput), right = traceInput(rightInput);
   if (left.coreSha256 !== right.coreSha256) throw new Error('Cannot compare different core builds');
+  if (left.rulesSha256 !== right.rulesSha256) throw new Error('Cannot compare different rules builds');
   if (left.recordingSha256 !== right.recordingSha256) throw new Error('Cannot compare different action recordings');
   if (left.environment.node !== right.environment.node) throw new Error('Cannot compare different Node versions');
   for (let index = 0; index < left.frames.length; index++) {

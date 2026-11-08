@@ -14,7 +14,7 @@ let world, checkpoint, playing = false, accumulator = 0, last = 0, unchanged = t
 const input = { x: 0, y: 0, dash: false };
 function report(error) { document.getElementById('errors').textContent += `${String(error)}\n`; console.error({ level: 'error', event: 'astronaut_audition.failure', error: String(error) }); }
 function reset() {
-  world = createWorld(42); world.fireCooldown = 1000000; world.spawnCooldown = 1000000; world.bossSpawned = true;
+  world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 }); world.fireCooldown = 1000000; world.spawnCooldown = 1000000; world.bossSpawned = true;
   dispatch(world, { kind: 'pause' }); checkpoint = structuredClone(world); playing = false; input.x = 0; input.y = 0; accumulator = 0; unchanged = true; lastEvents = [];
 }
 function resume() { if (world.phase.kind === 'paused') dispatch(world, { kind: 'resume' }); else if (world.phase.kind === 'upgrading') dispatch(world, { kind: 'choose', upgrade: world.phase.offers[0] }); }

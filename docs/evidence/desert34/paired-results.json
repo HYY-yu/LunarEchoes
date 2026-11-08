@@ -1,0 +1,1153 @@
+{
+  "baseline": "bde5936d13d6890a72d24d36bb0039e48e36df44",
+  "head": "bde5936d13d6890a72d24d36bb0039e48e36df44",
+  "sourceDirty": true,
+  "node": "24.21.0",
+  "baselineActionsSha256": "d21bf773c29a32bec82ca34af79bae655626f2fea446df7609e97a2805a9caf8",
+  "comparedActions": 141580,
+  "excludedFields": [
+    "context"
+  ],
+  "compared": "Every remaining World field including events after every exact captured action",
+  "summary": {
+    "cases": 18,
+    "won": 6,
+    "lost": 12,
+    "mismatches": 0,
+    "terminalReplays": 36
+  },
+  "rows": [
+    {
+      "seed": 208907,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3844,
+      "combatSeconds": 64.06666666666666,
+      "storySeconds": 0,
+      "acceptedHits": 11,
+      "actualRawDamage": 110,
+      "damageCells": 11,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": 10,
+      "level": 1,
+      "kills": 66,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3844,
+      "actionsSha256": "ef542719a5922adff50ebe2a136d33e5d8b4fc2f2291757f60abb0b3e86d31df",
+      "checksum": "514096da",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "e0bd9dde",
+      "battleChecksum": "514096da",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 0
+    },
+    {
+      "seed": 42,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3358,
+      "combatSeconds": 55.96666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 10,
+      "actualRawDamage": 100,
+      "damageCells": 10,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": 10,
+      "level": 1,
+      "kills": 58,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3358,
+      "actionsSha256": "a1aafa21e937184d4c4fc40f15a46fc16befa4093b5da5611c478e50ec0e27e8",
+      "checksum": "1c60bbd7",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "5d453b01",
+      "battleChecksum": "1c60bbd7",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 0
+    },
+    {
+      "seed": 101,
+      "strategy": "stationary",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3332,
+      "combatSeconds": 55.53333333333333,
+      "storySeconds": 0,
+      "acceptedHits": 10,
+      "actualRawDamage": 100,
+      "damageCells": 10,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": 10,
+      "level": 1,
+      "kills": 53,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3332,
+      "actionsSha256": "eedd068f9e76d65c1967294bd0ceae90ff5e81cb7d7bba3671cf57e14303e87d",
+      "checksum": "dae3022a",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "95e0d75a",
+      "battleChecksum": "dae3022a",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 0
+    },
+    {
+      "seed": 208907,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3844,
+      "combatSeconds": 64.06666666666666,
+      "storySeconds": 0,
+      "acceptedHits": 11,
+      "actualRawDamage": 110,
+      "damageCells": 11,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": 10,
+      "level": 1,
+      "kills": 66,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3844,
+      "actionsSha256": "ef542719a5922adff50ebe2a136d33e5d8b4fc2f2291757f60abb0b3e86d31df",
+      "checksum": "514096da",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "e0bd9dde",
+      "battleChecksum": "514096da",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 0
+    },
+    {
+      "seed": 42,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3358,
+      "combatSeconds": 55.96666666666667,
+      "storySeconds": 0,
+      "acceptedHits": 10,
+      "actualRawDamage": 100,
+      "damageCells": 10,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": 10,
+      "level": 1,
+      "kills": 58,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3358,
+      "actionsSha256": "a1aafa21e937184d4c4fc40f15a46fc16befa4093b5da5611c478e50ec0e27e8",
+      "checksum": "1c60bbd7",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "5d453b01",
+      "battleChecksum": "1c60bbd7",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 0
+    },
+    {
+      "seed": 101,
+      "strategy": "stationary",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 3332,
+      "combatSeconds": 55.53333333333333,
+      "storySeconds": 0,
+      "acceptedHits": 10,
+      "actualRawDamage": 100,
+      "damageCells": 10,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": 10,
+      "level": 1,
+      "kills": 53,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [],
+      "actionCount": 3332,
+      "actionsSha256": "eedd068f9e76d65c1967294bd0ceae90ff5e81cb7d7bba3671cf57e14303e87d",
+      "checksum": "dae3022a",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "95e0d75a",
+      "battleChecksum": "dae3022a",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 0
+    },
+    {
+      "seed": 208907,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 9354,
+      "combatSeconds": 155.9,
+      "storySeconds": 0,
+      "acceptedHits": 14,
+      "actualRawDamage": 140,
+      "damageCells": 14,
+      "hp": 0,
+      "maxHp": 100,
+      "capacityCells": 10,
+      "level": 12,
+      "kills": 310,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9071,
+      "upgrades": [
+        {
+          "tick": 713,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1317,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1995,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2618,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 3319,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4304,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5181,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5934,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7062,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8213,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 9226,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 9365,
+      "actionsSha256": "a632464d372fecc16d7a6c64824a66d9c1945d61b6dc102192d2221c3d06f800",
+      "checksum": "1a534bfd",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "3d22d6ce",
+      "battleChecksum": "1a534bfd",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 1
+    },
+    {
+      "seed": 42,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 10533,
+      "combatSeconds": 175.55,
+      "storySeconds": 0,
+      "acceptedHits": 15,
+      "actualRawDamage": 150,
+      "damageCells": 15,
+      "hp": 0,
+      "maxHp": 120,
+      "capacityCells": 12,
+      "level": 13,
+      "kills": 406,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8683,
+      "upgrades": [
+        {
+          "tick": 599,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1131,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1813,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2444,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3081,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4054,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5241,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 6233,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7203,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8343,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 9191,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 10267,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10545,
+      "actionsSha256": "812eb017ca83262783225bcd12626760964dab483837e64c671b96d87448c625",
+      "checksum": "06e464ab",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "8ab55c10",
+      "battleChecksum": "06e464ab",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 1
+    },
+    {
+      "seed": 101,
+      "strategy": "novice",
+      "preference": "attack",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 7041,
+      "combatSeconds": 117.35,
+      "storySeconds": 0,
+      "acceptedHits": 18,
+      "actualRawDamage": 180,
+      "damageCells": 18,
+      "hp": 0,
+      "maxHp": 140,
+      "capacityCells": 14,
+      "level": 9,
+      "kills": 153,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [
+        {
+          "tick": 662,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1210,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1758,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2475,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3052,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4018,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 5007,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 6140,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 7049,
+      "actionsSha256": "34903a59474d27f59c20727716dbab3d8a18b97adeaddada6e92238cf91760e7",
+      "checksum": "e8bf2e90",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "145213bb",
+      "battleChecksum": "e8bf2e90",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 0
+    },
+    {
+      "seed": 208907,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 7878,
+      "combatSeconds": 131.3,
+      "storySeconds": 0,
+      "acceptedHits": 21,
+      "actualRawDamage": 210,
+      "damageCells": 21,
+      "hp": 0,
+      "maxHp": 160,
+      "capacityCells": 16,
+      "level": 9,
+      "kills": 185,
+      "bossSpawned": false,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [
+        {
+          "tick": 713,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1317,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1995,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2618,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3319,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4304,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5161,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6494,
+          "upgrade": "orbit"
+        }
+      ],
+      "actionCount": 7886,
+      "actionsSha256": "06fffdc94086c6f6824acc5af1eded01c5330799aa6bf6fe66ef26f23e02cabe",
+      "checksum": "9bbae801",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "ca6229d0",
+      "battleChecksum": "9bbae801",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 0
+    },
+    {
+      "seed": 42,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 5,
+      "actualRawDamage": 50,
+      "damageCells": 5,
+      "hp": 160,
+      "maxHp": 160,
+      "capacityCells": 16,
+      "level": 13,
+      "kills": 428,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9258,
+      "upgrades": [
+        {
+          "tick": 599,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1131,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1871,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2571,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3189,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 4154,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5221,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 6361,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7365,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8643,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9624,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 10672,
+          "upgrade": "orbit"
+        }
+      ],
+      "actionCount": 10812,
+      "actionsSha256": "35eee14ebbb399bc861fe074f4ae3bdb0ae0bf1dbb46c86301b107c263992730",
+      "checksum": "2ec9cc6c",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "e66722fe",
+      "battleChecksum": "2ec9cc6c",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 1
+    },
+    {
+      "seed": 101,
+      "strategy": "novice",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 9979,
+      "combatSeconds": 166.31666666666666,
+      "storySeconds": 0,
+      "acceptedHits": 32,
+      "actualRawDamage": 320,
+      "damageCells": 32,
+      "hp": 0,
+      "maxHp": 220,
+      "capacityCells": 22,
+      "level": 11,
+      "kills": 303,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9569,
+      "upgrades": [
+        {
+          "tick": 662,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1210,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 1758,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2475,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3052,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4018,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 5093,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 6345,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7595,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9018,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 9989,
+      "actionsSha256": "f8315e7d43dc71174a02ef1a0fcefae8574e24fa59471147241b1f5a84fb466e",
+      "checksum": "cda9922f",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "5b1a79bc",
+      "battleChecksum": "cda9922f",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 1
+    },
+    {
+      "seed": 208907,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": 0,
+      "hp": 100,
+      "maxHp": 100,
+      "capacityCells": 10,
+      "level": 12,
+      "kills": 432,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8464,
+      "upgrades": [
+        {
+          "tick": 850,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1192,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1749,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2646,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3166,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3863,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4905,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 6239,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7671,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8509,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 9596,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "38a5819097be4d565a052c0c6da0bcb3b12af1ca2201736fb9a71cfc3f7f7181",
+      "checksum": "6d37c8d2",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "fd028575",
+      "battleChecksum": "6d37c8d2",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 1
+    },
+    {
+      "seed": 42,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": 0,
+      "hp": 100,
+      "maxHp": 100,
+      "capacityCells": 10,
+      "level": 12,
+      "kills": 438,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 9770,
+      "upgrades": [
+        {
+          "tick": 586,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1029,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1794,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2368,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 3106,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4055,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 5270,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 6147,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 7880,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 8691,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 9789,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "ffd6e8dbdccc4aa7d0ad82df3d1ad2147c5d051184c88953025438d41306bef4",
+      "checksum": "ff94b04b",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "ac423fab",
+      "battleChecksum": "ff94b04b",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 1
+    },
+    {
+      "seed": 101,
+      "strategy": "skilled",
+      "preference": "attack",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": 0,
+      "hp": 100,
+      "maxHp": 100,
+      "capacityCells": 10,
+      "level": 12,
+      "kills": 430,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 8529,
+      "upgrades": [
+        {
+          "tick": 608,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1140,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 1752,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2527,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3056,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 4165,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 5063,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 6090,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 7371,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8643,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 9842,
+          "upgrade": "pulse"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "b599edece3a4da3b038e9677d61dcabedde3a369572bbf34edf5a6fe99239603",
+      "checksum": "c71d5dc4",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "8bda109f",
+      "battleChecksum": "c71d5dc4",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 1
+    },
+    {
+      "seed": 208907,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 1,
+      "actualRawDamage": 10,
+      "damageCells": 1,
+      "hp": 200,
+      "maxHp": 200,
+      "capacityCells": 20,
+      "level": 12,
+      "kills": 410,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 10125,
+      "upgrades": [
+        {
+          "tick": 850,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 1192,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1749,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2646,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 3166,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3884,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 4894,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6010,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7265,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8723,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 9548,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "6b825e3c21d27625a4fb1d05230efeb412ca03d27da17bb3e78261d8dfccea19",
+      "checksum": "75577091",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "8985bd59",
+      "battleChecksum": "75577091",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 1
+    },
+    {
+      "seed": 42,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "won",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 1,
+      "actualRawDamage": 10,
+      "damageCells": 1,
+      "hp": 200,
+      "maxHp": 200,
+      "capacityCells": 20,
+      "level": 12,
+      "kills": 382,
+      "bossSpawned": true,
+      "bossKilled": true,
+      "bossKillTick": 10355,
+      "upgrades": [
+        {
+          "tick": 586,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1029,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1794,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 2368,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 3106,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4199,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 5386,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 6408,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7225,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 8489,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 10128,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "d4e06bf2adac35a425b997eefd74546efcadecdeb1db2e029c2399279a8a6005",
+      "checksum": "972e377a",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "b4d88ba1",
+      "battleChecksum": "972e377a",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 1
+    },
+    {
+      "seed": 101,
+      "strategy": "skilled",
+      "preference": "hull",
+      "phase": "lost",
+      "timeout": false,
+      "error": null,
+      "ticks": 10800,
+      "combatSeconds": 180,
+      "storySeconds": 0,
+      "acceptedHits": 0,
+      "actualRawDamage": 0,
+      "damageCells": 0,
+      "hp": 220,
+      "maxHp": 220,
+      "capacityCells": 22,
+      "level": 12,
+      "kills": 390,
+      "bossSpawned": true,
+      "bossKilled": false,
+      "bossKillTick": null,
+      "upgrades": [
+        {
+          "tick": 608,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 1140,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 1752,
+          "upgrade": "pulse"
+        },
+        {
+          "tick": 2527,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 3086,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 4107,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 5210,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 6169,
+          "upgrade": "hull"
+        },
+        {
+          "tick": 7221,
+          "upgrade": "orbit"
+        },
+        {
+          "tick": 8559,
+          "upgrade": "nova"
+        },
+        {
+          "tick": 10124,
+          "upgrade": "hull"
+        }
+      ],
+      "actionCount": 10811,
+      "actionsSha256": "6ad9fa5c496fb688d6c04564e999b7ff9784abc6f7af291d3efedffbbc62637e",
+      "checksum": "04bb1367",
+      "replayMatch": true,
+      "stageId": "desert-base",
+      "rulesVersion": "desert-base-1",
+      "finalChecksum": "f2741d5d",
+      "battleChecksum": "04bb1367",
+      "sameActionMatch": true,
+      "terminalReplays": 2,
+      "bossEvents": 1
+    }
+  ]
+}

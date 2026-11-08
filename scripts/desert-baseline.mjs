@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { readFile, writeFile } from 'node:fs/promises';
+import { gzipSync } from 'node:zlib';
+import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
+const [directory, output] = process.argv.slice(2);
+if (!directory || !output) throw new Error('Usage: desert-baseline.mjs baseline-directory output.json.gz');
+const baseline = 'bde5936d13d6890a72d24d36bb0039e48e36df44';
+for (const file of ['src/core.ts', 'scripts/armor-balance.mjs']) assert.equal(await readFile(resolve(directory, file), 'utf8'), execFileSync('git', ['show', `${baseline}:${file}`], { encoding: 'utf8' }));
+const core = await import(pathToFileURL(resolve(directory, 'dist/core.js')));
+const { playArmorCase } = await import(pathToFileURL(resolve(directory, 'scripts/armor-balance.mjs')));
+if (core.VERSION !== 'lunar-armor-1') throw new Error('Expected frozen pre-desert baseline');
+const cases = [];
+for (const strategy of ['stationary', 'novice', 'skilled']) for (const preference of ['attack', 'hull']) for (const seed of [208907, 42, 101]) cases.push(playArmorCase(core, seed, strategy, preference));
+if (cases.some(row => row.error || row.timeout || !row.replayMatch)) throw new Error('Baseline case failed');
+await writeFile(output, gzipSync(JSON.stringify({ baseline, node: process.versions.node, cases })));
+console.info({ event: 'desert.baseline.captured', cases: cases.length, actions: cases.reduce((total, row) => total + row.actionCount, 0), output });

@@ -1,8 +1,7 @@
-export const VERSION = 'lunar-armor-1';
+import { resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 10, hullCapacityCells: 2, hullRepairCells: 4, repairEveryTicks: HZ * 30 });
-export const DURATION = HZ * 180;
-export const ARENA = 1500;
 export type Upgrade = 'pulse' | 'orbit' | 'nova' | 'boots' | 'hull' | 'magnet';
 export type Phase = { kind: 'running' } | { kind: 'upgrading'; offers: Upgrade[] } | { kind: 'paused'; previous: 'running' } | { kind: 'won' } | { kind: 'lost' };
 export type Input = { x: number; y: number; dash: boolean };
@@ -14,19 +13,27 @@ export type Crystal = { x: number; y: number; value: number };
 export type Fx = { x: number; y: number; kind: 'hit' | 'kill' | 'nova' | 'dash'; life: number; size: number };
 export type Event = 'enemy-hit' | 'shot' | 'hit' | 'kill' | 'pickup' | 'upgrade' | 'dash' | 'won' | 'lost' | 'boss';
 export type World = {
-  seed: number; rng: number; tick: number; phase: Phase; nextId: number;
+  readonly context: StageContext;
+  readonly seed: number; rng: number; tick: number; phase: Phase; nextId: number;
   player: { x: number; y: number; hp: number; maxHp: number; invincible: number; dashCooldown: number; dashTicks: number; dx: number; dy: number };
   enemies: Enemy[]; shots: Shot[]; crystals: Crystal[]; effects: Fx[]; events: Event[];
   level: number; xp: number; threshold: number; kills: number; upgrades: Record<Upgrade, number>;
   fireCooldown: number; novaCooldown: number; spawnCooldown: number; bossSpawned: boolean; bossKilled: boolean;
 };
-export type Recording = { version: string; seed: number; actions: Action[] };
+export type ActionBuffer = { version: typeof VERSION; stageId: StageContext['stageId']; rulesVersion: StageContext['rulesVersion']; seed: number; actions: Action[] };
+export type Recording = Readonly<Omit<ActionBuffer, 'actions'> & { actions: readonly Action[]; finalChecksum: string }>;
 export const UPGRADE_ORDER: readonly Upgrade[] = Object.freeze<Upgrade[]>(['pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet']);
-export function createWorld(seed: number): World {
-  return { seed: seed >>> 0, rng: (seed >>> 0) || 1, tick: 0, phase: { kind: 'running' }, nextId: 1,
-    player: { x: ARENA / 2, y: ARENA / 2, hp: ARMOR_RULES.initialCells * ARMOR_RULES.hpPerCell, maxHp: ARMOR_RULES.initialCells * ARMOR_RULES.hpPerCell, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
+export function createWorld(request: unknown): World {
+  if (!object(request)) throw new SimulationError('invalid-data');
+  keys(request, ['stageId', 'rulesVersion', 'seed']);
+  const context = resolveStage(request.stageId, request.rulesVersion), rules = stageRules(context);
+  const seed = parseSeed(request.seed);
+  const world: World = { context, seed, rng: seed || 1, tick: 0, phase: { kind: 'running' }, nextId: 1,
+    player: { x: rules.arenaSize / 2, y: rules.arenaSize / 2, hp: ARMOR_RULES.initialCells * ARMOR_RULES.hpPerCell, maxHp: ARMOR_RULES.initialCells * ARMOR_RULES.hpPerCell, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
     enemies: [], shots: [], crystals: [], effects: [], events: [], level: 1, xp: 0, threshold: 5, kills: 0,
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
+  Object.defineProperties(world, { context: { writable: false, configurable: false }, seed: { writable: false, configurable: false } });
+  return world;
 }
 export function random(world: World): number {
   let n = world.rng;
@@ -40,14 +47,14 @@ export function normalizeInput(input: Input): Input {
   const length = Math.max(1, Math.hypot(x, y));
   return { x: x / length, y: y / length, dash: input.dash === true };
 }
-function clamp(n: number): number { return Math.max(36, Math.min(ARENA - 36, n)); }
+function clamp(world: World, n: number): number { return Math.max(36, Math.min(stageRules(world.context).arenaSize - 36, n)); }
 function distance(x: number, y: number, bx: number, by: number): number { return Math.hypot(x - bx, y - by); }
 function spawn(world: World, kind: EnemyKind): void {
   const angle = random(world) * Math.PI * 2;
   const d = kind === 'boss' ? 350 : 400 + random(world) * 100;
   const hp = kind === 'boss' ? 950 : kind === 'sentry' ? 50 : kind === 'drone' ? 22 : 30;
-  let x = clamp(world.player.x + Math.cos(angle) * d), y = clamp(world.player.y + Math.sin(angle) * d);
-  if (distance(x, y, world.player.x, world.player.y) < 250) { x = clamp(world.player.x - Math.cos(angle) * d); y = clamp(world.player.y - Math.sin(angle) * d); }
+  let x = clamp(world, world.player.x + Math.cos(angle) * d), y = clamp(world, world.player.y + Math.sin(angle) * d);
+  if (distance(x, y, world.player.x, world.player.y) < 250) { x = clamp(world, world.player.x - Math.cos(angle) * d); y = clamp(world, world.player.y - Math.sin(angle) * d); }
   world.enemies.push({ id: world.nextId++, kind, x, y, hp, maxHp: hp, radius: kind === 'boss' ? 27 : kind === 'sentry' ? 15 : 11, attack: 75 + Math.floor(random(world) * 120), flash: 0 });
 }
 function kill(world: World, enemy: Enemy): void {
@@ -104,9 +111,9 @@ function step(world: World, input: Input): void {
   }
   const speed = 2.5 + world.upgrades.boots * .24;
   if (p.dashTicks > 0) {
-    p.dashTicks--; p.x = clamp(p.x + p.dx * 8); p.y = clamp(p.y + p.dy * 8);
+    p.dashTicks--; p.x = clamp(world, p.x + p.dx * 8); p.y = clamp(world, p.y + p.dy * 8);
     if (world.tick % 2 === 0) world.effects.push({ x: p.x, y: p.y, kind: 'dash', life: 16, size: 10 });
-  } else { p.x = clamp(p.x + input.x * speed); p.y = clamp(p.y + input.y * speed); }
+  } else { p.x = clamp(world, p.x + input.x * speed); p.y = clamp(world, p.y + input.y * speed); }
   if (input.x !== 0 || input.y !== 0) { p.dx = input.x; p.dy = input.y; }
   if (world.tick % ARMOR_RULES.repairEveryTicks === 0) p.hp = Math.min(p.maxHp, p.hp + ARMOR_RULES.hpPerCell);
   world.spawnCooldown--;
@@ -116,7 +123,7 @@ function step(world: World, input: Input): void {
     spawn(world, kind);
     world.spawnCooldown = Math.max(13, 60 - Math.floor(t / 3));
   }
-  if (world.tick >= HZ * 140 && !world.bossSpawned) { spawn(world, 'boss'); world.bossSpawned = true; world.events.push('boss'); }
+  if (world.tick >= stageRules(world.context).bossSpawnTick && !world.bossSpawned) { spawn(world, 'boss'); world.bossSpawned = true; world.events.push('boss'); }
   world.fireCooldown--;
   if (world.fireCooldown <= 0 && world.enemies.length) {
     let target = world.enemies[0];
@@ -197,20 +204,87 @@ function step(world: World, input: Input): void {
     world.xp -= world.threshold; world.level++; world.threshold = Math.floor(world.threshold * 1.24) + 2;
     world.phase = { kind: 'upgrading', offers: offers(world) };
   }
-  if (world.phase.kind === 'running' && world.tick >= DURATION) {
+  if (world.phase.kind === 'running' && world.tick >= stageRules(world.context).durationTicks) {
     world.phase = { kind: world.bossKilled ? 'won' : 'lost' };
     world.events.push(world.bossKilled ? 'won' : 'lost');
   }
 }
-export function checksum(world: World): string {
-  const data = JSON.stringify({ ...world, events: [] });
-  let hash = 2166136261;
-  for (let i = 0; i < data.length; i++) hash = Math.imul(hash ^ data.charCodeAt(i), 16777619);
-  return (hash >>> 0).toString(16).padStart(8, '0');
+function hash(data: string): string {
+  let value = 2166136261;
+  for (let i = 0; i < data.length; i++) value = Math.imul(value ^ data.charCodeAt(i), 16777619);
+  return (value >>> 0).toString(16).padStart(8, '0');
 }
-export function replay(recording: Recording): World {
-  if (recording.version !== VERSION) throw new Error('Replay version mismatch');
-  const world = createWorld(recording.seed);
+export function checksum(world: World): string {
+  const { context, ...battle } = world;
+  return hash(JSON.stringify({ ...battle, events: [] }));
+}
+export function finalChecksum(world: World): string {
+  return hash(JSON.stringify([VERSION, world.context.stageId, world.context.rulesVersion, world.seed, checksum(world)]));
+}
+function object(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype;
+}
+function keys(value: Record<string, unknown>, expected: readonly string[]): void {
+  if (Reflect.ownKeys(value).length !== expected.length || expected.some(key => !Object.hasOwn(value, key))) throw new SimulationError('invalid-data');
+}
+function parseSeed(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 4294967295) throw new SimulationError('invalid-data');
+  return value;
+}
+function parseAction(value: unknown): Action {
+  if (!object(value)) throw new SimulationError('invalid-data');
+  if (value.kind === 'tick') {
+    keys(value, ['kind', 'input']);
+    if (!object(value.input)) throw new SimulationError('invalid-data');
+    keys(value.input, ['x', 'y', 'dash']);
+    const { x, y, dash } = value.input;
+    if (typeof x !== 'number' || !Number.isFinite(x) || typeof y !== 'number' || !Number.isFinite(y) || typeof dash !== 'boolean') throw new SimulationError('invalid-data');
+    return { kind: 'tick', input: Object.freeze({ x, y, dash }) };
+  }
+  if (value.kind === 'choose') {
+    keys(value, ['kind', 'upgrade']);
+    const upgrade = UPGRADE_ORDER.find(id => id === value.upgrade);
+    if (!upgrade) throw new SimulationError('invalid-data');
+    return { kind: 'choose', upgrade };
+  }
+  if (value.kind === 'pause' || value.kind === 'resume') { keys(value, ['kind']); return { kind: value.kind }; }
+  throw new SimulationError('invalid-data');
+}
+export function parseActionBuffer(input: unknown): ActionBuffer {
+  if (!object(input)) throw new SimulationError('invalid-data');
+  if (input.version !== VERSION) throw new SimulationError('incompatible-version');
+  keys(input, ['version', 'stageId', 'rulesVersion', 'seed', 'actions']);
+  const context = resolveStage(input.stageId, input.rulesVersion), seed = parseSeed(input.seed);
+  if (!Array.isArray(input.actions)) throw new SimulationError('invalid-data');
+  const actions = Array.from(input.actions, value => Object.freeze(parseAction(value)));
+  return { version: VERSION, ...context, seed, actions };
+}
+export function startRecording(world: World): ActionBuffer {
+  return { version: VERSION, ...world.context, seed: world.seed, actions: [] };
+}
+export function finishRecording(world: World, actions: readonly Action[]): Recording {
+  if (world.phase.kind !== 'won' && world.phase.kind !== 'lost') throw new SimulationError('nonterminal-replay');
+  const buffer = parseActionBuffer({ ...startRecording(world), actions });
+  return Object.freeze({ ...buffer, actions: Object.freeze(buffer.actions), finalChecksum: finalChecksum(world) });
+}
+export function prepareReplay(input: unknown): { world: World; recording: Recording } {
+  if (!object(input)) throw new SimulationError('invalid-data');
+  if (input.version !== VERSION) throw new SimulationError('incompatible-version');
+  keys(input, ['version', 'stageId', 'rulesVersion', 'seed', 'actions', 'finalChecksum']);
+  const { finalChecksum: expected, ...prefix } = input;
+  const buffer = parseActionBuffer(prefix);
+  if (typeof expected !== 'string' || !/^[0-9a-f]{8}$/.test(expected)) throw new SimulationError('invalid-data');
+  const recording = Object.freeze({ ...buffer, actions: Object.freeze(buffer.actions), finalChecksum: expected });
+  return { world: createWorld({ stageId: recording.stageId, rulesVersion: recording.rulesVersion, seed: recording.seed }), recording };
+}
+export function verifyReplay(world: World, recording: Recording, consumedActions: number): void {
+  if (consumedActions !== recording.actions.length) throw new SimulationError('incomplete-replay');
+  if (world.phase.kind !== 'won' && world.phase.kind !== 'lost') throw new SimulationError('nonterminal-replay');
+  if (world.context.stageId !== recording.stageId || world.context.rulesVersion !== recording.rulesVersion || world.seed !== recording.seed || finalChecksum(world) !== recording.finalChecksum) throw new SimulationError('checksum-mismatch');
+}
+export function replay(input: unknown): World {
+  const { world, recording } = prepareReplay(input);
   for (const action of recording.actions) dispatch(world, action);
+  verifyReplay(world, recording, recording.actions.length);
   return world;
 }

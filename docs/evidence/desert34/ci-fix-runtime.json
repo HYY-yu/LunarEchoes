@@ -1,0 +1,24 @@
+{
+  "runtimeBaselineHead": "dda6971e9c1f990b18fa4f4a2020baa2aa72ede2",
+  "runtimeFilesCompared": 14,
+  "runtimeByteDifferences": 0,
+  "productionSourceDifferences": 0,
+  "historicalActionBytesUnchanged": true,
+  "baselineActionsSha256": "d21bf773c29a32bec82ca34af79bae655626f2fea446df7609e97a2805a9caf8",
+  "runtimeSha256": {
+    "art.js": "7c2599408fe6ce61590ee08c3fac9cbd28b1305d106e8cb4a200bcf18d822909",
+    "audio.js": "46c5a5d771595a0ad7f4ee6513f32fca9c82f8625337d0b7d4d56eaf7e5c8ab8",
+    "core.js": "70441c7857131220aa527f9818de1b4a5e552df19bad2f15ac45a609a11a213f",
+    "desert-scene.js": "7de943ddee11824eac65daa35b99bab5bf40cfaaea29c018b4f685f0f3aafd08",
+    "i18n.js": "709787c370539812ba7f1668a0c01420957335e44050b8a4bd9d00b64e3298df",
+    "index.html": "3a5707ef6737c252201f47613080d1dbfa5ccdf00b9d819e68ea1f09700abd33",
+    "logger.js": "bc17b67fd97f29e5017b45bbff4af8257f1d8df69e265415fffc342ea32cefc7",
+    "main.js": "4abd8d33df6c8df0b5feb4599cf9033e61231e06090fc6858d2de82ce18d1c46",
+    "progress-storage.js": "cfeacdddb39dde2d415ba2d06925a9efb9bf7bb82b236f77a81a54b5f5da4f03",
+    "progress.js": "90917ab5fc67cd09c88a81fb4533375a698d43cc822b1ad0216e24e29c7a7317",
+    "render.js": "bacc0182a656155cffa423daff3c7e075a056a1bed0345d441a8bb875eb032be",
+    "stage-contract.js": "43b623992f7fcf57e4434ed2c638a6607afbd175de61c4d3d0430ceedf810594",
+    "stage-rules.js": "8f888820cf6b09cd3df5f69a10bcfd3da4ba6a90a5db4e97c5b844a55c5b95cb",
+    "style.css": "b5f2fae5a4570a059da2472807b91f72663f7e12e89b5ba33f1cd1b5ca4c884e"
+  }
+}

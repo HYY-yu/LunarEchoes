@@ -1,28 +1,26 @@
-import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
-import ts from 'typescript';
+import { loadCoreRevision } from './load-core-revision.mjs';
+import { stageRules } from '../dist/stage-rules.js';
 import * as head from '../dist/core.js';
-const revision = process.argv[2] ?? '56c6923d381baf40750be08da00a6fa576d6723c';
-const source = execFileSync('git', ['show', `${revision}:src/core.ts`], { encoding: 'utf8' });
-const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
-const base = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
+const revision = process.argv[2] ?? 'bde5936d13d6890a72d24d36bb0039e48e36df44';
+const { core: base } = await loadCoreRevision(revision);
 let actions = 0;
 function compare(a, b, action) {
   base.dispatch(a, action); head.dispatch(b, action); actions++;
-  const { events: oldEvents, ...oldState } = a, { events: newEvents, ...newState } = b;
+  const { events: oldEvents, context: oldContext, ...oldState } = a, { events: newEvents, context, ...newState } = b;
   assert.deepEqual(newState, oldState); assert.equal(head.checksum(b), base.checksum(a));
-  assert.deepEqual(newEvents.filter(event => event !== 'enemy-hit'), oldEvents);
+  assert.deepEqual(base.VERSION === 'lunar-1' ? newEvents.filter(event => event !== 'enemy-hit') : newEvents, oldEvents);
 }
 for (const seed of [208907, 42, 101]) {
-  const a = base.createWorld(seed), b = head.createWorld(seed);
-  for (let i = 0; i < head.DURATION + 100 && !['won', 'lost'].includes(a.phase.kind); i++) {
+  const a = base.createWorld(base.VERSION === 'lunar-2' ? { stageId: 'desert-base', rulesVersion: 'desert-base-1', seed } : seed), b = head.createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed });
+  for (let i = 0; i < stageRules(b.context).durationTicks + 100 && !['won', 'lost'].includes(a.phase.kind); i++) {
     if (a.phase.kind === 'upgrading') compare(a, b, { kind: 'choose', upgrade: a.phase.offers[0] });
     if (i % 160 === 0) { compare(a, b, { kind: 'pause' }); compare(a, b, { kind: 'resume' }); }
     compare(a, b, { kind: 'tick', input: { x: Math.cos(i / 120), y: Math.sin(i / 120), dash: i % 160 === 0 } });
   }
 }
 for (const weapon of ['bullet', 'orbit', 'nova']) {
-  const a = base.createWorld(1), b = head.createWorld(1);
+  const a = base.createWorld(base.VERSION === 'lunar-2' ? { stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 1 } : 1), b = head.createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 1 });
   for (const world of [a, b]) {
     world.spawnCooldown = 999; world.fireCooldown = 999;
     const x = world.player.x + (weapon === 'orbit' ? 58 : 50);
@@ -31,4 +29,4 @@ for (const weapon of ['bullet', 'orbit', 'nova']) {
   }
   compare(a, b, { kind: 'tick', input: { x: 0, y: 0, dash: false } }); assert(b.events.includes('enemy-hit'));
 }
-console.info({ event: 'audio.differential_passed', base: revision, actions, compared: 'complete World excluding transient events, every checksum, old event order' });
+console.info({ event: 'audio.differential_passed', base: revision, actions, compared: 'complete battle World excluding only context and transient events, every checksum, old event order' });

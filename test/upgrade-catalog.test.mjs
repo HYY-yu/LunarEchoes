@@ -9,7 +9,7 @@ const baseline = JSON.parse(readFileSync(new URL('../docs/evidence/equipment22/b
 
 test('upgrade catalog matches every world upgrade exactly once in offer order', () => {
   assert.deepEqual(UPGRADE_ORDER, expected);
-  assert.deepEqual(UPGRADE_ORDER, Object.keys(createWorld(42).upgrades));
+  assert.deepEqual(UPGRADE_ORDER, Object.keys(createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 }).upgrades));
   assert.equal(new Set(UPGRADE_ORDER).size, UPGRADE_ORDER.length);
 });
 
@@ -19,7 +19,7 @@ test('external mutation is rejected and offers preserve the catalog and baseline
   assert.throws(() => { UPGRADE_ORDER[0] = 'hull'; }, TypeError);
   assert.throws(() => UPGRADE_ORDER.reverse(), TypeError);
   for (const original of baseline.results) {
-    const world = createWorld(original.seed), offers = [];
+    const world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: original.seed }), offers = [];
     for (let n = 0; n < 8; n++) {
       world.xp = world.threshold;
       dispatch(world, { kind: 'tick', input: { x: 0, y: 0, dash: false } });

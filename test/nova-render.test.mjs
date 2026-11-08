@@ -20,7 +20,7 @@ function scene(t) {
   const previous = globalThis.document;
   globalThis.document = { createElement() { return { getContext() { return { ...context, fillRect() {} }; } }; } };
   t.after(() => { if (previous === undefined) delete globalThis.document; else globalThis.document = previous; });
-  const render = createRenderer(canvas), world = createWorld(42);
+  const render = createRenderer(canvas), world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 });
   world.fireCooldown = 100000; world.spawnCooldown = 100000;
   function draw(time = 0, renderedWorld = world) {
     pixels.length = 0; arcs.length = 0; hits.length = 0;
@@ -66,7 +66,7 @@ test('nova freezes through pause upgrade and terminal states and repeats after r
   for (let i = 0; i < 29; i++) dispatch(world, { kind: 'tick', input: { x: 0, y: 0, dash: false } });
   assert.equal(world.effects.filter(fx => fx.kind === 'nova').length, 0);
   assert.equal(draw().length, 0);
-  const restarted = createWorld(42);
+  const restarted = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 });
   restarted.upgrades.nova = 1; restarted.fireCooldown = 100000; restarted.spawnCooldown = 100000;
   dispatch(restarted, { kind: 'tick', input: { x: 0, y: 0, dash: false } });
   assert.notEqual(restarted, world);
