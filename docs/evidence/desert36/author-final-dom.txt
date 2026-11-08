@@ -1,0 +1,17 @@
+- generic "Desert base combat test. Story and campaign pending."
+- banner:
+  - navigation:
+    - button "Sound on"
+    - button "中文"
+    - button "Pause"
+- generic: Armor
+- meter "Armor"
+- generic: Signal sync
+- strong: 00:41
+- text: Level 02
+- strong: 40 Kills
+- generic "Pulse rifle · LV 2":
+  - generic: LV 2
+- status
+- contentinfo:
+  - generic: DESERT COMBAT TEST · STORY AND CAMPAIGN PENDING · Mission seed 2171555687 · SURVIVE 03:00 · DEFEAT THE HARVESTER
