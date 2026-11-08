@@ -1,12 +1,54 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { createWorld, dispatch, checksum, VERSION } from '../dist/core.js';
+import { createWorld, dispatch, checksum, VERSION, UPGRADE_ORDER } from '../dist/core.js';
 
 const digest = value => createHash('sha256').update(value).digest('hex');
 const inputDigest = recording => digest(JSON.stringify(recording));
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const fixture = new URL('./fixtures/checksum-prefix.json', import.meta.url);
+
+function numericRecord(value, path, numbers, other = []) {
+  const keys = [...numbers, ...other];
+  if (!object(value) || Object.keys(value).length !== keys.length || keys.some(key => !Object.hasOwn(value, key))) throw new Error(`Invalid World structure at ${path}`);
+  for (const key of numbers) if (!Number.isFinite(value[key])) throw new Error(`Invalid World number at ${path}.${key}`);
+}
+
+function variant(value, choices, path) {
+  if (!choices.includes(value)) throw new Error(`Invalid World variant at ${path}`);
+}
+
+function worldInput(world) {
+  numericRecord(world, '$', ['seed', 'rng', 'tick', 'nextId', 'level', 'xp', 'threshold', 'kills', 'fireCooldown', 'novaCooldown', 'spawnCooldown'], ['phase', 'player', 'enemies', 'shots', 'crystals', 'effects', 'events', 'upgrades', 'bossSpawned', 'bossKilled']);
+  for (const key of ['bossSpawned', 'bossKilled']) if (typeof world[key] !== 'boolean') throw new Error(`Invalid World boolean at $.${key}`);
+  numericRecord(world.player, '$.player', ['x', 'y', 'hp', 'maxHp', 'invincible', 'dashCooldown', 'dashTicks', 'dx', 'dy']);
+  const upgrades = UPGRADE_ORDER;
+  numericRecord(world.upgrades, '$.upgrades', upgrades);
+  if (!object(world.phase)) throw new Error('Invalid World phase');
+  variant(world.phase.kind, ['running', 'upgrading', 'paused', 'won', 'lost'], '$.phase.kind');
+  const phaseKeys = world.phase.kind === 'upgrading' ? ['kind', 'offers'] : world.phase.kind === 'paused' ? ['kind', 'previous'] : ['kind'];
+  numericRecord(world.phase, '$.phase', [], phaseKeys);
+  if (world.phase.kind === 'paused') variant(world.phase.previous, ['running'], '$.phase.previous');
+  if (world.phase.kind === 'upgrading') {
+    if (!Array.isArray(world.phase.offers)) throw new Error('Invalid World offers');
+    for (const offer of world.phase.offers) variant(offer, upgrades, '$.phase.offers');
+  }
+  for (const key of ['enemies', 'shots', 'crystals', 'effects', 'events']) if (!Array.isArray(world[key])) throw new Error(`Invalid World array at $.${key}`);
+  if (world.events.length) throw new Error('Invalid World events: diagnostic snapshots require an empty array');
+  for (const enemy of world.enemies) {
+    numericRecord(enemy, '$.enemies[]', ['id', 'x', 'y', 'hp', 'maxHp', 'radius', 'attack', 'flash'], ['kind']);
+    variant(enemy.kind, ['crawler', 'drone', 'sentry', 'boss'], '$.enemies[].kind');
+  }
+  for (const shot of world.shots) {
+    numericRecord(shot, '$.shots[]', ['x', 'y', 'vx', 'vy', 'life', 'damage'], ['hostile']);
+    if (typeof shot.hostile !== 'boolean') throw new Error('Invalid World boolean at $.shots[].hostile');
+  }
+  for (const crystal of world.crystals) numericRecord(crystal, '$.crystals[]', ['x', 'y', 'value']);
+  for (const effect of world.effects) {
+    numericRecord(effect, '$.effects[]', ['x', 'y', 'life', 'size'], ['kind']);
+    variant(effect.kind, ['hit', 'kill', 'nova', 'dash'], '$.effects[].kind');
+  }
+}
 
 function recordingInput(value) {
   if (!object(value) || value.version !== VERSION || !Number.isInteger(value.seed) || value.seed < 0 || value.seed > 4294967295) throw new Error('Invalid diagnostic recording');
@@ -45,6 +87,7 @@ function traceInput(value) {
   if (!Array.isArray(value.frames) || value.frames.length !== recording.actions.length + 1) throw new Error('Trace frame count is invalid');
   for (const [index, frame] of value.frames.entries()) {
     if (!object(frame) || frame.actionIndex !== index || !object(frame.world) || !Number.isInteger(frame.world.tick) || frame.world.tick < 0) throw new Error(`Invalid trace frame ${index}`);
+    worldInput(frame.world);
     if (checksum(frame.world) !== frame.checksum) throw new Error(`Trace frame checksum is invalid at ${index}`);
   }
   return value;
