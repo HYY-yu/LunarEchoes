@@ -1,0 +1,83 @@
+diff --git a/src/core.ts b/src/core.ts
+index 3e875da..d23e8b2 100644
+--- a/src/core.ts
++++ b/src/core.ts
+@@ -20,7 +20,7 @@ export type World = {
+   fireCooldown: number; novaCooldown: number; spawnCooldown: number; bossSpawned: boolean; bossKilled: boolean;
+ };
+ export type Recording = { version: string; seed: number; actions: Action[] };
+-const upgrades: Upgrade[] = ['pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet'];
++export const UPGRADE_ORDER: readonly Upgrade[] = Object.freeze<Upgrade[]>(['pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet']);
+ export function createWorld(seed: number): World {
+   return { seed: seed >>> 0, rng: (seed >>> 0) || 1, tick: 0, phase: { kind: 'running' }, nextId: 1,
+     player: { x: ARENA / 2, y: ARENA / 2, hp: 100, maxHp: 100, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
+@@ -66,7 +66,7 @@ function damagePlayer(world: World, damage: number): void {
+   if (p.hp === 0) { world.phase = { kind: 'lost' }; world.events.push('lost'); }
+ }
+ function offers(world: World): Upgrade[] {
+-  const pool = [...upgrades];
++  const pool = [...UPGRADE_ORDER];
+   const result: Upgrade[] = [];
+   while (result.length < 3) result.push(pool.splice(Math.floor(random(world) * pool.length), 1)[0]);
+   return result;
+diff --git a/src/main.ts b/src/main.ts
+index d37452b..6aa2eea 100644
+--- a/src/main.ts
++++ b/src/main.ts
+@@ -1,4 +1,4 @@
+-import { createWorld, dispatch, checksum, VERSION, HZ, DURATION, type World, type Action, type Recording, type Upgrade } from './core.js';
++import { createWorld, dispatch, checksum, VERSION, HZ, DURATION, UPGRADE_ORDER, type World, type Action, type Recording } from './core.js';
+ import { createRenderer } from './render.js';
+ import { Synth } from './audio.js';
+ import { dictionary, upgradeLabel, type Language } from './i18n.js';
+@@ -81,7 +81,7 @@ function updateUi(force = false) {
+   element('dash').textContent = world.player.dashCooldown > 0 ? (world.player.dashCooldown / HZ).toFixed(1) : t.dash;
+   element('footer-left').textContent = screen === 'title' ? t.prototype : `${t.seed} ${world.seed} · ${screen === 'replay' ? t.replaying : t.objective}`;
+   const equipment = element('equipment'); equipment.replaceChildren();
+-  for (const id of ['pulse', 'orbit', 'nova'] satisfies Upgrade[]) if (world.upgrades[id]) { const node = document.createElement('span'); node.innerHTML = `<i class="module-icon icon-${id}" aria-hidden="true"></i><span>LV ${world.upgrades[id]}</span>`; node.title = upgradeLabel(id, language).title; node.setAttribute('aria-label', `${node.title} · LV ${world.upgrades[id]}`); equipment.append(node); }
++  for (const id of UPGRADE_ORDER) if (world.upgrades[id] > 0) { const node = document.createElement('span'); node.innerHTML = `<i class="module-icon icon-${id}" aria-hidden="true"></i><span>LV ${world.upgrades[id]}</span>`; node.title = upgradeLabel(id, language).title; node.setAttribute('aria-label', `${node.title} · LV ${world.upgrades[id]}`); equipment.append(node); }
+   if (!force && signature === lastUi) return;
+   lastUi = signature; overlay.replaceChildren(); synth.setSession(screen === 'title' ? 'menu' : world.phase.kind === 'won' || world.phase.kind === 'lost' ? 'terminal' : world.phase.kind);
+   if (screen === 'title') {
+diff --git a/test/upgrade-catalog.test.mjs b/test/upgrade-catalog.test.mjs
+new file mode 100644
+index 0000000..68bbed2
+--- /dev/null
++++ b/test/upgrade-catalog.test.mjs
+@@ -0,0 +1,36 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { readFileSync } from 'node:fs';
++import { createWorld, dispatch, checksum, UPGRADE_ORDER } from '../dist/core.js';
++
++const expected = ['pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet'];
++const baseline = JSON.parse(readFileSync(new URL('../docs/evidence/equipment22/baseline.json', import.meta.url)));
++
++test('upgrade catalog matches every world upgrade exactly once in offer order', () => {
++  assert.deepEqual(UPGRADE_ORDER, expected);
++  assert.deepEqual(UPGRADE_ORDER, Object.keys(createWorld(42).upgrades));
++  assert.equal(new Set(UPGRADE_ORDER).size, UPGRADE_ORDER.length);
++});
++
++test('external mutation is rejected and offers preserve the catalog and baseline simulation', () => {
++  assert.equal(Object.isFrozen(UPGRADE_ORDER), true);
++  assert.throws(() => UPGRADE_ORDER.push('pulse'), TypeError);
++  assert.throws(() => { UPGRADE_ORDER[0] = 'hull'; }, TypeError);
++  assert.throws(() => UPGRADE_ORDER.reverse(), TypeError);
++  for (const original of baseline.results) {
++    const world = createWorld(original.seed), offers = [];
++    for (let n = 0; n < 8; n++) {
++      world.xp = world.threshold;
++      dispatch(world, { kind: 'tick', input: { x: 0, y: 0, dash: false } });
++      assert.equal(world.phase.kind, 'upgrading');
++      offers.push([...world.phase.offers]);
++      assert.equal(new Set(world.phase.offers).size, 3);
++      assert(world.phase.offers.every(id => UPGRADE_ORDER.includes(id)));
++      dispatch(world, { kind: 'choose', upgrade: world.phase.offers[0] });
++      assert.deepEqual(UPGRADE_ORDER, expected);
++    }
++    assert.deepEqual(offers, original.offers);
++    assert.equal(checksum(world), original.checksum);
++    assert.equal(world.rng, original.rng);
++  }
++});

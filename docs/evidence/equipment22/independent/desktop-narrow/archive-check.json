@@ -1,0 +1,48 @@
+{
+  "checkedAt": "2026-11-08",
+  "method": "Original source and archived bytes compared directly; SHA256 and byte counts match frames.json; dimensions independently read with macOS sips.",
+  "frames": [
+    {
+      "file": "independent-replay-en.jpg",
+      "bytes": 49172,
+      "sha256": "a686e6201c6a58d2a6a7db92c9712f08b03b72e0c1e37dc3a961afccb75e1a6f",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "file": "independent-reset-en.jpg",
+      "bytes": 45850,
+      "sha256": "b543c3dab5223d83d219e51f53c18c15338e6efcb7625861c861643f8a3dd62f",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "file": "six-desktop-en.jpg",
+      "bytes": 49869,
+      "sha256": "75fde85f03a71a560e02fe3d663ca79eba10810d9e8c6ff6d4f189f7ff685795",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "file": "six-desktop-zh-running.jpg",
+      "bytes": 78665,
+      "sha256": "f38be7d201024ddb894b75f9b483129731bf486b4859a63982bcf316610a8d5c",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "file": "six-narrow-zh-running.jpg",
+      "bytes": 25472,
+      "sha256": "ac62701b43533fc2c159a4684f8b51a780ec483f5cbd753e470f43697ccc3279",
+      "width": 390,
+      "height": 693
+    },
+    {
+      "file": "six-narrow-en-running.jpg",
+      "bytes": 26740,
+      "sha256": "f3417fda8cc6809f715e885cc4f1b79e48babe0fc4772e8f720c0a6b234bc044",
+      "width": 390,
+      "height": 693
+    }
+  ]
+}
