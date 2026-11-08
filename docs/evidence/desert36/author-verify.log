@@ -1,0 +1,171 @@
+
+> lunar-relay@0.1.0 verify
+> npm test && npm run check && node scripts/simulate.mjs
+
+
+> lunar-relay@0.1.0 test
+> npm run build && node --test test/*.test.mjs
+
+
+> lunar-relay@0.1.0 build
+> node scripts/build.mjs
+
+✔ balance driver records actual input replay and integer candidate armor without filtering failures (371.589625ms)
+✔ all accepted contact and projectile damage consumes exactly one armor cell (2.221209ms)
+✔ invincibility and dash keep their existing decrement-before-contact boundaries (0.659542ms)
+✔ the final cell produces one terminal loss and no further simulation (0.213542ms)
+✔ passive repair is one capped whole cell at the global thirty-second boundary (0.199208ms)
+✔ repair still precedes accepted damage and can cancel its net tick change (0.18125ms)
+✔ hull adds two cells and repairs at most four without duplicate or invalid selection (0.168875ms)
+✔ normal actions keep both armor values in whole cells and candidate replays reject old rules (30.676791ms)
+✔ mute and hidden create no sources, cancel active and future voices (1.366417ms)
+✔ pause cancels battle while feedback and exactly one outcome remain possible (0.17775ms)
+✔ duplicate cues throttle and polyphony stays bounded (0.14325ms)
+✔ pending activation cannot revive muted hidden or restarted generation (0.136708ms)
+✔ music retains bass and percussion and resume never catches up stale beats (0.901ms)
+✔ mode transitions cancel old feedback but same mode preserves its own cue (0.330583ms)
+✔ pending audio activation preserves the latest session pause state (0.171541ms)
+✔ first interaction and unmute confirmation activate before feedback (0.166458ms)
+✔ a terminal transition invalidates pending button confirmation (0.734708ms)
+✔ replay exhaustion retains terminal sound while a real menu change stops it (0.302958ms)
+✔ pending device resume survives keyboard upgrade while stale UI feedback expires (0.110708ms)
+✔ same seed and inputs reproduce the complete state (14.4485ms)
+✔ pause freezes simulation and resume continues (0.130125ms)
+✔ upgrade freezes combat and can only be selected once (0.102875ms)
+✔ death is terminal and emits a single outcome (0.093333ms)
+✔ fresh deployment clears all previous combat state (0.341875ms)
+✔ input is finite, normalized and diagonal speed is limited (0.364208ms)
+✔ corner spawns cannot overlap the player (0.17225ms)
+✔ end of mission wins only after boss defeat (0.073958ms)
+✔ replay rejects incompatible versions (0.087584ms)
+✔ enemy-hit is transient and emitted for bullet orbit and nova damage (0.378709ms)
+✔ legacy sprite pixels remain unchanged and crawler has three contained leg poses (6.010375ms)
+✔ crawler animation uses simulation ticks, freezes with combat and leaves all World data unchanged (6.842625ms)
+✔ walk phases retain hurt alpha and other enemies telegraphs (3.96025ms)
+✔ astronaut preserves its torso and palette across three contained leg poses (2.76775ms)
+✔ astronaut walks only after observed movement, remains stable within one tick and stops at idle (7.901292ms)
+✔ astronaut freezes its selected pose through pause upgrade and terminal states (2.528ms)
+✔ astronaut sampling resets on world replacement and rewind, and handles skipped ticks without history guesses (3.240208ms)
+✔ astronaut boundary input stays idle and preserves hurt alpha and shadow anchor (1.433666ms)
+✔ desert map caches small integer pixel sources and restores all modified caller state (6.632916ms)
+✔ desert map repeats geometry without randomness and separates west wreckage and east array (4.503625ms)
+✔ actual renderer leaves complete World and checksum untouched across movement pause and restart (5.142708ms)
+✔ only the implemented desert context builds a world and its identity cannot drift (0.793417ms)
+✔ the real desert run matches the frozen engine on this platform at every captured action (1443.797959ms)
+✔ the same-platform regression oracle rejects battle mutations and serialization drift (1.371208ms)
+✔ actual movement and spawning consume the controlled arena and Boss may exceed the ordinary enemy cap (0.193667ms)
+✔ full recordings have six fields and replay twice through the shared validated factory (131.565ms)
+✔ context final hash uses the approved fixed array and original event-free battle state (0.346708ms)
+✔ pending buffers cannot become terminal recordings and copies isolate action mutation (10.603209ms)
+✔ all structure and compatibility errors reject before the current world is replaced (15.221083ms)
+✔ valid out-of-range vectors keep normalizeInput semantics and altered battle actions fail final verification (98.594ms)
+✔ fresh world and recording reset every build field after a real terminal run (0.130709ms)
+✔ both languages distinguish compatibility failures and unfinished desert content (0.127125ms)
+✔ desert illustrations cover their pixel frame, remain deterministic and distinguish outcomes (24.071333ms)
+✔ desert illustration leaves the caller drawing state intact (3.81175ms)
+✔ canonical desert script has eight ordered bilingual beats and victory-only rainforest handoff (0.967291ms)
+✔ catalog rejects malformed roots, entries, duplicate IDs, missing beats and reordering (0.3985ms)
+✔ every beat rejects wrong stage and missing or blank locales (2.92075ms)
+✔ defeat cannot route to success and only victory can carry the planned handoff (0.432875ms)
+✔ CLI reports structured success and file loading errors (123.274042ms)
+✔ nova has distinct expanding and dissolving pixel frames inside its existing radius (32.610625ms)
+✔ nova freezes through pause upgrade and terminal states and repeats after restart (8.9095ms)
+✔ nova leaves enemy danger telegraphs and non nova effects intact (2.186ms)
+✔ new progress is a frozen first-stage snapshot without a persisted write (1.957667ms)
+✔ each known progress boundary unlocks exactly its ordered prefix (0.974334ms)
+✔ all progress, stage, source and outcome combinations enforce one adjacent grant (0.951959ms)
+✔ a full campaign advances in order and duplicate or old wins cannot chain grants (0.347375ms)
+✔ unknown or missing source and outcome are rejected rather than treated as victory (0.491ms)
+✔ new snapshots preserve the two-field codec and rejected raw input remains rejected (0.444ms)
+✔ opening absent or valid progress only reads and exposes immutable snapshots (2.581416ms)
+✔ rejected saves preserve exact bytes, request immediate recovery and block future automatic writes (0.617125ms)
+✔ successful advanced persistence uses preflight, write, exact readback and skips duplicate or older results (0.329917ms)
+✔ a newer valid disk boundary is retained in both session and storage across sequential sessions (0.163958ms)
+✔ save preflight rejects replacement bad data before writing and retains the in-session advancement (0.21675ms)
+✔ load and save preflight read failures retain the original exception and protect against writes (0.217541ms)
+✔ a write error keeps the advance, does not roll back and permits only a genuinely newer retry (0.563125ms)
+✔ post-write failures and every unequal readback are uncertain without rollback or inferred protection (0.472542ms)
+✔ cancelled or invalid reset makes no storage call and does not change ready or protected state (0.277708ms)
+✔ confirmed reset rereads, overwrites even an unsupported save, verifies, then resets and unprotects (0.181042ms)
+✔ each reset failure stage preserves the prior session and protection and never rolls back (1.249ms)
+✔ injected caller objects and previously exposed snapshots cannot mutate retained progress (0.180583ms)
+✔ all six known stage boundaries round trip without implying playable content (2.084833ms)
+✔ encoding emits only the canonical two fields and does not mutate its input (0.216709ms)
+✔ only raw null is missing; empty strings and malformed JSON are rejected verbatim (0.100291ms)
+✔ JSON root types cannot become valid or missing progress (0.670833ms)
+✔ missing or incorrectly typed versions are distinct from unsupported integer versions (0.722416ms)
+✔ v1 requires exactly its two fields (0.851291ms)
+✔ stage IDs require exact known strings without coercion or fallback (0.117666ms)
+✔ mixed errors obey documented priority and preserve every raw character (0.064875ms)
+✔ the fixed diagnostic prefix uses real dispatch and repeated captures match (16.340791ms)
+✔ comparison identifies the first changed state field and its saved double bits (7.975875ms)
+✔ comparison rejects mismatched core, actions, Node and corrupted frames (18.838834ms)
+✔ comparison rejects malformed World structures even when their checksum is recomputed (68.619875ms)
+✔ valid state differences remain diagnosable without matching local values or entity counts (14.826ms)
+✔ CLI fails on missing files, malformed arguments and the wrong required Node (134.750875ms)
+✔ two stage samples load with distinct maps and complete bilingual story (0.8165ms)
+✔ complete campaigns require all six stages in their canonical order (0.720042ms)
+✔ unknown, duplicate, unordered and missing stage references do not fall back (0.15475ms)
+✔ duration rejects noninteger, nonfinite and out-of-range input (0.147625ms)
+✔ wave schedule bounds and references are validated (0.225709ms)
+✔ boss must reference the existing boss kind and appear before stage end (0.121875ms)
+✔ each story beat requires nonblank Chinese and English strings (8.509083ms)
+✔ malformed roots, nested objects and sparse arrays are rejected (0.322125ms)
+✔ parsed catalog owns deeply immutable data isolated from its input (0.236083ms)
+✔ upgrade catalog matches every world upgrade exactly once in offer order (1.675333ms)
+✔ external mutation is rejected and offers preserve the catalog and baseline simulation (1.88525ms)
+ℹ tests 104
+ℹ suites 0
+ℹ pass 104
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2178.919292
+
+> lunar-relay@0.1.0 check
+> npm run build && node scripts/check.mjs
+
+
+> lunar-relay@0.1.0 build
+> node scripts/build.mjs
+
+{
+  event: 'check.complete',
+  gzipBytes: 32626,
+  budgetBytes: 153600,
+  passed: true
+}
+{
+  event: 'simulation.finished',
+  seed: 208907,
+  phase: 'won',
+  seconds: 180,
+  kills: 432,
+  level: 12,
+  hp: 100,
+  bossKilled: true,
+  checksum: '6d37c8d2'
+}
+{
+  event: 'simulation.finished',
+  seed: 42,
+  phase: 'won',
+  seconds: 180,
+  kills: 438,
+  level: 12,
+  hp: 100,
+  bossKilled: true,
+  checksum: 'ff94b04b'
+}
+{
+  event: 'simulation.finished',
+  seed: 101,
+  phase: 'won',
+  seconds: 180,
+  kills: 430,
+  level: 12,
+  hp: 100,
+  bossKilled: true,
+  checksum: 'c71d5dc4'
+}

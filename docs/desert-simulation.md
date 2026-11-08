@@ -1,6 +1,6 @@
 # 沙漠战斗接入
 
-[Issue #34](https://github.com/HYY-yu/LunarEchoes/issues/34) 将已运行的战斗接入首关身份。唯一可建世界的组合为 `desert-base` 与 `desert-base-1`。其他五个已知 ID、未知 ID、错误规则均拒绝。当前仍使用临时月面美术，界面明确标记地图与剧情待接入。本任务不完成 B1、B2 或 Issue #23。
+[Issue #34](https://github.com/HYY-yu/LunarEchoes/issues/34) 将已运行的战斗接入首关身份。唯一可建世界的组合为 `desert-base` 与 `desert-base-1`。其他五个已知 ID、未知 ID、错误规则均拒绝。PR35 验收时使用临时月面美术，界面标记地图与剧情待接入；后续 Issue #36 将其替换为代码像素沙漠战场，见[沙漠基地战场地图](desert-map.md)。剧情与战役仍待接入。本任务不完成 B1、B2 或 Issue #23。
 
 ## 规则与世界
 
