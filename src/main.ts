@@ -1,4 +1,4 @@
-import { createWorld, dispatch, checksum, VERSION, HZ, DURATION, UPGRADE_ORDER, type World, type Action, type Recording } from './core.js';
+import { createWorld, dispatch, checksum, VERSION, HZ, DURATION, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
 import { dictionary, upgradeLabel, type Language } from './i18n.js';
@@ -16,6 +16,9 @@ let lastRecording: Recording | null = null;
 let lastChecksum = '';
 let replayIndex = 0;
 let accumulator = 0, lastFrame = 0, lastUi = '', noticeTimer = 0;
+const armorNode = element('armor-cells');
+const armorSpans: HTMLSpanElement[] = [];
+let lastArmorCurrent = -1, lastArmorMaximum = -1, lastArmorLanguage: Language | null = null;
 const keys = new Set<string>();
 let stickX = 0, stickY = 0, dashPressed = false;
 const coarse = matchMedia('(pointer: coarse)').matches;
@@ -64,6 +67,19 @@ function panel(title: string, subtitle: string): HTMLElement {
   section.append(eyebrow, heading, description); overlay.append(section); return section;
 }
 function formatTime(ticks: number) { const seconds = Math.floor(ticks / HZ); return `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`; }
+function updateArmor() {
+  const current = world.player.hp / ARMOR_RULES.hpPerCell, maximum = world.player.maxHp / ARMOR_RULES.hpPerCell;
+  if (current === lastArmorCurrent && maximum === lastArmorMaximum && language === lastArmorLanguage) return;
+  while (armorSpans.length > maximum) armorSpans.pop()?.remove();
+  while (armorSpans.length < maximum) {
+    const cell = document.createElement('span'); cell.className = 'armor-cell'; cell.setAttribute('aria-hidden', 'true');
+    armorSpans.push(cell); armorNode.append(cell);
+  }
+  for (const [index, cell] of armorSpans.entries()) cell.classList.toggle('filled', index < current);
+  armorNode.setAttribute('aria-valuenow', String(current)); armorNode.setAttribute('aria-valuemax', String(maximum));
+  armorNode.setAttribute('aria-valuetext', language === 'zh' ? `剩余 ${current} 格，共 ${maximum} 格` : `${current} of ${maximum} armor cells remaining`);
+  lastArmorCurrent = current; lastArmorMaximum = maximum; lastArmorLanguage = language;
+}
 function updateUi(force = false) {
   const t = text();
   document.body.dataset.screen = screen; document.body.dataset.phase = world.phase.kind;
@@ -74,7 +90,7 @@ function updateUi(force = false) {
   element('pause').hidden = screen !== 'replay' && (screen !== 'game' || world.phase.kind !== 'running' && world.phase.kind !== 'paused');
   hud.hidden = screen === 'title'; touch.hidden = !coarse || screen !== 'game' || world.phase.kind !== 'running';
   element('health-label').textContent = t.health; element('time-label').textContent = screen === 'replay' ? t.replaying : t.time;
-  element('health-fill').style.width = `${world.player.hp / world.player.maxHp * 100}%`; element('health-value').textContent = `${Math.ceil(world.player.hp)} / ${world.player.maxHp}`;
+  updateArmor();
   element('clock').textContent = formatTime(world.tick); element('sync-fill').style.width = `${Math.min(100, world.tick / DURATION * 100)}%`;
   element('level').textContent = `${t.level} ${world.level.toString().padStart(2, '0')}`; element('kills').textContent = `${world.kills} ${t.kills}`;
   element('xp-fill').style.width = `${Math.min(100, world.xp / world.threshold * 100)}%`;

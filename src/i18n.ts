@@ -1,4 +1,4 @@
-import type { Upgrade } from './core.js';
+import { ARMOR_RULES, type Upgrade } from './core.js';
 export type Language = 'zh' | 'en';
 const zh = {
   report: '任务报告 / MISSION REPORT', name: '月面回响', subtitle: '守住最后一道月球信号。', mission: '静海基地 · 中继任务 07', start: '启动任务', replay: '回放上一局', replaying: '回放中', pause: '暂停', resume: '继续任务', restart: '重新部署', home: '返回基地', muted: '声音关', sound: '声音开', lang: 'EN', time: '信号同步', health: '装甲', level: '等级', kills: '击破', dash: '冲刺', ready: '就绪', upgrading: '选择技术升级', upgradeHint: '战斗已暂停。选择一个模块继续任务。', won: '信号已送达', lost: '信号中断', wonBody: '中继链路恢复。月球仍然听得见我们。', lostBody: '你的信号已存档。下一次部署会走得更远。', paused: '任务已暂停', controls: 'WASD / 方向键移动 · 空格冲刺 · P 暂停', touch: '左侧拖动移动 · 右侧冲刺', brief: '自动开火。收集能源，升级装备。坚持 3 分钟并击败收割者。', seed: '任务种子', boss: '收割者抵达', error: '系统异常，请刷新重试。', replayDone: '回放结束', replayVerified: '回放校验一致', replayFailed: '回放校验失败', noReplay: '完成一次任务即可回放', select: '装配模块', warning: '最终信号窗口开启', brand: 'LUNAR / RELAY', prototype: '月面行动 / 01', objective: '生存 03:00 · 击败收割者', recovered: '采集能源', replayEnd: '已到达录制终点', pausedHint: '深呼吸。月球会等你。'
@@ -12,7 +12,7 @@ const upgradeText: Record<Upgrade, { zh: [string, string]; en: [string, string];
   orbit: { zh: ['轨道无人机', '环绕机体，持续切割靠近的敌人。'], en: ['Orbital drone', 'An orbiting drone cuts through nearby enemies.'], icon: '◎' },
   nova: { zh: ['电磁新星', '周期性释放范围冲击，清除近身威胁。'], en: ['EMP nova', 'A periodic shockwave clears nearby threats.'], icon: '✳' },
   boots: { zh: ['矢量推进器', '移动速度提升，更轻松穿过敌群。'], en: ['Vector thrusters', 'Move faster and slip between enemy formations.'], icon: '»' },
-  hull: { zh: ['复合装甲', '装甲上限 +25，立即修复 45 点。'], en: ['Composite armor', '+25 maximum armor and repair 45 immediately.'], icon: '◇' },
+  hull: { zh: ['复合装甲', `装甲上限增加 ${ARMOR_RULES.hullCapacityCells} 格，立即修复最多 ${ARMOR_RULES.hullRepairCells} 格。`], en: ['Composite armor', `Add ${ARMOR_RULES.hullCapacityCells} armor cells to capacity. Repair up to ${ARMOR_RULES.hullRepairCells} cells immediately.`], icon: '◇' },
   magnet: { zh: ['引力采集器', '扩大能源吸引范围，减少回头拾取。'], en: ['Gravity collector', 'Attract energy from a greater distance.'], icon: '⊕' }
 };
 export function upgradeLabel(id: Upgrade, lang: Language) { return { title: upgradeText[id][lang][0], description: upgradeText[id][lang][1], icon: upgradeText[id].icon }; }
