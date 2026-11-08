@@ -1,14 +1,15 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#091b26"><meta name="description" content="月面回响 · 沙漠战斗测试。剧情与战役尚待接入。Desert combat test; story and campaign pending."><title>月面回响 · Lunar Relay</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20fill%3D%22%23091b26%22%20d%3D%22M0%200h16v16H0z%22%2F%3E%3Cpath%20fill%3D%22%239be5d4%22%20d%3D%22M4%202h7v2H7v2H5v4h2v2h4v2H4v-2H2V4h2z%22%2F%3E%3Cpath%20fill%3D%22%23efbf72%22%20d%3D%22M11%205h2v2h2v2h-2v4h-2V9H9V7h2z%22%2F%3E%3C%2Fsvg%3E"><link rel="stylesheet" href="/style.css"></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#091b26"><meta name="description" content="月面回响 · 沙漠战斗测试。开场已接入，后续剧情与战役待接入。Desert opening available; later story and campaign pending."><title>月面回响 · Lunar Relay</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20fill%3D%22%23091b26%22%20d%3D%22M0%200h16v16H0z%22%2F%3E%3Cpath%20fill%3D%22%239be5d4%22%20d%3D%22M4%202h7v2H7v2H5v4h2v2h4v2H4v-2H2V4h2z%22%2F%3E%3Cpath%20fill%3D%22%23efbf72%22%20d%3D%22M11%205h2v2h2v2h-2v4h-2V9H9V7h2z%22%2F%3E%3C%2Fsvg%3E"><link rel="stylesheet" href="/style.css"></head>
 <body>
-<canvas id="game" aria-label="沙漠战斗测试，剧情与战役尚待接入"></canvas>
+<canvas id="game" tabindex="-1" aria-label="沙漠基地战斗"></canvas>
 <div class="scanlines"></div>
 <header><a class="wordmark" href="/">LUNAR<span>/</span>RELAY<i>TEST</i></a><nav><button id="sound"></button><button id="language">EN</button><button id="pause" hidden></button></nav></header>
 <div id="hud" hidden><div class="hud-left"><div class="eyebrow" id="health-label"></div><div id="armor-cells" role="meter" aria-labelledby="health-label" aria-valuemin="0"></div></div><div class="timer"><span id="time-label"></span><strong id="clock">00:00</strong><div class="sync-track"><div id="sync-fill"></div></div></div><div class="hud-right"><span id="level"></span><strong id="kills"></strong></div><div class="xp-track"><div id="xp-fill"></div></div><div id="equipment"></div></div>
 <div id="overlay"></div>
 <div id="notice" role="status" aria-live="polite"></div>
 <div id="touch" hidden><div id="joystick"><span id="stick"></span></div><button id="dash"></button></div>
-<footer><span id="footer-left"></span><span id="footer-right">剧情与战役尚待接入</span></footer>
+<footer><span id="footer-left"></span><span id="footer-right">后续剧情与战役待接入</span></footer>
+<script id="desert-opening" type="application/json"></script>
 <script type="module" src="/main.js"></script>
 </body></html>
