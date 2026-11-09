@@ -4,9 +4,9 @@
 
 ## 内容与会话边界
 
-`main.ts` 仍独占 screen、World、录制和结算 DOM。只有 `screen === 'game' && world.phase.kind === 'lost'` 展示 `drawDesertScene(context, 'defeat')` 和 `desert-base.defeat`。回放终点继续显示校验结果，胜利继续使用原结算。
+`main.ts` 仍独占 screen、World、录制和结算 DOM。只有 `screen === 'game' && world.phase.kind === 'lost'` 展示 `drawDesertScene(context, 'defeat')` 和 `desert-base.defeat`。回放终点继续显示校验结果。后续 Issue #42 的胜利结算使用独立分支，见[沙漠胜利结算](desert-victory.md)，失败分支和样式保持原样。
 
-`DesertContent` 统一持有 opening、objective、defeat 三条只读双语内容。构建端 `scripts/desert-content.mjs` 的 `embedDesertContent` 从完整校验后的原目录提取内容，嵌入 `desert-content` JSON script。运行端 `parseDesertContent` 验证精确字段、ID 和非空双语，并冻结结果。原私有 opening helper、anchor 和调用者已迁移，没有第二加载器、远程请求或手抄剧情。
+`DesertContent` 统一持有 opening、objective、defeat、victory、nextClue 五条只读双语内容。构建端 `scripts/desert-content.mjs` 的 `embedDesertContent` 从完整校验后的原目录提取内容，嵌入 `desert-content` JSON script。运行端 `parseDesertContent` 验证精确字段、ID 和非空双语，并冻结结果。原私有 opening helper、anchor 和调用者已迁移，没有第二加载器、远程请求或手抄剧情。
 
 失败画布、完整正文、统计和动作按钮只挂载一次。语言与静音刷新原位更新文本和无障碍标签，保留节点与滚动。首次挂载时，焦点在战场或 body 才转到重新部署，并使用 preventScroll；已有 header 焦点保持不变。既有按钮原生 Enter 与 Space 输入规则保持不变。
 
@@ -14,7 +14,7 @@
 
 ## 作者验证与剩余门槛
 
-作者先在精确基线运行 `npm ci` 和 `npm run verify`。改动后的 `npm run verify` 通过 115 项测试，0 失败，AST 禁止注释检查和下载预算检查均通过。实际产物共 35,118 gzip 字节，预算仍为 153,600 字节。三个既有模拟种子仍在 180 秒获胜，checksum 与基线一致。208907 为 `6d37c8d2`，42 为 `ff94b04b`，101 为 `c71d5dc4`。
+以下为 Issue #40 的历史作者证据。作者先在精确基线运行 `npm ci` 和 `npm run verify`。改动后的 `npm run verify` 通过 115 项测试，0 失败，AST 禁止注释检查和下载预算检查均通过。实际产物共 35,118 gzip 字节，预算仍为 153,600 字节。三个既有模拟种子仍在 180 秒获胜，checksum 与基线一致。208907 为 `6d37c8d2`，42 为 `ff94b04b`，101 为 `c71d5dc4`。
 
 `test/opening-main.test.mjs` 执行实际编译的 main 和真实模拟，沿标题、开场和自然失败到结算，没有注入 World 或装甲。测试比较完整 canonical 三条中英文、所有 locale 的 script 转义和 replacement token，拒绝缺失或损坏的 defeat。实际画布的 845 条绘制命令与原 defeat 场景一致，并固定其 SHA-256。终局完整 World、录制动作、封存录制、checksum 和种子调用次数在展示交互后保持不变。测试验证节点、焦点和滚动稳定，直接 Replay 校验与终局一致，直接 Retry 得到新种子的完整初始世界。实际输入机器人自然获胜仍走原胜利结算。关闭 live 路由或把绘画改成 victory 的临时反例都使目标测试失败，随后恢复产物。
 

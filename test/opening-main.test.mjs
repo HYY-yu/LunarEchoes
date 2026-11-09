@@ -4,12 +4,14 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 import { drawDesertScene } from '../dist/desert-scene.js';
-import { createWorld, normalizeInput } from '../dist/core.js';
+import { createWorld, normalizeInput, replay, finalChecksum } from '../dist/core.js';
 import { play } from '../scripts/simulate.mjs';
 import ts from 'typescript';
 import { embedDesertContent } from '../scripts/desert-content.mjs';
 const catalog = JSON.parse(readFileSync('content/desert-base.story.json', 'utf8'));
 const html = readFileSync('dist/index.html', 'utf8');
+const contentBeats = ['opening', 'objective', 'defeat', 'victory', 'next-clue'];
+const contentKey = beat => beat === 'next-clue' ? 'nextClue' : beat;
 const embedded = html.match(/<script id="desert-content" type="application\/json">([^]*?)<\/script>/)[1];
 function harness(content = embedded) {
   const listeners = new Map(), logs = [], sessions = [];
@@ -20,7 +22,7 @@ function harness(content = embedded) {
     replaceChildren(...nodes) { for (const node of this.children) node.parentElement = null; this.children = []; this.append(...nodes); }
     remove() { this.parentElement.children = this.parentElement.children.filter(node => node !== this); }
     setAttribute(key, value) { this.attributes[key] = value; }
-    focus() { active = this; }
+    focus(options) { active = this; this.focusOptions = options; this.focusCalls = (this.focusCalls ?? 0) + 1; }
     closest(selector) { return selector.split(', ').includes(this.tagName.toLowerCase()) ? this : this.parentElement?.closest(selector) ?? null; }
     addEventListener(name, handler) { this.events.set(name, handler); }
     setPointerCapture(id) { this.captures.add(id); }
@@ -53,7 +55,7 @@ function harness(content = embedded) {
     if (cache.has(name)) return cache.get(name).exports;
     const module = { exports: {} }; cache.set(name, module);
     let source = readFileSync(`dist/${name}`, 'utf8');
-    if (name === 'main.js') source += '\nglobalThis.inspectMain = () => JSON.stringify({ world, actions: recording.actions, screen, checksum: finalChecksum(world), replayVerified, lastRecording });';
+    if (name === 'main.js') source += '\nglobalThis.inspectMain = () => JSON.stringify({ world, actions: recording.actions, screen, checksum: finalChecksum(world), replayVerified, lastRecording }); globalThis.inspectContentFrozen = () => Object.isFrozen(desertContent) && Object.values(desertContent).every(value => Object.isFrozen(value));';
     const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
     const require = path => path === './render.js' ? { createRenderer: () => () => {} } : path === './audio.js' ? { Synth } : path === './logger.js' ? { log: (...entry) => logs.push(entry) } : load(path.slice(2));
     vm.runInContext(`(function(require,module,exports){${compiled}\n})`, context, { filename: name })(require, module, module.exports);
@@ -63,29 +65,30 @@ function harness(content = embedded) {
   const snapshot = () => JSON.parse(context.inspectMain());
   const event = (name, props = {}) => { const value = { target: active ?? get('game'), repeat: false, preventDefault() { this.defaultPrevented = true; }, ...props }; listeners.get(name)?.(value); return value; };
   const click = label => { const node = all().find(node => node.tagName === 'BUTTON' && node.textContent === label); assert.ok(node, `button ${label}`); node.onclick(); return node; };
-  return { get, click, event, logs, sessions, snapshot, document, get active() { return active; }, get seedCalls() { return seedCalls; }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
+  return { get, click, event, logs, sessions, snapshot, document, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
 }
-test('built content contains exactly three canonical entries and escapes every locale without changing text', () => {
-  const expected = Object.fromEntries(catalog.filter(entry => ['opening', 'objective', 'defeat'].includes(entry.beat)).map(({ beat, id, zh, en }) => [beat, { id, zh, en }]));
-  assert.deepEqual(JSON.parse(embedded), expected);
-  for (const beat of ['opening', 'objective', 'defeat']) for (const language of ['zh', 'en']) {
+test('built content contains exactly five canonical entries and escapes every locale without changing text', () => {
+  const expected = Object.fromEntries(catalog.filter(entry => contentBeats.includes(entry.beat)).map(({ beat, id, zh, en }) => [contentKey(beat), { id, zh, en }]));
+  assert.deepEqual(JSON.parse(embedded), expected); assert.equal(harness().contentFrozen, true);
+  for (const beat of contentBeats) for (const language of ['zh', 'en']) {
     const changed = structuredClone(catalog); changed.find(entry => entry.beat === beat)[language] = '</script><strong>" & \u2028\u2029 text';
     const output = embedDesertContent('<script id="desert-content" type="application/json"></script>', changed);
-    assert.equal(JSON.parse(output.match(/json">([^]*?)<\/script>/)[1])[beat][language], changed.find(entry => entry.beat === beat)[language]);
+    assert.equal(JSON.parse(output.match(/json">([^]*?)<\/script>/)[1])[contentKey(beat)][language], changed.find(entry => entry.beat === beat)[language]);
     assert.equal(output.match(/<\/script>/g).length, 1);
   }
   for (const invalid of [null, catalog.slice(1), catalog.map((entry, i) => i ? entry : { ...entry, en: '' })]) assert.throws(() => embedDesertContent('', invalid));
   for (const invalid of [catalog.filter(entry => entry.beat !== 'defeat'), catalog.map(entry => entry.beat === 'defeat' ? { ...entry, id: 'desert-base.victory' } : entry), catalog.map(entry => entry.beat === 'defeat' ? { ...entry, zh: '' } : entry)]) assert.throws(() => embedDesertContent('<script id="desert-content" type="application/json"></script>', invalid));
+  for (const beat of ['victory', 'next-clue']) for (const transform of [entries => entries.filter(entry => entry.beat !== beat), entries => entries.map(entry => entry.beat === beat ? { ...entry, id: 'desert-base.defeat' } : entry), entries => entries.map(entry => entry.beat === beat ? { ...entry, en: ' ' } : entry), entries => entries.map(entry => entry.beat === beat ? { ...entry, zh: 7 } : entry), entries => entries.map(entry => entry.beat === beat ? { ...entry, extra: true } : entry)]) assert.throws(() => embedDesertContent('<script id="desert-content" type="application/json"></script>', transform(structuredClone(catalog))));
   assert.throws(() => embedDesertContent('', catalog), /anchor/);
 });
-test('embedded content preserves replacement tokens in all three bilingual entries', () => {
+test('embedded content preserves replacement tokens in all five bilingual entries', () => {
   const anchor = '<script id="desert-content" type="application/json"></script>';
   for (const token of ['$$', '$&', '$`', "$'", '$1', '$<name>']) {
     const changed = structuredClone(catalog);
     for (const entry of changed) for (const language of ['zh', 'en']) entry[language] = `Signal ${token} received`;
     const output = embedDesertContent(`before${anchor}after`, changed);
     const content = JSON.parse(output.match(/json">([^]*?)<\/script>/)[1]);
-    for (const beat of ['opening', 'objective', 'defeat']) for (const language of ['zh', 'en']) assert.equal(content[beat][language], changed.find(entry => entry.beat === beat)[language]);
+    for (const beat of contentBeats) for (const language of ['zh', 'en']) assert.equal(content[contentKey(beat)][language], changed.find(entry => entry.beat === beat)[language]);
     assert.ok(output.startsWith('before<script'));
     assert.ok(output.endsWith('</script>after'));
   }
@@ -161,18 +164,78 @@ test('direct Retry skips the defeat narrative and rebuilds the current stage wit
   const retry = app.snapshot(); assert.equal(retry.screen, 'game'); assert.equal(retry.world.phase.kind, 'running'); assert.equal(retry.world.tick, 0); assert.equal(retry.world.level, 1); assert.equal(retry.world.xp, 0); assert.equal(retry.world.player.hp, retry.world.player.maxHp); assert.deepEqual(retry.world, createWorld({ ...retry.world.context, seed: retry.world.seed })); assert.deepEqual(retry.world.context, terminal.world.context); assert.deepEqual(retry.actions, []); assert.equal(app.seedCalls, 2); assert.notEqual(retry.world.seed, terminal.world.seed); assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('opening-panel'), null); assert.equal(app.active, app.get('game'));
   app.key('KeyD', true); app.key('Space', true); app.frame(); app.frame(); assert.ok(app.snapshot().actions.every(action => action.input.x === 0 && !action.input.dash));
 });
-test('a naturally won live session retains the existing generic result without defeat story or art', () => {
-  const app = harness(); app.click('启动任务'); app.click('部署出发'); app.pointer('joystick', 'pointerdown'); app.frame();
+function naturalWin(app, focus = 'canvas') {
+  app.click('启动任务'); app.click('部署出发'); app.pointer('joystick', 'pointerdown'); app.frame();
+  if (focus === 'body') app.document.body.focus();
+  if (focus === 'header') app.get('sound').focus();
   const { recording } = play(42);
   for (const action of recording.actions) {
     if (action.kind === 'choose') { const state = app.snapshot(); assert.equal(state.world.phase.kind, 'upgrading', `tick ${state.world.tick}`); const offers = state.world.phase.offers; app.key(`Digit${offers.indexOf(action.upgrade) + 1}`); }
     else if (action.kind === 'tick') { const input = normalizeInput(action.input); app.pointer('joystick', 'pointermove', 9, input.x * 40, input.y * 40); if (action.input.dash) { app.key('Space'); app.release('Space'); } app.frame(1000 / 60 + .000001); }
   }
-  assert.equal(app.snapshot().world.phase.kind, 'won'); assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('defeat-art'), null); assert.ok(app.get('overlay').children[0].children.some(node => node.textContent === '信号已送达'));
+  assert.equal(app.snapshot().world.phase.kind, 'won');
+  const terminal = app.snapshot(), replayed = replay(terminal.lastRecording);
+  assert.deepEqual(terminal.world, JSON.parse(JSON.stringify(replayed)));
+  assert.deepEqual(terminal.actions, terminal.lastRecording.actions);
+  assert.equal(terminal.checksum, finalChecksum(replayed));
+  assert.equal(terminal.checksum, terminal.lastRecording.finalChecksum);
+  assert.equal(app.snapshot().world.tick, 10800); assert.equal(app.snapshot().world.bossKilled, true);
+  return app.snapshot();
+}
+test('natural live victory draws the original scene and keeps full bilingual story, state, nodes, focus and scroll stable', () => {
+  const app = harness(), terminal = naturalWin(app), panel = app.get('victory-panel'), retry = app.get('victory-retry'), replay = app.get('victory-replay'), art = app.get('victory-art');
+  assert.ok(panel); assert.equal(app.active, retry); assert.equal(retry.focusOptions.preventScroll, true); assert.equal(retry.focusCalls, 1);
+  assert.equal(art.width, 320); assert.equal(art.height, 180); assert.equal(art.attributes.role, 'img'); assert.equal(panel.attributes['aria-labelledby'], 'victory-heading');
+  const original = []; drawDesertScene({ save() {}, restore() {}, fillRect(...rect) { original.push([this.fillStyle, ...rect]); } }, 'victory');
+  assert.deepEqual(art.commands, original); assert.equal(art.commands.length, 816);
+  assert.equal(createHash('sha256').update(JSON.stringify(art.commands)).digest('hex'), '98f2ed7fec6239a2a78f0f25cd8da6e8a787a2d29b1f245545b8511974001203');
+  const victory = catalog.find(entry => entry.beat === 'victory'), clue = catalog.find(entry => entry.beat === 'next-clue');
+  const story = app.get('victory-story'), nextClue = app.get('victory-next-clue'), statLabel = app.get('victory-time');
+  assert.equal(story.dataset.storyId, victory.id); assert.equal(nextClue.dataset.storyId, clue.id);
+  assert.ok(panel.children.indexOf(story) < panel.children.indexOf(nextClue));
+  assert.equal(story.textContent, victory.zh); assert.equal(nextClue.textContent, clue.zh);
+  assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('defeat-art'), null);
+  assert.equal(panel.children.at(-1).children.length, 2); assert.equal(retry.textContent, '重新部署'); assert.equal(replay.textContent, '回放上一局');
+  assert.ok(app.logs.some(([, name, data]) => name === 'session.finished' && data.outcome === 'won' && data.checksum === terminal.checksum));
+  panel.scrollTop = 87;
+  for (let i = 0; i < 20; i++) { app.frame(60000); for (const code of ['KeyD', 'Space', 'KeyP', 'Escape', 'Digit1']) app.key(code); }
+  app.get('language').focus(); app.get('language').onclick();
+  assert.equal(story.textContent, victory.en); assert.equal(nextClue.textContent, clue.en); assert.ok(art.attributes['aria-label']);
+  app.get('sound').onclick(); app.event('blur'); app.document.hidden = true; app.event('visibilitychange'); app.frame(600000); app.document.hidden = false; app.event('visibilitychange');
+  app.pointer('joystick', 'pointerdown'); app.pointer('dash', 'pointerdown');
+  assert.deepEqual(app.snapshot(), terminal); assert.equal(app.seedCalls, 1); assert.equal(app.sessions.at(-1), 'terminal');
+  for (const [id, node] of [['victory-panel', panel], ['victory-retry', retry], ['victory-replay', replay], ['victory-art', art], ['victory-story', story], ['victory-next-clue', nextClue], ['victory-time', statLabel]]) assert.equal(app.get(id), node);
+  assert.equal(panel.scrollTop, 87); assert.equal(app.active, app.get('language')); assert.equal(retry.focusCalls, 1);
+});
+test('live victory preserves header focus and direct native Replay verifies the complete recording with no result narrative', () => {
+  const app = harness(), terminal = naturalWin(app, 'header'); assert.equal(app.active, app.get('sound')); assert.equal(app.get('victory-retry').focusCalls, undefined);
+  assert.equal(app.activate('victory-replay', 'Space').defaultPrevented, undefined); assert.equal(app.snapshot().screen, 'replay'); assert.equal(app.seedCalls, 1);
+  for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) { assertNoVictory(app); assert.equal(app.get('defeat-panel'), null); app.frame(); }
+  assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assert.equal(app.snapshot().checksum, terminal.checksum); assert.deepEqual(app.snapshot().world, terminal.world); assert.deepEqual(app.snapshot().lastRecording, terminal.lastRecording); assert.equal(app.seedCalls, 1);
+  assert.ok(app.logs.some(([, name]) => name === 'replay.finished')); assertNoVictory(app); assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('opening-panel'), null);
+});
+test('direct native victory Retry skips narrative with fresh seed, empty input and a complete initial world', () => {
+  const app = harness(), terminal = naturalWin(app, 'body'); assert.equal(app.active, app.get('victory-retry')); assert.equal(app.get('victory-retry').focusOptions.preventScroll, true);
+  assert.equal(app.activate('victory-retry', 'Enter').defaultPrevented, undefined);
+  const retry = app.snapshot(); assert.equal(retry.screen, 'game'); assert.equal(retry.world.phase.kind, 'running'); assert.equal(retry.world.tick, 0); assert.equal(retry.world.level, 1); assert.equal(retry.world.xp, 0); assert.equal(retry.world.player.hp, retry.world.player.maxHp); assert.deepEqual(retry.world, createWorld({ ...retry.world.context, seed: retry.world.seed })); assert.deepEqual(retry.world.context, terminal.world.context); assert.deepEqual(retry.actions, []); assert.equal(app.seedCalls, 2); assert.notEqual(retry.world.seed, terminal.world.seed); assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('opening-panel'), null); assert.equal(app.active, app.get('game')); assertNoVictory(app);
+  app.key('KeyD', true); app.key('Space', true); app.frame(); app.frame(); assert.ok(app.snapshot().actions.every(action => action.input.x === 0 && action.input.y === 0 && !action.input.dash));
+});
+function assertNoVictory(app) {
+  for (const id of ['victory-panel', 'victory-art', 'victory-story', 'victory-next-clue']) assert.equal(app.get(id), null);
+  const walk = node => [node, ...node.children.flatMap(walk)];
+  for (const entry of catalog.filter(entry => ['victory', 'next-clue'].includes(entry.beat))) assert.equal(walk(app.get('overlay')).some(node => node.dataset.storyId === entry.id || [entry.zh, entry.en].includes(node.textContent)), false);
+}
+test('victory content never appears in title, opening, running, paused, upgrading, lost or lost replay', () => {
+  const app = harness(); assertNoVictory(app); app.click('启动任务'); assertNoVictory(app); app.click('部署出发'); assertNoVictory(app); app.key('KeyP'); assertNoVictory(app); app.release('KeyP'); app.key('KeyP');
+  for (let i = 0; i < 15000 && !['won', 'lost'].includes(app.snapshot().world.phase.kind); i++) { assertNoVictory(app); if (app.snapshot().world.phase.kind === 'upgrading') app.key('Digit1'); app.frame(); }
+  assert.equal(app.snapshot().world.phase.kind, 'lost'); assertNoVictory(app); app.activate('defeat-replay', 'Enter');
+  for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) { assertNoVictory(app); app.frame(); }
+  assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assertNoVictory(app);
 });
 test('missing and corrupt embedded runtime content report failure and cannot begin combat', () => {
   const invalid = ['', '{', '{}', JSON.stringify({ opening: { id: 'wrong' }, objective: {} })];
   for (const change of [content => { delete content.defeat; }, content => { content.defeat.id = 'desert-base.victory'; }, content => { content.defeat.zh = ' '; }, content => { content.defeat.en = ''; }, content => { content.defeat.en = 7; }, content => { content.defeat.extra = 'unexpected'; }, content => { content.extra = {}; }]) { const content = JSON.parse(embedded); change(content); invalid.push(JSON.stringify(content)); }
+  for (const key of ['victory', 'nextClue']) for (const change of [content => { delete content[key]; }, content => { content[key].id = 'desert-base.defeat'; }, content => { content[key].zh = ' '; }, content => { content[key].en = ''; }, content => { content[key].zh = 7; }, content => { content[key].en = null; }, content => { content[key].extra = 'unexpected'; }]) { const content = JSON.parse(embedded); change(content); invalid.push(JSON.stringify(content)); }
   for (const content of invalid) {
     const app = harness(content); assert.ok(app.logs.some(([level, name]) => level === 'error' && name === 'runtime.failure')); assert.ok(app.get('notice').textContent); app.click('启动任务'); assert.equal(app.seedCalls, 0); assert.equal(app.snapshot().screen, 'title');
   }

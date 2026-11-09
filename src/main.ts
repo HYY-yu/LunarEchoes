@@ -11,14 +11,16 @@ type DesertContent = Readonly<{
   opening: Readonly<{ id: 'desert-base.opening'; zh: string; en: string }>;
   objective: Readonly<{ id: 'desert-base.objective'; zh: string; en: string }>;
   defeat: Readonly<{ id: 'desert-base.defeat'; zh: string; en: string }>;
+  victory: Readonly<{ id: 'desert-base.victory'; zh: string; en: string }>;
+  nextClue: Readonly<{ id: 'desert-base.next-clue'; zh: string; en: string }>;
 }>;
 function parseDesertContent(input: unknown): DesertContent {
   function entry<Id extends string>(value: unknown, id: Id): Readonly<{ id: Id; zh: string; en: string }> {
     if (!value || typeof value !== 'object' || !('id' in value) || value.id !== id || !('zh' in value) || typeof value.zh !== 'string' || !value.zh.trim() || Object.keys(value).length !== 3 || !('en' in value) || typeof value.en !== 'string' || !value.en.trim()) throw new Error(`Invalid desert content entry ${id}`);
     return Object.freeze({ id, zh: value.zh, en: value.en });
   }
-  if (!input || typeof input !== 'object' || !('opening' in input) || !('objective' in input) || !('defeat' in input) || Object.keys(input).length !== 3) throw new Error('Invalid desert content');
-  return Object.freeze({ opening: entry(input.opening, 'desert-base.opening'), objective: entry(input.objective, 'desert-base.objective'), defeat: entry(input.defeat, 'desert-base.defeat') });
+  if (!input || typeof input !== 'object' || !('opening' in input) || !('objective' in input) || !('defeat' in input) || !('victory' in input) || !('nextClue' in input) || Object.keys(input).length !== 5) throw new Error('Invalid desert content');
+  return Object.freeze({ opening: entry(input.opening, 'desert-base.opening'), objective: entry(input.objective, 'desert-base.objective'), defeat: entry(input.defeat, 'desert-base.defeat'), victory: entry(input.victory, 'desert-base.victory'), nextClue: entry(input.nextClue, 'desert-base.next-clue') });
 }
 function element(id: string): HTMLElement { const node = document.getElementById(id); if (!node) throw new Error(`Missing element ${id}`); return node; }
 const canvasNode = element('game');
@@ -196,6 +198,35 @@ function updateUi(force = false) {
     element('defeat-story').textContent = desertContent.defeat[language]; element('defeat-description').textContent = t.lostBody;
     element('defeat-time').textContent = t.time; element('defeat-kills').textContent = t.kills; element('defeat-level').textContent = t.level;
     element('defeat-retry').textContent = t.restart; element('defeat-replay').textContent = t.replay;
+    return;
+  }
+  if (screen === 'game' && world.phase.kind === 'won' && desertContent) {
+    if (!document.getElementById('victory-panel')) {
+      const focusRetry = document.activeElement === canvasNode || document.activeElement === document.body;
+      overlay.replaceChildren();
+      const section = document.createElement('section'); section.id = 'victory-panel'; section.className = 'modal result victory'; section.setAttribute('aria-labelledby', 'victory-heading');
+      const art = document.createElement('canvas'); art.id = 'victory-art'; art.width = DESERT_SCENE_SIZE.width; art.height = DESERT_SCENE_SIZE.height; art.setAttribute('role', 'img');
+      const context = art.getContext('2d'); if (!context) throw new Error('Victory canvas is unavailable'); drawDesertScene(context, 'victory');
+      const eyebrow = document.createElement('div'); eyebrow.id = 'victory-report'; eyebrow.className = 'eyebrow';
+      const heading = document.createElement('h2'); heading.id = 'victory-heading';
+      const story = document.createElement('p'); story.id = 'victory-story'; story.dataset.storyId = desertContent.victory.id;
+      const nextClue = document.createElement('p'); nextClue.id = 'victory-next-clue'; nextClue.dataset.storyId = desertContent.nextClue.id;
+      const description = document.createElement('p'); description.id = 'victory-description';
+      const stats = document.createElement('div'); stats.className = 'stats';
+      for (const [id, value] of [['time', formatTime(world.tick)], ['kills', String(world.kills)], ['level', String(world.level)]]) {
+        const stat = document.createElement('span'); const label = document.createElement('span'); label.id = `victory-${id}`;
+        const amount = document.createElement('strong'); amount.textContent = value; stat.append(label, amount); stats.append(stat);
+      }
+      const actions = document.createElement('div'); actions.className = 'actions';
+      const retry = button('', 'primary', begin); retry.id = 'victory-retry';
+      const replay = button('', 'secondary', startReplay); replay.id = 'victory-replay';
+      actions.append(retry, replay); section.append(art, eyebrow, heading, story, nextClue, description, stats, actions); overlay.append(section);
+      if (focusRetry) retry.focus({ preventScroll: true });
+    }
+    element('victory-art').setAttribute('aria-label', t.victoryArt); element('victory-report').textContent = t.report; element('victory-heading').textContent = t.won;
+    element('victory-story').textContent = desertContent.victory[language]; element('victory-next-clue').textContent = desertContent.nextClue[language]; element('victory-description').textContent = t.wonBody;
+    element('victory-time').textContent = t.time; element('victory-kills').textContent = t.kills; element('victory-level').textContent = t.level;
+    element('victory-retry').textContent = t.restart; element('victory-replay').textContent = t.replay;
     return;
   }
   overlay.replaceChildren();
