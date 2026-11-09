@@ -7,17 +7,18 @@ import { log } from './logger.js';
 import { DESERT_SCENE_SIZE, drawDesertScene } from './desert-scene.js';
 type Screen = 'title' | 'opening' | 'game' | 'replay' | 'replay-end';
 type OpeningFinish = 'continue' | 'skip';
-type OpeningContent = Readonly<{
+type DesertContent = Readonly<{
   opening: Readonly<{ id: 'desert-base.opening'; zh: string; en: string }>;
   objective: Readonly<{ id: 'desert-base.objective'; zh: string; en: string }>;
+  defeat: Readonly<{ id: 'desert-base.defeat'; zh: string; en: string }>;
 }>;
-function parseOpening(input: unknown): OpeningContent {
+function parseDesertContent(input: unknown): DesertContent {
   function entry<Id extends string>(value: unknown, id: Id): Readonly<{ id: Id; zh: string; en: string }> {
-    if (!value || typeof value !== 'object' || !('id' in value) || value.id !== id || !('zh' in value) || typeof value.zh !== 'string' || !value.zh.trim() || !('en' in value) || typeof value.en !== 'string' || !value.en.trim()) throw new Error(`Invalid opening entry ${id}`);
-    return { id, zh: value.zh, en: value.en };
+    if (!value || typeof value !== 'object' || !('id' in value) || value.id !== id || !('zh' in value) || typeof value.zh !== 'string' || !value.zh.trim() || Object.keys(value).length !== 3 || !('en' in value) || typeof value.en !== 'string' || !value.en.trim()) throw new Error(`Invalid desert content entry ${id}`);
+    return Object.freeze({ id, zh: value.zh, en: value.en });
   }
-  if (!input || typeof input !== 'object' || !('opening' in input) || !('objective' in input)) throw new Error('Invalid desert opening content');
-  return { opening: entry(input.opening, 'desert-base.opening'), objective: entry(input.objective, 'desert-base.objective') };
+  if (!input || typeof input !== 'object' || !('opening' in input) || !('objective' in input) || !('defeat' in input) || Object.keys(input).length !== 3) throw new Error('Invalid desert content');
+  return Object.freeze({ opening: entry(input.opening, 'desert-base.opening'), objective: entry(input.objective, 'desert-base.objective'), defeat: entry(input.defeat, 'desert-base.defeat') });
 }
 function element(id: string): HTMLElement { const node = document.getElementById(id); if (!node) throw new Error(`Missing element ${id}`); return node; }
 const canvasNode = element('game');
@@ -27,7 +28,7 @@ const overlay = element('overlay'), hud = element('hud'), touch = element('touch
 let language: Language = 'zh';
 let world: World = createWorld({ ...DESERT_CONTEXT, seed: 208907 });
 let screen: Screen = 'title';
-let openingContent: OpeningContent | null = null;
+let desertContent: DesertContent | null = null;
 let recording: ActionBuffer = startRecording(world);
 let lastRecording: Recording | null = null;
 let playingRecording: Recording | null = null;
@@ -68,16 +69,16 @@ function clearCombatInput() {
   stickPointer = null; stick.style.transform = '';
 }
 function showOpening() {
-  if (!openingContent) throw new Error('Desert opening content unavailable');
+  if (!desertContent) throw new Error('Desert content unavailable');
   screen = 'opening'; clearCombatInput(); updateUi(true); element('opening-continue').focus();
-  log('info', 'story.opening.started', { id: openingContent.opening.id });
+  log('info', 'story.opening.started', { id: desertContent.opening.id });
 }
 function finishOpening(reason: OpeningFinish) {
-  if (screen !== 'opening' || !openingContent) return;
-  log('info', 'story.opening.finished', { id: openingContent.opening.id, reason }); begin();
+  if (screen !== 'opening' || !desertContent) return;
+  log('info', 'story.opening.finished', { id: desertContent.opening.id, reason }); begin();
 }
 function begin() {
-  if (!openingContent) throw new Error('Desert opening content unavailable');
+  if (!desertContent) throw new Error('Desert content unavailable');
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
   const nextWorld = createWorld({ ...DESERT_CONTEXT, seed: seedArray[0] });
   synth.reset(); world = nextWorld; recording = startRecording(world); playingRecording = null; screen = 'game'; clearCombatInput();
@@ -149,24 +150,52 @@ function updateUi(force = false) {
   for (const id of UPGRADE_ORDER) if (world.upgrades[id] > 0) { const node = document.createElement('span'); node.innerHTML = `<i class="module-icon icon-${id}" aria-hidden="true"></i><span>LV ${world.upgrades[id]}</span>`; node.title = upgradeLabel(id, language).title; node.setAttribute('aria-label', `${node.title} · LV ${world.upgrades[id]}`); equipment.append(node); }
   if (!force && signature === lastUi) return;
   lastUi = signature; synth.setSession(screen === 'title' || screen === 'opening' ? 'menu' : world.phase.kind === 'won' || world.phase.kind === 'lost' ? 'terminal' : world.phase.kind);
-  if (screen === 'opening' && openingContent) {
+  if (screen === 'opening' && desertContent) {
     if (!document.getElementById('opening-panel')) {
       overlay.replaceChildren();
       const section = document.createElement('section'); section.id = 'opening-panel'; section.className = 'modal opening'; section.setAttribute('aria-labelledby', 'opening-heading');
       const art = document.createElement('canvas'); art.id = 'opening-art'; art.width = DESERT_SCENE_SIZE.width; art.height = DESERT_SCENE_SIZE.height; art.setAttribute('role', 'img');
       const context = art.getContext('2d'); if (!context) throw new Error('Opening canvas is unavailable'); drawDesertScene(context, 'opening');
       const heading = document.createElement('h2'); heading.id = 'opening-heading';
-      const story = document.createElement('p'); story.id = 'opening-story'; story.dataset.storyId = openingContent.opening.id;
+      const story = document.createElement('p'); story.id = 'opening-story'; story.dataset.storyId = desertContent.opening.id;
       const objectiveHeading = document.createElement('h3'); objectiveHeading.id = 'opening-objective-heading';
-      const objective = document.createElement('p'); objective.id = 'opening-objective'; objective.dataset.storyId = openingContent.objective.id;
+      const objective = document.createElement('p'); objective.id = 'opening-objective'; objective.dataset.storyId = desertContent.objective.id;
       const actions = document.createElement('div'); actions.className = 'actions';
       const deploy = button('', 'primary', () => finishOpening('continue')); deploy.id = 'opening-continue';
       const skip = button('', 'secondary', () => finishOpening('skip')); skip.id = 'opening-skip';
       actions.append(deploy, skip); section.append(art, heading, story, objectiveHeading, objective, actions); overlay.append(section);
     }
     element('opening-art').setAttribute('aria-label', t.openingArt); element('opening-heading').textContent = t.opening;
-    element('opening-story').textContent = openingContent.opening[language]; element('opening-objective-heading').textContent = t.missionObjective;
-    element('opening-objective').textContent = openingContent.objective[language]; element('opening-continue').textContent = t.deploy; element('opening-skip').textContent = t.skipOpening;
+    element('opening-story').textContent = desertContent.opening[language]; element('opening-objective-heading').textContent = t.missionObjective;
+    element('opening-objective').textContent = desertContent.objective[language]; element('opening-continue').textContent = t.deploy; element('opening-skip').textContent = t.skipOpening;
+    return;
+  }
+  if (screen === 'game' && world.phase.kind === 'lost' && desertContent) {
+    if (!document.getElementById('defeat-panel')) {
+      const focusRetry = document.activeElement === canvasNode || document.activeElement === document.body;
+      overlay.replaceChildren();
+      const section = document.createElement('section'); section.id = 'defeat-panel'; section.className = 'modal result defeat'; section.setAttribute('aria-labelledby', 'defeat-heading');
+      const art = document.createElement('canvas'); art.id = 'defeat-art'; art.width = DESERT_SCENE_SIZE.width; art.height = DESERT_SCENE_SIZE.height; art.setAttribute('role', 'img');
+      const context = art.getContext('2d'); if (!context) throw new Error('Defeat canvas is unavailable'); drawDesertScene(context, 'defeat');
+      const eyebrow = document.createElement('div'); eyebrow.id = 'defeat-report'; eyebrow.className = 'eyebrow';
+      const heading = document.createElement('h2'); heading.id = 'defeat-heading';
+      const story = document.createElement('p'); story.id = 'defeat-story'; story.dataset.storyId = desertContent.defeat.id;
+      const description = document.createElement('p'); description.id = 'defeat-description';
+      const stats = document.createElement('div'); stats.className = 'stats';
+      for (const [id, value] of [['time', formatTime(world.tick)], ['kills', String(world.kills)], ['level', String(world.level)]]) {
+        const stat = document.createElement('span'); const label = document.createElement('span'); label.id = `defeat-${id}`;
+        const amount = document.createElement('strong'); amount.textContent = value; stat.append(label, amount); stats.append(stat);
+      }
+      const actions = document.createElement('div'); actions.className = 'actions';
+      const retry = button('', 'primary', begin); retry.id = 'defeat-retry';
+      const replay = button('', 'secondary', startReplay); replay.id = 'defeat-replay';
+      actions.append(retry, replay); section.append(art, eyebrow, heading, story, description, stats, actions); overlay.append(section);
+      if (focusRetry) retry.focus({ preventScroll: true });
+    }
+    element('defeat-art').setAttribute('aria-label', t.defeatArt); element('defeat-report').textContent = t.report; element('defeat-heading').textContent = t.lost;
+    element('defeat-story').textContent = desertContent.defeat[language]; element('defeat-description').textContent = t.lostBody;
+    element('defeat-time').textContent = t.time; element('defeat-kills').textContent = t.kills; element('defeat-level').textContent = t.level;
+    element('defeat-retry').textContent = t.restart; element('defeat-replay').textContent = t.replay;
     return;
   }
   overlay.replaceChildren();
@@ -195,9 +224,9 @@ function updateUi(force = false) {
   }
   if (world.phase.kind === 'paused') {
     const section = panel(t.paused, t.pausedHint);
-    if (openingContent) {
+    if (desertContent) {
       const heading = document.createElement('h3'); heading.textContent = t.missionObjective;
-      const objective = document.createElement('p'); objective.textContent = openingContent.objective[language]; objective.dataset.storyId = openingContent.objective.id;
+      const objective = document.createElement('p'); objective.textContent = desertContent.objective[language]; objective.dataset.storyId = desertContent.objective.id;
       section.append(heading, objective);
     }
     section.append(button(t.resume, 'primary', pause)); return;
@@ -274,5 +303,5 @@ function frame(now: number) {
     requestAnimationFrame(frame);
   } catch (error) { fail(error); }
 }
-try { openingContent = parseOpening(JSON.parse(element('desert-opening').textContent ?? '')); } catch (error) { fail(error); }
+try { desertContent = parseDesertContent(JSON.parse(element('desert-content').textContent ?? '')); } catch (error) { fail(error); }
 updateUi(true); requestAnimationFrame(frame);
