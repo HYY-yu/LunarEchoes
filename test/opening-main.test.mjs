@@ -14,10 +14,21 @@ const contentBeats = ['opening', 'objective', 'defeat', 'victory', 'next-clue'];
 const contentKey = beat => beat === 'next-clue' ? 'nextClue' : beat;
 const embedded = html.match(/<script id="desert-content" type="application\/json">([^]*?)<\/script>/)[1];
 function harness(content = embedded) {
-  const listeners = new Map(), logs = [], sessions = [];
-  let active, raf, seedCalls = 0, now = 1000;
+  const listeners = new Map(), logs = [], sessions = [], timers = new Map(), cancelledTimers = [];
+  let active, raf, seedCalls = 0, now = 1000, timerNow = 0, nextTimer = 1, audioFailure = false;
+  const setTimeout = (callback, delay) => { const id = nextTimer++; timers.set(id, { callback, at: timerNow + delay }); return id; };
+  const clearTimeout = id => { if (timers.delete(id)) cancelledTimers.push(id); };
+  function advanceTimers(ms) {
+    const until = timerNow + ms;
+    for (;;) {
+      const next = [...timers].filter(([, timer]) => timer.at <= until).sort((a, b) => a[1].at - b[1].at || a[0] - b[0])[0];
+      if (!next) break;
+      const [id, timer] = next; timers.delete(id); timerNow = timer.at; timer.callback();
+    }
+    timerNow = until;
+  }
   class Element {
-    constructor(tag = 'div') { this.tagName = tag.toUpperCase(); this.children = []; this.style = {}; this.dataset = {}; this.attributes = {}; this.hidden = false; this.textContent = ''; this.id = ''; this.scrollTop = 0; this.captures = new Set(); this.events = new Map(); this.classList = { add() {}, remove() {}, toggle() {} }; }
+    constructor(tag = 'div') { this.tagName = tag.toUpperCase(); this.children = []; this.style = {}; this.dataset = {}; this.attributes = {}; this.hidden = false; this.textContent = ''; this.id = ''; this.scrollTop = 0; this.captures = new Set(); this.events = new Map(); const classes = new Set(); this.classList = { add: name => classes.add(name), remove: name => classes.delete(name), contains: name => classes.has(name), toggle(name, force = !classes.has(name)) { if (force) classes.add(name); else classes.delete(name); return force; } }; }
     append(...nodes) { this.children.push(...nodes); for (const node of nodes) node.parentElement = this; }
     replaceChildren(...nodes) { for (const node of this.children) node.parentElement = null; this.children = []; this.append(...nodes); }
     remove() { this.parentElement.children = this.parentElement.children.filter(node => node !== this); }
@@ -40,7 +51,7 @@ function harness(content = embedded) {
   const document = { body, documentElement: {}, hidden: false, get activeElement() { return active; }, getElementById: get, createElement: tag => tag === 'canvas' ? new Canvas() : new Element(tag), addEventListener: (name, handler) => listeners.set(name, handler) };
   class Synth {
     muted = false;
-    async activate() { return true; }
+    async activate() { if (audioFailure) { audioFailure = false; throw new Error('test audio unavailable'); } return true; }
     setMuted(value) { this.muted = value; }
     setSession(value) { sessions.push(value); }
     setHidden() {}
@@ -48,14 +59,14 @@ function harness(content = embedded) {
     play() {}
     events() {}
   }
-  const context = vm.createContext({ document, HTMLElement: Element, HTMLCanvasElement: Canvas, matchMedia: () => ({ matches: true }), crypto: { getRandomValues(array) { seedCalls++; array[0] = 41 + seedCalls; } }, requestAnimationFrame: callback => { raf = callback; }, console, location: { search: '' }, URLSearchParams, setTimeout: () => 1, clearTimeout() {}, addEventListener: (name, handler) => listeners.set(name, handler) });
+  const context = vm.createContext({ document, HTMLElement: Element, HTMLCanvasElement: Canvas, matchMedia: () => ({ matches: true }), crypto: { getRandomValues(array) { seedCalls++; array[0] = 41 + seedCalls; } }, requestAnimationFrame: callback => { raf = callback; }, console, location: { search: '' }, URLSearchParams, setTimeout, clearTimeout, addEventListener: (name, handler) => listeners.set(name, handler) });
   context.window = context;
   const cache = new Map();
   function load(name) {
     if (cache.has(name)) return cache.get(name).exports;
     const module = { exports: {} }; cache.set(name, module);
     let source = readFileSync(`dist/${name}`, 'utf8');
-    if (name === 'main.js') source += '\nglobalThis.inspectMain = () => JSON.stringify({ world, actions: recording.actions, screen, checksum: finalChecksum(world), replayVerified, lastRecording }); globalThis.inspectContentFrozen = () => Object.isFrozen(desertContent) && Object.values(desertContent).every(value => Object.isFrozen(value));';
+    if (name === 'main.js') source += '\nglobalThis.inspectMain = () => JSON.stringify({ world, actions: recording.actions, recording, playingRecording, screen, checksum: finalChecksum(world), replayVerified, lastRecording }); globalThis.inspectContentFrozen = () => Object.isFrozen(desertContent) && Object.values(desertContent).every(value => Object.isFrozen(value)); globalThis.inspectNoticeTimer = () => noticeTimer; globalThis.replaceRecording = value => { lastRecording = JSON.parse(value); };';
     const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
     const require = path => path === './render.js' ? { createRenderer: () => () => {} } : path === './audio.js' ? { Synth } : path === './logger.js' ? { log: (...entry) => logs.push(entry) } : load(path.slice(2));
     vm.runInContext(`(function(require,module,exports){${compiled}\n})`, context, { filename: name })(require, module, module.exports);
@@ -65,8 +76,15 @@ function harness(content = embedded) {
   const snapshot = () => JSON.parse(context.inspectMain());
   const event = (name, props = {}) => { const value = { target: active ?? get('game'), repeat: false, preventDefault() { this.defaultPrevented = true; }, ...props }; listeners.get(name)?.(value); return value; };
   const click = label => { const node = all().find(node => node.tagName === 'BUTTON' && node.textContent === label); assert.ok(node, `button ${label}`); node.onclick(); return node; };
-  return { get, click, event, logs, sessions, snapshot, document, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
+  return { get, click, event, logs, sessions, snapshot, document, advanceTimers, cancelledTimers, get noticeTimer() { return context.inspectNoticeTimer(); }, get pendingTimers() { return [...timers.keys()]; }, rejectAudio() { audioFailure = true; }, replaceRecording(value) { context.replaceRecording(JSON.stringify(value)); }, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
 }
+test('actual main expires notice text and visibility at 3500 ms without changing the complete session', () => {
+  const app = harness('{'), before = app.snapshot(), notice = app.get('notice');
+  assert.ok(app.logs.some(([level, name]) => level === 'error' && name === 'runtime.failure'));
+  assert.equal(notice.textContent, '系统异常，请刷新重试。'); assert.equal(notice.classList.contains('visible'), true);
+  app.advanceTimers(3499); assert.equal(notice.textContent, '系统异常，请刷新重试。'); assert.equal(notice.classList.contains('visible'), true); assert.equal(app.pendingTimers.length, 1);
+  app.advanceTimers(1); assert.equal(notice.textContent, ''); assert.equal(notice.classList.contains('visible'), false); assert.equal(app.noticeTimer, 0); assert.deepEqual(app.pendingTimers, []); assert.deepEqual(app.snapshot(), before);
+});
 test('built content contains exactly five canonical entries and escapes every locale without changing text', () => {
   const expected = Object.fromEntries(catalog.filter(entry => contentBeats.includes(entry.beat)).map(({ beat, id, zh, en }) => [contentKey(beat), { id, zh, en }]));
   assert.deepEqual(JSON.parse(embedded), expected); assert.equal(harness().contentFrozen, true);
