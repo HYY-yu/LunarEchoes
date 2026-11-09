@@ -45,7 +45,8 @@ let stickX = 0, stickY = 0, dashPressed = false;
 let stickPointer: number | null = null;
 const coarse = matchMedia('(pointer: coarse)').matches;
 function text() { return dictionary(language); }
-function notify(message: string) { const node = element('notice'); node.textContent = message; node.classList.add('visible'); window.clearTimeout(noticeTimer); noticeTimer = window.setTimeout(() => node.classList.remove('visible'), 3500); }
+function clearNotice() { window.clearTimeout(noticeTimer); noticeTimer = 0; const node = element('notice'); node.classList.remove('visible'); node.textContent = ''; }
+function notify(message: string) { clearNotice(); const node = element('notice'); node.textContent = message; node.classList.add('visible'); noticeTimer = window.setTimeout(clearNotice, 3500); }
 function fail(error: unknown) { log('error', 'runtime.failure', { message: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : '', seed: world.seed, tick: world.tick }); notify(text().error); }
 async function enableAudio(confirm = false) { try { return await synth.activate(confirm ? 'ui-confirm' : undefined); } catch (error) { log('error', 'audio.activation_failed', { error: String(error) }); notify(language === 'zh' ? '音频启动失败，游戏可继续。' : 'Audio unavailable. You can keep playing.'); return false; } }
 function act(action: Action, record = true) {
@@ -83,7 +84,7 @@ function begin() {
   if (!desertContent) throw new Error('Desert content unavailable');
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
   const nextWorld = createWorld({ ...DESERT_CONTEXT, seed: seedArray[0] });
-  synth.reset(); world = nextWorld; recording = startRecording(world); playingRecording = null; screen = 'game'; clearCombatInput();
+  synth.reset(); world = nextWorld; recording = startRecording(world); playingRecording = null; screen = 'game'; clearCombatInput(); clearNotice();
   log('info', 'session.started', { seed: world.seed, version: VERSION, ...world.context }); updateUi(true); void enableAudio();
   canvasNode.focus();
 }
@@ -99,11 +100,11 @@ function startReplay() {
   if (!lastRecording) return;
   try {
     const next = prepareReplay(lastRecording);
-    synth.reset(); world = next.world; playingRecording = next.recording; replayIndex = 0; replayVerified = false; screen = 'replay'; clearCombatInput();
+    synth.reset(); world = next.world; playingRecording = next.recording; replayIndex = 0; replayVerified = false; screen = 'replay'; clearCombatInput(); clearNotice();
     log('info', 'replay.started', { version: VERSION, ...world.context, seed: world.seed, actions: playingRecording.actions.length }); updateUi(true); void enableAudio();
   } catch (error) { replayFailure(error); }
 }
-function showTitle() { screen = 'title'; playingRecording = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); clearCombatInput(); synth.reset(); updateUi(true); void enableAudio(); }
+function showTitle() { screen = 'title'; playingRecording = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); clearCombatInput(); synth.reset(); clearNotice(); updateUi(true); void enableAudio(); }
 function pause() {
   if (screen !== 'game') return;
   if (world.phase.kind === 'running') act({ kind: 'pause' }); else if (world.phase.kind === 'paused') { act({ kind: 'resume' }); void enableAudio(); }
