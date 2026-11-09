@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 import { drawDesertScene } from '../dist/desert-scene.js';
-import { createWorld, normalizeInput, replay, finalChecksum } from '../dist/core.js';
+import { createWorld, normalizeInput, replay, finalChecksum, startRecording } from '../dist/core.js';
 import { play } from '../scripts/simulate.mjs';
 import ts from 'typescript';
 import { embedDesertContent } from '../scripts/desert-content.mjs';
@@ -14,10 +14,21 @@ const contentBeats = ['opening', 'objective', 'defeat', 'victory', 'next-clue'];
 const contentKey = beat => beat === 'next-clue' ? 'nextClue' : beat;
 const embedded = html.match(/<script id="desert-content" type="application\/json">([^]*?)<\/script>/)[1];
 function harness(content = embedded) {
-  const listeners = new Map(), logs = [], sessions = [];
-  let active, raf, seedCalls = 0, now = 1000;
+  const listeners = new Map(), logs = [], sessions = [], timers = new Map(), cancelledTimers = [];
+  let active, raf, seedCalls = 0, now = 1000, timerNow = 0, nextTimer = 1, audioFailure = false;
+  const setTimeout = (callback, delay) => { const id = nextTimer++; timers.set(id, { callback, at: timerNow + delay }); return id; };
+  const clearTimeout = id => { if (timers.delete(id)) cancelledTimers.push(id); };
+  function advanceTimers(ms) {
+    const until = timerNow + ms;
+    for (;;) {
+      const next = [...timers].filter(([, timer]) => timer.at <= until).sort((a, b) => a[1].at - b[1].at || a[0] - b[0])[0];
+      if (!next) break;
+      const [id, timer] = next; timers.delete(id); timerNow = timer.at; timer.callback();
+    }
+    timerNow = until;
+  }
   class Element {
-    constructor(tag = 'div') { this.tagName = tag.toUpperCase(); this.children = []; this.style = {}; this.dataset = {}; this.attributes = {}; this.hidden = false; this.textContent = ''; this.id = ''; this.scrollTop = 0; this.captures = new Set(); this.events = new Map(); this.classList = { add() {}, remove() {}, toggle() {} }; }
+    constructor(tag = 'div') { this.tagName = tag.toUpperCase(); this.children = []; this.style = {}; this.dataset = {}; this.attributes = {}; this.hidden = false; this.textContent = ''; this.id = ''; this.scrollTop = 0; this.captures = new Set(); this.events = new Map(); const classes = new Set(); this.classList = { add: name => classes.add(name), remove: name => classes.delete(name), contains: name => classes.has(name), toggle(name, force = !classes.has(name)) { if (force) classes.add(name); else classes.delete(name); return force; } }; }
     append(...nodes) { this.children.push(...nodes); for (const node of nodes) node.parentElement = this; }
     replaceChildren(...nodes) { for (const node of this.children) node.parentElement = null; this.children = []; this.append(...nodes); }
     remove() { this.parentElement.children = this.parentElement.children.filter(node => node !== this); }
@@ -40,7 +51,7 @@ function harness(content = embedded) {
   const document = { body, documentElement: {}, hidden: false, get activeElement() { return active; }, getElementById: get, createElement: tag => tag === 'canvas' ? new Canvas() : new Element(tag), addEventListener: (name, handler) => listeners.set(name, handler) };
   class Synth {
     muted = false;
-    async activate() { return true; }
+    async activate() { if (audioFailure) { audioFailure = false; throw new Error('test audio unavailable'); } return true; }
     setMuted(value) { this.muted = value; }
     setSession(value) { sessions.push(value); }
     setHidden() {}
@@ -48,25 +59,85 @@ function harness(content = embedded) {
     play() {}
     events() {}
   }
-  const context = vm.createContext({ document, HTMLElement: Element, HTMLCanvasElement: Canvas, matchMedia: () => ({ matches: true }), crypto: { getRandomValues(array) { seedCalls++; array[0] = 41 + seedCalls; } }, requestAnimationFrame: callback => { raf = callback; }, console, location: { search: '' }, URLSearchParams, setTimeout: () => 1, clearTimeout() {}, addEventListener: (name, handler) => listeners.set(name, handler) });
+  const context = vm.createContext({ document, HTMLElement: Element, HTMLCanvasElement: Canvas, matchMedia: () => ({ matches: true }), crypto: { getRandomValues(array) { seedCalls++; array[0] = 41 + seedCalls; } }, requestAnimationFrame: callback => { raf = callback; }, console, location: { search: '' }, URLSearchParams, setTimeout, clearTimeout, addEventListener: (name, handler) => listeners.set(name, handler) });
   context.window = context;
   const cache = new Map();
   function load(name) {
     if (cache.has(name)) return cache.get(name).exports;
     const module = { exports: {} }; cache.set(name, module);
     let source = readFileSync(`dist/${name}`, 'utf8');
-    if (name === 'main.js') source += '\nglobalThis.inspectMain = () => JSON.stringify({ world, actions: recording.actions, screen, checksum: finalChecksum(world), replayVerified, lastRecording }); globalThis.inspectContentFrozen = () => Object.isFrozen(desertContent) && Object.values(desertContent).every(value => Object.isFrozen(value));';
+    if (name === 'main.js') source += '\nglobalThis.inspectMain = (complete = false) => JSON.stringify({ world, actions: recording.actions, screen, checksum: finalChecksum(world), replayVerified, lastRecording, ...(complete ? { recording, playingRecording } : {}) }); globalThis.inspectContentFrozen = () => Object.isFrozen(desertContent) && Object.values(desertContent).every(value => Object.isFrozen(value)); globalThis.inspectNoticeTimer = () => noticeTimer; globalThis.inspectProgress = () => JSON.stringify({ screen, tick: world.tick }); globalThis.replaceRecording = value => { lastRecording = JSON.parse(value); };';
     const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
     const require = path => path === './render.js' ? { createRenderer: () => () => {} } : path === './audio.js' ? { Synth } : path === './logger.js' ? { log: (...entry) => logs.push(entry) } : load(path.slice(2));
     vm.runInContext(`(function(require,module,exports){${compiled}\n})`, context, { filename: name })(require, module, module.exports);
     return module.exports;
   }
   load('main.js');
-  const snapshot = () => JSON.parse(context.inspectMain());
+  const snapshot = (complete = false) => JSON.parse(context.inspectMain(complete));
   const event = (name, props = {}) => { const value = { target: active ?? get('game'), repeat: false, preventDefault() { this.defaultPrevented = true; }, ...props }; listeners.get(name)?.(value); return value; };
   const click = label => { const node = all().find(node => node.tagName === 'BUTTON' && node.textContent === label); assert.ok(node, `button ${label}`); node.onclick(); return node; };
-  return { get, click, event, logs, sessions, snapshot, document, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
+  return { get, click, event, logs, sessions, snapshot, session: () => snapshot(true), progress: () => JSON.parse(context.inspectProgress()), document, advanceTimers, cancelledTimers, get noticeTimer() { return context.inspectNoticeTimer(); }, get pendingTimers() { return [...timers.keys()]; }, rejectAudio() { audioFailure = true; }, replaceRecording(value) { context.replaceRecording(JSON.stringify(value)); }, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
 }
+test('actual main expires notice text and visibility at 3500 ms without changing the complete session', () => {
+  const app = harness('{'), before = app.session(), notice = app.get('notice');
+  assert.ok(app.logs.some(([level, name]) => level === 'error' && name === 'runtime.failure'));
+  assert.equal(notice.textContent, '系统异常，请刷新重试。'); assert.equal(notice.classList.contains('visible'), true);
+  app.advanceTimers(3499); assert.equal(notice.textContent, '系统异常，请刷新重试。'); assert.equal(notice.classList.contains('visible'), true); assert.equal(app.pendingTimers.length, 1);
+  app.advanceTimers(1); assert.equal(notice.textContent, ''); assert.equal(notice.classList.contains('visible'), false); assert.equal(app.noticeTimer, 0); assert.deepEqual(app.pendingTimers, []); assert.deepEqual(app.session(), before);
+});
+function assertNotice(app, message) {
+  assert.equal(app.get('notice').textContent, message); assert.equal(app.get('notice').classList.contains('visible'), Boolean(message));
+  assert.equal(app.pendingTimers.length, message ? 1 : 0); assert.equal(Boolean(app.noticeTimer), Boolean(message));
+}
+test('replacement notice keeps its own deadline after the cancelled notice deadline', () => {
+  const app = harness(), before = app.session(); app.event('error', { message: 'first runtime error' }); const first = app.noticeTimer;
+  app.advanceTimers(1000); app.get('language').onclick(); app.event('unhandledrejection', { reason: 'second runtime error' }); const second = app.noticeTimer;
+  assert.notEqual(first, second); assert.ok(app.cancelledTimers.includes(first)); assert.deepEqual(app.pendingTimers, [second]);
+  app.advanceTimers(2500); assertNotice(app, 'System error. Refresh to retry.'); assert.equal(app.noticeTimer, second);
+  app.advanceTimers(999); assertNotice(app, 'System error. Refresh to retry.'); app.advanceTimers(1); assertNotice(app, '');
+  assert.deepEqual(app.session(), before);
+  assert.deepEqual(app.logs.filter(([, name]) => name === 'runtime.failure').map(([level, , data]) => [level, data.message]), [['error', 'first runtime error'], ['error', 'second runtime error']]);
+});
+test('pause blur visibility language and mute retain the notice and its original deadline', () => {
+  const app = harness(); app.click('启动任务'); app.click('部署出发'); app.event('error', { message: 'retained error' }); const timer = app.noticeTimer;
+  app.advanceTimers(1000); app.key('KeyP'); assert.equal(app.session().screen, 'game'); assert.equal(app.session().world.phase.kind, 'paused');
+  app.release('KeyP'); app.key('KeyP'); assert.equal(app.session().world.phase.kind, 'running'); app.event('blur'); assert.equal(app.session().world.phase.kind, 'paused');
+  app.document.hidden = true; app.event('visibilitychange'); app.document.hidden = false; app.event('visibilitychange'); app.get('language').onclick(); app.get('sound').onclick();
+  assertNotice(app, '系统异常，请刷新重试。'); assert.equal(app.noticeTimer, timer); assert.deepEqual(app.cancelledTimers, []);
+  const paused = app.session(); assert.equal(paused.screen, 'game'); assert.equal(paused.world.phase.kind, 'paused');
+  app.advanceTimers(2499); assertNotice(app, '系统异常，请刷新重试。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), paused);
+});
+test('Replay without a recording keeps the existing notice unchanged', () => {
+  const app = harness(), before = app.session(); app.event('error', { message: 'no recording' }); const timer = app.noticeTimer;
+  app.advanceTimers(1000); app.click('回放上一局'); assert.deepEqual(app.session(), before); assertNotice(app, '系统异常，请刷新重试。'); assert.equal(app.noticeTimer, timer); assert.deepEqual(app.cancelledTimers, []);
+  app.advanceTimers(2499); assertNotice(app, '系统异常，请刷新重试。'); app.advanceTimers(1); assertNotice(app, '');
+});
+test('successful deployment cancels the old notice before a fresh bilingual audio error', async () => {
+  for (const language of ['zh', 'en']) {
+    const app = harness(); app.click('启动任务'); app.event('error', { message: 'opening error' }); const timer = app.noticeTimer;
+    if (language === 'en') app.get('language').onclick();
+    app.advanceTimers(1000); app.rejectAudio(); app.get('opening-continue').onclick(); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(timer));
+    const begun = app.session(); assert.deepEqual(begun.world, createWorld({ ...begun.world.context, seed: begun.world.seed })); assert.deepEqual(begun.recording, startRecording(begun.world)); assert.deepEqual(begun.actions, []);
+    await new Promise(resolve => setImmediate(resolve));
+    const message = language === 'zh' ? '音频启动失败，游戏可继续。' : 'Audio unavailable. You can keep playing.';
+    assertNotice(app, message); assert.ok(app.logs.some(([level, name, data]) => level === 'error' && name === 'audio.activation_failed' && data.error.includes('test audio unavailable')));
+    app.advanceTimers(2500); assertNotice(app, message); app.advanceTimers(999); assertNotice(app, message); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), begun);
+  }
+});
+test('a synchronous UI failure after deployment publishes a fresh bilingual error with its own deadline', () => {
+  for (const language of ['zh', 'en']) {
+    const app = harness(); app.click('启动任务'); if (language === 'en') app.get('language').onclick();
+    app.event('error', { message: 'old opening error' }); const oldTimer = app.noticeTimer; app.advanceTimers(1000);
+    const game = app.get('game'), setAttribute = game.setAttribute.bind(game);
+    game.setAttribute = (...args) => { game.setAttribute = setAttribute; throw new Error(`test UI update unavailable: ${args[0]}`); };
+    app.get('opening-continue').onclick(); const begun = app.session();
+    assert.equal(begun.screen, 'game'); assert.deepEqual(begun.world, createWorld({ ...begun.world.context, seed: begun.world.seed })); assert.deepEqual(begun.recording, startRecording(begun.world)); assert.deepEqual(begun.actions, []);
+    const message = language === 'zh' ? '系统异常，请刷新重试。' : 'System error. Refresh to retry.';
+    assertNotice(app, message); assert.notEqual(app.noticeTimer, oldTimer); assert.ok(app.cancelledTimers.includes(oldTimer));
+    assert.ok(app.logs.some(([level, name, data]) => level === 'error' && name === 'runtime.failure' && data.message.includes('test UI update unavailable')));
+    app.advanceTimers(2500); assertNotice(app, message); app.advanceTimers(999); assertNotice(app, message); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), begun);
+  }
+});
 test('built content contains exactly five canonical entries and escapes every locale without changing text', () => {
   const expected = Object.fromEntries(catalog.filter(entry => contentBeats.includes(entry.beat)).map(({ beat, id, zh, en }) => [contentKey(beat), { id, zh, en }]));
   assert.deepEqual(JSON.parse(embedded), expected); assert.equal(harness().contentFrozen, true);
@@ -182,6 +253,68 @@ function naturalWin(app, focus = 'canvas') {
   assert.equal(app.snapshot().world.tick, 10800); assert.equal(app.snapshot().world.bossKilled, true);
   return app.snapshot();
 }
+function noticeTerminal(app) { naturalWin(app); return app.session(); }
+test('normal Boss notices expire in both languages without changing the full live or replay session', () => {
+  const app = harness(), terminal = noticeTerminal(app); assertNotice(app, '收割者抵达');
+  app.advanceTimers(3499); assertNotice(app, '收割者抵达'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), terminal);
+  app.get('language').onclick(); app.activate('victory-replay', 'Enter');
+  for (let i = 0; i < 15000 && app.progress().tick < 8400; i++) app.frame();
+  assert.equal(app.session().screen, 'replay'); assertNotice(app, 'Harvester incoming'); const boss = app.session();
+  app.advanceTimers(3499); assertNotice(app, 'Harvester incoming'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), boss);
+  for (let i = 0; i < 15000 && app.progress().screen === 'replay'; i++) app.frame();
+  const done = app.session(); assert.equal(done.replayVerified, true); assert.deepEqual(done.world, terminal.world); assert.equal(done.checksum, terminal.checksum); assert.deepEqual(done.recording, terminal.recording); assert.deepEqual(done.lastRecording, terminal.lastRecording);
+});
+test('native Retry clears active Boss notice and timer while replacing the complete live session', () => {
+  const app = harness(), terminal = noticeTerminal(app), timer = app.noticeTimer; assertNotice(app, '收割者抵达');
+  app.advanceTimers(1000); app.activate('victory-retry', 'Enter'); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(timer));
+  const actual = app.session(), world = createWorld({ ...terminal.world.context, seed: actual.world.seed });
+  assert.notEqual(world.seed, terminal.world.seed); assert.equal(app.seedCalls, 2);
+  assert.deepEqual(actual, { ...terminal, world, actions: [], recording: startRecording(world), playingRecording: null, screen: 'game', checksum: finalChecksum(world) });
+  app.advanceTimers(1000); app.event('error', { message: 'new retry error' }); const afterError = app.session();
+  app.advanceTimers(1500); assertNotice(app, '系统异常，请刷新重试。'); app.advanceTimers(1999); assertNotice(app, '系统异常，请刷新重试。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), afterError);
+});
+test('native Replay and Home cancel Boss timers while retaining recordings and complete replay results', async () => {
+  const app = harness(), terminal = noticeTerminal(app), liveTimer = app.noticeTimer;
+  app.advanceTimers(1000); app.rejectAudio(); app.activate('victory-replay', 'Space'); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(liveTimer));
+  const start = app.session(), initial = createWorld({ ...terminal.world.context, seed: terminal.world.seed });
+  assert.deepEqual(start, { ...terminal, world: initial, screen: 'replay', playingRecording: terminal.lastRecording, checksum: finalChecksum(initial) }); assert.equal(app.seedCalls, 1);
+  await new Promise(resolve => setImmediate(resolve)); assertNotice(app, '音频启动失败，游戏可继续。');
+  app.advanceTimers(2500); assertNotice(app, '音频启动失败，游戏可继续。'); app.advanceTimers(999); assertNotice(app, '音频启动失败，游戏可继续。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), start);
+  for (let i = 0; i < 15000 && app.progress().screen === 'replay'; i++) app.frame();
+  const done = app.session(); assert.equal(done.replayVerified, true); assert.equal(done.checksum, terminal.checksum); assert.deepEqual(done.world, terminal.world); assert.deepEqual(done.recording, terminal.recording); assert.deepEqual(done.lastRecording, terminal.lastRecording); assertNotice(app, '收割者抵达');
+  const endTimer = app.noticeTimer; app.click('返回基地'); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(endTimer));
+  const endHome = app.session(), endPreview = createWorld({ ...terminal.world.context, seed: 208907 });
+  assert.deepEqual(endHome, { ...done, world: endPreview, screen: 'title', playingRecording: null, checksum: finalChecksum(endPreview) });
+  app.click('回放上一局'); assertNotice(app, '');
+  for (let i = 0; i < 15000 && app.progress().tick < 8400; i++) app.frame();
+  assertNotice(app, '收割者抵达'); const boss = app.session(), replayTimer = app.noticeTimer; app.advanceTimers(1000); app.get('pause').onclick(); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(replayTimer));
+  const home = app.session(), preview = createWorld({ ...terminal.world.context, seed: 208907 });
+  assert.deepEqual(home, { ...boss, world: preview, screen: 'title', playingRecording: null, checksum: finalChecksum(preview) }); assert.equal(app.seedCalls, 1);
+  app.click('回放上一局'); app.event('error', { message: 'before home audio failure' }); const prior = app.noticeTimer; app.rejectAudio(); app.get('pause').onclick(); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(prior));
+  await new Promise(resolve => setImmediate(resolve)); assertNotice(app, '音频启动失败，游戏可继续。');
+  assert.ok(app.logs.some(([level, name]) => level === 'error' && name === 'audio.activation_failed'));
+  const afterError = app.session(); app.advanceTimers(3499); assertNotice(app, '音频启动失败，游戏可继续。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), afterError);
+});
+test('invalid Replay preserves its bilingual rejection notice and the complete current session', () => {
+  const app = harness(); naturalLoss(app);
+  for (const language of ['zh', 'en']) {
+    if (language === 'en') app.get('language').onclick();
+    app.replaceRecording({ ...app.session().lastRecording, actions: 'invalid actions' }); const before = app.session();
+    app.event('error', { message: 'old terminal notice' }); const timer = app.noticeTimer; app.advanceTimers(1000); app.activate('defeat-replay', 'Enter');
+    const message = language === 'zh' ? '无法播放，回放数据无效。进度未改变。' : 'Cannot play this replay. Its data is invalid. Progress is unchanged.';
+    assertNotice(app, message); assert.ok(app.cancelledTimers.includes(timer)); assert.deepEqual(app.session(), before);
+    assert.ok(app.logs.some(([level, name, data]) => level === 'warn' && name === 'replay.rejected' && data.code === 'invalid-data'));
+    app.advanceTimers(2500); assertNotice(app, message); app.advanceTimers(999); assertNotice(app, message); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), before);
+  }
+});
+test('replay end preserves a new verification error for its full duration', () => {
+  const app = harness(), terminal = naturalLoss(app); app.replaceRecording({ ...terminal.lastRecording, finalChecksum: terminal.checksum === '00000000' ? 'ffffffff' : '00000000' });
+  app.activate('defeat-replay', 'Enter');
+  for (let i = 0; i < 15000 && app.progress().screen === 'replay'; i++) app.frame();
+  const done = app.session(); assert.equal(done.screen, 'replay-end'); assert.equal(done.replayVerified, false); assert.deepEqual(done.world, terminal.world); assert.equal(done.checksum, terminal.checksum); assert.deepEqual(done.actions, terminal.actions);
+  assertNotice(app, '回放校验失败。进度未改变。'); assert.ok(app.logs.some(([level, name, data]) => level === 'error' && name === 'replay.rejected' && data.code === 'checksum-mismatch'));
+  app.advanceTimers(3499); assertNotice(app, '回放校验失败。进度未改变。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), done);
+});
 test('natural live victory draws the original scene and keeps full bilingual story, state, nodes, focus and scroll stable', () => {
   const app = harness(), terminal = naturalWin(app), panel = app.get('victory-panel'), retry = app.get('victory-retry'), replay = app.get('victory-replay'), art = app.get('victory-art');
   assert.ok(panel); assert.equal(app.active, retry); assert.equal(retry.focusOptions.preventScroll, true); assert.equal(retry.focusCalls, 1);
