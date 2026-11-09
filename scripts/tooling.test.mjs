@@ -19,6 +19,23 @@ async function waitFor(read, label) {
   throw new Error('Timed out waiting for ' + label);
 }
 
+async function waitForDevServer(run) {
+  const records = output => output.split('\n').filter(Boolean).map(line => { try { return JSON.parse(line); } catch { return null; } });
+  return waitFor(async () => {
+    if (run.exited) {
+      const status = await run.done;
+      const started = records(run.stderr).find(line => line?.event === 'task.started');
+      const evidence = started ? await Promise.all(['start.json', 'result.json'].map(async name => {
+        const path = join(started.directory, name);
+        try { return { name, path, record: JSON.parse(await readFile(path, 'utf8')) }; }
+        catch (error) { return { name, path, error: { code: error.code ?? null, message: String(error) } }; }
+      })) : [];
+      throw new Error('Dev server exited before readiness: ' + JSON.stringify({ status, stdout: run.stdout, stderr: run.stderr, directory: started?.directory ?? null, evidence }));
+    }
+    return records(run.stdout).find(line => line?.event === 'server.started')?.url;
+  }, 'dev server');
+}
+
 async function fixture(t) {
   const root = await mkdtemp(join(tmpdir(), 'lunar-tooling-test-'));
   await mkdir(join(root, 'scripts'));
@@ -161,13 +178,72 @@ test('changing real inputs cannot produce a successful exact-source receipt', { 
   assert.equal(receipt.value.sourceAfter.dirty, true);
 });
 
+test('dev readiness reports an already failed child instead of a timeout', { timeout: 30000 }, async t => {
+  const f = await fixture(t);
+  await f.flag('fail');
+  const dev = f.start('dev');
+  const observed = waitForDevServer(dev).then(url => ({ url }), error => ({ error }));
+  assert.deepEqual(await dev.done, { code: 7, signal: null });
+  const { error } = await observed;
+  assert.ok(error instanceof Error);
+  assert.match(error.message, /^Dev server exited before readiness: /);
+  const diagnostic = JSON.parse(error.message.slice('Dev server exited before readiness: '.length));
+  assert.deepEqual(diagnostic.status, { code: 7, signal: null });
+  assert.equal(diagnostic.stderr, dev.stderr);
+  assert.match(diagnostic.stderr, /task.finished/);
+  assert.equal(diagnostic.evidence.find(item => item.name === 'result.json').record.outcome.code, 7);
+  assert.equal(diagnostic.evidence.find(item => item.name === 'start.json').record.command, 'dev');
+  const retained = JSON.stringify(diagnostic);
+  await rm(f.root, { recursive: true, force: true });
+  await assert.rejects(readFile(diagnostic.evidence.find(item => item.name === 'result.json').path), { code: 'ENOENT' });
+  assert.equal(JSON.parse(retained).evidence.find(item => item.name === 'result.json').record.outcome.code, 7);
+});
+
+test('dev readiness does not confuse an early zero exit with a listening server', { timeout: 30000 }, async t => {
+  const f = await fixture(t);
+  const path = join(f.root, 'scripts', 'task-steps.mjs');
+  const steps = await readFile(path, 'utf8');
+  const serve = steps.indexOf('export async function serve(');
+  assert.notEqual(serve, -1);
+  await writeFile(path, steps.slice(0, serve) + 'export async function serve() {}\n');
+  const dev = f.start('dev');
+  assert.deepEqual(await dev.done, { code: 0, signal: null });
+  await assert.rejects(waitForDevServer(dev), error => {
+    assert.match(error.message, /^Dev server exited before readiness: /);
+    const diagnostic = JSON.parse(error.message.slice('Dev server exited before readiness: '.length));
+    assert.deepEqual(diagnostic.status, { code: 0, signal: null });
+    assert.equal(diagnostic.evidence.find(item => item.name === 'result.json').record.outcome.code, 0);
+    return true;
+  });
+});
+
+test('dev readiness retains an early signal and identifies missing terminal evidence', { timeout: 30000 }, async t => {
+  const f = await fixture(t);
+  await f.flag('hold');
+  const dev = f.start('dev');
+  await f.ready('build.ready');
+  dev.child.kill('SIGTERM');
+  assert.deepEqual(await dev.done, { code: null, signal: 'SIGTERM' });
+  const [receipt] = await f.receipts();
+  const directory = await realpath(receipt.directory);
+  await rm(join(receipt.directory, 'result.json'));
+  await assert.rejects(waitForDevServer(dev), error => {
+    assert.match(error.message, /^Dev server exited before readiness: /);
+    const diagnostic = JSON.parse(error.message.slice('Dev server exited before readiness: '.length));
+    assert.deepEqual(diagnostic.status, { code: null, signal: 'SIGTERM' });
+    assert.equal(diagnostic.directory, directory);
+    assert.equal(diagnostic.stderr, dev.stderr);
+    assert.equal(diagnostic.evidence.find(item => item.name === 'result.json').error.code, 'ENOENT');
+    assert.equal(diagnostic.evidence.find(item => item.name === 'result.json').record, undefined);
+    assert.equal(diagnostic.evidence.find(item => item.name === 'start.json').record.command, 'dev');
+    return true;
+  });
+});
+
 test('dev serves its immutable snapshot without holding the build transaction', { timeout: 30000 }, async t => {
   const f = await fixture(t);
   const dev = f.start('dev');
-  const url = await waitFor(() => {
-    const lines = dev.stdout.split('\n').filter(Boolean).map(line => { try { return JSON.parse(line); } catch { return null; } });
-    return lines.find(line => line?.event === 'server.started')?.url;
-  }, 'dev server');
+  const url = await waitForDevServer(dev);
   assert.equal(await (await fetch(url)).text(), 'first');
   await writeFile(join(f.root, 'input.txt'), 'second');
   assert.equal((await f.start('build').done).code, 0);
