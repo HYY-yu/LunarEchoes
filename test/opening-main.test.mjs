@@ -124,6 +124,20 @@ test('successful deployment cancels the old notice before a fresh bilingual audi
     app.advanceTimers(2500); assertNotice(app, message); app.advanceTimers(999); assertNotice(app, message); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), begun);
   }
 });
+test('a synchronous UI failure after deployment publishes a fresh bilingual error with its own deadline', () => {
+  for (const language of ['zh', 'en']) {
+    const app = harness(); app.click('启动任务'); if (language === 'en') app.get('language').onclick();
+    app.event('error', { message: 'old opening error' }); const oldTimer = app.noticeTimer; app.advanceTimers(1000);
+    const game = app.get('game'), setAttribute = game.setAttribute.bind(game);
+    game.setAttribute = (...args) => { game.setAttribute = setAttribute; throw new Error(`test UI update unavailable: ${args[0]}`); };
+    app.get('opening-continue').onclick(); const begun = app.session();
+    assert.equal(begun.screen, 'game'); assert.deepEqual(begun.world, createWorld({ ...begun.world.context, seed: begun.world.seed })); assert.deepEqual(begun.recording, startRecording(begun.world)); assert.deepEqual(begun.actions, []);
+    const message = language === 'zh' ? '系统异常，请刷新重试。' : 'System error. Refresh to retry.';
+    assertNotice(app, message); assert.notEqual(app.noticeTimer, oldTimer); assert.ok(app.cancelledTimers.includes(oldTimer));
+    assert.ok(app.logs.some(([level, name, data]) => level === 'error' && name === 'runtime.failure' && data.message.includes('test UI update unavailable')));
+    app.advanceTimers(2500); assertNotice(app, message); app.advanceTimers(999); assertNotice(app, message); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), begun);
+  }
+});
 test('built content contains exactly five canonical entries and escapes every locale without changing text', () => {
   const expected = Object.fromEntries(catalog.filter(entry => contentBeats.includes(entry.beat)).map(({ beat, id, zh, en }) => [contentKey(beat), { id, zh, en }]));
   assert.deepEqual(JSON.parse(embedded), expected); assert.equal(harness().contentFrozen, true);
