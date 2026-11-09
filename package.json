@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "dev": "npm run build && node scripts/serve.mjs",
-    "test": "npm run build && node --test test/*.test.mjs",
-    "check": "npm run build && node scripts/check.mjs",
-    "verify": "npm test && npm run check && node scripts/simulate.mjs"
+    "build": "node scripts/task.mjs build",
+    "dev": "node scripts/task.mjs dev",
+    "test": "node scripts/task.mjs test",
+    "check": "node scripts/task.mjs check",
+    "verify": "node scripts/task.mjs verify"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
