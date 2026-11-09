@@ -1,6 +1,6 @@
 # 沙漠开场接入
 
-[Issue #38](https://github.com/HYY-yu/LunarEchoes/issues/38) 让玩家在部署前看到既有沙漠像素画、失联背景和操作目标。首次启动任务先展示开场，部署和跳过才创建新局。暂停页保留完整目标。此单元不完成 B1、B2 或 Issue #23，也不接入无线电、结局、线索、解锁、存档或其他地图。
+[Issue #38](https://github.com/HYY-yu/LunarEchoes/issues/38) 让玩家在部署前看到既有沙漠像素画、失联背景和操作目标。首次启动任务先展示开场，部署和跳过才创建新局。暂停页保留完整目标。开场单元不完成 B1、B2 或 Issue #23，也不接入无线电、结局、线索、解锁、存档或其他地图。后续 Issue #40 接入真实失败结算，见[沙漠失败结算](desert-defeat.md)。
 
 ## 会话与内容
 
@@ -8,7 +8,7 @@
 
 标题按钮调用 `showOpening()`，只切屏和清理输入与帧时间。`finishOpening(reason)` 仅在开场有效，记录稳定 ID 和 continue 或 skip，再调用唯一的新局入口 `begin()`。Retry 直接调用 `begin()`，Replay 直接调用 `startReplay()`。开场等待、语言、静音、失焦、隐藏和恢复均不派发战斗动作，不生成新局种子。
 
-构建通过现有 `validateDesertStory` 校验完整原目录，只提取 `desert-base.opening` 与 `desert-base.objective` 的 ID 和完整中英文。内容嵌入 inert application/json script，转义小于号，没有请求、加载状态、手抄剧情或依赖。main 在边界解析 unknown，验证两个 ID 和非空语言；错误使用现有 Error 日志与双语通知，不能进入战斗。
+当前构建通过现有 `validateDesertStory` 校验完整原目录，由 `embedDesertContent` 统一提取 `desert-base.opening`、`desert-base.objective` 和 `desert-base.defeat` 的 ID 和完整中英文。内容嵌入 inert application/json script，转义小于号，没有请求、加载状态、手抄剧情或依赖。main 通过 `parseDesertContent` 在边界解析 unknown，验证三个精确 ID、字段和非空语言；错误使用现有 Error 日志与双语通知，不能进入战斗。
 
 语言和静音刷新原位更新开场 DOM，保留动作按钮、焦点和滚动位置。部署后焦点转到游戏画布。按键释放始终清理；开场不收集战斗按键，跨屏自动重复不会补入已清空按键集。原生按钮 Enter 与 Space 保留浏览器激活。运行中 header 按钮获得焦点后，WASD、暂停和数字升级仍有效；文本输入不接收战斗快捷键。这是协调者指出的局部输入合同修正，没有增加玩法。
 
