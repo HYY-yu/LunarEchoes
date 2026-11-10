@@ -5,7 +5,7 @@ export function embedDesertContent(html, catalog) {
     const { id, zh, en } = entries.find(entry => entry.beat === beat);
     return { id, zh, en };
   };
-  const content = JSON.stringify({ opening: select('opening'), objective: select('objective'), defeat: select('defeat'), victory: select('victory'), nextClue: select('next-clue'), firstContact: select('radio.first-contact') }).replaceAll('<', '\\u003c');
+  const content = JSON.stringify({ opening: select('opening'), objective: select('objective'), defeat: select('defeat'), victory: select('victory'), nextClue: select('next-clue'), firstContact: select('radio.first-contact'), telemetry: select('radio.telemetry') }).replaceAll('<', '\\u003c');
   const anchor = '<script id="desert-content" type="application/json"></script>';
   if (!html.includes(anchor)) throw new Error('Missing desert content anchor');
   return html.replace(anchor, () => `<script id="desert-content" type="application/json">${content}</script>`);
