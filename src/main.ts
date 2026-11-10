@@ -6,7 +6,8 @@ import { dictionary, upgradeLabel, type Language } from './i18n.js';
 import { log } from './logger.js';
 import { DESERT_SCENE_SIZE, drawDesertScene } from './desert-scene.js';
 type Screen = 'title' | 'opening' | 'game' | 'replay' | 'replay-end';
-type RadioState = 'inactive' | 'waiting' | 'active' | 'dismissed' | 'disabled';
+type RadioBeat = 'firstContact' | 'telemetry';
+type RadioState = Readonly<{ kind: 'inactive' | 'waiting' | 'disabled' }> | Readonly<{ kind: 'active' | 'dismissed'; beat: RadioBeat }>;
 type OpeningFinish = 'continue' | 'skip';
 type DesertContent = Readonly<{
   opening: Readonly<{ id: 'desert-base.opening'; zh: string; en: string }>;
@@ -14,6 +15,7 @@ type DesertContent = Readonly<{
   defeat: Readonly<{ id: 'desert-base.defeat'; zh: string; en: string }>;
   victory: Readonly<{ id: 'desert-base.victory'; zh: string; en: string }>;
   firstContact: Readonly<{ id: 'desert-base.radio.first-contact'; zh: string; en: string }>;
+  telemetry: Readonly<{ id: 'desert-base.radio.telemetry'; zh: string; en: string }>;
   nextClue: Readonly<{ id: 'desert-base.next-clue'; zh: string; en: string }>;
 }>;
 function parseDesertContent(input: unknown): DesertContent {
@@ -21,8 +23,8 @@ function parseDesertContent(input: unknown): DesertContent {
     if (!value || typeof value !== 'object' || !('id' in value) || value.id !== id || !('zh' in value) || typeof value.zh !== 'string' || !value.zh.trim() || Object.keys(value).length !== 3 || !('en' in value) || typeof value.en !== 'string' || !value.en.trim()) throw new Error(`Invalid desert content entry ${id}`);
     return Object.freeze({ id, zh: value.zh, en: value.en });
   }
-  if (!input || typeof input !== 'object' || !('opening' in input) || !('objective' in input) || !('defeat' in input) || !('victory' in input) || !('nextClue' in input) || !('firstContact' in input) || Object.keys(input).length !== 6) throw new Error('Invalid desert content');
-  return Object.freeze({ opening: entry(input.opening, 'desert-base.opening'), objective: entry(input.objective, 'desert-base.objective'), defeat: entry(input.defeat, 'desert-base.defeat'), victory: entry(input.victory, 'desert-base.victory'), nextClue: entry(input.nextClue, 'desert-base.next-clue'), firstContact: entry(input.firstContact, 'desert-base.radio.first-contact') });
+  if (!input || typeof input !== 'object' || !('opening' in input) || !('objective' in input) || !('defeat' in input) || !('victory' in input) || !('nextClue' in input) || !('firstContact' in input) || !('telemetry' in input) || Object.keys(input).length !== 7) throw new Error('Invalid desert content');
+  return Object.freeze({ opening: entry(input.opening, 'desert-base.opening'), objective: entry(input.objective, 'desert-base.objective'), defeat: entry(input.defeat, 'desert-base.defeat'), victory: entry(input.victory, 'desert-base.victory'), nextClue: entry(input.nextClue, 'desert-base.next-clue'), firstContact: entry(input.firstContact, 'desert-base.radio.first-contact'), telemetry: entry(input.telemetry, 'desert-base.radio.telemetry') });
 }
 function element(id: string): HTMLElement { const node = document.getElementById(id); if (!node) throw new Error(`Missing element ${id}`); return node; }
 const canvasNode = element('game');
@@ -33,7 +35,7 @@ let language: Language = 'zh';
 let world: World = createWorld({ ...DESERT_CONTEXT, seed: 208907 });
 let screen: Screen = 'title';
 let desertContent: DesertContent | null = null;
-let radioState: RadioState = 'inactive';
+let radioState: RadioState = { kind: 'inactive' };
 const radio = document.createElement('aside'); radio.id = 'radio'; radio.hidden = true;
 const radioMessage = document.createElement('div'); radioMessage.setAttribute('role', 'status'); radioMessage.setAttribute('aria-live', 'polite');
 const radioLabel = document.createElement('span'); radioLabel.id = 'radio-label';
@@ -59,38 +61,39 @@ function notify(message: string) { clearNotice(); const node = element('notice')
 function fail(error: unknown) { log('error', 'runtime.failure', { message: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : '', seed: world.seed, tick: world.tick }); notify(text().error); }
 async function enableAudio(confirm = false) { try { return await synth.activate(confirm ? 'ui-confirm' : undefined); } catch (error) { log('error', 'audio.activation_failed', { error: String(error) }); notify(language === 'zh' ? '音频启动失败，游戏可继续。' : 'Audio unavailable. You can keep playing.'); return false; } }
 function setRadio(next: RadioState, reason: string) {
-  if (radioState === next) return;
-  if (radioState === 'active' && next !== 'active') log('info', 'story.radio.ended', { id: desertContent?.firstContact.id, seed: world.seed, tick: world.tick, reason });
+  if (radioState.kind === next.kind && (!('beat' in radioState) || ('beat' in next && radioState.beat === next.beat))) return;
+  if (radioState.kind === 'active') log('info', 'story.radio.ended', { id: desertContent?.[radioState.beat].id, seed: world.seed, tick: world.tick, reason });
   radioState = next;
-  if (next === 'active') log('info', 'story.radio.started', { id: desertContent?.firstContact.id, seed: world.seed, tick: world.tick });
+  if (next.kind === 'active') log('info', 'story.radio.started', { id: desertContent?.[next.beat].id, seed: world.seed, tick: world.tick });
 }
 function updateRadio() {
-  const visible = radioState === 'active' && screen === 'game' && world.phase.kind === 'running' && !document.hidden;
+  const visible = radioState.kind === 'active' && screen === 'game' && world.phase.kind === 'running' && !document.hidden;
   if (!visible && document.activeElement === radioClose) canvasNode.focus({ preventScroll: true });
   if (radio.hidden === visible) radio.hidden = !visible;
-  const t = text(), story = radioState === 'active' && desertContent ? desertContent.firstContact[language] : '';
+  const t = text(), entry = radioState.kind === 'active' ? desertContent?.[radioState.beat] : null, story = entry ? entry[language] : '';
   if (radioStory.textContent !== story) radioStory.textContent = story;
-  if (desertContent && radioStory.dataset.storyId !== desertContent.firstContact.id) radioStory.dataset.storyId = desertContent.firstContact.id;
+  if (entry && radioStory.dataset.storyId !== entry.id) radioStory.dataset.storyId = entry.id;
   if (radioLabel.textContent !== t.radio) radioLabel.textContent = t.radio;
   if (radioClose.textContent !== t.closeRadio) radioClose.textContent = t.closeRadio;
   if (radioClose.getAttribute('aria-label') !== t.closeRadioLabel) radioClose.setAttribute('aria-label', t.closeRadioLabel);
   const disable = document.getElementById('radio-disable');
   if (disable instanceof HTMLButtonElement) {
-    const label = radioState === 'disabled' ? t.radioDisabled : t.disableRadio;
+    const label = radioState.kind === 'disabled' ? t.radioDisabled : t.disableRadio;
     if (disable.textContent !== label) disable.textContent = label;
-    if (disable.disabled !== (radioState === 'disabled')) disable.disabled = radioState === 'disabled';
+    if (disable.disabled !== (radioState.kind === 'disabled')) disable.disabled = radioState.kind === 'disabled';
   }
   const reset = document.getElementById('radio-reset'); if (reset && reset.textContent !== t.radioReset) reset.textContent = t.radioReset;
 }
-radioClose.onclick = () => { try { if (radioState === 'active') { setRadio('dismissed', 'dismissed'); updateRadio(); } } catch (error) { fail(error); } };
+radioClose.onclick = () => { try { if (radioState.kind === 'active') { setRadio({ kind: 'dismissed', beat: radioState.beat }, 'dismissed'); updateRadio(); } } catch (error) { fail(error); } };
 function act(action: Action, record = true) {
   if (record && screen === 'game') recording.actions.push(action);
   const before = world.phase.kind;
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
-    if (world.phase.kind === 'won' || world.phase.kind === 'lost') setRadio('inactive', 'terminal');
-    else if (radioState === 'waiting' && world.events.includes('kill')) setRadio('active', 'first-kill');
+    if (world.phase.kind === 'won' || world.phase.kind === 'lost') setRadio({ kind: 'inactive' }, 'terminal');
+    else if (radioState.kind === 'waiting' && world.events.includes('kill')) setRadio({ kind: 'active', beat: 'firstContact' }, 'first-kill');
+    else if (radioState.kind === 'dismissed' && radioState.beat === 'firstContact' && world.phase.kind === 'running' && !document.hidden && world.tick >= stageRules(world.context).durationTicks / 2) setRadio({ kind: 'active', beat: 'telemetry' }, 'midpoint');
   }
   updateRadio();
   if (world.events.includes('boss')) notify(text().boss);
@@ -123,7 +126,7 @@ function begin() {
   if (!desertContent) throw new Error('Desert content unavailable');
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
   const nextWorld = createWorld({ ...DESERT_CONTEXT, seed: seedArray[0] });
-  synth.reset(); world = nextWorld; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio('waiting', 'begin'); clearCombatInput(); clearNotice();
+  synth.reset(); world = nextWorld; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: 'waiting' }, 'begin'); clearCombatInput(); clearNotice();
   log('info', 'session.started', { seed: world.seed, version: VERSION, ...world.context }); updateUi(true); void enableAudio();
   canvasNode.focus();
 }
@@ -139,11 +142,11 @@ function startReplay() {
   if (!lastRecording) return;
   try {
     const next = prepareReplay(lastRecording);
-    synth.reset(); world = next.world; playingRecording = next.recording; replayIndex = 0; replayVerified = false; screen = 'replay'; setRadio('inactive', 'replay'); clearCombatInput(); clearNotice();
+    synth.reset(); world = next.world; playingRecording = next.recording; replayIndex = 0; replayVerified = false; screen = 'replay'; setRadio({ kind: 'inactive' }, 'replay'); clearCombatInput(); clearNotice();
     log('info', 'replay.started', { version: VERSION, ...world.context, seed: world.seed, actions: playingRecording.actions.length }); updateUi(true); void enableAudio();
   } catch (error) { replayFailure(error); }
 }
-function showTitle() { screen = 'title'; playingRecording = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); clearCombatInput(); synth.reset(); setRadio('inactive', 'home'); clearNotice(); updateUi(true); void enableAudio(); }
+function showTitle() { screen = 'title'; playingRecording = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); clearCombatInput(); synth.reset(); setRadio({ kind: 'inactive' }, 'home'); clearNotice(); updateUi(true); void enableAudio(); }
 function pause() {
   if (screen !== 'game') return;
   if (world.phase.kind === 'running') act({ kind: 'pause' }); else if (world.phase.kind === 'paused') { act({ kind: 'resume' }); void enableAudio(); }
@@ -278,7 +281,7 @@ function updateUi(force = false) {
       const objective = document.createElement('p'); objective.id = 'pause-objective'; objective.dataset.storyId = desertContent.objective.id;
       const resume = button('', 'primary', pause); resume.id = 'pause-resume';
       const disable = document.createElement('button'); disable.id = 'radio-disable'; disable.type = 'button'; disable.className = 'secondary';
-      disable.onclick = () => { try { if (radioState !== 'disabled') { setRadio('disabled', 'disabled'); log('info', 'story.radio.disabled', { id: desertContent?.firstContact.id, seed: world.seed, tick: world.tick }); updateRadio(); } } catch (error) { fail(error); } };
+      disable.onclick = () => { try { if (radioState.kind !== 'disabled') { setRadio({ kind: 'disabled' }, 'disabled'); log('info', 'story.radio.disabled', { id: desertContent?.firstContact.id, seed: world.seed, tick: world.tick }); updateRadio(); } } catch (error) { fail(error); } };
       const reset = document.createElement('p'); reset.id = 'radio-reset';
       const actions = document.createElement('div'); actions.className = 'actions'; actions.append(resume, disable);
       section.append(heading, objective, actions, reset);
