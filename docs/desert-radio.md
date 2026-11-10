@@ -12,4 +12,4 @@ main 独占每局呈现状态 `inactive | waiting | active | dismissed | disable
 
 `npm run verify` 检查完整模拟、下载预算及实际 main 的内容边界、状态、焦点、提示期限、原生按钮、配对会话和回放。边界测试在 VM 设置 5399／5400 等状态；另用正常种子动作完整游玩超过中点，观察遥测正文后比较控件操作与对照的完整会话、终局录制及真实回放。两类测试均不代替实机。
 
-真实正常游戏的 first-contact 到遥测顺序、双语窄屏与桌面验收和当前远程 SHA 的非作者验收由 PR 证据记录。当前浏览器通道不可用，新遥测候选保持 Draft/HOLD，不能以测试替身、HTTP 文件一致或旧 first-contact 证据代替新 UI 验收。
+[PR #53](https://github.com/HYY-yu/LunarEchoes/pull/53) 已合并。非作者验收为 PASS+NOTES，用户提供中文 first-contact 和英文遥测的桌面实机图，并反馈触屏正常、明确授权合并。触屏没有截图，本轮也没有新增精确视口或 44 CSS 像素尺寸测量，未提供暂停恢复录像，详见[验收记录](https://github.com/HYY-yu/LunarEchoes/pull/53#issuecomment-6765776816)。测试、HTTP 文件一致和桌面静图各自只支持其覆盖范围，不代替未取得的实机证据。
