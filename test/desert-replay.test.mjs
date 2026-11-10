@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { createWorld, dispatch, checksum, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, replay, parseActionBuffer, HZ, VERSION } from '../dist/core.js';
@@ -44,9 +46,17 @@ test('the real desert run matches the frozen engine on this platform at every ca
   assert.equal(terminal.phase.kind, 'won'); assert.equal(terminal.tick, 180 * HZ);
   const before = baseline.createWorld(sample.seed), world = createWorld(request(sample.seed)), bossTicks = [];
   assertSameBattle(before, world, 'initial state');
+  const prefix = fullTerminal ? { firstAction: null, initial: JSON.parse(JSON.stringify(world)), afterFirst: null, states: [[world.tick, sha256(JSON.stringify(world))]] } : null;
   for (const [index, action] of sample.recording.actions.entries()) {
     baseline.dispatch(before, action); dispatch(world, action);
     assertSameBattle(before, world, `captured action ${index}`);
+    if (prefix && index < 64) {
+      prefix.states.push([world.tick, sha256(JSON.stringify(world))]);
+      if (index === 0) {
+        prefix.firstAction = JSON.parse(JSON.stringify(action));
+        prefix.afterFirst = JSON.parse(JSON.stringify(world));
+      }
+    }
     if (world.events.includes('boss')) bossTicks.push(world.tick);
   }
   assert.deepEqual(world, terminal);
@@ -56,13 +66,20 @@ test('the real desert run matches the frozen engine on this platform at every ca
   if (fullTerminal) {
     const buffer = parseActionBuffer({ version: VERSION, ...DESERT_CONTEXT, seed: sample.seed, actions: sample.recording.actions });
     assert.equal(sha256(JSON.stringify(buffer.actions)), sample.actionsSha256, 'full terminal parsed actions identity mismatch');
+    assert.equal(prefix.states.length, 65, 'full terminal prefix state count');
+    assert.equal(prefix.initial.tick, 0, 'full terminal initial tick');
+    assert.equal(prefix.afterFirst.tick, 1, 'full terminal afterFirst tick');
+    assert.deepEqual(prefix.firstAction, sample.recording.actions[0], 'full terminal firstAction identity');
+    assert.deepEqual(prefix.states[0], [prefix.initial.tick, sha256(JSON.stringify(prefix.initial))], 'full terminal initial fingerprint');
+    assert.deepEqual(prefix.states[1], [prefix.afterFirst.tick, sha256(JSON.stringify(prefix.afterFirst))], 'full terminal afterFirst fingerprint');
     t.diagnostic(terminalJson({
       event: 'lunar.full-terminal-pinned',
       runtime: { node: process.versions.node, v8: process.versions.v8, platform: process.platform, arch: process.arch },
       modules: Object.fromEntries(['core', 'stage-rules', 'stage-contract'].map(name => [`dist/${name}.js`, sha256(readFileSync(new URL(`../dist/${name}.js`, import.meta.url)))])),
       input: { baseline: captured.baseline, gzipSha256: sha256(fixtureGzip), actionsSha256: sample.actionsSha256, bufferSha256: sha256(JSON.stringify(buffer)), seed: sample.seed, strategy: sample.strategy, preference: sample.preference, actionCount: buffer.actions.length, tickCount: 10800, chooseCount: 11 },
       context: { version: buffer.version, stageId: buffer.stageId, rulesVersion: buffer.rulesVersion },
-      terminal: { phase: world.phase.kind, tick: world.tick, battleChecksum: checksum(world), finalChecksum: finalChecksum(world) }
+      terminal: { phase: world.phase.kind, tick: world.tick, battleChecksum: checksum(world), finalChecksum: finalChecksum(world) },
+      prefix
     }));
   }
 });
@@ -222,4 +239,38 @@ test('full terminal diagnostic enforces the UTF8 byte boundary before emission',
   assert.equal(Buffer.byteLength(terminalJson('a'.repeat(8190)), 'utf8'), 8192);
   assert.throws(() => terminalJson('a'.repeat(8191)), /full terminal record exceeds 8192 UTF8 bytes/);
   assert.throws(() => terminalJson('月'.repeat(2731)), /full terminal record exceeds 8192 UTF8 bytes/);
+});
+
+test('the full terminal subprocess exposes the frozen first64 states or rejects its actual runtime', () => {
+  const env = { ...process.env, LUNAR_FULL_TERMINAL: '1' };
+  delete env.NODE_TEST_CONTEXT;
+  const child = spawnSync(process.execPath, ['--test', '--test-reporter=tap', '--test-name-pattern=^the real desert run matches the frozen engine on this platform at every captured action$', fileURLToPath(import.meta.url)], { env, encoding: 'utf8' });
+  assert.ifError(child.error);
+  assert.equal(child.signal, null);
+  const records = child.stdout.split('\n').filter(line => line.startsWith('# {')).map(line => line.slice(2)).filter(line => JSON.parse(line).event === 'lunar.full-terminal-pinned');
+  if (process.versions.node !== '24.21.0' || process.versions.v8 !== '13.6.233.17-node.53') {
+    assert.notEqual(child.status, 0);
+    assert.equal(records.length, 0);
+    assert.match(child.stdout + child.stderr, process.versions.node !== '24.21.0' ? /full terminal requires Node 24\.21\.0/ : /full terminal requires V8 13\.6\.233\.17-node\.53/);
+    return;
+  }
+  assert.equal(child.status, 0, child.stdout + child.stderr);
+  assert.equal(records.length, 1, 'one full terminal event');
+  assert(Buffer.byteLength(records[0], 'utf8') <= 8192);
+  const record = JSON.parse(records[0]);
+  assert(record.prefix, 'full terminal prefix is missing');
+  assert.deepEqual(Object.keys(record), ['event', 'runtime', 'modules', 'input', 'context', 'terminal', 'prefix']);
+  const world = createWorld(request(42));
+  const initial = JSON.parse(JSON.stringify(world));
+  const states = [[world.tick, sha256(JSON.stringify(world))]];
+  let afterFirst;
+  for (const [index, action] of sample.recording.actions.slice(0, 64).entries()) {
+    dispatch(world, action);
+    states.push([world.tick, sha256(JSON.stringify(world))]);
+    if (index === 0) afterFirst = JSON.parse(JSON.stringify(world));
+  }
+  assert.deepEqual(record.prefix.firstAction, sample.recording.actions[0], 'full terminal firstAction');
+  assert.deepEqual(record.prefix.initial, initial, 'full terminal initial');
+  assert.deepEqual(record.prefix.afterFirst, afterFirst, 'full terminal afterFirst');
+  assert.deepEqual(record.prefix.states, states, 'full terminal first64 states');
 });
