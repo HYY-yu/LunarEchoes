@@ -37,3 +37,7 @@ jobs:
         run: |
           node scripts/replay-diagnostic.mjs capture /tmp/lunar-checksum-trace.json 24.21.0
           node scripts/replay-diagnostic.mjs compare docs/evidence/desert34/macos-node24.21.0.json /tmp/lunar-checksum-trace.json
+      - name: Record the full fixed terminal at Node 24.21.0
+        env:
+          LUNAR_FULL_TERMINAL: '1'
+        run: node --test --test-reporter=tap --test-name-pattern='^the real desert run matches the frozen engine on this platform at every captured action$' test/desert-replay.test.mjs

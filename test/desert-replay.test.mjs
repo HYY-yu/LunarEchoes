@@ -1,15 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
-import { createWorld, dispatch, checksum, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, replay, parseActionBuffer, HZ } from '../dist/core.js';
+import { createWorld, dispatch, checksum, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, replay, parseActionBuffer, HZ, VERSION } from '../dist/core.js';
 import { DESERT_CONTEXT, stageRules } from '../dist/stage-rules.js';
 import { STAGE_ORDER } from '../dist/stage-contract.js';
 import { dictionary } from '../dist/i18n.js';
 import { loadCoreRevision } from '../scripts/load-core-revision.mjs';
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
 const request = seed => ({ ...DESERT_CONTEXT, seed });
-const captured = JSON.parse(gunzipSync(readFileSync(new URL('../docs/evidence/desert34/baseline-actions.json.gz', import.meta.url))));
+const fullTerminal = fullTerminalMode(process.env.LUNAR_FULL_TERMINAL, process.versions);
+const fixtureGzip = readFileSync(new URL('../docs/evidence/desert34/baseline-actions.json.gz', import.meta.url));
+const captured = JSON.parse(gunzipSync(fixtureGzip));
 assert.equal(captured.baseline, 'bde5936d13d6890a72d24d36bb0039e48e36df44');
 const { core: baseline } = await loadCoreRevision(captured.baseline);
 function assertSameBattle(before, after, label) {
@@ -20,6 +23,7 @@ function assertSameBattle(before, after, label) {
   assert.equal(checksum(after), baseline.checksum(before), label);
 }
 const sample = captured.cases.find(row => row.seed === 42 && row.strategy === 'skilled' && row.preference === 'attack');
+if (fullTerminal) fullTerminalInput(captured, fixtureGzip);
 const terminal = createWorld(request(sample.seed));
 for (const action of sample.recording.actions) dispatch(terminal, action);
 const recording = finishRecording(terminal, sample.recording.actions);
@@ -36,7 +40,7 @@ test('only the implemented desert context builds a world and its identity cannot
   for (const seed of [-1, 4294967296, .5, NaN, Infinity, '42', null]) rejects(() => createWorld(request(seed)), 'invalid-data');
   for (const input of [null, 42, {}, { ...request(42), rules: { durationTicks: 1 } }]) rejects(() => createWorld(input), 'invalid-data');
 });
-test('the real desert run matches the frozen engine on this platform at every captured action', () => {
+test('the real desert run matches the frozen engine on this platform at every captured action', t => {
   assert.equal(terminal.phase.kind, 'won'); assert.equal(terminal.tick, 180 * HZ);
   const before = baseline.createWorld(sample.seed), world = createWorld(request(sample.seed)), bossTicks = [];
   assertSameBattle(before, world, 'initial state');
@@ -49,6 +53,18 @@ test('the real desert run matches the frozen engine on this platform at every ca
   assert.equal(world.phase.kind, before.phase.kind); assert.equal(world.tick, before.tick);
   assert.deepEqual(bossTicks, [140 * HZ]);
   assert.equal(stageRules(world.context).durationTicks, world.tick);
+  if (fullTerminal) {
+    const buffer = parseActionBuffer({ version: VERSION, ...DESERT_CONTEXT, seed: sample.seed, actions: sample.recording.actions });
+    assert.equal(sha256(JSON.stringify(buffer.actions)), sample.actionsSha256, 'full terminal parsed actions identity mismatch');
+    t.diagnostic(terminalJson({
+      event: 'lunar.full-terminal-pinned',
+      runtime: { node: process.versions.node, v8: process.versions.v8, platform: process.platform, arch: process.arch },
+      modules: Object.fromEntries(['core', 'stage-rules', 'stage-contract'].map(name => [`dist/${name}.js`, sha256(readFileSync(new URL(`../dist/${name}.js`, import.meta.url)))])),
+      input: { baseline: captured.baseline, gzipSha256: sha256(fixtureGzip), actionsSha256: sample.actionsSha256, bufferSha256: sha256(JSON.stringify(buffer)), seed: sample.seed, strategy: sample.strategy, preference: sample.preference, actionCount: buffer.actions.length, tickCount: 10800, chooseCount: 11 },
+      context: { version: buffer.version, stageId: buffer.stageId, rulesVersion: buffer.rulesVersion },
+      terminal: { phase: world.phase.kind, tick: world.tick, battleChecksum: checksum(world), finalChecksum: finalChecksum(world) }
+    }));
+  }
 });
 test('the same-platform regression oracle rejects battle mutations and serialization drift', () => {
   const before = baseline.createWorld(42), after = createWorld(request(42));
@@ -146,4 +162,64 @@ test('both languages distinguish compatibility failures and unfinished desert co
     assert.equal(new Set([text.replayVersion, text.replayStage, text.replayRules, text.replayInvalid]).size, 4);
     assert(!/MARE|静海|25°/.test(text.mission));
   }
+});
+
+function sha256(value) { return createHash('sha256').update(value).digest('hex'); }
+function fullTerminalMode(mode, versions) {
+  assert(mode === undefined || mode === '1', 'full terminal mode must be unset or 1');
+  if (mode === undefined) return false;
+  assert.equal(versions.node, '24.21.0', 'full terminal requires Node 24.21.0');
+  assert.equal(versions.v8, '13.6.233.17-node.53', 'full terminal requires V8 13.6.233.17-node.53');
+  return true;
+}
+function fullTerminalInput(fixture, gzip) {
+  assert.equal(sha256(gzip), 'd21bf773c29a32bec82ca34af79bae655626f2fea446df7609e97a2805a9caf8', 'full terminal gzip identity mismatch');
+  assert.equal(fixture.baseline, 'bde5936d13d6890a72d24d36bb0039e48e36df44', 'full terminal baseline identity mismatch');
+  const matches = fixture.cases.filter(row => row.seed === 42 && row.strategy === 'skilled' && row.preference === 'attack');
+  assert.equal(matches.length, 1, 'full terminal requires one seed42 skilled attack case');
+  const row = matches[0], actions = row.recording.actions;
+  assert.equal(row.recording.seed, 42, 'full terminal recording seed mismatch');
+  assert.deepEqual([row.actionCount, actions.length, actions.filter(action => action.kind === 'tick').length, actions.filter(action => action.kind === 'choose').length], [10811, 10811, 10800, 11], 'full terminal action counts mismatch');
+  assert.equal(sha256(JSON.stringify(actions)), 'ffd6e8dbdccc4aa7d0ad82df3d1ad2147c5d051184c88953025438d41306bef4', 'full terminal frozen actions identity mismatch');
+  assert.equal(row.actionsSha256, sha256(JSON.stringify(actions)), 'full terminal declared actions identity mismatch');
+  return row;
+}
+function terminalJson(value) {
+  const json = JSON.stringify(value);
+  assert(Buffer.byteLength(json, 'utf8') <= 8192, 'full terminal record exceeds 8192 UTF8 bytes');
+  return json;
+}
+test('full terminal diagnostic rejects invalid mode and synthetic runtime identities', () => {
+  assert.equal(fullTerminalMode(undefined, { node: 'other', v8: 'other' }), false);
+  assert.equal(fullTerminalMode('1', { node: '24.21.0', v8: '13.6.233.17-node.53' }), true);
+  for (const mode of ['', '0', 'true']) assert.throws(() => fullTerminalMode(mode, process.versions), /full terminal mode must be unset or 1/);
+  assert.throws(() => fullTerminalMode('1', { node: '24.22.2', v8: '13.6.233.17-node.53' }), /full terminal requires Node 24.21.0/);
+  assert.throws(() => fullTerminalMode('1', { node: '24.21.0', v8: 'different' }), /full terminal requires V8 13.6.233.17-node.53/);
+});
+test('full terminal diagnostic rejects changed frozen input even with a recomputed declaration', () => {
+  const gzip = readFileSync(new URL('../docs/evidence/desert34/baseline-actions.json.gz', import.meta.url));
+  const fixture = () => ({ baseline: captured.baseline, cases: [structuredClone(sample)] });
+  assert.equal(fullTerminalInput(captured, gzip), sample);
+  assert.throws(() => fullTerminalInput(captured, Buffer.from('changed')), /full terminal gzip identity mismatch/);
+  const baselineChanged = fixture(); baselineChanged.baseline = '0'.repeat(40);
+  assert.throws(() => fullTerminalInput(baselineChanged, gzip), /full terminal baseline identity mismatch/);
+  const duplicate = fixture(); duplicate.cases.push(duplicate.cases[0]);
+  assert.throws(() => fullTerminalInput(duplicate, gzip), /full terminal requires one seed42 skilled attack case/);
+  assert.throws(() => fullTerminalInput({ ...fixture(), cases: [] }, gzip), /full terminal requires one seed42 skilled attack case/);
+  const seedChanged = fixture(); seedChanged.cases[0].recording.seed = 43;
+  assert.throws(() => fullTerminalInput(seedChanged, gzip), /full terminal recording seed mismatch/);
+  const countChanged = fixture(); countChanged.cases[0].actionCount--;
+  assert.throws(() => fullTerminalInput(countChanged, gzip), /full terminal action counts mismatch/);
+  const kindChanged = fixture(); kindChanged.cases[0].recording.actions[0] = { kind: 'pause' };
+  assert.throws(() => fullTerminalInput(kindChanged, gzip), /full terminal action counts mismatch/);
+  const declaredChanged = fixture(); declaredChanged.cases[0].actionsSha256 = '0'.repeat(64);
+  assert.throws(() => fullTerminalInput(declaredChanged, gzip), /full terminal declared actions identity mismatch/);
+  const actionChanged = fixture(); actionChanged.cases[0].recording.actions[0].input.x += .125;
+  actionChanged.cases[0].actionsSha256 = createHash('sha256').update(JSON.stringify(actionChanged.cases[0].recording.actions)).digest('hex');
+  assert.throws(() => fullTerminalInput(actionChanged, gzip), /full terminal frozen actions identity mismatch/);
+});
+test('full terminal diagnostic enforces the UTF8 byte boundary before emission', () => {
+  assert.equal(Buffer.byteLength(terminalJson('a'.repeat(8190)), 'utf8'), 8192);
+  assert.throws(() => terminalJson('a'.repeat(8191)), /full terminal record exceeds 8192 UTF8 bytes/);
+  assert.throws(() => terminalJson('月'.repeat(2731)), /full terminal record exceeds 8192 UTF8 bytes/);
 });
