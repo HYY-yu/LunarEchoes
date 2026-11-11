@@ -13,7 +13,16 @@ const html = readFileSync('dist/index.html', 'utf8');
 const contentBeats = ['opening', 'objective', 'defeat', 'victory', 'next-clue', 'radio.first-contact', 'radio.telemetry', 'boss'];
 const contentKey = beat => beat === 'next-clue' ? 'nextClue' : beat === 'radio.first-contact' ? 'firstContact' : beat === 'radio.telemetry' ? 'telemetry' : beat;
 const embedded = html.match(/<script id="desert-content" type="application\/json">([^]*?)<\/script>/)[1];
-function harness(content = embedded) {
+const progressKey = 'lunar-relay.campaign-progress';
+const savedProgress = stageId => JSON.stringify({ version: 1, highestUnlockedStageId: stageId });
+function memoryStorage(raw = null) {
+  return {
+    raw, reads: [], writes: [],
+    getItem(key) { this.reads.push(key); return this.raw; },
+    setItem(key, value) { this.writes.push([key, value]); this.raw = value; }
+  };
+}
+function harness(content = embedded, localStorage = memoryStorage()) {
   const listeners = new Map(), logs = [], sessions = [], timers = new Map(), cancelledTimers = [];
   let active, raf, seedCalls = 0, now = 1000, timerNow = 0, nextTimer = 1, audioFailure = false, seedFailure = false, audioActivations = 0;
   const setTimeout = (callback, delay) => { const id = nextTimer++; timers.set(id, { callback, at: timerNow + delay }); return id; };
@@ -63,7 +72,7 @@ function harness(content = embedded) {
     play() {}
     events() {}
   }
-  const context = vm.createContext({ document, HTMLElement: Element, HTMLCanvasElement: Canvas, HTMLButtonElement: Button, matchMedia: () => ({ matches: true }), crypto: { getRandomValues(array) { if (seedFailure) { seedFailure = false; throw new Error('test seed unavailable'); } seedCalls++; array[0] = 41 + seedCalls; } }, requestAnimationFrame: callback => { raf = callback; }, console, location: { search: '' }, URLSearchParams, setTimeout, clearTimeout, addEventListener: (name, handler) => listeners.set(name, handler) });
+  const context = vm.createContext({ document, localStorage, HTMLElement: Element, HTMLCanvasElement: Canvas, HTMLButtonElement: Button, matchMedia: () => ({ matches: true }), crypto: { getRandomValues(array) { if (seedFailure) { seedFailure = false; throw new Error('test seed unavailable'); } seedCalls++; array[0] = 41 + seedCalls; } }, requestAnimationFrame: callback => { raf = callback; }, console, location: { search: '' }, URLSearchParams, setTimeout, clearTimeout, addEventListener: (name, handler) => listeners.set(name, handler) });
   context.window = context;
   const cache = new Map();
   function load(name) {
@@ -229,10 +238,13 @@ test('natural live loss draws the original defeat scene and preserves terminal s
   for (const entry of catalog.filter(entry => ['victory', 'next-clue'].includes(entry.beat))) assert.equal(panel.children.some(node => node.dataset.storyId === entry.id || [entry.zh, entry.en].includes(node.textContent)), false);
 });
 test('natural loss preserves existing header focus and direct Replay verifies the full recording without live narrative', () => {
-  const app = harness(), terminal = naturalLoss(app, true); assert.equal(app.active, app.get('sound'));
+  const storage = memoryStorage();
+  const app = harness(embedded, storage), terminal = naturalLoss(app, true); assert.equal(app.active, app.get('sound'));
+  assert.deepEqual(storage.writes, []);
   assert.equal(app.activate('defeat-replay', 'Space').defaultPrevented, undefined); assert.equal(app.snapshot().screen, 'replay'); assert.equal(app.seedCalls, 1); assert.equal(app.get('defeat-panel'), null);
   for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) { app.frame(); assert.equal(app.get('defeat-panel'), null); }
   assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assert.equal(app.snapshot().checksum, terminal.checksum); assert.deepEqual(app.snapshot().world, terminal.world); assert.ok(app.logs.some(([, name]) => name === 'replay.finished')); assert.equal(app.get('defeat-panel'), null);
+  assert.deepEqual(storage.writes, []);
 });
 test('direct Retry skips the defeat narrative and rebuilds the current stage with a fresh seed', () => {
   const app = harness(), terminal = naturalLoss(app); assert.equal(app.activate('defeat-retry', 'Enter').defaultPrevented, undefined);
@@ -348,11 +360,14 @@ test('natural live victory draws the original scene and keeps full bilingual sto
   assert.equal(panel.scrollTop, 87); assert.equal(app.active, app.get('language')); assert.equal(retry.focusCalls, 1);
 });
 test('live victory preserves header focus and direct native Replay verifies the complete recording with no result narrative', () => {
-  const app = harness(), terminal = naturalWin(app, 'header'); assert.equal(app.active, app.get('sound')); assert.equal(app.get('victory-retry').focusCalls, undefined);
+  const storage = memoryStorage();
+  const app = harness(embedded, storage), terminal = naturalWin(app, 'header'); assert.equal(app.active, app.get('sound')); assert.equal(app.get('victory-retry').focusCalls, undefined);
+  assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
   assert.equal(app.activate('victory-replay', 'Space').defaultPrevented, undefined); assert.equal(app.snapshot().screen, 'replay'); assert.equal(app.seedCalls, 1);
   for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) { assertNoVictory(app); assert.equal(app.get('defeat-panel'), null); app.frame(); }
   assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assert.equal(app.snapshot().checksum, terminal.checksum); assert.deepEqual(app.snapshot().world, terminal.world); assert.deepEqual(app.snapshot().lastRecording, terminal.lastRecording); assert.equal(app.seedCalls, 1);
   assert.ok(app.logs.some(([, name]) => name === 'replay.finished')); assertNoVictory(app); assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('opening-panel'), null);
+  assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
 });
 test('direct native victory Retry skips narrative with fresh seed, empty input and a complete initial world', () => {
   const app = harness(), terminal = naturalWin(app, 'body'); assert.equal(app.active, app.get('victory-retry')); assert.equal(app.get('victory-retry').focusOptions.preventScroll, true);
@@ -620,4 +635,130 @@ test('late first kill still owns the unread slot and failed new preparation pres
   const active = app.session(); app.failNextSeed(); app.invokeBegin(); assert.deepEqual(app.session(), active); assert.equal(app.radioBeat, 'telemetry'); assert.equal(app.get('radio').hidden, false); assertNotice(app, '系统异常，请刷新重试。');
   const offer = play(42).recording.actions.find(action => action.kind === 'choose').upgrade;
   atRadioTick(app, 5500, { kind: 'upgrading', offers: [offer] }); app.get('language').onclick(); assert.equal(app.get('radio').hidden, true); assert.equal(app.radioBeat, 'telemetry'); app.key('Digit1'); assert.equal(app.get('radio').hidden, false); assert.equal(radioStarts(app).length, 2);
+});
+
+test('title loads one local progress session and deployment does not create a save', () => {
+  const storage = memoryStorage();
+  const app = harness(embedded, storage);
+  assert.match(app.get('title-progress').textContent, /沙漠基地 · 已解锁/);
+  app.get('language').onclick();
+  assert.match(app.get('title-progress').textContent, /Desert Base · Unlocked/);
+  app.click('Begin mission'); app.click('Skip opening');
+  assert.equal(app.snapshot().screen, 'game');
+  assert.deepEqual(storage.reads, [progressKey]); assert.deepEqual(storage.writes, []);
+});
+
+test('a live desert victory saves rainforest once and a fresh title restores that unlock', () => {
+  const storage = memoryStorage();
+  const app = harness(embedded, storage);
+  naturalWin(app);
+  assert.match(app.get('victory-progress').textContent, /雨林深处 · 已解锁，暂不可游玩.*进度已保存/);
+  assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
+  const refreshed = harness(embedded, storage);
+  assert.match(refreshed.get('title-progress').textContent, /雨林深处 · 已解锁，暂不可游玩/);
+  naturalWin(refreshed);
+  assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
+});
+
+test('a higher save is restored and an explicit reset writes only after confirmation', () => {
+  const storage = memoryStorage(savedProgress('antarctica'));
+  const app = harness(embedded, storage);
+  assert.match(app.get('title-progress').textContent, /寒冻南极 · 已解锁，暂不可游玩/);
+  app.click('重置本机进度'); app.activate('progress-reset-cancel', 'Enter');
+  assert.equal(storage.raw, savedProgress('antarctica')); assert.deepEqual(storage.writes, []);
+  app.click('重置本机进度'); app.activate('progress-reset-confirm', 'Enter');
+  assert.match(app.get('title-progress').textContent, /沙漠基地.*本机进度已重置/);
+  assert.deepEqual(storage.writes, [[progressKey, savedProgress('desert-base')]]);
+});
+
+test('invalid and unknown saves block deployment until the player chooses recovery or temporary play', () => {
+  for (const [raw, reason] of [[' {broken', /local save is invalid/], [' {"version":99}', /unknown version/]]) {
+    const storage = memoryStorage(raw), app = harness(embedded, storage);
+    assert.equal(app.get('mission-start'), null);
+    app.get('language').onclick();
+    assert.match(app.get('progress-reset-panel').children[2].textContent, reason);
+    assert.equal(storage.raw, raw); assert.deepEqual(storage.writes, []);
+    app.click('Play without saving');
+    assert.match(app.get('title-progress').textContent, /Progress cannot be saved/);
+    assert.equal(storage.raw, raw); assert.deepEqual(storage.writes, []);
+    app.click('Reset local progress'); app.click('Confirm reset');
+    assert.equal(storage.raw, savedProgress('desert-base'));
+    assert.match(app.get('title-progress').textContent, /Local progress reset/);
+  }
+});
+
+test('a save changed to unknown after startup is protected until explicit confirmation', () => {
+  const raw = ' {"version":99}', storage = memoryStorage();
+  const app = harness(embedded, storage);
+  storage.raw = raw;
+  const terminal = naturalWin(app);
+  assert.equal(app.get('victory-retry'), null);
+  assert.ok(app.get('progress-reset-panel'));
+  assert.deepEqual(storage.writes, []); assert.equal(storage.raw, raw);
+  app.click('临时游玩');
+  assert.match(app.get('victory-progress').textContent, /雨林深处.*无法保存/);
+  assert.deepEqual(app.snapshot(), terminal);
+  assert.equal(storage.raw, raw); assert.deepEqual(storage.writes, []);
+});
+
+test('write and read-back failures keep the live unlock with different messages', () => {
+  for (const verification of [false, true]) {
+    const storage = memoryStorage();
+    storage.setItem = (key, value) => {
+      storage.writes.push([key, value]);
+      if (!verification) throw new Error('blocked write');
+    };
+    const app = harness(embedded, storage);
+    naturalWin(app);
+    const message = app.get('victory-progress').textContent;
+    assert.match(message, /雨林深处/);
+    assert.match(message, verification ? /无法确认本次进度是否保存/ : /本次进度未保存/);
+    assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
+    assert.ok(app.logs.some(([level, name, data]) => level === 'error' && name === 'progress.storage_failed' && data.phase === (verification ? 'save_verify' : 'save_write')));
+  }
+});
+
+test('an unavailable local storage read falls back to a temporary session', () => {
+  const storage = memoryStorage();
+  storage.getItem = () => { throw new Error('blocked read'); };
+  const app = harness(embedded, storage);
+  assert.match(app.get('title-progress').textContent, /本次仅临时游玩/);
+  assert.equal(app.get('progress-reset-panel'), null);
+  assert.deepEqual(storage.writes, []);
+});
+
+test('failed or unconfirmed resets report whether saving remains blocked', () => {
+  for (const [raw, protectedSession] of [[' {bad', true], [savedProgress('antarctica'), false]]) {
+    for (const verifyFailed of [false, true]) {
+      const storage = memoryStorage(raw);
+      storage.setItem = () => {
+        if (!verifyFailed) throw new Error('blocked reset');
+        storage.raw = savedProgress('rainforest');
+      };
+      const app = harness(embedded, storage);
+      if (!protectedSession) app.click('重置本机进度');
+      app.click('确认重置');
+      const message = app.get('title-progress').textContent;
+      assert.match(message, verifyFailed ? /无法确认重置结果/ : /未能重置本机进度/);
+      assert.equal(message.includes('无法保存进度'), protectedSession);
+      assert.match(message, protectedSession ? /沙漠基地/ : /寒冻南极/);
+    }
+  }
+});
+
+test('temporary play unlocks rainforest in memory without replacing the invalid save', () => {
+  const raw = ' {bad', storage = memoryStorage(raw), app = harness(embedded, storage);
+  app.click('临时游玩');
+  naturalWin(app);
+  assert.match(app.get('victory-progress').textContent, /雨林深处.*无法保存进度/);
+  assert.deepEqual(storage.reads, [progressKey]); assert.deepEqual(storage.writes, []); assert.equal(storage.raw, raw);
+});
+
+test('a higher save written after startup cannot be downgraded by a desert victory', () => {
+  const storage = memoryStorage(), app = harness(embedded, storage);
+  storage.raw = savedProgress('antarctica');
+  naturalWin(app);
+  assert.match(app.get('victory-progress').textContent, /寒冻南极.*进度已保存/);
+  assert.equal(storage.raw, savedProgress('antarctica'));
+  assert.deepEqual(storage.writes, [[progressKey, savedProgress('antarctica')]]);
 });
