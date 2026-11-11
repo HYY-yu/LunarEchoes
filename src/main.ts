@@ -16,6 +16,7 @@ type DesertContent = Readonly<{
   victory: Readonly<{ id: 'desert-base.victory'; zh: string; en: string }>;
   firstContact: Readonly<{ id: 'desert-base.radio.first-contact'; zh: string; en: string }>;
   telemetry: Readonly<{ id: 'desert-base.radio.telemetry'; zh: string; en: string }>;
+  boss: Readonly<{ id: 'desert-base.boss'; zh: string; en: string }>;
   nextClue: Readonly<{ id: 'desert-base.next-clue'; zh: string; en: string }>;
 }>;
 function parseDesertContent(input: unknown): DesertContent {
@@ -23,8 +24,8 @@ function parseDesertContent(input: unknown): DesertContent {
     if (!value || typeof value !== 'object' || !('id' in value) || value.id !== id || !('zh' in value) || typeof value.zh !== 'string' || !value.zh.trim() || Object.keys(value).length !== 3 || !('en' in value) || typeof value.en !== 'string' || !value.en.trim()) throw new Error(`Invalid desert content entry ${id}`);
     return Object.freeze({ id, zh: value.zh, en: value.en });
   }
-  if (!input || typeof input !== 'object' || !('opening' in input) || !('objective' in input) || !('defeat' in input) || !('victory' in input) || !('nextClue' in input) || !('firstContact' in input) || !('telemetry' in input) || Object.keys(input).length !== 7) throw new Error('Invalid desert content');
-  return Object.freeze({ opening: entry(input.opening, 'desert-base.opening'), objective: entry(input.objective, 'desert-base.objective'), defeat: entry(input.defeat, 'desert-base.defeat'), victory: entry(input.victory, 'desert-base.victory'), nextClue: entry(input.nextClue, 'desert-base.next-clue'), firstContact: entry(input.firstContact, 'desert-base.radio.first-contact'), telemetry: entry(input.telemetry, 'desert-base.radio.telemetry') });
+  if (!input || typeof input !== 'object' || !('opening' in input) || !('objective' in input) || !('defeat' in input) || !('victory' in input) || !('nextClue' in input) || !('firstContact' in input) || !('telemetry' in input) || !('boss' in input) || Object.keys(input).length !== 8) throw new Error('Invalid desert content');
+  return Object.freeze({ opening: entry(input.opening, 'desert-base.opening'), objective: entry(input.objective, 'desert-base.objective'), defeat: entry(input.defeat, 'desert-base.defeat'), victory: entry(input.victory, 'desert-base.victory'), nextClue: entry(input.nextClue, 'desert-base.next-clue'), firstContact: entry(input.firstContact, 'desert-base.radio.first-contact'), telemetry: entry(input.telemetry, 'desert-base.radio.telemetry'), boss: entry(input.boss, 'desert-base.boss') });
 }
 function element(id: string): HTMLElement { const node = document.getElementById(id); if (!node) throw new Error(`Missing element ${id}`); return node; }
 const canvasNode = element('game');
@@ -56,8 +57,15 @@ let stickX = 0, stickY = 0, dashPressed = false;
 let stickPointer: number | null = null;
 const coarse = matchMedia('(pointer: coarse)').matches;
 function text() { return dictionary(language); }
-function clearNotice() { window.clearTimeout(noticeTimer); noticeTimer = 0; const node = element('notice'); node.classList.remove('visible'); node.textContent = ''; }
-function notify(message: string) { clearNotice(); const node = element('notice'); node.textContent = message; node.classList.add('visible'); noticeTimer = window.setTimeout(clearNotice, 3500); }
+function clearNotice() { window.clearTimeout(noticeTimer); noticeTimer = 0; const node = element('notice'); node.classList.remove('visible'); node.classList.remove('boss-notice'); node.textContent = ''; }
+function notify(message: string, kind: 'general' | 'boss' = 'general') {
+  clearNotice();
+  const node = element('notice');
+  node.textContent = message;
+  node.classList.toggle('boss-notice', kind === 'boss');
+  node.classList.add('visible');
+  noticeTimer = window.setTimeout(clearNotice, 3500);
+}
 function fail(error: unknown) { log('error', 'runtime.failure', { message: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : '', seed: world.seed, tick: world.tick }); notify(text().error); }
 async function enableAudio(confirm = false) { try { return await synth.activate(confirm ? 'ui-confirm' : undefined); } catch (error) { log('error', 'audio.activation_failed', { error: String(error) }); notify(language === 'zh' ? '音频启动失败，游戏可继续。' : 'Audio unavailable. You can keep playing.'); return false; } }
 function setRadio(next: RadioState, reason: string) {
@@ -96,7 +104,12 @@ function act(action: Action, record = true) {
     else if (radioState.kind === 'dismissed' && radioState.beat === 'firstContact' && world.phase.kind === 'running' && !document.hidden && world.tick >= stageRules(world.context).durationTicks / 2) setRadio({ kind: 'active', beat: 'telemetry' }, 'midpoint');
   }
   updateRadio();
-  if (world.events.includes('boss')) notify(text().boss);
+  if (world.events.includes('boss')) {
+    if (screen === 'game') {
+      if (!desertContent) throw new Error('Desert content unavailable');
+      notify(desertContent.boss[language], 'boss');
+    } else notify(text().boss);
+  }
   if (before !== world.phase.kind) {
     log('info', 'session.phase', { seed: world.seed, tick: world.tick, before, phase: world.phase.kind });
     if (screen === 'game' && (world.phase.kind === 'won' || world.phase.kind === 'lost')) {
