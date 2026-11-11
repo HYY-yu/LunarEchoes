@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>雨林深处 · 开场画预览</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100svh; display: grid; place-items: center; padding: 20px; background: #101f26; color: #e8eee7; font: 16px ui-monospace, monospace; }
+  main { max-width: 100%; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  h1 { margin: 0; font-size: clamp(18px, 4vw, 28px); }
+  button { min-height: 44px; padding: 8px 12px; color: #a4fff0; background: #163437; border: 1px solid #60858a; font: inherit; cursor: pointer; }
+  button:focus-visible { outline: 2px solid #ffc378; outline-offset: 2px; }
+  canvas { display: block; width: min(320px, 100%); height: auto; image-rendering: pixelated; outline: 1px solid #60858a; }
+  p { margin: 12px 0 0; color: #ffc378; }
+  @media (min-width: 680px) { canvas { width: 640px; } }
+  @media (min-width: 1000px) { canvas { width: 960px; } }
+</style>
+</head>
+<body>
+<main>
+<header><h1 id="title">雨林深处</h1><button id="language" type="button">English</button></header>
+<canvas id="scene" role="img" aria-label="林冠下亮着灯的研究站，前景是盘根通路和遗迹空地"></canvas>
+<p id="caption">开场画预览</p>
+<p id="error" role="alert" hidden></p>
+</main>
+<script type="module">
+  const scene = document.getElementById('scene');
+  const labels = {
+    'zh-CN': { title: '雨林深处', caption: '开场画预览', language: 'English', art: '林冠下亮着灯的研究站，前景是盘根通路和遗迹空地', error: '画面未能加载。请刷新重试。' },
+    en: { title: 'Deep Rainforest', caption: 'Opening scene preview', language: '中文', art: 'A lit research station beneath the canopy, beyond a root-covered trail and a clearing with ruins', error: 'The scene failed to load. Refresh to retry.' }
+  };
+  const language = document.getElementById('language');
+  function setLanguage(lang) {
+    const label = labels[lang];
+    document.documentElement.lang = lang;
+    document.title = `${label.title} · ${label.caption}`;
+    document.getElementById('title').textContent = label.title;
+    document.getElementById('caption').textContent = label.caption;
+    language.textContent = label.language;
+    scene.setAttribute('aria-label', label.art);
+    document.getElementById('error').textContent = label.error;
+  }
+  language.addEventListener('click', () => setLanguage(document.documentElement.lang === 'en' ? 'zh-CN' : 'en'));
+  try {
+    const { RAINFOREST_SCENE_SIZE, drawRainforestOpening } = await import('/rainforest-opening.mjs');
+    scene.width = RAINFOREST_SCENE_SIZE.width;
+    scene.height = RAINFOREST_SCENE_SIZE.height;
+    const ctx = scene.getContext('2d', { alpha: false });
+    if (!ctx) throw new Error('Canvas 2D is unavailable');
+    drawRainforestOpening(ctx);
+    scene.dataset.ready = 'true';
+  } catch (error) {
+    setLanguage(document.documentElement.lang);
+    document.getElementById('error').hidden = false;
+    console.error({ level: 'error', event: 'rainforest_audition.draw_failed', error: String(error) });
+  }
+</script>
+</body>
+</html>
