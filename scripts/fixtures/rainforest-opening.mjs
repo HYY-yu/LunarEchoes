@@ -120,3 +120,68 @@ export function drawRainforestOpening(ctx) {
     ctx.restore();
   }
 }
+
+export function drawRainforestVictory(ctx) {
+  drawRainforestOpening(ctx);
+  const ink = '#101f26', steel = '#31545a', light = '#60858a', beacon = '#a4fff0';
+  const visor = '#263f4a', suit = '#e8eee7', gold = '#ffc378';
+  const rect = (x, y, w, h, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
+  };
+
+  ctx.save();
+  try {
+    for (const [x, y, w, h] of [[191, 43, 4, 3], [187, 38, 4, 5], [183, 30, 4, 8], [225, 43, 4, 3], [229, 38, 4, 5], [233, 30, 4, 8]]) {
+      rect(x, y, w, h, '#408069');
+      rect(x + 1, y, 2, h, beacon);
+    }
+    rect(153, 99, 7, 3, beacon);
+    rect(162, 99, 9, 3, beacon);
+    rect(193, 101, 23, 16, ink);
+    rect(196, 103, 17, 10, steel);
+    rect(199, 104, 11, 2, beacon);
+    rect(200, 111, 11, 2, light);
+    rect(192, 117, 25, 2, beacon);
+
+    rect(106, 167, 60, 3, '#163437');
+    rect(113, 170, 63, 2, '#163437');
+    rect(121, 149, 9, 17, ink);
+    rect(134, 151, 9, 16, ink);
+    rect(123, 150, 5, 13, light);
+    rect(136, 153, 5, 11, steel);
+    rect(119, 163, 12, 5, ink);
+    rect(134, 165, 13, 4, ink);
+
+    rect(114, 129, 10, 20, ink);
+    rect(116, 132, 7, 13, steel);
+    rect(121, 127, 22, 26, ink);
+    rect(124, 130, 16, 20, light);
+    rect(126, 131, 11, 12, suit);
+    rect(126, 144, 13, 4, steel);
+    rect(129, 144, 2, 3, gold);
+    rect(124, 112, 18, 17, ink);
+    rect(127, 109, 11, 3, ink);
+    rect(127, 112, 11, 3, suit);
+    rect(126, 115, 14, 10, suit);
+    rect(132, 115, 9, 6, visor);
+    rect(136, 116, 5, 2, beacon);
+    rect(129, 126, 9, 2, light);
+
+    rect(140, 132, 11, 9, ink);
+    rect(141, 133, 8, 5, suit);
+    rect(146, 138, 7, 5, light);
+    rect(150, 127, 26, 19, ink);
+    rect(155, 123, 15, 4, ink);
+    rect(158, 125, 9, 2, light);
+    rect(153, 130, 20, 13, steel);
+    rect(156, 132, 14, 7, visor);
+    rect(158, 133, 8, 1, beacon);
+    rect(158, 135, 11, 1, beacon);
+    rect(158, 137, 5, 1, beacon);
+    rect(153, 141, 20, 2, light);
+    rect(170, 141, 3, 2, gold);
+  } finally {
+    ctx.restore();
+  }
+}
