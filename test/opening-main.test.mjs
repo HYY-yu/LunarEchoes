@@ -10,7 +10,7 @@ import ts from 'typescript';
 import { embedDesertContent } from '../scripts/desert-content.mjs';
 const catalog = JSON.parse(readFileSync('content/desert-base.story.json', 'utf8'));
 const html = readFileSync('dist/index.html', 'utf8');
-const contentBeats = ['opening', 'objective', 'defeat', 'victory', 'next-clue', 'radio.first-contact', 'radio.telemetry'];
+const contentBeats = ['opening', 'objective', 'defeat', 'victory', 'next-clue', 'radio.first-contact', 'radio.telemetry', 'boss'];
 const contentKey = beat => beat === 'next-clue' ? 'nextClue' : beat === 'radio.first-contact' ? 'firstContact' : beat === 'radio.telemetry' ? 'telemetry' : beat;
 const embedded = html.match(/<script id="desert-content" type="application\/json">([^]*?)<\/script>/)[1];
 function harness(content = embedded) {
@@ -142,7 +142,7 @@ test('a synchronous UI failure after deployment publishes a fresh bilingual erro
     app.advanceTimers(2500); assertNotice(app, message); app.advanceTimers(999); assertNotice(app, message); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), begun);
   }
 });
-test('built content contains exactly seven canonical entries and escapes every locale without changing text', () => {
+test('built content contains exactly eight canonical entries and escapes every locale without changing text', () => {
   const expected = Object.fromEntries(catalog.filter(entry => contentBeats.includes(entry.beat)).map(({ beat, id, zh, en }) => [contentKey(beat), { id, zh, en }]));
   assert.deepEqual(JSON.parse(embedded), expected); assert.equal(harness().contentFrozen, true);
   for (const beat of contentBeats) for (const language of ['zh', 'en']) {
@@ -156,7 +156,7 @@ test('built content contains exactly seven canonical entries and escapes every l
   for (const beat of contentBeats) for (const transform of [entries => entries.filter(entry => entry.beat !== beat), entries => entries.map(entry => entry.beat === beat ? { ...entry, id: 'desert-base.invalid' } : entry), entries => entries.map(entry => entry.beat === beat ? { ...entry, en: ' ' } : entry), entries => entries.map(entry => entry.beat === beat ? { ...entry, zh: 7 } : entry), entries => entries.map(entry => entry.beat === beat ? { ...entry, extra: true } : entry)]) assert.throws(() => embedDesertContent('<script id="desert-content" type="application/json"></script>', transform(structuredClone(catalog))));
   assert.throws(() => embedDesertContent('', catalog), /anchor/);
 });
-test('embedded content preserves replacement tokens in all seven bilingual entries', () => {
+test('embedded content preserves replacement tokens in all eight bilingual entries', () => {
   const anchor = '<script id="desert-content" type="application/json"></script>';
   for (const token of ['$$', '$&', '$`', "$'", '$1', '$<name>']) {
     const changed = structuredClone(catalog);
@@ -239,8 +239,9 @@ test('direct Retry skips the defeat narrative and rebuilds the current stage wit
   const retry = app.snapshot(); assert.equal(retry.screen, 'game'); assert.equal(retry.world.phase.kind, 'running'); assert.equal(retry.world.tick, 0); assert.equal(retry.world.level, 1); assert.equal(retry.world.xp, 0); assert.equal(retry.world.player.hp, retry.world.player.maxHp); assert.deepEqual(retry.world, createWorld({ ...retry.world.context, seed: retry.world.seed })); assert.deepEqual(retry.world.context, terminal.world.context); assert.deepEqual(retry.actions, []); assert.equal(app.seedCalls, 2); assert.notEqual(retry.world.seed, terminal.world.seed); assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('opening-panel'), null); assert.equal(app.active, app.get('game'));
   app.key('KeyD', true); app.key('Space', true); app.frame(); app.frame(); assert.ok(app.snapshot().actions.every(action => action.input.x === 0 && !action.input.dash));
 });
-function naturalWin(app, focus = 'canvas') {
+function naturalWin(app, focus = 'canvas', language = 'zh') {
   app.click('启动任务'); app.click('部署出发'); app.pointer('joystick', 'pointerdown'); app.frame();
+  if (language === 'en') app.get('language').onclick();
   if (focus === 'body') app.document.body.focus();
   if (focus === 'header') app.get('sound').focus();
   const { recording } = play(42);
@@ -259,8 +260,9 @@ function naturalWin(app, focus = 'canvas') {
 }
 function noticeTerminal(app) { naturalWin(app); return app.session(); }
 test('normal Boss notices expire in both languages without changing the full live or replay session', () => {
-  const app = harness(), terminal = noticeTerminal(app); assertNotice(app, '收割者抵达');
-  app.advanceTimers(3499); assertNotice(app, '收割者抵达'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), terminal);
+  const bossEntry = catalog.find(entry => entry.beat === 'boss');
+  const app = harness(), terminal = noticeTerminal(app); assertNotice(app, bossEntry.zh);
+  app.advanceTimers(3499); assertNotice(app, bossEntry.zh); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), terminal);
   app.get('language').onclick(); app.activate('victory-replay', 'Enter');
   for (let i = 0; i < 15000 && app.progress().tick < 8400; i++) app.frame();
   assert.equal(app.session().screen, 'replay'); assertNotice(app, 'Harvester incoming'); const boss = app.session();
@@ -269,13 +271,14 @@ test('normal Boss notices expire in both languages without changing the full liv
   const done = app.session(); assert.equal(done.replayVerified, true); assert.deepEqual(done.world, terminal.world); assert.equal(done.checksum, terminal.checksum); assert.deepEqual(done.recording, terminal.recording); assert.deepEqual(done.lastRecording, terminal.lastRecording);
 });
 test('native Retry clears active Boss notice and timer while replacing the complete live session', () => {
-  const app = harness(), terminal = noticeTerminal(app), timer = app.noticeTimer; assertNotice(app, '收割者抵达');
+  const app = harness(); naturalWin(app, 'canvas', 'en');
+  const terminal = app.session(), timer = app.noticeTimer; assertNotice(app, catalog.find(entry => entry.beat === 'boss').en);
   app.advanceTimers(1000); app.activate('victory-retry', 'Enter'); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(timer));
   const actual = app.session(), world = createWorld({ ...terminal.world.context, seed: actual.world.seed });
   assert.notEqual(world.seed, terminal.world.seed); assert.equal(app.seedCalls, 2);
   assert.deepEqual(actual, { ...terminal, world, actions: [], recording: startRecording(world), playingRecording: null, screen: 'game', checksum: finalChecksum(world) });
   app.advanceTimers(1000); app.event('error', { message: 'new retry error' }); const afterError = app.session();
-  app.advanceTimers(1500); assertNotice(app, '系统异常，请刷新重试。'); app.advanceTimers(1999); assertNotice(app, '系统异常，请刷新重试。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), afterError);
+  app.advanceTimers(1500); assertNotice(app, 'System error. Refresh to retry.'); app.advanceTimers(1999); assertNotice(app, 'System error. Refresh to retry.'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), afterError);
 });
 test('native Replay and Home cancel Boss timers while retaining recordings and complete replay results', async () => {
   const app = harness(), terminal = noticeTerminal(app), liveTimer = app.noticeTimer;
