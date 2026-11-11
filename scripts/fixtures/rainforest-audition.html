@@ -6,14 +6,16 @@
 <title>雨林深处 · 开场画预览</title>
 <style>
   * { box-sizing: border-box; }
-  body { margin: 0; min-height: 100svh; display: grid; place-items: center; padding: 20px; background: #101f26; color: #e8eee7; font: 16px ui-monospace, monospace; }
+  body { margin: 0; min-height: 100svh; display: grid; place-items: center; padding: 16px 20px; background: #101f26; color: #e8eee7; font: 16px ui-monospace, monospace; }
   main { max-width: 100%; }
-  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
   h1 { margin: 0; font-size: clamp(18px, 4vw, 28px); }
   button { min-height: 44px; padding: 8px 12px; color: #a4fff0; background: #163437; border: 1px solid #60858a; font: inherit; cursor: pointer; }
   button:focus-visible { outline: 2px solid #ffc378; outline-offset: 2px; }
   canvas { display: block; width: min(320px, 100%); height: auto; image-rendering: pixelated; outline: 1px solid #60858a; }
-  p { margin: 12px 0 0; color: #ffc378; }
+  p { margin: 10px 0 0; color: #ffc378; }
+  nav { display: flex; gap: 8px; margin-bottom: 8px; }
+  nav [aria-pressed="true"] { color: #101f26; background: #a4fff0; }
   @media (min-width: 680px) { canvas { width: 640px; } }
   @media (min-width: 1000px) { canvas { width: 960px; } }
 </style>
@@ -21,35 +23,66 @@
 <body>
 <main>
 <header><h1 id="title">雨林深处</h1><button id="language" type="button">English</button></header>
+<nav aria-label="场景预览" id="scenes">
+<button id="opening" type="button" aria-pressed="true">开场</button>
+<button id="victory" type="button" aria-pressed="false">胜利</button>
+</nav>
 <canvas id="scene" role="img" aria-label="林冠下亮着灯的研究站，前景是盘根通路和遗迹空地"></canvas>
 <p id="caption">开场画预览</p>
 <p id="error" role="alert" hidden></p>
 </main>
 <script type="module">
   const scene = document.getElementById('scene');
+  const buttons = {
+    opening: document.getElementById('opening'),
+    victory: document.getElementById('victory')
+  };
+  let selected = 'opening';
   const labels = {
-    'zh-CN': { title: '雨林深处', caption: '开场画预览', language: 'English', art: '林冠下亮着灯的研究站，前景是盘根通路和遗迹空地', error: '画面未能加载。请刷新重试。' },
-    en: { title: 'Deep Rainforest', caption: 'Opening scene preview', language: '中文', art: 'A lit research station beneath the canopy, beyond a root-covered trail and a clearing with ruins', error: 'The scene failed to load. Refresh to retry.' }
+    'zh-CN': {
+      title: '雨林深处', language: 'English', scenes: '场景预览', error: '画面未能加载。请刷新重试。',
+      opening: { button: '开场', caption: '开场画预览', art: '林冠下亮着灯的研究站，前景是盘根通路和遗迹空地' },
+      victory: { button: '胜利', caption: '胜利画预览', art: '工程兵带着取回的信号记录，身后研究站的信标已经恢复' }
+    },
+    en: {
+      title: 'Deep Rainforest', language: '中文', scenes: 'Scene preview', error: 'The scene failed to load. Refresh to retry.',
+      opening: { button: 'Opening', caption: 'Opening scene preview', art: 'A lit research station beneath the canopy, beyond a root-covered trail and a clearing with ruins' },
+      victory: { button: 'Victory', caption: 'Victory scene preview', art: 'The engineer carries the recovered signal records as the research station beacon comes back online' }
+    }
   };
   const language = document.getElementById('language');
   function setLanguage(lang) {
     const label = labels[lang];
+    const view = label[selected];
     document.documentElement.lang = lang;
-    document.title = `${label.title} · ${label.caption}`;
+    document.title = `${label.title} · ${view.caption}`;
     document.getElementById('title').textContent = label.title;
-    document.getElementById('caption').textContent = label.caption;
+    document.getElementById('caption').textContent = view.caption;
+    document.getElementById('scenes').setAttribute('aria-label', label.scenes);
     language.textContent = label.language;
-    scene.setAttribute('aria-label', label.art);
+    scene.setAttribute('aria-label', view.art);
     document.getElementById('error').textContent = label.error;
+    for (const [id, button] of Object.entries(buttons)) {
+      button.textContent = label[id].button;
+      button.setAttribute('aria-pressed', String(id === selected));
+    }
   }
   language.addEventListener('click', () => setLanguage(document.documentElement.lang === 'en' ? 'zh-CN' : 'en'));
   try {
-    const { RAINFOREST_SCENE_SIZE, drawRainforestOpening } = await import('/rainforest-opening.mjs');
+    const { RAINFOREST_SCENE_SIZE, drawRainforestOpening, drawRainforestVictory } = await import('/rainforest-opening.mjs');
     scene.width = RAINFOREST_SCENE_SIZE.width;
     scene.height = RAINFOREST_SCENE_SIZE.height;
     const ctx = scene.getContext('2d', { alpha: false });
     if (!ctx) throw new Error('Canvas 2D is unavailable');
-    drawRainforestOpening(ctx);
+    const draw = { opening: drawRainforestOpening, victory: drawRainforestVictory };
+    function selectScene(id) {
+      selected = id;
+      setLanguage(document.documentElement.lang);
+      draw[id](ctx);
+      scene.dataset.scene = id;
+    }
+    selectScene('opening');
+    for (const [id, button] of Object.entries(buttons)) button.addEventListener('click', () => selectScene(id));
     scene.dataset.ready = 'true';
   } catch (error) {
     setLanguage(document.documentElement.lang);
