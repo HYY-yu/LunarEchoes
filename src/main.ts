@@ -4,6 +4,8 @@ import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
 import { dictionary, upgradeLabel, type Language } from './i18n.js';
 import { log } from './logger.js';
+import { applyStageResult } from './progress.js';
+import { openProgressStorage, type ProgressStorageResult } from './progress-storage.js';
 import { DESERT_SCENE_SIZE, drawDesertScene } from './desert-scene.js';
 type Screen = 'title' | 'opening' | 'game' | 'replay' | 'replay-end';
 type RadioBeat = 'firstContact' | 'telemetry';
@@ -33,6 +35,11 @@ if (!(canvasNode instanceof HTMLCanvasElement)) throw new Error('Game canvas is 
 const render = createRenderer(canvasNode), synth = new Synth();
 const overlay = element('overlay'), hud = element('hud'), touch = element('touch');
 let language: Language = 'zh';
+const progressStorage = openProgressStorage({
+  getItem: key => window.localStorage.getItem(key),
+  setItem: (key, value) => window.localStorage.setItem(key, value)
+});
+let resetRequested = false;
 let world: World = createWorld({ ...DESERT_CONTEXT, seed: 208907 });
 let screen: Screen = 'title';
 let desertContent: DesertContent | null = null;
@@ -57,6 +64,67 @@ let stickX = 0, stickY = 0, dashPressed = false;
 let stickPointer: number | null = null;
 const coarse = matchMedia('(pointer: coarse)').matches;
 function text() { return dictionary(language); }
+function logProgressResult(result: ProgressStorageResult) {
+  if (result.kind === 'recovery_required') log('warn', 'progress.recovery_required', { phase: result.phase, reason: result.reason });
+  if (result.kind === 'not_saved' || result.kind === 'uncertain') {
+    log('error', 'progress.storage_failed', { phase: result.phase, reason: result.kind === 'uncertain' ? result.reason : 'storage_error' });
+  }
+  if (result.kind === 'saved' || result.kind === 'reset') log('info', `progress.${result.kind}`, { stageId: progressStorage.snapshot().progress.highestUnlockedStageId });
+}
+function saveVictory() {
+  const transition = applyStageResult({ progress: progressStorage.snapshot().progress, stageId: world.context.stageId, source: 'live', outcome: 'won' });
+  if (transition.kind !== 'advanced') return;
+  log('info', 'progress.unlocked', { stageId: transition.progress.highestUnlockedStageId });
+  const { result } = progressStorage.saveAdvanced(transition);
+  logProgressResult(result);
+}
+function progressFeedback() {
+  const t = text(), { result, protection } = progressStorage.snapshot();
+  const temporary = protection.kind === 'protected' ? t.progressTemporary : '';
+  const withProtection = (message: string) => temporary ? `${message} ${temporary}` : message;
+  switch (result.kind) {
+    case 'saved': return t.progressSaved;
+    case 'reset': return t.progressResetDone;
+    case 'not_saved':
+      if (result.phase === 'reset_read' || result.phase === 'reset_write') return withProtection(t.progressResetFailed);
+      return result.phase === 'load' ? temporary : withProtection(t.progressNotSaved);
+    case 'uncertain': return withProtection(result.phase === 'reset_verify' ? t.progressResetUncertain : t.progressUncertain);
+    default: return temporary;
+  }
+}
+function renderProgress(elementId: string) {
+  const t = text(), { progress } = progressStorage.snapshot();
+  const stage = t.stageNames[progress.highestUnlockedStageId];
+  const availability = progress.highestUnlockedStageId === DESERT_CONTEXT.stageId ? t.progressPlayable : t.progressUnavailable;
+  element(elementId).textContent = [`${t.progressHeading} · ${stage} · ${availability}`, progressFeedback()].filter(Boolean).join(' ');
+}
+function resolveProgressReset(decision: 'confirmed' | 'cancelled') {
+  const { result } = progressStorage.reset(decision);
+  resetRequested = false;
+  logProgressResult(result);
+  updateUi(true);
+  document.getElementById(screen === 'title' ? 'mission-start' : 'victory-retry')?.focus({ preventScroll: true });
+}
+function renderProgressReset() {
+  const t = text(), { result } = progressStorage.snapshot();
+  const reason = result.kind === 'recovery_required' ? result.reason === 'unknown_version' ? t.progressUnknown : t.progressInvalid : '';
+  if (!document.getElementById('progress-reset-panel')) {
+    overlay.replaceChildren();
+    const section = panel('', ''); section.id = 'progress-reset-panel';
+    section.setAttribute('role', 'dialog'); section.setAttribute('aria-labelledby', 'progress-reset-heading');
+    section.children[1].id = 'progress-reset-heading';
+    const actions = document.createElement('div'); actions.className = 'actions';
+    const cancel = button('', 'secondary', () => resolveProgressReset('cancelled')); cancel.id = 'progress-reset-cancel';
+    const confirm = button('', 'primary', () => resolveProgressReset('confirmed')); confirm.id = 'progress-reset-confirm';
+    actions.append(cancel, confirm); section.append(actions); cancel.focus({ preventScroll: true });
+  }
+  const section = element('progress-reset-panel');
+  section.children[0].textContent = t.progressHeading;
+  section.children[1].textContent = t.progressReset;
+  section.children[2].textContent = [reason, t.progressResetWarning, reason ? t.progressCancelWarning : ''].filter(Boolean).join(' ');
+  element('progress-reset-cancel').textContent = reason ? t.progressPlayTemporary : t.progressCancel;
+  element('progress-reset-confirm').textContent = t.progressResetConfirm;
+}
 function clearNotice() { window.clearTimeout(noticeTimer); noticeTimer = 0; const node = element('notice'); node.classList.remove('visible'); node.classList.remove('boss-notice'); node.textContent = ''; }
 function notify(message: string, kind: 'general' | 'boss' = 'general') {
   clearNotice();
@@ -114,6 +182,7 @@ function act(action: Action, record = true) {
     log('info', 'session.phase', { seed: world.seed, tick: world.tick, before, phase: world.phase.kind });
     if (screen === 'game' && (world.phase.kind === 'won' || world.phase.kind === 'lost')) {
       lastRecording = finishRecording(world, recording.actions);
+      if (world.phase.kind === 'won') saveVictory();
       log('info', 'session.finished', { seed: world.seed, tick: world.tick, outcome: world.phase.kind, checksum: lastRecording.finalChecksum, ...world.context, kills: world.kills });
     }
     updateUi(true);
@@ -209,6 +278,10 @@ function updateUi(force = false) {
   for (const id of UPGRADE_ORDER) if (world.upgrades[id] > 0) { const node = document.createElement('span'); node.innerHTML = `<i class="module-icon icon-${id}" aria-hidden="true"></i><span>LV ${world.upgrades[id]}</span>`; node.title = upgradeLabel(id, language).title; node.setAttribute('aria-label', `${node.title} · LV ${world.upgrades[id]}`); equipment.append(node); }
   if (!force && signature === lastUi) return;
   lastUi = signature; synth.setSession(screen === 'title' || screen === 'opening' ? 'menu' : world.phase.kind === 'won' || world.phase.kind === 'lost' ? 'terminal' : world.phase.kind);
+  if (resetRequested || progressStorage.snapshot().result.kind === 'recovery_required') {
+    renderProgressReset();
+    return;
+  }
   if (screen === 'opening' && desertContent) {
     if (!document.getElementById('opening-panel')) {
       overlay.replaceChildren();
@@ -277,11 +350,13 @@ function updateUi(force = false) {
       const actions = document.createElement('div'); actions.className = 'actions';
       const retry = button('', 'primary', begin); retry.id = 'victory-retry';
       const replay = button('', 'secondary', startReplay); replay.id = 'victory-replay';
-      actions.append(retry, replay); section.append(art, eyebrow, heading, story, nextClue, description, stats, actions); overlay.append(section);
+      const progress = document.createElement('p'); progress.id = 'victory-progress'; progress.setAttribute('role', 'status');
+      actions.append(retry, replay); section.append(art, eyebrow, heading, story, nextClue, description, progress, stats, actions); overlay.append(section);
       if (focusRetry) retry.focus({ preventScroll: true });
     }
     element('victory-art').setAttribute('aria-label', t.victoryArt); element('victory-report').textContent = t.report; element('victory-heading').textContent = t.won;
     element('victory-story').textContent = desertContent.victory[language]; element('victory-next-clue').textContent = desertContent.nextClue[language]; element('victory-description').textContent = t.wonBody;
+    renderProgress('victory-progress');
     element('victory-time').textContent = t.time; element('victory-kills').textContent = t.kills; element('victory-level').textContent = t.level;
     element('victory-retry').textContent = t.restart; element('victory-replay').textContent = t.replay;
     return;
@@ -308,11 +383,13 @@ function updateUi(force = false) {
   if (screen === 'title') {
     const intro = document.createElement('section'); intro.className = 'intro';
     intro.innerHTML = `<div class="eyebrow">${t.mission}</div><h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${t.brief}</p>`;
-    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(button(t.start, 'primary', showOpening));
-    const replayButton = button(t.replay, 'secondary', startReplay); replayButton.disabled = !lastRecording; actions.append(replayButton); intro.append(actions);
+    const progress = document.createElement('p'); progress.id = 'title-progress'; progress.setAttribute('role', 'status'); intro.append(progress);
+    const start = button(t.start, 'primary', showOpening); start.id = 'mission-start';
+    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(start);
+    const replayButton = button(t.replay, 'secondary', startReplay); replayButton.disabled = !lastRecording; actions.append(replayButton, button(t.progressReset, 'secondary', () => { resetRequested = true; updateUi(true); })); intro.append(actions);
     const controls = document.createElement('p'); controls.className = 'controls'; controls.innerHTML = `<span class="desktop">${t.controls}</span><span class="mobile">${t.touch}</span>`; intro.append(controls);
     const stamp = document.createElement('div'); stamp.className = 'mission-stamp'; stamp.innerHTML = `<strong>${formatTime(stageRules(world.context).durationTicks)}<small> MIN</small></strong>${t.mission}<br>${t.pendingContent}`;
-    overlay.append(intro, stamp); return;
+    overlay.append(intro, stamp); renderProgress('title-progress'); return;
   }
   if (screen === 'replay-end') {
     const section = panel(t.replayDone, replayVerified ? t.replayVerified : t.replayFailed);
@@ -401,4 +478,5 @@ function frame(now: number) {
   } catch (error) { fail(error); }
 }
 try { desertContent = parseDesertContent(JSON.parse(element('desert-content').textContent ?? '')); } catch (error) { fail(error); }
+logProgressResult(progressStorage.snapshot().result);
 updateUi(true); requestAnimationFrame(frame);
