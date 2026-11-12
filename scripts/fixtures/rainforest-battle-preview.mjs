@@ -87,13 +87,17 @@ function terrain(ctx, area, width, height, zoom) {
   areas[area](ctx);
 }
 
-function shot(ctx, x, y, hostile, direction) {
-  const length = hostile ? 8 : 12;
-  box(ctx, '#14232c', x - 3, y - 2, 7, 7);
-  ctx.fillStyle = hostile ? '#bb8167' : '#6ac2ba';
-  ctx.fillRect(Math.round(x - length / 2), Math.round(y - length * direction), 2, 2);
-  ctx.fillRect(Math.round(x - length / 4), Math.round(y - length * direction / 2), 2, 2);
-  box(ctx, hostile ? '#f6b77c' : '#d9fff2', x - 2, y - 1, hostile ? 5 : 3, hostile ? 5 : 3);
+function shot(ctx, x, y, hostile, travelX, travelY) {
+  const size = hostile ? 5 : 3;
+  const tail = (hostile ? 2.2 : 8) * 2 / Math.hypot(travelX, travelY);
+  ctx.fillStyle = hostile ? '#f6b77c' : '#d9fff2';
+  ctx.fillRect(Math.round(x) - 2, Math.round(y) - 2, size, size);
+  ctx.strokeStyle = hostile ? '#dc916166' : '#8af5e5aa';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x - travelX * tail, y - travelY * tail);
+  ctx.stroke();
 }
 
 function encounter(ctx, atlas, elapsed) {
@@ -122,12 +126,14 @@ function encounter(ctx, atlas, elapsed) {
   }
   atlas.draw(ctx, 'sentry', sentryX, sentryY, 1.8, tick);
   for (let index = 0; index < 7; index++) {
+    const travelX = Math.sin(index * 1.3) * 65;
+    const travelY = 112;
     const phase = ((time / 17 + index * 16 + 8) % 117) / 117;
-    shot(ctx, sentryX + Math.sin(index * 1.3) * phase * 65 - 5, sentryY + phase * 112, true, 1);
+    shot(ctx, sentryX + travelX * phase - 5, sentryY + travelY * phase, true, travelX, travelY);
   }
   for (let index = 0; index < 4; index++) {
     const phase = ((time / 13 + index * 24) % 95) / 95;
-    shot(ctx, x - phase * 54 - 12, y - phase * 82 - 8, false, -1);
+    shot(ctx, x - phase * 54 - 12, y - phase * 82 - 8, false, -54, -82);
   }
   ctx.fillStyle = '#0d262777';
   ctx.beginPath();
