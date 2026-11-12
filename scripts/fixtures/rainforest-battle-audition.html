@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>雨林深处 · 战场预览</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0d1b20; color: #e8eee7; font: 14px ui-monospace, monospace; }
+  main { min-height: 100svh; display: grid; grid-template-rows: auto auto minmax(280px, 1fr) auto; gap: 8px; padding: 12px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  h1 { margin: 0; font-size: clamp(17px, 3vw, 24px); }
+  button { min-height: 44px; padding: 6px 10px; border: 1px solid #52777a; background: #142c2c; color: #e8eee7; font: inherit; cursor: pointer; }
+  button:focus-visible { outline: 2px solid #ffd499; outline-offset: 2px; }
+  button[aria-pressed="true"] { background: #a4fff0; color: #101f26; border-color: #a4fff0; }
+  nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 6px; }
+  .field { position: relative; border: 1px solid #52777a; }
+  canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  p { margin: 0; line-height: 1.35; }
+  #caption { color: #c3ded6; }
+  #error { color: #ffd499; }
+  @media (max-width: 440px) { main { padding: 8px; } button { padding-inline: 6px; } }
+</style>
+</head>
+<body>
+<main>
+<header><h1 id="title">雨林深处 · 战场预览</h1><button id="language" type="button">English</button></header>
+<nav id="scenes" aria-label="战场区域">
+<button id="canopy" type="button" aria-pressed="true">林冠阴影</button>
+<button id="ruins" type="button" aria-pressed="false">遗迹空地</button>
+<button id="roots" type="button" aria-pressed="false">盘根通路</button>
+<button id="motion" type="button">暂停</button>
+</nav>
+<div class="field"><canvas id="battlefield" role="img" aria-label="林冠阴影中的工程兵、弹幕与攻击预警"></canvas></div>
+<p id="caption">浅青弹是友方，橙色方弹是敌方，金色虚线是攻击预警。</p>
+<p id="error" role="alert" hidden></p>
+</main>
+<script type="module">
+  const labels = {
+    'zh-CN': {
+      title: '雨林深处 · 战场预览', language: 'English', scenes: '战场区域', pause: '暂停', play: '继续',
+      canopy: '林冠阴影', ruins: '遗迹空地', roots: '盘根通路',
+      art: name => `${name}中的工程兵、弹幕与攻击预警`,
+      caption: '浅青弹是友方，橙色方弹是敌方，金色虚线是攻击预警。',
+      error: '画面未能加载。请确认已构建并刷新重试。'
+    },
+    en: {
+      title: 'Deep Rainforest · Battlefield Preview', language: '中文', scenes: 'Battlefield areas', pause: 'Pause', play: 'Resume',
+      canopy: 'Canopy', ruins: 'Ruins', roots: 'Root trail',
+      art: name => `Engineer, projectiles, and attack warning in ${name.toLowerCase()}`,
+      caption: 'Pale cyan shots are friendly. Orange square shots are hostile. The dashed gold ring warns of an attack.',
+      error: 'The preview could not load. Build the game and refresh to retry.'
+    }
+  };
+  const canvas = document.getElementById('battlefield');
+  const language = document.getElementById('language');
+  const motion = document.getElementById('motion');
+  const error = document.getElementById('error');
+  const buttons = ['canopy', 'ruins', 'roots'].map(id => document.getElementById(id));
+  let selected = 'canopy';
+  let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function updateLabels(lang) {
+    const label = labels[lang];
+    document.documentElement.lang = lang;
+    document.title = label.title;
+    document.getElementById('title').textContent = label.title;
+    document.getElementById('scenes').setAttribute('aria-label', label.scenes);
+    document.getElementById('caption').textContent = label.caption;
+    canvas.setAttribute('aria-label', label.art(label[selected]));
+    language.textContent = label.language;
+    motion.textContent = paused ? label.play : label.pause;
+    error.textContent = label.error;
+    for (const button of buttons) {
+      button.textContent = label[button.id];
+      button.setAttribute('aria-pressed', String(button.id === selected));
+    }
+  }
+
+  const currentLanguage = () => document.documentElement.lang;
+  updateLabels(currentLanguage());
+  language.addEventListener('click', () => updateLabels(currentLanguage() === 'en' ? 'zh-CN' : 'en'));
+  try {
+    const { createBattlefieldPreview } = await import('/rainforest-battle-preview.mjs');
+    const preview = createBattlefieldPreview(canvas);
+    preview.setPaused(paused);
+    motion.addEventListener('click', () => {
+      paused = !paused;
+      preview.setPaused(paused);
+      updateLabels(currentLanguage());
+    });
+    for (const button of buttons) button.addEventListener('click', () => {
+      selected = button.id;
+      preview.select(selected);
+      updateLabels(currentLanguage());
+    });
+  } catch (caught) {
+    console.error('Rainforest battlefield preview failed', caught);
+    error.hidden = false;
+    for (const button of [...buttons, motion]) button.disabled = true;
+  }
+</script>
+</body>
+</html>
