@@ -1,6 +1,6 @@
 # 六关战役路线
 
-本文件是待实施的剧情与内容计划。当前游戏已接入沙漠首关的既有战斗规则、lunar-2 回放与代码像素沙漠战场。已接入可跳过的沙漠开场和暂停目标，见[沙漠开场接入](desert-opening.md)。已接入真实失败结算的既有像素画与双语原文，见[沙漠失败结算](desert-defeat.md)。已接入真实胜利结算的既有像素画、双语原文与雨林叙事线索，见[沙漠胜利结算](desert-victory.md)。已接入首次击杀后的双语 first-contact 无线电，以及第一条关闭后于战斗中点展示的既有遥测原文，见[沙漠战斗无线电](desert-radio.md)。[PR #53](https://github.com/HYY-yu/LunarEchoes/pull/53) 已合并，实机证据及触屏无截图的限制见[验收记录](https://github.com/HYY-yu/LunarEchoes/pull/53#issuecomment-6765776816)。其他无线电、跨关解锁、持久战役存档和其他五张地图尚未接入，尚未完成六关战役。具体范围见[沙漠战斗接入](desert-simulation.md)与[沙漠基地战场地图](desert-map.md)。用户确定每关战斗 180–300 秒，六关战斗总计 18–30 分钟，不含剧情和菜单；剧情可跳过，文本支持中文与英文。
+本文件是待实施的剧情与内容计划。当前游戏已接入沙漠首关的既有战斗规则、lunar-2 回放与代码像素沙漠战场。已接入可跳过的沙漠开场和暂停目标，见[沙漠开场接入](desert-opening.md)。已接入真实失败结算的既有像素画与双语原文，见[沙漠失败结算](desert-defeat.md)。已接入真实胜利结算的既有像素画、双语原文与雨林叙事线索，见[沙漠胜利结算](desert-victory.md)。已接入首次击杀后的双语 first-contact 无线电，以及第一条关闭后于战斗中点展示的既有遥测原文，见[沙漠战斗无线电](desert-radio.md)。[PR #53](https://github.com/HYY-yu/LunarEchoes/pull/53) 已合并，实机证据及触屏无截图的限制见[验收记录](https://github.com/HYY-yu/LunarEchoes/pull/53#issuecomment-6765776816)。首次赢得沙漠基地任务会解锁雨林深处。本机保存成功后，刷新仍可看到该解锁状态，见 [PR #59](https://github.com/HYY-yu/LunarEchoes/pull/59)。选关列表按战役顺序显示六关及其状态。目前只有沙漠基地可部署，雨林解锁后仍暂不可部署，见 [PR #63](https://github.com/HYY-yu/LunarEchoes/pull/63)。其他无线电和后续五张地图尚未接入，六关战役仍待完成。具体范围见[沙漠战斗接入](desert-simulation.md)与[沙漠基地战场地图](desert-map.md)。用户确定每关战斗 180–300 秒，六关战斗总计 18–30 分钟，不含剧情和菜单；剧情可跳过，文本支持中文与英文。
 
 主角是地球防卫部队的中继工程兵。外星机械生物通过月球信号网络侵入地球，主角从求援、防守逐步转为反攻，最终切断月面入侵源。自动攻击、走位、冲刺和升级构筑保持既有玩法，不增加新的核心玩法。
 
@@ -43,6 +43,6 @@
 
 HYY-yu 已在 [Issue #8 的决定评论](https://github.com/HYY-yu/LunarEchoes/issues/8#issuecomment-6679991092) 确认三项体验规则。失败只重试当前关，已解锁不回退。每次进入关卡重新构筑，不继承上一局装备、等级、经验或当前装甲。当前浏览器本机只保存已解锁关卡，不保存进行中的战斗。完整记录与后续验收草案见[战役进度与失败重试决定](campaign-progression-proposal.md)。记录决定不代表 A2 已实现或六关已经可玩。
 
-HYY-yu 已在 [Issue #14 的决定评论](https://github.com/HYY-yu/LunarEchoes/issues/14#issuecomment-6684779269)批准最小本机存档和按关回放协议。坏数据或未知版本保留原文，发现时立即请求确认重置；取消则临时游玩且明确不能保存。采用 `lunar-2` 关卡与规则绑定的录制及上下文校验，不兼容旧数据，重试生成新种子。完整字段、写入失败与核对未知状态、双语反馈及后续验收见[本机解锁存档与按关回放技术决定](campaign-protocol-proposal.md)。这些决定尚未实现，不代表 A2 或 B1 完成。
+HYY-yu 已在 [Issue #14 的决定评论](https://github.com/HYY-yu/LunarEchoes/issues/14#issuecomment-6684779269)批准最小本机存档和按关回放协议。坏数据或未知版本保留原文，发现时立即请求确认重置；取消则临时游玩且明确不能保存。采用 `lunar-2` 关卡与规则绑定的录制及上下文校验，不兼容旧数据，重试生成新种子。完整字段、写入失败与核对未知状态、双语反馈及后续验收见[本机解锁存档与按关回放技术决定](campaign-protocol-proposal.md)。沙漠基地已接入本机解锁进度保存和按关回放。后续关卡的可玩内容仍待接入。
 
 具体主角身份、对白和敌人命名仍由 story_director 提案。本次决定之外的回放或 checksum 新语义、护塔新耐久或失败条件仍须另行提案并取得人类决定。第一轮保持既有单局构筑行为。
