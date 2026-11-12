@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 const routes = new Map([
   ['/', ['./fixtures/rainforest-battle-audition.html', 'text/html; charset=utf-8']],
   ['/rainforest-battle-preview.mjs', ['./fixtures/rainforest-battle-preview.mjs', 'text/javascript']],
+  ['/rainforest-terrain.mjs', ['./fixtures/rainforest-terrain.mjs', 'text/javascript']],
   ['/art.js', ['../dist/art.js', 'text/javascript']]
 ]);
 const files = new Map();
