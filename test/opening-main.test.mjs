@@ -648,6 +648,47 @@ test('title loads one local progress session and deployment does not create a sa
   assert.deepEqual(storage.reads, [progressKey]); assert.deepEqual(storage.writes, []);
 });
 
+test('the mission list displays all six stages in order and preserves local progress across language and back navigation', () => {
+  const storage = memoryStorage(savedProgress('rainforest')), app = harness(embedded, storage), before = app.session();
+  app.activate('mission-select', 'Enter');
+  assert.equal(app.active.id, 'stages-heading');
+  assert.equal(app.get('hud').hidden, true);
+  const list = app.get('stage-list');
+  assert.deepEqual(list.children.map(row => row.children.map(node => node.textContent)), [
+    ['沙漠基地', '部署出发'], ['雨林深处', '已解锁，暂不可游玩'], ['寒冻南极', '未解锁'],
+    ['太空电梯', '未解锁'], ['保卫哨塔', '未解锁'], ['月面回响', '未解锁']
+  ]);
+  app.activate('language', 'Enter');
+  assert.equal(app.active.id, 'language');
+  assert.deepEqual(list.children.map(row => row.children.map(node => node.textContent)), [
+    ['Desert Base', 'Deploy'], ['Deep Rainforest', 'Unlocked, not yet playable'], ['Frozen Antarctica', 'Locked'],
+    ['Space Elevator', 'Locked'], ['Watchtower Defense', 'Locked'], ['Lunar Echoes', 'Locked']
+  ]);
+  assert.equal(list.children.filter(row => row.children.some(node => node.tagName === 'BUTTON')).length, 1);
+  app.activate('stages-back', 'Enter');
+  assert.equal(app.active.id, 'mission-select');
+  assert.deepEqual(app.session(), before);
+  assert.deepEqual(storage.reads, [progressKey]); assert.deepEqual(storage.writes, []);
+});
+
+test('selecting Desert reaches the existing opening and can return before deployment', () => {
+  const storage = memoryStorage(), app = harness(embedded, storage);
+  app.click('选择任务');
+  const list = app.get('stage-list');
+  assert.ok(list.children.slice(1).every(row => row.children[1].textContent === '未解锁'));
+  app.click('部署出发');
+  assert.equal(app.active.id, 'opening-continue');
+  assert.equal(app.get('opening-story').dataset.storyId, 'desert-base.opening');
+  assert.equal(app.seedCalls, 0);
+  app.click('返回选关');
+  assert.equal(app.active.id, 'stages-heading');
+  app.click('部署出发');
+  app.activate('opening-continue', 'Enter');
+  assert.equal(app.progress().screen, 'game');
+  assert.equal(app.seedCalls, 1);
+  assert.deepEqual(storage.writes, []);
+});
+
 test('a live desert victory saves rainforest once and a fresh title restores that unlock', () => {
   const storage = memoryStorage();
   const app = harness(embedded, storage);
