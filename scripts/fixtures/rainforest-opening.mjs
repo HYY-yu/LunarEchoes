@@ -185,3 +185,68 @@ export function drawRainforestVictory(ctx) {
     ctx.restore();
   }
 }
+
+export function drawRainforestFailure(ctx) {
+  drawRainforestOpening(ctx);
+  const { width, height } = RAINFOREST_SCENE_SIZE;
+  const ink = '#101923', steel = '#344a57', pale = '#a8bac0';
+  const warning = '#e6a370', dimWarning = '#a45f50';
+  const rect = (x, y, w, h, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
+  };
+
+  ctx.save();
+  try {
+    rect(0, 0, width, height, '#14263866');
+    rect(208, 29, 3, 6, steel);
+    rect(204, 53, 10, 3, '#304751');
+    rect(237, 96, 8, 2, '#506775');
+    rect(153, 99, 18, 3, '#805c50');
+    rect(160, 98, 2, 6, steel);
+    rect(198, 97, 17, 3, dimWarning);
+    rect(209, 28, 2, 2, warning);
+    rect(194, 37, 5, 2, dimWarning);
+    rect(186, 31, 3, 2, dimWarning);
+    rect(219, 37, 5, 2, dimWarning);
+    rect(229, 31, 3, 2, dimWarning);
+    rect(201, 24, 4, 2, warning);
+    rect(215, 24, 4, 2, warning);
+
+    rect(102, 170, 43, 3, '#23343c');
+    rect(111, 149, 8, 11, ink);
+    rect(106, 157, 11, 10, ink);
+    rect(103, 164, 12, 5, ink);
+    rect(109, 157, 5, 7, steel);
+    rect(122, 149, 8, 12, ink);
+    rect(128, 157, 9, 12, ink);
+    rect(128, 165, 12, 5, ink);
+    rect(130, 158, 4, 7, steel);
+
+    rect(125, 130, 14, 21, ink);
+    rect(130, 133, 6, 15, steel);
+    rect(133, 135, 2, 5, dimWarning);
+    rect(108, 128, 22, 25, ink);
+    rect(111, 131, 15, 17, steel);
+    rect(112, 132, 10, 11, pale);
+    rect(110, 143, 12, 5, steel);
+
+    rect(104, 114, 19, 17, ink);
+    rect(107, 111, 13, 3, ink);
+    rect(108, 114, 11, 3, pale);
+    rect(106, 117, 15, 9, pale);
+    rect(105, 117, 10, 6, '#293f50');
+    rect(106, 119, 6, 2, warning);
+    rect(112, 126, 9, 3, steel);
+
+    rect(101, 132, 11, 8, ink);
+    rect(99, 138, 8, 8, ink);
+    rect(103, 133, 7, 5, pale);
+    rect(100, 140, 6, 4, steel);
+    rect(124, 139, 8, 10, ink);
+    rect(128, 146, 7, 5, ink);
+    rect(126, 140, 4, 7, pale);
+  } finally {
+    ctx.restore();
+  }
+}
