@@ -2,6 +2,7 @@ import { ARMOR_RULES, type Upgrade } from './core.js';
 export type Language = 'zh' | 'en';
 const zh = {
   stageNames: { 'desert-base': '沙漠基地', rainforest: '雨林深处', antarctica: '寒冻南极', 'space-elevator': '太空电梯', watchtower: '保卫哨塔', 'lunar-echoes': '月面回响' },
+  campaignStages: '选择任务', backToTitle: '返回标题', backToStages: '返回选关', stageLocked: '未解锁',
   progressHeading: '本机解锁进度', progressPlayable: '已解锁', progressUnavailable: '已解锁，暂不可游玩',
   progressSaved: '进度已保存。', progressTemporary: '本次仅临时游玩，无法保存进度。', progressNotSaved: '本次进度未保存，刷新后可能丢失。',
   progressUncertain: '无法确认本次进度是否保存，刷新后可能丢失。', progressResetDone: '本机进度已重置。',
@@ -15,6 +16,7 @@ const zh = {
 };
 const en: typeof zh = {
   stageNames: { 'desert-base': 'Desert Base', rainforest: 'Deep Rainforest', antarctica: 'Frozen Antarctica', 'space-elevator': 'Space Elevator', watchtower: 'Watchtower Defense', 'lunar-echoes': 'Lunar Echoes' },
+  campaignStages: 'Select mission', backToTitle: 'Back to title', backToStages: 'Back to missions', stageLocked: 'Locked',
   progressHeading: 'Local unlock progress', progressPlayable: 'Unlocked', progressUnavailable: 'Unlocked, not yet playable',
   progressSaved: 'Progress saved.', progressTemporary: 'You can play this session. Progress cannot be saved.', progressNotSaved: 'Progress was not saved and may be lost on reload.',
   progressUncertain: 'Saving could not be confirmed. Progress may be lost on reload.', progressResetDone: 'Local progress reset.',
