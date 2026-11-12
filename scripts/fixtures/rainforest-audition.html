@@ -26,6 +26,7 @@
 <nav aria-label="场景预览" id="scenes">
 <button id="opening" type="button" aria-pressed="true">开场</button>
 <button id="victory" type="button" aria-pressed="false">胜利</button>
+<button id="failure" type="button" aria-pressed="false">失败</button>
 </nav>
 <canvas id="scene" role="img" aria-label="林冠下亮着灯的研究站，前景是盘根通路和遗迹空地"></canvas>
 <p id="caption">开场画预览</p>
@@ -35,19 +36,22 @@
   const scene = document.getElementById('scene');
   const buttons = {
     opening: document.getElementById('opening'),
-    victory: document.getElementById('victory')
+    victory: document.getElementById('victory'),
+    failure: document.getElementById('failure')
   };
   let selected = 'opening';
   const labels = {
     'zh-CN': {
       title: '雨林深处', language: 'English', scenes: '场景预览', error: '画面未能加载。请刷新重试。',
       opening: { button: '开场', caption: '开场画预览', art: '林冠下亮着灯的研究站，前景是盘根通路和遗迹空地' },
-      victory: { button: '胜利', caption: '胜利画预览', art: '工程兵带着取回的信号记录，身后研究站的信标已经恢复' }
+      victory: { button: '胜利', caption: '胜利画预览', art: '工程兵带着取回的信号记录，身后研究站的信标已经恢复' },
+      failure: { button: '失败', caption: '失败画预览', art: '研究站信号中断，工程兵未取回记录，沿根路撤离' }
     },
     en: {
       title: 'Deep Rainforest', language: '中文', scenes: 'Scene preview', error: 'The scene failed to load. Refresh to retry.',
       opening: { button: 'Opening', caption: 'Opening scene preview', art: 'A lit research station beneath the canopy, beyond a root-covered trail and a clearing with ruins' },
-      victory: { button: 'Victory', caption: 'Victory scene preview', art: 'The engineer carries the recovered signal records as the research station beacon comes back online' }
+      victory: { button: 'Victory', caption: 'Victory scene preview', art: 'The engineer carries the recovered signal records as the research station beacon comes back online' },
+      failure: { button: 'Failure', caption: 'Failure scene preview', art: 'The station signal drops out as the engineer retreats along the root-covered trail without the records' }
     }
   };
   const language = document.getElementById('language');
@@ -69,12 +73,12 @@
   }
   language.addEventListener('click', () => setLanguage(document.documentElement.lang === 'en' ? 'zh-CN' : 'en'));
   try {
-    const { RAINFOREST_SCENE_SIZE, drawRainforestOpening, drawRainforestVictory } = await import('/rainforest-opening.mjs');
+    const { RAINFOREST_SCENE_SIZE, drawRainforestOpening, drawRainforestVictory, drawRainforestFailure } = await import('/rainforest-opening.mjs');
     scene.width = RAINFOREST_SCENE_SIZE.width;
     scene.height = RAINFOREST_SCENE_SIZE.height;
     const ctx = scene.getContext('2d', { alpha: false });
     if (!ctx) throw new Error('Canvas 2D is unavailable');
-    const draw = { opening: drawRainforestOpening, victory: drawRainforestVictory };
+    const draw = { opening: drawRainforestOpening, victory: drawRainforestVictory, failure: drawRainforestFailure };
     function selectScene(id) {
       selected = id;
       setLanguage(document.documentElement.lang);
