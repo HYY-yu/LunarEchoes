@@ -1,0 +1,43 @@
+[
+  {
+    "id": "rainforest.opening",
+    "stageId": "rainforest",
+    "beat": "opening",
+    "outcome": "any",
+    "zh": "林冠下就是回信的研究站。他们截获过和沙漠里相似的信号。",
+    "en": "The station that answered us is just beneath the canopy. They picked up a signal like the one in the desert."
+  },
+  {
+    "id": "rainforest.objective",
+    "stageId": "rainforest",
+    "beat": "objective",
+    "outcome": "any",
+    "zh": "击退入侵者，取回研究站的信号记录。",
+    "en": "Repel the invaders and recover the station's signal records."
+  },
+  {
+    "id": "rainforest.victory",
+    "stageId": "rainforest",
+    "beat": "victory",
+    "outcome": "won",
+    "zh": "孢子母体倒下了，记录也拿到了。记录显示，外星生物的行动由同一个信号同步。",
+    "en": "The Spore Matriarch is down. We have the records. They show that one signal is keeping the alien creatures in sync."
+  },
+  {
+    "id": "rainforest.defeat",
+    "stageId": "rainforest",
+    "beat": "defeat",
+    "outcome": "lost",
+    "zh": "我们没能取回记录。重新部署，再试一次。",
+    "en": "We couldn't recover the records. Redeploy and try again."
+  },
+  {
+    "id": "rainforest.next-clue",
+    "stageId": "rainforest",
+    "beat": "next-clue",
+    "outcome": "won",
+    "nextStageId": "antarctica",
+    "zh": "解码结果指向南极接收阵列。去那里追查信号来源。",
+    "en": "The decoded records point to the Antarctic receiver array. Head there to trace the signal."
+  }
+]
