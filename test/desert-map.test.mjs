@@ -17,7 +17,7 @@ function context() {
     setLineDash(value) { this.dash = value; },
     strokeRect(...args) { calls.push(['outline', ...args]); },
     createRadialGradient() { return { addColorStop() {} }; },
-    scale() {}, translate() {}, beginPath() {}, ellipse() {}, arc() {}, fill() {}, stroke() {}, moveTo() {}, lineTo() {}
+    scale() {}, translate() {}, clip() {}, beginPath() {}, ellipse() {}, arc() {}, fill() {}, stroke() {}, moveTo() {}, lineTo() {}
   };
 }
 function environment(t) {
@@ -74,4 +74,33 @@ test('actual renderer leaves complete World and checksum untouched across moveme
   for (let i = 0; i < 240; i++) dispatch(world, { kind: 'tick', input: { x: 1, y: 0, dash: i === 0 } });
   draw(world); dispatch(world, { kind: 'pause' }); draw(world);
   draw(createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 101 }));
+});
+
+test('renderer selects terrain by the world stage and keeps shared projectile styles', t => {
+  environment(t);
+  const previous = globalThis.Path2D;
+  globalThis.Path2D = class { rect() {} };
+  t.after(() => { if (previous === undefined) delete globalThis.Path2D; else globalThis.Path2D = previous; });
+  const ctx = context(), canvas = { width: 0, height: 0, clientWidth: 390, clientHeight: 600, getContext() { return ctx; } };
+  ctx.globalAlpha = 1;
+  const render = createRenderer(canvas);
+  const styles = [];
+  for (const [stageId, rulesVersion, background] of [['rainforest', 'rainforest-1', '#283e37'], ['desert-base', 'desert-base-1', 'sand-pattern']]) {
+    const world = createWorld({ stageId, rulesVersion, seed: 42 });
+    world.shots.push(
+      { x: 715, y: 725, vx: 8, vy: 0, life: 10, damage: 1, hostile: false },
+      { x: 785, y: 725, vx: -2.2, vy: 0, life: 10, damage: 1, hostile: true }
+    );
+    const before = JSON.stringify(world);
+    ctx.calls.length = 0;
+    render(world, 0);
+    assert.equal(JSON.stringify(world), before);
+    assert.equal(ctx.calls.find(call => call[0] === 'rect')[1], background);
+    styles.push(ctx.calls.filter(call => call[0] === 'rect' && ['#d9fff2', '#f6b77c'].includes(call[1])));
+  }
+  assert.deepEqual(styles[0], [
+    ['rect', '#d9fff2', 1, 713, 723, 3, 3],
+    ['rect', '#f6b77c', 1, 783, 723, 5, 5]
+  ]);
+  assert.deepEqual(styles[1], styles[0]);
 });
