@@ -1,4 +1,4 @@
-import { DESERT_CONTEXT, stageRules, SimulationError } from './stage-rules.js';
+import { DESERT_CONTEXT, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
@@ -43,7 +43,8 @@ const progressStorage = openProgressStorage({
 let resetRequested = false;
 let world: World = createWorld({ ...DESERT_CONTEXT, seed: 208907 });
 let screen: Screen = 'title';
-let openingSource: 'title' | 'stages' = 'title';
+type OpeningSource = 'title' | 'stages';
+let opening: { context: StageContext; source: OpeningSource } | null = null;
 let desertContent: DesertContent | null = null;
 let radioState: RadioState = { kind: 'inactive' };
 const radio = document.createElement('aside'); radio.id = 'radio'; radio.hidden = true;
@@ -198,25 +199,25 @@ function clearCombatInput() {
   stickPointer = null; stick.style.transform = '';
 }
 function showStages() {
-  screen = 'stages'; updateUi(true); element('stages-heading').focus({ preventScroll: true });
+  opening = null; screen = 'stages'; updateUi(true); element('stages-heading').focus({ preventScroll: true });
 }
 function closeStages() {
   screen = 'title'; updateUi(true); element('mission-select').focus({ preventScroll: true });
 }
-function showOpening(source: typeof openingSource = 'title') {
+function showOpening(context: StageContext, source: OpeningSource = 'title') {
   if (!desertContent) throw new Error('Desert content unavailable');
-  openingSource = source; screen = 'opening'; clearCombatInput(); updateUi(true); element('opening-continue').focus();
+  opening = { context, source }; screen = 'opening'; clearCombatInput(); updateUi(true); element('opening-continue').focus();
   log('info', 'story.opening.started', { id: desertContent.opening.id });
 }
 function finishOpening(reason: OpeningFinish) {
-  if (screen !== 'opening' || !desertContent) return;
-  log('info', 'story.opening.finished', { id: desertContent.opening.id, reason }); begin();
+  if (screen !== 'opening' || !opening || !desertContent) return;
+  log('info', 'story.opening.finished', { id: desertContent.opening.id, reason }); begin(opening.context);
 }
-function begin() {
+function begin(context: StageContext) {
   if (!desertContent) throw new Error('Desert content unavailable');
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
-  const nextWorld = createWorld({ ...DESERT_CONTEXT, seed: seedArray[0] });
-  synth.reset(); world = nextWorld; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: 'waiting' }, 'begin'); clearCombatInput(); clearNotice();
+  const nextWorld = createWorld({ ...context, seed: seedArray[0] });
+  synth.reset(); world = nextWorld; opening = null; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: 'waiting' }, 'begin'); clearCombatInput(); clearNotice();
   log('info', 'session.started', { seed: world.seed, version: VERSION, ...world.context }); updateUi(true); void enableAudio();
   canvasNode.focus();
 }
@@ -275,7 +276,7 @@ function renderStages() {
     for (const stageId of STAGE_ORDER) {
       const row = document.createElement('li'); row.dataset.stageId = stageId;
       const name = document.createElement('strong');
-      const status = stageId === DESERT_CONTEXT.stageId && desertContent ? button('', 'primary', () => showOpening('stages')) : document.createElement('span');
+      const status = stageId === DESERT_CONTEXT.stageId && desertContent ? button('', 'primary', () => showOpening(DESERT_CONTEXT, 'stages')) : document.createElement('span');
       row.append(name, status); list.append(row);
     }
     const back = button('', 'secondary', closeStages); back.id = 'stages-back';
@@ -340,7 +341,7 @@ function updateUi(force = false) {
       const deploy = button('', 'primary', () => finishOpening('continue')); deploy.id = 'opening-continue';
       const skip = button('', 'secondary', () => finishOpening('skip')); skip.id = 'opening-skip';
       actions.append(deploy, skip);
-      if (openingSource === 'stages') {
+      if (opening?.source === 'stages') {
         const back = button('', 'secondary', showStages); back.id = 'opening-back'; actions.append(back);
       }
       section.append(art, heading, story, objectiveHeading, objective, actions); overlay.append(section);
@@ -368,7 +369,7 @@ function updateUi(force = false) {
         const amount = document.createElement('strong'); amount.textContent = value; stat.append(label, amount); stats.append(stat);
       }
       const actions = document.createElement('div'); actions.className = 'actions';
-      const retry = button('', 'primary', begin); retry.id = 'defeat-retry';
+      const retry = button('', 'primary', () => begin(world.context)); retry.id = 'defeat-retry';
       const replay = button('', 'secondary', startReplay); replay.id = 'defeat-replay';
       actions.append(retry, replay); section.append(art, eyebrow, heading, story, description, stats, actions); overlay.append(section);
       if (focusRetry) retry.focus({ preventScroll: true });
@@ -397,7 +398,7 @@ function updateUi(force = false) {
         const amount = document.createElement('strong'); amount.textContent = value; stat.append(label, amount); stats.append(stat);
       }
       const actions = document.createElement('div'); actions.className = 'actions';
-      const retry = button('', 'primary', begin); retry.id = 'victory-retry';
+      const retry = button('', 'primary', () => begin(world.context)); retry.id = 'victory-retry';
       const replay = button('', 'secondary', startReplay); replay.id = 'victory-replay';
       const progress = document.createElement('p'); progress.id = 'victory-progress'; progress.setAttribute('role', 'status');
       actions.append(retry, replay); section.append(art, eyebrow, heading, story, nextClue, description, progress, stats, actions); overlay.append(section);
@@ -433,7 +434,7 @@ function updateUi(force = false) {
     const intro = document.createElement('section'); intro.className = 'intro';
     intro.innerHTML = `<div class="eyebrow">${t.mission}</div><h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${t.brief}</p>`;
     const progress = document.createElement('p'); progress.id = 'title-progress'; progress.setAttribute('role', 'status'); intro.append(progress);
-    const start = button(t.start, 'primary', showOpening); start.id = 'mission-start';
+    const start = button(t.start, 'primary', () => showOpening(DESERT_CONTEXT)); start.id = 'mission-start';
     const stages = button(t.campaignStages, 'secondary', showStages); stages.id = 'mission-select';
     const actions = document.createElement('div'); actions.className = 'actions'; actions.append(start, stages);
     const replayButton = button(t.replay, 'secondary', startReplay); replayButton.disabled = !lastRecording; actions.append(replayButton, button(t.progressReset, 'secondary', () => { resetRequested = true; updateUi(true); })); intro.append(actions);
@@ -458,7 +459,7 @@ function updateUi(force = false) {
   if (world.phase.kind === 'won' || world.phase.kind === 'lost') {
     const won = world.phase.kind === 'won'; const section = panel(won ? t.won : t.lost, won ? t.wonBody : t.lostBody);
     const stats = document.createElement('div'); stats.className = 'stats'; stats.innerHTML = `<span>${t.time}<strong>${formatTime(world.tick)}</strong></span><span>${t.kills}<strong>${world.kills}</strong></span><span>${t.level}<strong>${world.level}</strong></span>`;
-    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(button(t.restart, 'primary', begin), button(t.replay, 'secondary', startReplay));
+    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(button(t.restart, 'primary', () => begin(world.context)), button(t.replay, 'secondary', startReplay));
     section.append(stats, actions); return;
   }
 }
