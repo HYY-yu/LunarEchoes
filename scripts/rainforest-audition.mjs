@@ -2,8 +2,9 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 
 const routes = new Map([
-  ['/', ['rainforest-audition.html', 'text/html; charset=utf-8']],
-  ['/rainforest-opening.mjs', ['rainforest-opening.mjs', 'text/javascript']]
+  ['/', ['./fixtures/rainforest-audition.html', 'text/html; charset=utf-8']],
+  ['/rainforest-opening.mjs', ['./fixtures/rainforest-opening.mjs', 'text/javascript']],
+  ['/rainforest.story.json', ['../dist/rainforest.story.json', 'application/json; charset=utf-8']]
 ]);
 const server = createServer(async (request, response) => {
   if (request.url === '/favicon.ico') {
@@ -17,7 +18,7 @@ const server = createServer(async (request, response) => {
   }
   try {
     const [file, type] = route;
-    const bytes = await readFile(new URL(`./fixtures/${file}`, import.meta.url));
+    const bytes = await readFile(new URL(file, import.meta.url));
     response.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store' }).end(bytes);
   } catch (error) {
     console.error({ level: 'error', event: 'rainforest_audition.read_failed', error: String(error) });

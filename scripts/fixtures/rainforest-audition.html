@@ -14,6 +14,8 @@
   button:focus-visible { outline: 2px solid #ffc378; outline-offset: 2px; }
   canvas { display: block; width: min(320px, 100%); height: auto; image-rendering: pixelated; outline: 1px solid #60858a; }
   p { margin: 10px 0 0; color: #ffc378; }
+  #story { max-width: 65ch; }
+  #story p { color: inherit; }
   nav { display: flex; gap: 8px; margin-bottom: 8px; }
   nav [aria-pressed="true"] { color: #101f26; background: #a4fff0; }
   @media (min-width: 680px) { canvas { width: 640px; } }
@@ -30,6 +32,7 @@
 </nav>
 <canvas id="scene" role="img" aria-label="林冠下亮着灯的研究站，前景是盘根通路和遗迹空地"></canvas>
 <p id="caption">开场画预览</p>
+<div id="story" hidden><p id="story-primary"></p><p id="story-followup" hidden></p></div>
 <p id="error" role="alert" hidden></p>
 </main>
 <script type="module">
@@ -39,16 +42,21 @@
     victory: document.getElementById('victory'),
     failure: document.getElementById('failure')
   };
+  const sceneBeats = { opening: ['opening', 'objective'], victory: ['victory', 'next-clue'], failure: ['defeat'] };
+  const story = document.getElementById('story');
+  const primary = document.getElementById('story-primary');
+  const followup = document.getElementById('story-followup');
   let selected = 'opening';
+  let copy;
   const labels = {
     'zh-CN': {
-      title: '雨林深处', language: 'English', scenes: '场景预览', error: '画面未能加载。请刷新重试。',
+      title: '雨林深处', language: 'English', scenes: '场景预览', error: '预览未能加载。请先构建游戏，再刷新重试。',
       opening: { button: '开场', caption: '开场画预览', art: '林冠下亮着灯的研究站，前景是盘根通路和遗迹空地' },
       victory: { button: '胜利', caption: '胜利画预览', art: '工程兵带着取回的信号记录，身后研究站的信标已经恢复' },
       failure: { button: '失败', caption: '失败画预览', art: '研究站信号中断，工程兵未取回记录，沿根路撤离' }
     },
     en: {
-      title: 'Deep Rainforest', language: '中文', scenes: 'Scene preview', error: 'The scene failed to load. Refresh to retry.',
+      title: 'Deep Rainforest', language: '中文', scenes: 'Scene preview', error: 'The preview failed to load. Build the game, then refresh to retry.',
       opening: { button: 'Opening', caption: 'Opening scene preview', art: 'A lit research station beneath the canopy, beyond a root-covered trail and a clearing with ruins' },
       victory: { button: 'Victory', caption: 'Victory scene preview', art: 'The engineer carries the recovered signal records as the research station beacon comes back online' },
       failure: { button: 'Failure', caption: 'Failure scene preview', art: 'The station signal drops out as the engineer retreats along the root-covered trail without the records' }
@@ -64,6 +72,13 @@
     document.getElementById('caption').textContent = view.caption;
     document.getElementById('scenes').setAttribute('aria-label', label.scenes);
     language.textContent = label.language;
+    if (copy) {
+      const [first, second] = sceneBeats[selected];
+      const locale = lang === 'en' ? 'en' : 'zh';
+      primary.textContent = copy.get(first)[locale];
+      followup.textContent = second ? copy.get(second)[locale] : '';
+      followup.hidden = !second;
+    }
     scene.setAttribute('aria-label', view.art);
     document.getElementById('error').textContent = label.error;
     for (const [id, button] of Object.entries(buttons)) {
@@ -73,7 +88,16 @@
   }
   language.addEventListener('click', () => setLanguage(document.documentElement.lang === 'en' ? 'zh-CN' : 'en'));
   try {
-    const { RAINFOREST_SCENE_SIZE, drawRainforestOpening, drawRainforestVictory, drawRainforestFailure } = await import('/rainforest-opening.mjs');
+    const [art, response] = await Promise.all([import('/rainforest-opening.mjs'), fetch('/rainforest.story.json')]);
+    if (!response.ok) throw new Error(`Rainforest story request failed: ${response.status}`);
+    const entries = await response.json();
+    const byBeat = new Map(entries.map(entry => [entry.beat, entry]));
+    for (const beat of Object.values(sceneBeats).flat()) {
+      const entry = byBeat.get(beat);
+      if (typeof entry?.zh !== 'string' || typeof entry.en !== 'string') throw new Error(`Missing story text: ${beat}`);
+    }
+    const { RAINFOREST_SCENE_SIZE, drawRainforestOpening, drawRainforestVictory, drawRainforestFailure } = art;
+    copy = byBeat;
     scene.width = RAINFOREST_SCENE_SIZE.width;
     scene.height = RAINFOREST_SCENE_SIZE.height;
     const ctx = scene.getContext('2d', { alpha: false });
@@ -87,11 +111,12 @@
     }
     selectScene('opening');
     for (const [id, button] of Object.entries(buttons)) button.addEventListener('click', () => selectScene(id));
+    story.hidden = false;
     scene.dataset.ready = 'true';
   } catch (error) {
     setLanguage(document.documentElement.lang);
     document.getElementById('error').hidden = false;
-    console.error({ level: 'error', event: 'rainforest_audition.draw_failed', error: String(error) });
+    console.error({ level: 'error', event: 'rainforest_audition.preview_failed', error: String(error) });
   }
 </script>
 </body>

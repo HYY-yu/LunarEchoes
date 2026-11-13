@@ -11,3 +11,5 @@
 | 南极交接 | 解码结果指向南极接收阵列。去那里追查信号来源。 | The decoded records point to the Antarctic receiver array. Head there to trace the signal. |
 
 胜利后接南极交接。失败后可重试雨林关。剧情跳过沿用战役约定。
+
+本机剧情预览先运行 `npm run build`，再运行 `node scripts/rainforest-audition.mjs`。打开 [雨林剧情预览](http://127.0.0.1:4188/)，切换语言和场景。开场显示任务目标，胜利显示南极线索，失败显示撤离结语。预览读取正式构建中的剧情 JSON。
