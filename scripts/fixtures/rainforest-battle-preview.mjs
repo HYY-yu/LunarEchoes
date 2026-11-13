@@ -1,6 +1,6 @@
 import { createAtlas } from '/art.js';
 
-import { drawRainforestTerrain, RAINFOREST_ANCHORS } from '/rainforest-terrain.mjs';
+import { drawRainforestTerrain, RAINFOREST_ANCHORS } from '/rainforest-map.js';
 
 function shot(ctx, x, y, hostile, travelX, travelY) {
   const size = hostile ? 5 : 3;

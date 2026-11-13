@@ -1,7 +1,9 @@
+type View = Readonly<{ left: number; top: number; width: number; height: number }>;
+
 export const RAINFOREST_ANCHORS = Object.freeze({
-  canopy: Object.freeze({ x: 0, y: 0 }),
-  ruins: Object.freeze({ x: 720, y: 0 }),
-  roots: Object.freeze({ x: 1440, y: 0 })
+  canopy: Object.freeze({ x: 250, y: 750 }),
+  ruins: Object.freeze({ x: 750, y: 750 }),
+  roots: Object.freeze({ x: 1250, y: 750 })
 });
 
 const tones = {
@@ -10,23 +12,24 @@ const tones = {
   roots: ['#273a33', '#30423a', '#39493f', '#414f44']
 };
 
-function box(ctx, color, x, y, width, height) {
+function box(ctx: CanvasRenderingContext2D, color: string, x: number, y: number, width: number, height: number) {
   ctx.fillStyle = color;
   const left = Math.round(x);
   const top = Math.round(y);
   ctx.fillRect(left, top, Math.round(x + width) - left, Math.round(y + height) - top);
 }
 
-function foliage(ctx, x, y, scale) {
-  for (const [dx, dy, width, height, color] of [
+function foliage(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number) {
+  const layers: readonly (readonly [number, number, number, number, string])[] = [
     [-20, -10, 40, 17, '#142b2b'], [-14, -17, 29, 25, '#142b2b'],
     [-18, -8, 36, 12, '#243d36'], [-11, -15, 24, 16, '#2b4539'],
     [-3, -17, 11, 9, '#365347'], [9, -10, 10, 10, '#2d493e'],
     [-14, -9, 10, 4, '#365347'], [-8, 1, 24, 4, '#203a34']
-  ]) box(ctx, color, x + dx * scale, y + dy * scale, width * scale, height * scale);
+  ];
+  for (const [dx, dy, width, height, color] of layers) box(ctx, color, x + dx * scale, y + dy * scale, width * scale, height * scale);
 }
 
-function canopy(ctx) {
+function canopy(ctx: CanvasRenderingContext2D) {
   for (const [x, y, scale] of [
     [-110, -105, 2], [-55, -90, 2], [15, -122, 3], [90, -94, 2], [132, -127, 3],
     [-134, -41, 2], [125, -22, 2], [-127, 57, 2], [112, 71, 2], [-62, 112, 2],
@@ -39,7 +42,7 @@ function canopy(ctx) {
   }
 }
 
-function ruins(ctx) {
+function ruins(ctx: CanvasRenderingContext2D) {
   for (let y = -72; y <= 60; y += 15) {
     for (let x = -102; x <= 85; x += 22) {
       if (Math.abs(x + 9) + Math.abs(y) > 140) continue;
@@ -58,7 +61,7 @@ function ruins(ctx) {
   for (const [x, y] of [[-139,-62],[117,-83],[-141,76],[121,96],[-214,30],[222,-23]]) foliage(ctx, x, y, 2);
 }
 
-function rootTrail(ctx) {
+function rootTrail(ctx: CanvasRenderingContext2D) {
   for (let y = -220; y < 220; y += 8) {
     const center = Math.round(Math.sin(y / 61) * 28);
     box(ctx, '#4e5040', center - 53, y, 106, 8);
@@ -78,12 +81,12 @@ function rootTrail(ctx) {
 }
 
 const regions = [
-  { anchor: RAINFOREST_ANCHORS.canopy, left: -Infinity, right: 360, colors: tones.canopy, draw: canopy },
-  { anchor: RAINFOREST_ANCHORS.ruins, left: 360, right: 1080, colors: tones.ruins, draw: ruins },
-  { anchor: RAINFOREST_ANCHORS.roots, left: 1080, right: Infinity, colors: tones.roots, draw: rootTrail }
+  { anchor: RAINFOREST_ANCHORS.canopy, left: -Infinity, right: 500, colors: tones.canopy, draw: canopy },
+  { anchor: RAINFOREST_ANCHORS.ruins, left: 500, right: 1000, colors: tones.ruins, draw: ruins },
+  { anchor: RAINFOREST_ANCHORS.roots, left: 1000, right: Infinity, colors: tones.roots, draw: rootTrail }
 ];
 
-export function drawRainforestTerrain(ctx, view) {
+export function drawRainforestTerrain(ctx: CanvasRenderingContext2D, view: View) {
   const right = view.left + view.width;
   const bottom = view.top + view.height;
   for (const region of regions) {
