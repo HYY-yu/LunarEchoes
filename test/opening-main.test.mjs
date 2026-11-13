@@ -79,7 +79,7 @@ function harness(content = embedded, localStorage = memoryStorage()) {
     if (cache.has(name)) return cache.get(name).exports;
     const module = { exports: {} }; cache.set(name, module);
     let source = readFileSync(`dist/${name}`, 'utf8');
-    if (name === 'main.js') source += '\nglobalThis.inspectMain = (complete = false) => JSON.stringify({ world, actions: recording.actions, screen, checksum: finalChecksum(world), replayVerified, lastRecording, ...(complete ? { recording, playingRecording } : {}) }); globalThis.inspectContentFrozen = () => Object.isFrozen(desertContent) && Object.values(desertContent).every(value => Object.isFrozen(value)); globalThis.inspectNoticeTimer = () => noticeTimer; globalThis.inspectProgress = () => JSON.stringify({ screen, tick: world.tick }); globalThis.invokeReplay = () => startReplay(); globalThis.invokeBegin = () => { try { begin(); } catch (error) { fail(error); } }; globalThis.inspectRadio = () => radioState.kind; globalThis.inspectRadioBeat = () => "beat" in radioState ? radioState.beat : null; globalThis.fixtureWorld = value => { const { seed, context, ...mutable } = JSON.parse(value); Object.assign(world, mutable); }; globalThis.replaceRecording = value => { lastRecording = JSON.parse(value); };';
+    if (name === 'main.js') source += '\nglobalThis.inspectMain = (complete = false) => JSON.stringify({ world, actions: recording.actions, screen, checksum: finalChecksum(world), replayVerified, lastRecording, ...(complete ? { recording, playingRecording } : {}) }); globalThis.inspectContentFrozen = () => Object.isFrozen(desertContent) && Object.values(desertContent).every(value => Object.isFrozen(value)); globalThis.inspectNoticeTimer = () => noticeTimer; globalThis.inspectProgress = () => JSON.stringify({ screen, tick: world.tick }); globalThis.invokeReplay = () => startReplay(); globalThis.invokeBegin = () => { try { begin(world.context); } catch (error) { fail(error); } }; globalThis.openStage = value => showOpening(JSON.parse(value)); globalThis.inspectRadio = () => radioState.kind; globalThis.inspectRadioBeat = () => "beat" in radioState ? radioState.beat : null; globalThis.fixtureWorld = value => { const { seed, context, ...mutable } = JSON.parse(value); Object.assign(world, mutable); }; globalThis.replaceRecording = value => { lastRecording = JSON.parse(value); };';
     const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
     const require = path => path === './render.js' ? { createRenderer: () => () => {} } : path === './audio.js' ? { Synth } : path === './logger.js' ? { log: (...entry) => logs.push(entry) } : load(path.slice(2));
     vm.runInContext(`(function(require,module,exports){${compiled}\n})`, context, { filename: name })(require, module, module.exports);
@@ -89,7 +89,7 @@ function harness(content = embedded, localStorage = memoryStorage()) {
   const snapshot = (complete = false) => JSON.parse(context.inspectMain(complete));
   const event = (name, props = {}) => { const value = { target: active ?? get('game'), repeat: false, preventDefault() { this.defaultPrevented = true; }, ...props }; listeners.get(name)?.(value); return value; };
   const click = label => { const node = all().find(node => node.tagName === 'BUTTON' && node.textContent === label); assert.ok(node, `button ${label}`); node.onclick(); return node; };
-  return { get, click, event, logs, sessions, snapshot, session: () => snapshot(true), progress: () => JSON.parse(context.inspectProgress()), document, advanceTimers, cancelledTimers, get noticeTimer() { return context.inspectNoticeTimer(); }, get pendingTimers() { return [...timers.keys()]; }, rejectAudio() { audioFailure = true; }, failNextSeed() { seedFailure = true; }, invokeBegin() { context.invokeBegin(); }, replaceRecording(value) { context.replaceRecording(JSON.stringify(value)); }, invokeReplay() { context.invokeReplay(); }, get radioState() { return context.inspectRadio(); }, get radioBeat() { return context.inspectRadioBeat(); }, fixtureWorld(value) { context.fixtureWorld(JSON.stringify(value)); }, get audioActivations() { return audioActivations; }, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
+  return { get, click, event, logs, sessions, snapshot, session: () => snapshot(true), progress: () => JSON.parse(context.inspectProgress()), document, advanceTimers, cancelledTimers, get noticeTimer() { return context.inspectNoticeTimer(); }, get pendingTimers() { return [...timers.keys()]; }, rejectAudio() { audioFailure = true; }, failNextSeed() { seedFailure = true; }, invokeBegin() { context.invokeBegin(); }, openStage(value) { context.openStage(JSON.stringify(value)); }, replaceRecording(value) { context.replaceRecording(JSON.stringify(value)); }, invokeReplay() { context.invokeReplay(); }, get radioState() { return context.inspectRadio(); }, get radioBeat() { return context.inspectRadioBeat(); }, fixtureWorld(value) { context.fixtureWorld(JSON.stringify(value)); }, get audioActivations() { return audioActivations; }, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
 }
 test('actual main expires notice text and visibility at 3500 ms without changing the complete session', () => {
   const app = harness('{'), before = app.session(), notice = app.get('notice');
@@ -246,6 +246,32 @@ test('natural loss preserves existing header focus and direct Replay verifies th
   assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assert.equal(app.snapshot().checksum, terminal.checksum); assert.deepEqual(app.snapshot().world, terminal.world); assert.ok(app.logs.some(([, name]) => name === 'replay.finished')); assert.equal(app.get('defeat-panel'), null);
   assert.deepEqual(storage.writes, []);
 });
+test('a selected stage survives deployment, same-stage retry and replay while home restores the desert preview', () => {
+  const app = harness(), selected = { stageId: 'rainforest', rulesVersion: 'rainforest-1' };
+  app.openStage(selected); app.get('opening-continue').onclick();
+  assert.deepEqual(app.session().world.context, selected);
+  assert.equal(app.session().recording.stageId, selected.stageId);
+  for (let i = 0; i < 15000 && app.snapshot().world.phase.kind !== 'lost'; i++) {
+    if (app.snapshot().world.phase.kind === 'upgrading') app.key('Digit1');
+    app.frame();
+  }
+  const first = app.session();
+  assert.equal(first.world.phase.kind, 'lost');
+  app.get('defeat-retry').onclick();
+  const retry = app.session();
+  assert.deepEqual(retry.world.context, selected);
+  assert.notEqual(retry.world.seed, first.world.seed);
+  assert.deepEqual(retry.world, createWorld({ ...selected, seed: retry.world.seed }));
+  app.invokeReplay();
+  assert.deepEqual(app.session().world.context, selected);
+  assert.equal(app.session().world.seed, first.world.seed);
+  for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) app.frame();
+  assert.equal(app.snapshot().screen, 'replay-end');
+  assert.equal(app.snapshot().replayVerified, true);
+  app.click('返回基地');
+  assert.equal(app.snapshot().world.context.stageId, 'desert-base');
+});
+
 test('direct Retry skips the defeat narrative and rebuilds the current stage with a fresh seed', () => {
   const app = harness(), terminal = naturalLoss(app); assert.equal(app.activate('defeat-retry', 'Enter').defaultPrevented, undefined);
   const retry = app.snapshot(); assert.equal(retry.screen, 'game'); assert.equal(retry.world.phase.kind, 'running'); assert.equal(retry.world.tick, 0); assert.equal(retry.world.level, 1); assert.equal(retry.world.xp, 0); assert.equal(retry.world.player.hp, retry.world.player.maxHp); assert.deepEqual(retry.world, createWorld({ ...retry.world.context, seed: retry.world.seed })); assert.deepEqual(retry.world.context, terminal.world.context); assert.deepEqual(retry.actions, []); assert.equal(app.seedCalls, 2); assert.notEqual(retry.world.seed, terminal.world.seed); assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('opening-panel'), null); assert.equal(app.active, app.get('game'));
