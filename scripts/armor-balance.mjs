@@ -1,4 +1,4 @@
-import { stageRules } from '../dist/stage-rules.js';
+import { DESERT_CONTEXT, stageRules } from '../dist/stage-rules.js';
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { pathToFileURL, fileURLToPath } from 'node:url';
@@ -35,8 +35,8 @@ function novice(world) {
   if (crystal) return { x: crystal.x - p.x, y: crystal.y - p.y, dash: false };
   return { x: Math.cos(world.tick / 240), y: Math.sin(world.tick / 240), dash: false };
 }
-export function playArmorCase(core, seed, strategy, preference) {
-  const world = core.createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed }), buffer = core.startRecording(world), upgrades = [];
+export function playArmorCase(core, seed, strategy, preference, context = DESERT_CONTEXT) {
+  const world = core.createWorld({ ...context, seed }), buffer = core.startRecording(world), upgrades = [];
   let acceptedHits = 0, actualRawDamage = 0, bossKillTick = null, iterations = 0, error = null, cached = { x: 0, y: 0, dash: false };
   const cell = core.ARMOR_RULES?.hpPerCell ?? null;
   const repairTicks = core.ARMOR_RULES?.repairEveryTicks ?? 180, repairAmount = cell ?? 1;

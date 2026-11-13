@@ -20,8 +20,9 @@ export type World = {
   level: number; xp: number; threshold: number; kills: number; upgrades: Record<Upgrade, number>;
   fireCooldown: number; novaCooldown: number; spawnCooldown: number; bossSpawned: boolean; bossKilled: boolean;
 };
-export type ActionBuffer = { version: typeof VERSION; stageId: StageContext['stageId']; rulesVersion: StageContext['rulesVersion']; seed: number; actions: Action[] };
-export type Recording = Readonly<Omit<ActionBuffer, 'actions'> & { actions: readonly Action[]; finalChecksum: string }>;
+type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
+export type ActionBuffer = RecordingContext & { actions: Action[] };
+export type Recording = Readonly<RecordingContext & { actions: readonly Action[]; finalChecksum: string }>;
 export const UPGRADE_ORDER: readonly Upgrade[] = Object.freeze<Upgrade[]>(['pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet']);
 export function createWorld(request: unknown): World {
   if (!object(request)) throw new SimulationError('invalid-data');
@@ -102,7 +103,7 @@ export function dispatch(world: World, action: Action): void {
 }
 function step(world: World, input: Input): void {
   world.tick++;
-  const p = world.player;
+  const rules = stageRules(world.context), p = world.player;
   if (p.invincible > 0) p.invincible--;
   if (p.dashCooldown > 0) p.dashCooldown--;
   if (input.dash && p.dashCooldown === 0 && (input.x !== 0 || input.y !== 0)) {
@@ -119,11 +120,17 @@ function step(world: World, input: Input): void {
   world.spawnCooldown--;
   if (world.spawnCooldown <= 0 && world.enemies.length < 180) {
     const t = world.tick / HZ;
-    const kind: EnemyKind = t > 30 && random(world) < .2 ? 'sentry' : t > 12 && random(world) < .35 ? 'drone' : 'crawler';
-    spawn(world, kind);
-    world.spawnCooldown = Math.max(13, 60 - Math.floor(t / 3));
+    if (rules.kind === 'rainforest') {
+      const chance = world.tick >= rules.lateWaveTick ? rules.lateSentryChance : rules.sentryChance;
+      spawn(world, world.tick >= rules.sentryStartTick && random(world) < chance ? 'sentry' : 'crawler');
+      world.spawnCooldown = Math.max(rules.minimumSpawnInterval, 60 - Math.floor(t / 3));
+    } else {
+      const kind: EnemyKind = t > 30 && random(world) < .2 ? 'sentry' : t > 12 && random(world) < .35 ? 'drone' : 'crawler';
+      spawn(world, kind);
+      world.spawnCooldown = Math.max(13, 60 - Math.floor(t / 3));
+    }
   }
-  if (world.tick >= stageRules(world.context).bossSpawnTick && !world.bossSpawned) { spawn(world, 'boss'); world.bossSpawned = true; world.events.push('boss'); }
+  if (world.tick >= rules.bossSpawnTick && !world.bossSpawned) { spawn(world, 'boss'); world.bossSpawned = true; world.events.push('boss'); }
   world.fireCooldown--;
   if (world.fireCooldown <= 0 && world.enemies.length) {
     let target = world.enemies[0];
@@ -204,7 +211,7 @@ function step(world: World, input: Input): void {
     world.xp -= world.threshold; world.level++; world.threshold = Math.floor(world.threshold * 1.24) + 2;
     world.phase = { kind: 'upgrading', offers: offers(world) };
   }
-  if (world.phase.kind === 'running' && world.tick >= stageRules(world.context).durationTicks) {
+  if (world.phase.kind === 'running' && world.tick >= rules.durationTicks) {
     world.phase = { kind: world.bossKilled ? 'won' : 'lost' };
     world.events.push(world.bossKilled ? 'won' : 'lost');
   }

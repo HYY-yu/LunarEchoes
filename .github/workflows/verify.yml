@@ -33,10 +33,17 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: '24.21.0'
-      - name: Compare the fixed diagnostic prefix at Node 24.21.0
+      - name: Verify the frozen and current desert prefixes at Node 24.21.0
         run: |
-          node scripts/replay-diagnostic.mjs capture /tmp/lunar-checksum-trace.json 24.21.0
-          node scripts/replay-diagnostic.mjs compare docs/evidence/desert34/macos-node24.21.0.json /tmp/lunar-checksum-trace.json
+          baseline=266c29bc09f68cc2f60b7797ba6bb404456be63b
+          if ! git cat-file -e "${baseline}:src/core.ts"; then
+            git fetch --no-tags --depth=1 origin "$baseline"
+          fi
+          frozen=$(mktemp -d "$RUNNER_TEMP/lunar-desert-prefix.XXXXXXXX")
+          git archive "$baseline" package.json tsconfig.json src scripts/replay-diagnostic.mjs scripts/fixtures/checksum-prefix.json | tar -x -C "$frozen"
+          node node_modules/typescript/bin/tsc -p "$frozen/tsconfig.json"
+          node "$frozen/scripts/replay-diagnostic.mjs" capture "$frozen/prefix.json" 24.21.0
+          node scripts/replay-diagnostic.mjs verify-desert-compat "$frozen/prefix.json" 24.21.0
       - name: Record the full fixed terminal at Node 24.21.0
         env:
           LUNAR_FULL_TERMINAL: '1'

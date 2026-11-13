@@ -8,6 +8,7 @@ const digest = value => createHash('sha256').update(value).digest('hex');
 const inputDigest = recording => digest(JSON.stringify(recording));
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const fixture = new URL('./fixtures/checksum-prefix.json', import.meta.url);
+const desertReference = new URL('../docs/evidence/desert34/macos-node24.21.0.json', import.meta.url);
 
 function numericRecord(value, path, numbers, other = []) {
   const keys = [...numbers, ...other];
@@ -122,6 +123,10 @@ export function compareTraces(leftInput, rightInput) {
   const left = traceInput(leftInput), right = traceInput(rightInput);
   if (left.coreSha256 !== right.coreSha256) throw new Error('Cannot compare different core builds');
   if (left.rulesSha256 !== right.rulesSha256) throw new Error('Cannot compare different rules builds');
+  return compareFrames(left, right);
+}
+
+function compareFrames(left, right) {
   if (left.recordingSha256 !== right.recordingSha256) throw new Error('Cannot compare different action recordings');
   if (left.environment.node !== right.environment.node) throw new Error('Cannot compare different Node versions');
   for (let index = 0; index < left.frames.length; index++) {
@@ -132,10 +137,23 @@ export function compareTraces(leftInput, rightInput) {
   return { result: 'same', actionsCompared: left.recording.actions.length, finalTick: left.frames.at(-1).world.tick, checksum: left.frames.at(-1).checksum };
 }
 
+export async function verifyDesertCompatibility(baselineInput, candidateInput) {
+  const reference = JSON.parse(await readFile(desertReference, 'utf8'));
+  const strict = compareTraces(reference, baselineInput);
+  if (strict.result !== 'same') throw new Error(`Frozen desert prefix differs: ${JSON.stringify(strict)}`);
+  const baseline = traceInput(baselineInput), candidate = traceInput(candidateInput);
+  for (const key of ['node', 'v8', 'platform', 'arch']) {
+    if (baseline.environment[key] !== candidate.environment[key]) throw new Error(`Different compatibility runtime: ${key}`);
+  }
+  const compatibility = compareFrames(baseline, candidate);
+  if (compatibility.result !== 'same') throw new Error(`Desert prefix changed: ${JSON.stringify(compatibility)}`);
+  return { strict, compatibility, builds: [baseline, candidate].map(({ coreSha256, rulesSha256 }) => ({ coreSha256, rulesSha256 })) };
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     const [command, first, second, ...extra] = process.argv.slice(2);
-    if (!first || !second || extra.length) throw new Error('Usage: replay-diagnostic.mjs capture output.json expected-node | compare left.json right.json');
+    if (!first || !second || extra.length) throw new Error('Usage: replay-diagnostic.mjs capture output.json expected-node | compare left.json right.json | verify-desert-compat baseline.json expected-node');
     if (command === 'capture') {
       if (process.versions.node !== second) throw new Error(`Expected Node ${second}, received ${process.versions.node}`);
       const trace = await captureTrace(JSON.parse(await readFile(fixture, 'utf8')));
@@ -144,6 +162,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     } else if (command === 'compare') {
       const left = JSON.parse(await readFile(first, 'utf8')), right = JSON.parse(await readFile(second, 'utf8'));
       console.info(JSON.stringify({ event: 'replay.diagnostic.compared', ...compareTraces(left, right), environments: [left.environment, right.environment], coreSha256: left.coreSha256, recordingSha256: left.recordingSha256, scope: 'synthetic action prefix, not terminal replay verification' }));
+    } else if (command === 'verify-desert-compat') {
+      if (process.versions.node !== second) throw new Error(`Expected Node ${second}, received ${process.versions.node}`);
+      const baseline = JSON.parse(await readFile(first, 'utf8'));
+      const candidate = await captureTrace(JSON.parse(await readFile(fixture, 'utf8')));
+      const result = await verifyDesertCompatibility(baseline, candidate);
+      console.info(JSON.stringify({ event: 'replay.diagnostic.desert_compatibility', ...result, environment: candidate.environment }));
     } else throw new Error(`Unknown diagnostic command ${command}`);
   } catch (error) {
     console.error({ event: 'replay.diagnostic.failed', error: String(error) });
