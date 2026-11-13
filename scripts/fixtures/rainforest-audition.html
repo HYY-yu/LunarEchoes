@@ -88,7 +88,7 @@
   }
   language.addEventListener('click', () => setLanguage(document.documentElement.lang === 'en' ? 'zh-CN' : 'en'));
   try {
-    const [art, response] = await Promise.all([import('/rainforest-opening.mjs'), fetch('/rainforest.story.json')]);
+    const [art, response] = await Promise.all([import('/rainforest-story-art.js'), fetch('/rainforest.story.json')]);
     if (!response.ok) throw new Error(`Rainforest story request failed: ${response.status}`);
     const entries = await response.json();
     const byBeat = new Map(entries.map(entry => [entry.beat, entry]));

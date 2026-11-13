@@ -1,18 +1,18 @@
 export const RAINFOREST_SCENE_SIZE = Object.freeze({ width: 320, height: 180 });
 
-export function drawRainforestOpening(ctx) {
+export function drawRainforestOpening(ctx: CanvasRenderingContext2D) {
   const { width, height } = RAINFOREST_SCENE_SIZE;
   const ink = '#101f26', shadow = '#163437', teal = '#23604f', jade = '#408069', moss = '#6b9556';
   const mist = '#94b584', stone = '#667c70', steel = '#31545a', lightSteel = '#60858a', root = '#503e3a';
   const dirt = '#8b6951', amber = '#ffc378', beacon = '#a4fff0';
-  const rect = (x, y, w, h, color) => {
+  const rect = (x: number, y: number, w: number, h: number, color: string) => {
     const left = Math.max(x, 0), top = Math.max(y, 0);
     const right = Math.min(x + w, width), bottom = Math.min(y + h, height);
     if (right <= left || bottom <= top) return;
     ctx.fillStyle = color;
     ctx.fillRect(left, top, right - left, bottom - top);
   };
-  const polygon = (points, color) => {
+  const polygon = (points: readonly (readonly [number, number])[], color: string) => {
     const low = Math.min(...points.map(([, y]) => y));
     const high = Math.max(...points.map(([, y]) => y));
     for (let y = low; y < high; y++) {
@@ -25,10 +25,10 @@ export function drawRainforestOpening(ctx) {
       for (let i = 0; i + 1 < hits.length; i += 2) rect(hits[i], y, hits[i + 1] - hits[i], 1, color);
     }
   };
-  const leaf = (x, y, w, h, color) => {
+  const leaf = (x: number, y: number, w: number, h: number, color: string) => {
     polygon([[x, y], [x + w / 4, y - h], [x + w * 3 / 4, y - h], [x + w, y - 2], [x + w * 3 / 4, y + 2], [x + w / 4, y + 4]], color);
   };
-  const fern = (x, y, s, color) => {
+  const fern = (x: number, y: number, s: number, color: string) => {
     polygon([[x, y], [x - 4 * s, y - 15 * s], [x - 14 * s, y - 21 * s], [x - 21 * s, y - 19 * s], [x - 13 * s, y - 16 * s], [x - 9 * s, y - 10 * s]], color);
     polygon([[x, y], [x - 2 * s, y - 21 * s], [x + 3 * s, y - 26 * s], [x + 5 * s, y - 21 * s], [x + 2 * s, y - 13 * s]], color);
     polygon([[x, y], [x + 7 * s, y - 16 * s], [x + 15 * s, y - 20 * s], [x + 21 * s, y - 19 * s], [x + 13 * s, y - 14 * s], [x + 8 * s, y - 7 * s]], color);
@@ -111,7 +111,7 @@ export function drawRainforestOpening(ctx) {
       rect(x, y, 2, h, shadow);
       rect(x - 2, y + h - 4, 2, 4, shadow);
     }
-    for (const [x, y, s, color] of [[12, 152, 1, teal], [33, 173, 1, jade], [71, 148, 1, moss], [99, 133, 1, jade], [130, 133, 1, teal], [254, 139, 1, moss], [286, 166, 1, jade], [312, 179, 1, teal]]) fern(x, y, s, color);
+    for (const [x, y, s, color] of ([[12, 152, 1, teal], [33, 173, 1, jade], [71, 148, 1, moss], [99, 133, 1, jade], [130, 133, 1, teal], [254, 139, 1, moss], [286, 166, 1, jade], [312, 179, 1, teal]] satisfies [number, number, number, string][])) fern(x, y, s, color);
     for (const [x, y, w] of [[43, 158, 16], [82, 156, 8], [101, 143, 11], [119, 138, 10], [232, 139, 14], [249, 148, 12], [261, 167, 13], [29, 176, 18]]) {
       rect(x, y, w, 2, moss);
       rect(x + 2, y - 2, 2, 2, jade);
@@ -121,11 +121,11 @@ export function drawRainforestOpening(ctx) {
   }
 }
 
-export function drawRainforestVictory(ctx) {
+export function drawRainforestVictory(ctx: CanvasRenderingContext2D) {
   drawRainforestOpening(ctx);
   const ink = '#101f26', steel = '#31545a', light = '#60858a', beacon = '#a4fff0';
   const visor = '#263f4a', suit = '#e8eee7', gold = '#ffc378';
-  const rect = (x, y, w, h, color) => {
+  const rect = (x: number, y: number, w: number, h: number, color: string) => {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, h);
   };
@@ -186,12 +186,12 @@ export function drawRainforestVictory(ctx) {
   }
 }
 
-export function drawRainforestFailure(ctx) {
+export function drawRainforestFailure(ctx: CanvasRenderingContext2D) {
   drawRainforestOpening(ctx);
   const { width, height } = RAINFOREST_SCENE_SIZE;
   const ink = '#101923', steel = '#344a57', pale = '#a8bac0';
   const warning = '#e6a370', dimWarning = '#a45f50';
-  const rect = (x, y, w, h, color) => {
+  const rect = (x: number, y: number, w: number, h: number, color: string) => {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, h);
   };
