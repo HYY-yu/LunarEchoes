@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { checksum, createWorld, dispatch, replay } from '../dist/core.js';
-import { captureTrace, compareTraces } from '../scripts/replay-diagnostic.mjs';
+import { captureTrace, compareTraces, verifyDesertCompatibility } from '../scripts/replay-diagnostic.mjs';
 
 const prefix = JSON.parse(await readFile(new URL('../scripts/fixtures/checksum-prefix.json', import.meta.url), 'utf8'));
 
@@ -121,4 +121,23 @@ test('CLI fails on missing files, malformed arguments and the wrong required Nod
       assert.match(result.stderr, /replay.diagnostic.failed/);
     }
   } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+test('desert compatibility validates the frozen build and rejects cross-build state drift', async () => {
+  const baseline = JSON.parse(await readFile(new URL('../docs/evidence/desert34/macos-node24.21.0.json', import.meta.url), 'utf8'));
+  const candidate = { ...structuredClone(baseline), coreSha256: '1'.repeat(64), rulesSha256: '2'.repeat(64) };
+  const checked = await verifyDesertCompatibility(baseline, candidate);
+  assert.deepEqual(checked.compatibility, { result: 'same', actionsCompared: 90, finalTick: 90, checksum: 'c55b6ea8' });
+  const wrongBuild = { ...baseline, coreSha256: '0'.repeat(64) };
+  await assert.rejects(() => verifyDesertCompatibility(wrongBuild, candidate), /different core builds/);
+  const wrongPlatform = { ...candidate, environment: { ...candidate.environment, platform: 'different' } };
+  await assert.rejects(() => verifyDesertCompatibility(baseline, wrongPlatform), /Different compatibility runtime: platform/);
+  const changed = structuredClone(candidate);
+  changed.frames[46].world.enemies[0].x += .125;
+  changed.frames[46].checksum = checksum(changed.frames[46].world);
+  await assert.rejects(() => verifyDesertCompatibility(baseline, changed), /Desert prefix changed: .*"actionIndex":46/);
+  const invalidBaseline = structuredClone(baseline);
+  invalidBaseline.frames[46].world.enemies[0].x += .125;
+  invalidBaseline.frames[46].checksum = checksum(invalidBaseline.frames[46].world);
+  await assert.rejects(() => verifyDesertCompatibility(invalidBaseline, candidate), /Frozen desert prefix differs: .*"actionIndex":46/);
 });
