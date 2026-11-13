@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 const routes = new Map([
   ['/', ['./fixtures/rainforest-audition.html', 'text/html; charset=utf-8']],
-  ['/rainforest-opening.mjs', ['./fixtures/rainforest-opening.mjs', 'text/javascript']],
+  ['/rainforest-story-art.js', ['../dist/rainforest-story-art.js', 'text/javascript']],
   ['/rainforest.story.json', ['../dist/rainforest.story.json', 'application/json; charset=utf-8']]
 ]);
 const server = createServer(async (request, response) => {
