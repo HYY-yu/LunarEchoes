@@ -44,15 +44,20 @@ let resetRequested = false;
 let world: World = createWorld({ ...DESERT_CONTEXT, seed: 208907 });
 let screen: Screen = 'title';
 type OpeningSource = 'title' | 'stages';
-type OpeningEntry = Readonly<{ id: string; zh: string; en: string }>;
-type OpeningContent = Readonly<{
-  opening: OpeningEntry;
-  objective: OpeningEntry;
+type StoryEntry = Readonly<{ id: string; zh: string; en: string }>;
+type StoryArt = Readonly<{
   size: Readonly<{ width: number; height: number }>;
   draw: (context: CanvasRenderingContext2D) => void;
 }>;
+type DefeatContent = Readonly<{ story: StoryEntry | null; art: StoryArt }>;
+type OpeningContent = StoryArt & Readonly<{
+  opening: StoryEntry;
+  objective: StoryEntry;
+  defeat?: DefeatContent;
+}>;
 let opening: { context: StageContext; source: OpeningSource; content: OpeningContent } | null = null;
 let openingRequest: symbol | null = null;
+let liveDefeat: DefeatContent | null = null;
 let desertContent: DesertContent | null = null;
 let radioState: RadioState = { kind: 'inactive' };
 const radio = document.createElement('aside'); radio.id = 'radio'; radio.hidden = true;
@@ -218,14 +223,20 @@ async function loadRainforestOpening(): Promise<OpeningContent> {
   const input: unknown = await response.json();
   if (!Array.isArray(input)) throw new Error('Invalid rainforest story');
   const entries: unknown[] = input;
-  function entry(beat: 'opening' | 'objective'): OpeningEntry {
+  function entry(beat: 'opening' | 'objective' | 'defeat'): StoryEntry {
+    const outcome = beat === 'defeat' ? 'lost' : 'any';
     const id = `rainforest.${beat}`;
     const matches = entries.filter(value => value !== null && typeof value === 'object' && 'id' in value && value.id === id);
     const value = matches[0];
-    if (matches.length !== 1 || !value || typeof value !== 'object' || !('stageId' in value) || value.stageId !== 'rainforest' || !('beat' in value) || value.beat !== beat || !('outcome' in value) || value.outcome !== 'any' || !('zh' in value) || typeof value.zh !== 'string' || !value.zh.trim() || !('en' in value) || typeof value.en !== 'string' || !value.en.trim()) throw new Error(`Invalid rainforest story entry ${id}`);
+    if (matches.length !== 1 || !value || typeof value !== 'object' || !('stageId' in value) || value.stageId !== 'rainforest' || !('beat' in value) || value.beat !== beat || !('outcome' in value) || value.outcome !== outcome || !('zh' in value) || typeof value.zh !== 'string' || !value.zh.trim() || !('en' in value) || typeof value.en !== 'string' || !value.en.trim()) throw new Error(`Invalid rainforest story entry ${id}`);
     return { id, zh: value.zh, en: value.en };
   }
-  return { opening: entry('opening'), objective: entry('objective'), size: art.RAINFOREST_SCENE_SIZE, draw: art.drawRainforestOpening };
+  const opening = entry('opening'), objective = entry('objective');
+  let defeatStory: StoryEntry | null = null;
+  try { defeatStory = entry('defeat'); }
+  catch (error) { log('warn', 'story.defeat.content_unavailable', { stageId: 'rainforest', error: String(error) }); }
+  const defeat = { story: defeatStory, art: { size: art.RAINFOREST_SCENE_SIZE, draw: art.drawRainforestFailure } };
+  return { opening, objective, size: art.RAINFOREST_SCENE_SIZE, draw: art.drawRainforestOpening, defeat };
 }
 function showOpening(context: StageContext, source: OpeningSource = 'title') {
   openingRequest = null;
@@ -253,13 +264,13 @@ function presentOpening(context: StageContext, source: OpeningSource, content: O
 }
 function finishOpening(reason: OpeningFinish) {
   if (screen !== 'opening' || !opening) return;
-  log('info', 'story.opening.finished', { id: opening.content.opening.id, reason }); begin(opening.context);
+  log('info', 'story.opening.finished', { id: opening.content.opening.id, reason }); begin(opening.context, opening.content.defeat ?? null);
 }
-function begin(context: StageContext) {
+function begin(context: StageContext, defeat = context.stageId === world.context.stageId ? liveDefeat : null) {
   if (!desertContent) throw new Error('Desert content unavailable');
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
   const nextWorld = createWorld({ ...context, seed: seedArray[0] });
-  synth.reset(); world = nextWorld; opening = null; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: 'waiting' }, 'begin'); clearCombatInput(); clearNotice();
+  synth.reset(); world = nextWorld; opening = null; liveDefeat = defeat; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: 'waiting' }, 'begin'); clearCombatInput(); clearNotice();
   log('info', 'session.started', { seed: world.seed, version: VERSION, ...world.context }); updateUi(true); void enableAudio();
   canvasNode.focus();
 }
@@ -279,7 +290,7 @@ function startReplay() {
     log('info', 'replay.started', { version: VERSION, ...world.context, seed: world.seed, actions: playingRecording.actions.length }); updateUi(true); void enableAudio();
   } catch (error) { replayFailure(error); }
 }
-function showTitle() { screen = 'title'; playingRecording = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); clearCombatInput(); synth.reset(); setRadio({ kind: 'inactive' }, 'home'); clearNotice(); updateUi(true); void enableAudio(); }
+function showTitle() { screen = 'title'; playingRecording = null; liveDefeat = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); clearCombatInput(); synth.reset(); setRadio({ kind: 'inactive' }, 'home'); clearNotice(); updateUi(true); void enableAudio(); }
 function pause() {
   if (screen !== 'game') return;
   if (world.phase.kind === 'running') act({ kind: 'pause' }); else if (world.phase.kind === 'paused') { act({ kind: 'resume' }); void enableAudio(); }
@@ -397,16 +408,21 @@ function updateUi(force = false) {
     element('opening-objective').textContent = content.objective[language]; element('opening-continue').textContent = t.deploy; element('opening-skip').textContent = t.skipOpening;
     return;
   }
-  if (screen === 'game' && world.phase.kind === 'lost' && desertContent) {
+  const defeatStage = screen === 'game' && world.phase.kind === 'lost' ? world.context.stageId : null;
+  const defeat = defeatStage === 'rainforest' ? liveDefeat : defeatStage === 'desert-base' && desertContent ? {
+    story: desertContent.defeat,
+    art: { size: DESERT_SCENE_SIZE, draw: (canvas: CanvasRenderingContext2D) => drawDesertScene(canvas, 'defeat') }
+  } : null;
+  if (defeat) {
     if (!document.getElementById('defeat-panel')) {
       const focusRetry = document.activeElement === canvasNode || document.activeElement === document.body;
       overlay.replaceChildren();
       const section = document.createElement('section'); section.id = 'defeat-panel'; section.className = 'modal result defeat'; section.setAttribute('aria-labelledby', 'defeat-heading');
-      const art = document.createElement('canvas'); art.id = 'defeat-art'; art.width = DESERT_SCENE_SIZE.width; art.height = DESERT_SCENE_SIZE.height; art.setAttribute('role', 'img');
-      const context = art.getContext('2d'); if (!context) throw new Error('Defeat canvas is unavailable'); drawDesertScene(context, 'defeat');
+      const art = document.createElement('canvas'); art.id = 'defeat-art'; art.width = defeat.art.size.width; art.height = defeat.art.size.height; art.setAttribute('role', 'img');
+      const context = art.getContext('2d'); if (!context) throw new Error('Defeat canvas is unavailable'); defeat.art.draw(context);
       const eyebrow = document.createElement('div'); eyebrow.id = 'defeat-report'; eyebrow.className = 'eyebrow';
       const heading = document.createElement('h2'); heading.id = 'defeat-heading';
-      const story = document.createElement('p'); story.id = 'defeat-story'; story.dataset.storyId = desertContent.defeat.id;
+      const story = document.createElement('p'); story.id = 'defeat-story'; if (defeat.story) story.dataset.storyId = defeat.story.id;
       const description = document.createElement('p'); description.id = 'defeat-description';
       const stats = document.createElement('div'); stats.className = 'stats';
       for (const [id, value] of [['time', formatTime(world.tick)], ['kills', String(world.kills)], ['level', String(world.level)]]) {
@@ -419,8 +435,10 @@ function updateUi(force = false) {
       actions.append(retry, replay); section.append(art, eyebrow, heading, story, description, stats, actions); overlay.append(section);
       if (focusRetry) retry.focus({ preventScroll: true });
     }
-    element('defeat-art').setAttribute('aria-label', t.defeatArt); element('defeat-report').textContent = t.report; element('defeat-heading').textContent = t.lost;
-    element('defeat-story').textContent = desertContent.defeat[language]; element('defeat-description').textContent = t.lostBody;
+    element('defeat-art').setAttribute('aria-label', defeatStage === 'rainforest' ? t.rainforestDefeatArt : t.defeatArt);
+    element('defeat-report').textContent = t.report;
+    element('defeat-heading').textContent = defeatStage === 'rainforest' ? `${t.stageNames.rainforest} · ${t.lost}` : t.lost;
+    element('defeat-story').textContent = defeat.story?.[language] ?? ''; element('defeat-description').textContent = t.lostBody;
     element('defeat-time').textContent = t.time; element('defeat-kills').textContent = t.kills; element('defeat-level').textContent = t.level;
     element('defeat-retry').textContent = t.restart; element('defeat-replay').textContent = t.replay;
     return;

@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 import { drawDesertScene } from '../dist/desert-scene.js';
+import { drawRainforestFailure } from '../dist/rainforest-story-art.js';
 import { createWorld, normalizeInput, replay, finalChecksum, startRecording } from '../dist/core.js';
 import { play } from '../scripts/simulate.mjs';
 import ts from 'typescript';
@@ -247,9 +248,12 @@ test('natural loss preserves existing header focus and direct Replay verifies th
   assert.deepEqual(storage.writes, []);
 });
 test('a selected stage survives deployment, same-stage retry and replay while home restores the desert preview', async () => {
-  const app = harness(), selected = { stageId: 'rainforest', rulesVersion: 'rainforest-1' };
+  const storage = memoryStorage(savedProgress('rainforest'));
+  let requests = 0;
+  const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
+  const app = harness(embedded, storage, async () => { requests++; return { ok: true, json: async () => story }; });
+  const selected = { stageId: 'rainforest', rulesVersion: 'rainforest-1' };
   await app.openStage(selected);
-  const story = JSON.parse(readFileSync('dist/rainforest.story.json', 'utf8'));
   for (const beat of ['opening', 'objective']) {
     const node = app.get(beat === 'opening' ? 'opening-story' : 'opening-objective');
     const entry = story.find(value => value.beat === beat);
@@ -270,19 +274,41 @@ test('a selected stage survives deployment, same-stage retry and replay while ho
   }
   const first = app.session();
   assert.equal(first.world.phase.kind, 'lost');
+  const defeat = story.find(value => value.beat === 'defeat');
+  const panel = app.get('defeat-panel'), art = app.get('defeat-art'), storyNode = app.get('defeat-story');
+  assert.equal(app.active, app.get('defeat-retry'));
+  assert.equal(storyNode.dataset.storyId, defeat.id);
+  assert.equal(storyNode.textContent, defeat.zh);
+  assert.match(app.get('defeat-heading').textContent, /雨林深处/);
+  const original = [];
+  drawRainforestFailure({ save() {}, restore() {}, fillRect(...rect) { original.push([this.fillStyle, ...rect]); } });
+  assert.deepEqual(art.commands, original);
+  app.get('language').focus(); app.get('language').onclick();
+  assert.equal(app.active, app.get('language'));
+  assert.equal(app.get('defeat-panel'), panel);
+  assert.equal(storyNode.textContent, defeat.en);
+  assert.match(art.getAttribute('aria-label'), /station signal/);
+  assert.match(app.get('defeat-heading').textContent, /Deep Rainforest/);
+  assert.equal(app.get('victory-next-clue'), null);
+  app.get('language').onclick();
   app.get('defeat-retry').onclick();
   const retry = app.session();
   assert.deepEqual(retry.world.context, selected);
   assert.notEqual(retry.world.seed, first.world.seed);
   assert.deepEqual(retry.world, createWorld({ ...selected, seed: retry.world.seed }));
-  app.invokeReplay();
+  finishIdle(app);
+  assert.equal(app.get('defeat-story').textContent, defeat.zh);
+  assert.equal(requests, 1);
+  app.get('defeat-replay').onclick();
   assert.deepEqual(app.session().world.context, selected);
-  assert.equal(app.session().world.seed, first.world.seed);
+  assert.equal(app.session().world.seed, retry.world.seed);
+  assert.equal(app.get('defeat-panel'), null);
   for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) app.frame();
   assert.equal(app.snapshot().screen, 'replay-end');
   assert.equal(app.snapshot().replayVerified, true);
   app.click('返回基地');
   assert.equal(app.snapshot().world.context.stageId, 'desert-base');
+  assert.deepEqual(storage.writes, []);
 });
 
 test('direct Retry skips the defeat narrative and rebuilds the current stage with a fresh seed', () => {
@@ -854,4 +880,22 @@ test('rainforest opening load failure preserves the current screen and progress'
   assert.deepEqual(storage.writes, []);
   assertNotice(app, '雨林开场未能加载，请重试。');
   assert.ok(app.logs.some(([level, event]) => level === 'error' && event === 'story.opening.load_failed'));
+});
+
+test('invalid rainforest defeat copy leaves opening, the failure illustration and redeployment usable', async () => {
+  const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
+  const defeat = story.find(entry => entry.beat === 'defeat');
+  defeat.outcome = 'won';
+  const app = harness(embedded, memoryStorage(), async () => ({ ok: true, json: async () => story }));
+  await app.openStage({ stageId: 'rainforest', rulesVersion: 'rainforest-1' });
+  app.get('opening-skip').onclick();
+  finishIdle(app);
+  assert.equal(app.get('defeat-story').textContent, '');
+  assert.equal(app.get('defeat-story').dataset.storyId, undefined);
+  assert.ok(app.get('defeat-art').commands.length > 0);
+  assert.match(app.get('defeat-heading').textContent, /雨林深处/);
+  assert.equal(app.logs.filter(([level, event]) => level === 'warn' && event === 'story.defeat.content_unavailable').length, 1);
+  app.get('defeat-retry').onclick();
+  assert.equal(app.session().world.phase.kind, 'running');
+  assert.equal(app.session().recording.stageId, 'rainforest');
 });
