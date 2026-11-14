@@ -358,7 +358,8 @@ function updateUi(force = false) {
   document.body.dataset.screen = screen; document.body.dataset.phase = world.phase.kind;
   canvasNode.setAttribute('aria-label', t.battlefield);
   const signature = `${screen}|${world.phase.kind}|${language}|${synth.muted}`;
-  element('footer-right').textContent = t.pendingContent;
+  const rainforestBattle = !menu && world.context.stageId === 'rainforest';
+  element('footer-right').textContent = rainforestBattle ? '' : t.pendingContent;
   element('sound').textContent = synth.muted ? t.muted : t.sound;
   element('language').textContent = t.lang; element('pause').textContent = screen === 'replay' ? t.home : world.phase.kind === 'paused' ? t.resume : t.pause;
   element('pause').hidden = screen !== 'replay' && (screen !== 'game' || world.phase.kind !== 'running' && world.phase.kind !== 'paused');
@@ -371,7 +372,11 @@ function updateUi(force = false) {
   element('xp-fill').style.width = `${Math.min(100, world.xp / world.threshold * 100)}%`;
   element('dash').textContent = world.player.dashCooldown > 0 ? (world.player.dashCooldown / HZ).toFixed(1) : t.dash;
   const menuLabel = screen === 'opening' && opening?.context.stageId === 'rainforest' ? t.stageNames.rainforest : t.prototype;
-  element('footer-left').textContent = menu ? menuLabel : `${t.prototype} · ${t.seed} ${world.seed} · ${screen === 'replay' ? t.replaying : t.objective}`;
+  const battleLabel = rainforestBattle ? t.stageNames.rainforest : t.prototype;
+  let battleObjective = rainforestBattle ? t.rainforestFooterObjective : t.objective;
+  if (screen === 'replay') battleObjective = t.replaying;
+  if (rainforestBattle && screen === 'replay-end') battleObjective = t.replayDone;
+  element('footer-left').textContent = menu ? menuLabel : `${battleLabel} · ${t.seed} ${world.seed} · ${battleObjective}`;
   const equipment = element('equipment'); equipment.replaceChildren();
   for (const id of UPGRADE_ORDER) if (world.upgrades[id] > 0) { const node = document.createElement('span'); node.innerHTML = `<i class="module-icon icon-${id}" aria-hidden="true"></i><span>LV ${world.upgrades[id]}</span>`; node.title = upgradeLabel(id, language).title; node.setAttribute('aria-label', `${node.title} · LV ${world.upgrades[id]}`); equipment.append(node); }
   if (!force && signature === lastUi) return;

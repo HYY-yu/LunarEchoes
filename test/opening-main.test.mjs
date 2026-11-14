@@ -268,6 +268,12 @@ test('a selected stage survives deployment, same-stage retry and replay while ho
   app.get('opening-continue').onclick();
   assert.deepEqual(app.session().world.context, selected);
   assert.equal(app.session().recording.stageId, selected.stageId);
+  const firstSeed = app.session().world.seed;
+  assert.equal(app.get('footer-left').textContent, `雨林深处 · 任务种子 ${firstSeed} · 取回研究站的信号记录`);
+  assert.equal(app.get('footer-right').textContent, '');
+  app.get('language').onclick();
+  assert.equal(app.get('footer-left').textContent, `Deep Rainforest · Mission seed ${firstSeed} · Recover the station's signal records`);
+  app.get('language').onclick();
   for (let i = 0; i < 15000 && app.snapshot().world.phase.kind !== 'lost'; i++) {
     if (app.snapshot().world.phase.kind === 'upgrading') app.key('Digit1');
     app.frame();
@@ -289,6 +295,7 @@ test('a selected stage survives deployment, same-stage retry and replay while ho
   assert.equal(storyNode.textContent, defeat.en);
   assert.match(art.getAttribute('aria-label'), /station signal/);
   assert.match(app.get('defeat-heading').textContent, /Deep Rainforest/);
+  assert.equal(app.get('footer-left').textContent, `Deep Rainforest · Mission seed ${firstSeed} · Recover the station's signal records`);
   assert.equal(app.get('victory-next-clue'), null);
   app.get('language').onclick();
   app.get('defeat-retry').onclick();
@@ -302,12 +309,16 @@ test('a selected stage survives deployment, same-stage retry and replay while ho
   app.get('defeat-replay').onclick();
   assert.deepEqual(app.session().world.context, selected);
   assert.equal(app.session().world.seed, retry.world.seed);
+  assert.equal(app.get('footer-left').textContent, `雨林深处 · 任务种子 ${retry.world.seed} · 回放中`);
   assert.equal(app.get('defeat-panel'), null);
   for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) app.frame();
   assert.equal(app.snapshot().screen, 'replay-end');
   assert.equal(app.snapshot().replayVerified, true);
+  assert.equal(app.get('footer-left').textContent, `雨林深处 · 任务种子 ${retry.world.seed} · 回放结束`);
   app.click('返回基地');
   assert.equal(app.snapshot().world.context.stageId, 'desert-base');
+  assert.equal(app.get('footer-left').textContent, '沙漠开场与战斗测试');
+  assert.equal(app.get('footer-right').textContent, '后续剧情与战役待接入');
   assert.deepEqual(storage.writes, []);
 });
 
