@@ -49,15 +49,17 @@ type StoryArt = Readonly<{
   size: Readonly<{ width: number; height: number }>;
   draw: (context: CanvasRenderingContext2D) => void;
 }>;
-type DefeatContent = Readonly<{ story: StoryEntry | null; art: StoryArt }>;
+type ResultContent = Readonly<{ story: StoryEntry | null; art: StoryArt }>;
+type VictoryContent = ResultContent & Readonly<{ nextClue: StoryEntry | null }>;
+type RainforestResults = Readonly<{ defeat: ResultContent; victory: VictoryContent }>;
 type OpeningContent = StoryArt & Readonly<{
   opening: StoryEntry;
   objective: StoryEntry;
-  defeat?: DefeatContent;
+  rainforestResults?: RainforestResults;
 }>;
 let opening: { context: StageContext; source: OpeningSource; content: OpeningContent } | null = null;
 let openingRequest: symbol | null = null;
-let liveDefeat: DefeatContent | null = null;
+let rainforestResults: RainforestResults | null = null;
 let desertContent: DesertContent | null = null;
 let radioState: RadioState = { kind: 'inactive' };
 const radio = document.createElement('aside'); radio.id = 'radio'; radio.hidden = true;
@@ -223,20 +225,27 @@ async function loadRainforestOpening(): Promise<OpeningContent> {
   const input: unknown = await response.json();
   if (!Array.isArray(input)) throw new Error('Invalid rainforest story');
   const entries: unknown[] = input;
-  function entry(beat: 'opening' | 'objective' | 'defeat'): StoryEntry {
-    const outcome = beat === 'defeat' ? 'lost' : 'any';
+  function entry(beat: 'opening' | 'objective' | 'defeat' | 'victory' | 'next-clue'): StoryEntry {
+    const outcome = beat === 'defeat' ? 'lost' : beat === 'victory' || beat === 'next-clue' ? 'won' : 'any';
     const id = `rainforest.${beat}`;
     const matches = entries.filter(value => value !== null && typeof value === 'object' && 'id' in value && value.id === id);
     const value = matches[0];
     if (matches.length !== 1 || !value || typeof value !== 'object' || !('stageId' in value) || value.stageId !== 'rainforest' || !('beat' in value) || value.beat !== beat || !('outcome' in value) || value.outcome !== outcome || !('zh' in value) || typeof value.zh !== 'string' || !value.zh.trim() || !('en' in value) || typeof value.en !== 'string' || !value.en.trim()) throw new Error(`Invalid rainforest story entry ${id}`);
+    if (beat === 'next-clue' && (!('nextStageId' in value) || value.nextStageId !== 'antarctica')) throw new Error(`Invalid rainforest handoff ${id}`);
     return { id, zh: value.zh, en: value.en };
   }
+  function optionalResultEntry(beat: 'defeat' | 'victory' | 'next-clue') {
+    try { return entry(beat); }
+    catch (error) {
+      log('warn', beat === 'defeat' ? 'story.defeat.content_unavailable' : 'story.victory.content_unavailable', { stageId: 'rainforest', beat, error: String(error) });
+      return null;
+    }
+  }
   const opening = entry('opening'), objective = entry('objective');
-  let defeatStory: StoryEntry | null = null;
-  try { defeatStory = entry('defeat'); }
-  catch (error) { log('warn', 'story.defeat.content_unavailable', { stageId: 'rainforest', error: String(error) }); }
-  const defeat = { story: defeatStory, art: { size: art.RAINFOREST_SCENE_SIZE, draw: art.drawRainforestFailure } };
-  return { opening, objective, size: art.RAINFOREST_SCENE_SIZE, draw: art.drawRainforestOpening, defeat };
+  const size = art.RAINFOREST_SCENE_SIZE;
+  const defeat = { story: optionalResultEntry('defeat'), art: { size, draw: art.drawRainforestFailure } };
+  const victory = { story: optionalResultEntry('victory'), nextClue: optionalResultEntry('next-clue'), art: { size, draw: art.drawRainforestVictory } };
+  return { opening, objective, size, draw: art.drawRainforestOpening, rainforestResults: { defeat, victory } };
 }
 function showOpening(context: StageContext, source: OpeningSource = 'title') {
   openingRequest = null;
@@ -264,13 +273,13 @@ function presentOpening(context: StageContext, source: OpeningSource, content: O
 }
 function finishOpening(reason: OpeningFinish) {
   if (screen !== 'opening' || !opening) return;
-  log('info', 'story.opening.finished', { id: opening.content.opening.id, reason }); begin(opening.context, opening.content.defeat ?? null);
+  log('info', 'story.opening.finished', { id: opening.content.opening.id, reason }); begin(opening.context, opening.content.rainforestResults ?? null);
 }
-function begin(context: StageContext, defeat = context.stageId === world.context.stageId ? liveDefeat : null) {
+function begin(context: StageContext, results = context.stageId === world.context.stageId ? rainforestResults : null) {
   if (!desertContent) throw new Error('Desert content unavailable');
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
   const nextWorld = createWorld({ ...context, seed: seedArray[0] });
-  synth.reset(); world = nextWorld; opening = null; liveDefeat = defeat; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: 'waiting' }, 'begin'); clearCombatInput(); clearNotice();
+  synth.reset(); world = nextWorld; opening = null; rainforestResults = results; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: 'waiting' }, 'begin'); clearCombatInput(); clearNotice();
   log('info', 'session.started', { seed: world.seed, version: VERSION, ...world.context }); updateUi(true); void enableAudio();
   canvasNode.focus();
 }
@@ -290,7 +299,7 @@ function startReplay() {
     log('info', 'replay.started', { version: VERSION, ...world.context, seed: world.seed, actions: playingRecording.actions.length }); updateUi(true); void enableAudio();
   } catch (error) { replayFailure(error); }
 }
-function showTitle() { screen = 'title'; playingRecording = null; liveDefeat = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); clearCombatInput(); synth.reset(); setRadio({ kind: 'inactive' }, 'home'); clearNotice(); updateUi(true); void enableAudio(); }
+function showTitle() { screen = 'title'; playingRecording = null; rainforestResults = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); clearCombatInput(); synth.reset(); setRadio({ kind: 'inactive' }, 'home'); clearNotice(); updateUi(true); void enableAudio(); }
 function pause() {
   if (screen !== 'game') return;
   if (world.phase.kind === 'running') act({ kind: 'pause' }); else if (world.phase.kind === 'paused') { act({ kind: 'resume' }); void enableAudio(); }
@@ -414,7 +423,7 @@ function updateUi(force = false) {
     return;
   }
   const defeatStage = screen === 'game' && world.phase.kind === 'lost' ? world.context.stageId : null;
-  const defeat = defeatStage === 'rainforest' ? liveDefeat : defeatStage === 'desert-base' && desertContent ? {
+  const defeat = defeatStage === 'rainforest' ? rainforestResults?.defeat : defeatStage === 'desert-base' && desertContent ? {
     story: desertContent.defeat,
     art: { size: DESERT_SCENE_SIZE, draw: (canvas: CanvasRenderingContext2D) => drawDesertScene(canvas, 'defeat') }
   } : null;
@@ -448,18 +457,24 @@ function updateUi(force = false) {
     element('defeat-retry').textContent = t.restart; element('defeat-replay').textContent = t.replay;
     return;
   }
-  if (screen === 'game' && world.phase.kind === 'won' && desertContent) {
+  const victoryStage = screen === 'game' && world.phase.kind === 'won' ? world.context.stageId : null;
+  const victory = victoryStage === 'rainforest' ? rainforestResults?.victory : victoryStage === 'desert-base' && desertContent ? {
+    story: desertContent.victory,
+    nextClue: desertContent.nextClue,
+    art: { size: DESERT_SCENE_SIZE, draw: (canvas: CanvasRenderingContext2D) => drawDesertScene(canvas, 'victory') }
+  } : null;
+  if (victory) {
     if (!document.getElementById('victory-panel')) {
       const focusRetry = document.activeElement === canvasNode || document.activeElement === document.body;
       overlay.replaceChildren();
       const section = document.createElement('section'); section.id = 'victory-panel'; section.className = 'modal result victory'; section.setAttribute('aria-labelledby', 'victory-heading');
-      const art = document.createElement('canvas'); art.id = 'victory-art'; art.width = DESERT_SCENE_SIZE.width; art.height = DESERT_SCENE_SIZE.height; art.setAttribute('role', 'img');
-      const context = art.getContext('2d'); if (!context) throw new Error('Victory canvas is unavailable'); drawDesertScene(context, 'victory');
+      const art = document.createElement('canvas'); art.id = 'victory-art'; art.width = victory.art.size.width; art.height = victory.art.size.height; art.setAttribute('role', 'img');
+      const context = art.getContext('2d'); if (!context) throw new Error('Victory canvas is unavailable'); victory.art.draw(context);
       const eyebrow = document.createElement('div'); eyebrow.id = 'victory-report'; eyebrow.className = 'eyebrow';
       const heading = document.createElement('h2'); heading.id = 'victory-heading';
-      const story = document.createElement('p'); story.id = 'victory-story'; story.dataset.storyId = desertContent.victory.id;
-      const nextClue = document.createElement('p'); nextClue.id = 'victory-next-clue'; nextClue.dataset.storyId = desertContent.nextClue.id;
-      const description = document.createElement('p'); description.id = 'victory-description';
+      const story = document.createElement('p'); story.id = 'victory-story'; story.hidden = !victory.story; if (victory.story) story.dataset.storyId = victory.story.id;
+      const nextClue = document.createElement('p'); nextClue.id = 'victory-next-clue'; nextClue.hidden = !victory.nextClue; if (victory.nextClue) nextClue.dataset.storyId = victory.nextClue.id;
+      const description = document.createElement('p'); description.id = 'victory-description'; description.hidden = victoryStage === 'rainforest';
       const stats = document.createElement('div'); stats.className = 'stats';
       for (const [id, value] of [['time', formatTime(world.tick)], ['kills', String(world.kills)], ['level', String(world.level)]]) {
         const stat = document.createElement('span'); const label = document.createElement('span'); label.id = `victory-${id}`;
@@ -472,8 +487,11 @@ function updateUi(force = false) {
       actions.append(retry, replay); section.append(art, eyebrow, heading, story, nextClue, description, progress, stats, actions); overlay.append(section);
       if (focusRetry) retry.focus({ preventScroll: true });
     }
-    element('victory-art').setAttribute('aria-label', t.victoryArt); element('victory-report').textContent = t.report; element('victory-heading').textContent = t.won;
-    element('victory-story').textContent = desertContent.victory[language]; element('victory-next-clue').textContent = desertContent.nextClue[language]; element('victory-description').textContent = t.wonBody;
+    element('victory-art').setAttribute('aria-label', victoryStage === 'rainforest' ? t.rainforestVictoryArt : t.victoryArt);
+    element('victory-report').textContent = t.report;
+    element('victory-heading').textContent = victoryStage === 'rainforest' ? `${t.stageNames.rainforest} · ${t.won}` : t.won;
+    element('victory-story').textContent = victory.story?.[language] ?? ''; element('victory-next-clue').textContent = victory.nextClue?.[language] ?? '';
+    element('victory-description').textContent = victoryStage === 'rainforest' ? '' : t.wonBody;
     renderProgress('victory-progress');
     element('victory-time').textContent = t.time; element('victory-kills').textContent = t.kills; element('victory-level').textContent = t.level;
     element('victory-retry').textContent = t.restart; element('victory-replay').textContent = t.replay;
