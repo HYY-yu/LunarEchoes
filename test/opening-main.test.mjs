@@ -22,7 +22,7 @@ function memoryStorage(raw = null) {
     setItem(key, value) { this.writes.push([key, value]); this.raw = value; }
   };
 }
-function harness(content = embedded, localStorage = memoryStorage()) {
+function harness(content = embedded, localStorage = memoryStorage(), fetchStory = async () => ({ ok: true, json: async () => JSON.parse(readFileSync('dist/rainforest.story.json', 'utf8')) })) {
   const listeners = new Map(), logs = [], sessions = [], timers = new Map(), cancelledTimers = [];
   let active, raf, seedCalls = 0, now = 1000, timerNow = 0, nextTimer = 1, audioFailure = false, seedFailure = false, audioActivations = 0;
   const setTimeout = (callback, delay) => { const id = nextTimer++; timers.set(id, { callback, at: timerNow + delay }); return id; };
@@ -72,7 +72,7 @@ function harness(content = embedded, localStorage = memoryStorage()) {
     play() {}
     events() {}
   }
-  const context = vm.createContext({ document, localStorage, HTMLElement: Element, HTMLCanvasElement: Canvas, HTMLButtonElement: Button, matchMedia: () => ({ matches: true }), crypto: { getRandomValues(array) { if (seedFailure) { seedFailure = false; throw new Error('test seed unavailable'); } seedCalls++; array[0] = 41 + seedCalls; } }, requestAnimationFrame: callback => { raf = callback; }, console, location: { search: '' }, URLSearchParams, setTimeout, clearTimeout, addEventListener: (name, handler) => listeners.set(name, handler) });
+  const context = vm.createContext({ document, localStorage, fetch: fetchStory, HTMLElement: Element, HTMLCanvasElement: Canvas, HTMLButtonElement: Button, matchMedia: () => ({ matches: true }), crypto: { getRandomValues(array) { if (seedFailure) { seedFailure = false; throw new Error('test seed unavailable'); } seedCalls++; array[0] = 41 + seedCalls; } }, requestAnimationFrame: callback => { raf = callback; }, console, location: { search: '' }, URLSearchParams, setTimeout, clearTimeout, addEventListener: (name, handler) => listeners.set(name, handler) });
   context.window = context;
   const cache = new Map();
   function load(name) {
@@ -89,7 +89,7 @@ function harness(content = embedded, localStorage = memoryStorage()) {
   const snapshot = (complete = false) => JSON.parse(context.inspectMain(complete));
   const event = (name, props = {}) => { const value = { target: active ?? get('game'), repeat: false, preventDefault() { this.defaultPrevented = true; }, ...props }; listeners.get(name)?.(value); return value; };
   const click = label => { const node = all().find(node => node.tagName === 'BUTTON' && node.textContent === label); assert.ok(node, `button ${label}`); node.onclick(); return node; };
-  return { get, click, event, logs, sessions, snapshot, session: () => snapshot(true), progress: () => JSON.parse(context.inspectProgress()), document, advanceTimers, cancelledTimers, get noticeTimer() { return context.inspectNoticeTimer(); }, get pendingTimers() { return [...timers.keys()]; }, rejectAudio() { audioFailure = true; }, failNextSeed() { seedFailure = true; }, invokeBegin() { context.invokeBegin(); }, openStage(value) { context.openStage(JSON.stringify(value)); }, replaceRecording(value) { context.replaceRecording(JSON.stringify(value)); }, invokeReplay() { context.invokeReplay(); }, get radioState() { return context.inspectRadio(); }, get radioBeat() { return context.inspectRadioBeat(); }, fixtureWorld(value) { context.fixtureWorld(JSON.stringify(value)); }, get audioActivations() { return audioActivations; }, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
+  return { get, click, event, logs, sessions, snapshot, session: () => snapshot(true), progress: () => JSON.parse(context.inspectProgress()), document, advanceTimers, cancelledTimers, get noticeTimer() { return context.inspectNoticeTimer(); }, get pendingTimers() { return [...timers.keys()]; }, rejectAudio() { audioFailure = true; }, failNextSeed() { seedFailure = true; }, invokeBegin() { context.invokeBegin(); }, openStage(value) { return context.openStage(JSON.stringify(value)); }, replaceRecording(value) { context.replaceRecording(JSON.stringify(value)); }, invokeReplay() { context.invokeReplay(); }, get radioState() { return context.inspectRadio(); }, get radioBeat() { return context.inspectRadioBeat(); }, fixtureWorld(value) { context.fixtureWorld(JSON.stringify(value)); }, get audioActivations() { return audioActivations; }, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
 }
 test('actual main expires notice text and visibility at 3500 ms without changing the complete session', () => {
   const app = harness('{'), before = app.session(), notice = app.get('notice');
@@ -246,9 +246,22 @@ test('natural loss preserves existing header focus and direct Replay verifies th
   assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assert.equal(app.snapshot().checksum, terminal.checksum); assert.deepEqual(app.snapshot().world, terminal.world); assert.ok(app.logs.some(([, name]) => name === 'replay.finished')); assert.equal(app.get('defeat-panel'), null);
   assert.deepEqual(storage.writes, []);
 });
-test('a selected stage survives deployment, same-stage retry and replay while home restores the desert preview', () => {
+test('a selected stage survives deployment, same-stage retry and replay while home restores the desert preview', async () => {
   const app = harness(), selected = { stageId: 'rainforest', rulesVersion: 'rainforest-1' };
-  app.openStage(selected); app.get('opening-continue').onclick();
+  await app.openStage(selected);
+  const story = JSON.parse(readFileSync('dist/rainforest.story.json', 'utf8'));
+  for (const beat of ['opening', 'objective']) {
+    const node = app.get(beat === 'opening' ? 'opening-story' : 'opening-objective');
+    const entry = story.find(value => value.beat === beat);
+    assert.equal(node.dataset.storyId, entry.id);
+    assert.equal(node.textContent, entry.zh);
+  }
+  assert.equal(app.get('footer-left').textContent, '雨林深处');
+  app.get('language').onclick();
+  assert.equal(app.get('footer-left').textContent, 'Deep Rainforest');
+  assert.equal(app.get('opening-story').textContent, story.find(value => value.beat === 'opening').en);
+  app.get('language').onclick();
+  app.get('opening-continue').onclick();
   assert.deepEqual(app.session().world.context, selected);
   assert.equal(app.session().recording.stageId, selected.stageId);
   for (let i = 0; i < 15000 && app.snapshot().world.phase.kind !== 'lost'; i++) {
@@ -828,4 +841,17 @@ test('a higher save written after startup cannot be downgraded by a desert victo
   assert.match(app.get('victory-progress').textContent, /寒冻南极.*进度已保存/);
   assert.equal(storage.raw, savedProgress('antarctica'));
   assert.deepEqual(storage.writes, [[progressKey, savedProgress('antarctica')]]);
+});
+
+test('rainforest opening load failure preserves the current screen and progress', async () => {
+  const storage = memoryStorage();
+  const app = harness(embedded, storage, async () => ({ ok: false, status: 503 }));
+  const before = app.session();
+  await app.openStage({ stageId: 'rainforest', rulesVersion: 'rainforest-1' });
+  assert.deepEqual(app.session(), before);
+  assert.equal(app.get('opening-panel'), null);
+  assert.equal(app.seedCalls, 0);
+  assert.deepEqual(storage.writes, []);
+  assertNotice(app, '雨林开场未能加载，请重试。');
+  assert.ok(app.logs.some(([level, event]) => level === 'error' && event === 'story.opening.load_failed'));
 });
