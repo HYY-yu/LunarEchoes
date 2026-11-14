@@ -945,6 +945,8 @@ test('live rainforest victory presents the canonical bilingual story and Antarct
   await app.openStage(RAINFOREST_CONTEXT);
   app.activate('opening-continue', 'Enter');
   const terminal = finishRainforestVictory(app);
+  assertNotice(app, '孢子母体抵达');
+  assert.equal(app.get('notice').classList.contains('boss-notice'), true);
   const panel = app.get('victory-panel'), art = app.get('victory-art');
   const victory = story.find(entry => entry.beat === 'victory'), clue = story.find(entry => entry.beat === 'next-clue');
   assert.deepEqual([app.get('victory-story').dataset.storyId, app.get('victory-next-clue').dataset.storyId], [victory.id, clue.id]);
@@ -963,6 +965,12 @@ test('live rainforest victory presents the canonical bilingual story and Antarct
   assert.equal(app.get('victory-art'), art);
   app.activate('victory-replay', 'Space');
   assert.equal(app.get('victory-panel'), null);
+  for (let i = 0; i < 15000 && app.progress().tick < 9300; i++) app.frame();
+  assert.equal(app.progress().screen, 'replay');
+  assertNotice(app, 'Spore Matriarch incoming');
+  assert.equal(app.get('notice').classList.contains('boss-notice'), true);
+  app.advanceTimers(3499); assertNotice(app, 'Spore Matriarch incoming');
+  app.advanceTimers(1); assertNotice(app, '');
   for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) app.frame();
   assert.equal(app.snapshot().screen, 'replay-end');
   assert.equal(app.snapshot().checksum, terminal.checksum);

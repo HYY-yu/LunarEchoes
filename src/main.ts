@@ -191,7 +191,8 @@ function act(action: Action, record = true) {
   }
   updateRadio();
   if (world.events.includes('boss')) {
-    if (screen === 'game') {
+    if (world.context.stageId === 'rainforest') notify(text().rainforestBoss, 'boss');
+    else if (screen === 'game') {
       if (!desertContent) throw new Error('Desert content unavailable');
       notify(desertContent.boss[language], 'boss');
     } else notify(text().boss);
