@@ -4,8 +4,11 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 import { drawDesertScene } from '../dist/desert-scene.js';
-import { drawRainforestFailure } from '../dist/rainforest-story-art.js';
+import { drawRainforestFailure, drawRainforestVictory } from '../dist/rainforest-story-art.js';
+import * as core from '../dist/core.js';
 import { createWorld, normalizeInput, replay, finalChecksum, startRecording } from '../dist/core.js';
+import { RAINFOREST_CONTEXT } from '../dist/stage-rules.js';
+import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play } from '../scripts/simulate.mjs';
 import ts from 'typescript';
 import { embedDesertContent } from '../scripts/desert-content.mjs';
@@ -909,4 +912,82 @@ test('invalid rainforest defeat copy leaves opening, the failure illustration an
   app.get('defeat-retry').onclick();
   assert.equal(app.session().world.phase.kind, 'running');
   assert.equal(app.session().recording.stageId, 'rainforest');
+});
+
+function finishRainforestVictory(app) {
+  app.pointer('joystick', 'pointerdown');
+  app.frame(0);
+  const { recording } = playArmorCase(core, 42, 'skilled', 'attack', RAINFOREST_CONTEXT);
+  for (const action of recording.actions) {
+    if (action.kind === 'choose') {
+      const phase = app.snapshot().world.phase;
+      assert.equal(phase.kind, 'upgrading');
+      app.key(`Digit${phase.offers.indexOf(action.upgrade) + 1}`);
+    } else if (action.kind === 'tick') {
+      const { x, y } = normalizeInput(action.input);
+      app.pointer('joystick', 'pointermove', 9, x * 40, y * 40);
+      if (action.input.dash) { app.key('Space'); app.release('Space'); }
+      app.frame(1000 / 60 + .000001);
+    }
+  }
+  const terminal = app.snapshot();
+  assert.equal(terminal.world.phase.kind, 'won');
+  assert.equal(terminal.world.tick, 11700);
+  assert.equal(terminal.world.bossKilled, true);
+  return terminal;
+}
+
+test('live rainforest victory presents the canonical bilingual story and Antarctic handoff once', async () => {
+  const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
+  const storage = memoryStorage(savedProgress('rainforest'));
+  let requests = 0;
+  const app = harness(embedded, storage, async () => { requests++; return { ok: true, json: async () => story }; });
+  await app.openStage(RAINFOREST_CONTEXT);
+  app.activate('opening-continue', 'Enter');
+  const terminal = finishRainforestVictory(app);
+  const panel = app.get('victory-panel'), art = app.get('victory-art');
+  const victory = story.find(entry => entry.beat === 'victory'), clue = story.find(entry => entry.beat === 'next-clue');
+  assert.deepEqual([app.get('victory-story').dataset.storyId, app.get('victory-next-clue').dataset.storyId], [victory.id, clue.id]);
+  assert.deepEqual([app.get('victory-story').textContent, app.get('victory-next-clue').textContent], [victory.zh, clue.zh]);
+  assert.match(app.get('victory-heading').textContent, /雨林深处/);
+  assert.match(art.attributes['aria-label'], /研究站/);
+  const original = [];
+  drawRainforestVictory({ save() {}, restore() {}, fillRect(...rect) { original.push([this.fillStyle, ...rect]); } });
+  assert.deepEqual(art.commands, original);
+  assert.equal(app.get('victory-description').hidden, true);
+  assert.deepEqual(storage.writes, [[progressKey, savedProgress('antarctica')]]);
+  assert.match(app.get('victory-progress').textContent, /寒冻南极 · 已解锁，暂不可游玩/);
+  app.get('language').onclick();
+  assert.deepEqual([app.get('victory-story').textContent, app.get('victory-next-clue').textContent], [victory.en, clue.en]);
+  assert.equal(app.get('victory-panel'), panel);
+  assert.equal(app.get('victory-art'), art);
+  app.activate('victory-replay', 'Space');
+  assert.equal(app.get('victory-panel'), null);
+  for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) app.frame();
+  assert.equal(app.snapshot().screen, 'replay-end');
+  assert.equal(app.snapshot().checksum, terminal.checksum);
+  assert.equal(app.snapshot().replayVerified, true);
+  assert.equal(app.get('victory-panel'), null);
+  assert.equal(requests, 1);
+  assert.deepEqual(storage.writes, [[progressKey, savedProgress('antarctica')]]);
+});
+
+test('an invalid rainforest handoff hides that paragraph and keeps the valid victory report and retry usable', async () => {
+  const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
+  story.find(entry => entry.beat === 'next-clue').nextStageId = 'watchtower';
+  const app = harness(embedded, memoryStorage(savedProgress('rainforest')), async () => ({ ok: true, json: async () => story }));
+  await app.openStage(RAINFOREST_CONTEXT);
+  app.activate('opening-skip', 'Enter');
+  const terminal = finishRainforestVictory(app);
+  assert.equal(app.get('victory-story').dataset.storyId, 'rainforest.victory');
+  assert.equal(app.get('victory-next-clue').hidden, true);
+  assert.equal(app.get('victory-next-clue').textContent, '');
+  assert.ok(app.get('victory-art').commands.length > 0);
+  assert.equal(app.logs.filter(([level, event, data]) => level === 'warn' && event === 'story.victory.content_unavailable' && data.beat === 'next-clue').length, 1);
+  app.activate('victory-retry', 'Enter');
+  const retry = app.session();
+  assert.equal(retry.world.phase.kind, 'running');
+  assert.deepEqual(retry.world.context, RAINFOREST_CONTEXT);
+  assert.notEqual(retry.world.seed, terminal.world.seed);
+  assert.equal(app.get('victory-panel'), null);
 });
