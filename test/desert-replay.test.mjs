@@ -37,9 +37,9 @@ test('a desert world retains its validated stage and seed identity', () => {
   assert.throws(() => { world.context.stageId = 'rainforest'; }, TypeError);
   assert.throws(() => { world.context = { ...DESERT_CONTEXT }; }, TypeError);
   assert.throws(() => { world.seed = 42; }, TypeError);
-  for (const stageId of [...STAGE_ORDER.slice(2), 'unknown', null]) rejects(() => createWorld({ ...request(42), stageId }), 'unavailable-stage');
+  for (const stageId of ['unknown', null]) rejects(() => createWorld({ ...request(42), stageId }), 'unavailable-stage');
+  for (const stageId of STAGE_ORDER.slice(1)) rejects(() => createWorld({ ...request(42), stageId }), 'incompatible-rules');
   for (const rulesVersion of ['desert-base-2', 'rainforest-1']) rejects(() => createWorld({ ...request(42), rulesVersion }), 'incompatible-rules');
-  rejects(() => createWorld({ ...request(42), stageId: 'rainforest' }), 'incompatible-rules');
   for (const seed of [-1, 4294967296, .5, NaN, Infinity, '42', null]) rejects(() => createWorld(request(seed)), 'invalid-data');
   for (const input of [null, 42, {}, { ...request(42), rules: { durationTicks: 1 } }]) rejects(() => createWorld(input), 'invalid-data');
 });
@@ -149,9 +149,9 @@ test('all structure and compatibility errors reject before the current world is 
   const invalid = [
     [null, 'invalid-data'], [{ ...recording, extra: true }, 'invalid-data'],
     ...['lunar-1', 'lunar-armor-1', 'unknown'].map(version => [{ ...recording, version }, 'incompatible-version']),
-    ...[...STAGE_ORDER.slice(2), 'unknown'].map(stageId => [{ ...recording, stageId }, 'unavailable-stage']),
+    [{ ...recording, stageId: 'unknown' }, 'unavailable-stage'],
+    ...STAGE_ORDER.slice(1).map(stageId => [{ ...recording, stageId }, 'incompatible-rules']),
     ...['wrong', 'rainforest-1'].map(rulesVersion => [{ ...recording, rulesVersion }, 'incompatible-rules']),
-    [{ ...recording, stageId: 'rainforest' }, 'incompatible-rules'],
     ...[-1, 4294967296, NaN, Infinity, 1.5, '42'].map(seed => [{ ...recording, seed }, 'invalid-data']),
     ...[null, {}, [null], Array(1), [{ kind: 'bad' }], [{ kind: 'choose', upgrade: 'bad' }], [{ kind: 'pause', extra: 1 }], [{ kind: 'tick', input: { x: NaN, y: 0, dash: false } }], [{ kind: 'tick', input: { x: 0, y: Infinity, dash: false } }], [{ kind: 'tick', input: { x: 0, y: 0, dash: 1 } }]].map(actions => [{ ...recording, actions }, 'invalid-data']),
     [{ ...recording, finalChecksum: null }, 'invalid-data'], [{ ...recording, finalChecksum: 'wrong' }, 'invalid-data']

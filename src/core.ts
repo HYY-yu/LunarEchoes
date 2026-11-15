@@ -50,10 +50,10 @@ export function normalizeInput(input: Input): Input {
 }
 function clamp(world: World, n: number): number { return Math.max(36, Math.min(stageRules(world.context).arenaSize - 36, n)); }
 function distance(x: number, y: number, bx: number, by: number): number { return Math.hypot(x - bx, y - by); }
-function spawn(world: World, kind: EnemyKind): void {
+function spawn(world: World, kind: EnemyKind, hitPoints?: number): void {
   const angle = random(world) * Math.PI * 2;
   const d = kind === 'boss' ? 350 : 400 + random(world) * 100;
-  const hp = kind === 'boss' ? 950 : kind === 'sentry' ? 50 : kind === 'drone' ? 22 : 30;
+  const hp = hitPoints ?? (kind === 'boss' ? 950 : kind === 'sentry' ? 50 : kind === 'drone' ? 22 : 30);
   let x = clamp(world, world.player.x + Math.cos(angle) * d), y = clamp(world, world.player.y + Math.sin(angle) * d);
   if (distance(x, y, world.player.x, world.player.y) < 250) { x = clamp(world, world.player.x - Math.cos(angle) * d); y = clamp(world, world.player.y - Math.sin(angle) * d); }
   world.enemies.push({ id: world.nextId++, kind, x, y, hp, maxHp: hp, radius: kind === 'boss' ? 27 : kind === 'sentry' ? 15 : 11, attack: 75 + Math.floor(random(world) * 120), flash: 0 });
@@ -124,13 +124,29 @@ function step(world: World, input: Input): void {
       const chance = world.tick >= rules.lateWaveTick ? rules.lateSentryChance : rules.sentryChance;
       spawn(world, world.tick >= rules.sentryStartTick && random(world) < chance ? 'sentry' : 'crawler');
       world.spawnCooldown = Math.max(rules.minimumSpawnInterval, 60 - Math.floor(t / 3));
+    } else if (rules.kind === 'campaign') {
+      let currentWave = rules.waves[0];
+      for (const wave of rules.waves) {
+        if (world.tick < wave.startTick) break;
+        currentWave = wave;
+      }
+      const roll = random(world);
+      const kind = roll < currentWave.sentryChance ? 'sentry'
+        : roll < currentWave.sentryChance + currentWave.droneChance ? 'drone' : 'crawler';
+      spawn(world, kind, kind === 'crawler' ? rules.crawlerHp : undefined);
+      world.spawnCooldown = currentWave.intervalTicks;
     } else {
       const kind: EnemyKind = t > 30 && random(world) < .2 ? 'sentry' : t > 12 && random(world) < .35 ? 'drone' : 'crawler';
       spawn(world, kind);
       world.spawnCooldown = Math.max(13, 60 - Math.floor(t / 3));
     }
   }
-  if (world.tick >= rules.bossSpawnTick && !world.bossSpawned) { spawn(world, 'boss'); world.bossSpawned = true; world.events.push('boss'); }
+  const campaignBoss = rules.kind === 'campaign' ? rules.boss : undefined;
+  if (world.tick >= rules.bossSpawnTick && !world.bossSpawned) {
+    spawn(world, 'boss', campaignBoss?.hp);
+    world.bossSpawned = true;
+    world.events.push('boss');
+  }
   world.fireCooldown--;
   if (world.fireCooldown <= 0 && world.enemies.length) {
     let target = world.enemies[0];
@@ -159,16 +175,19 @@ function step(world: World, input: Input): void {
     if (enemy.flash > 0) enemy.flash--;
     const angle = Math.atan2(p.y - enemy.y, p.x - enemy.x);
     const d = distance(p.x, p.y, enemy.x, enemy.y);
-    const speed = enemy.kind === 'boss' ? .65 : enemy.kind === 'drone' ? 1.45 : enemy.kind === 'sentry' ? .35 : .8;
+    const boss = enemy.kind === 'boss' ? campaignBoss : undefined;
+    const speed = enemy.kind === 'boss' ? boss?.speed ?? .65 : enemy.kind === 'drone' ? 1.45 : enemy.kind === 'sentry' ? .35 : .8;
     if (enemy.kind !== 'sentry' || d > 230) { enemy.x += Math.cos(angle) * speed; enemy.y += Math.sin(angle) * speed; }
     enemy.attack--;
     if ((enemy.kind === 'sentry' || enemy.kind === 'boss') && enemy.attack <= 0) {
-      const count = enemy.kind === 'boss' ? 12 : 1;
+      const count = boss?.shotCount ?? (enemy.kind === 'boss' ? 12 : 1);
+      const shotSpeed = boss?.shotSpeed ?? 2.2;
       for (let i = 0; i < count; i++) {
-        const a = count === 1 ? angle : i / count * Math.PI * 2 + world.tick * .01;
-        world.shots.push({ x: enemy.x, y: enemy.y, vx: Math.cos(a) * 2.2, vy: Math.sin(a) * 2.2, life: 220, damage: ARMOR_RULES.hpPerCell, hostile: true });
+        const a = boss?.aim === 'fan' ? angle + (i - (count - 1) / 2) * boss.fanStep
+          : count === 1 ? angle : i / count * Math.PI * 2 + world.tick * .01;
+        world.shots.push({ x: enemy.x, y: enemy.y, vx: Math.cos(a) * shotSpeed, vy: Math.sin(a) * shotSpeed, life: 220, damage: ARMOR_RULES.hpPerCell, hostile: true });
       }
-      enemy.attack = enemy.kind === 'boss' ? 135 : 180;
+      enemy.attack = boss?.cooldownTicks ?? (enemy.kind === 'boss' ? 135 : 180);
     }
     if (d < enemy.radius + 10) damagePlayer(world);
     if (world.upgrades.orbit > 0) {

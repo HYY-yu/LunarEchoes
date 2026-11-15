@@ -1,0 +1,157 @@
+[
+  {
+    "id": "antarctica.opening",
+    "stageId": "antarctica",
+    "beat": "opening",
+    "outcome": "any",
+    "zh": "用雨林带回的频率，南极接收阵列捕捉到了同一个信号。阵列还差最后一轮测向就能定位发射源。",
+    "en": "Tuned to the frequency from the rainforest, the Antarctic receiver array has picked up the same signal. One more scan will locate the source."
+  },
+  {
+    "id": "antarctica.objective",
+    "stageId": "antarctica",
+    "beat": "objective",
+    "outcome": "any",
+    "zh": "在阵列完成测向前守住冰原，击败冰壳巨兽。",
+    "en": "Hold the ice field while the array finishes its scan. Defeat the Ice-Shell Behemoth."
+  },
+  {
+    "id": "antarctica.victory",
+    "stageId": "antarctica",
+    "beat": "victory",
+    "outcome": "won",
+    "zh": "冰壳巨兽倒下了。阵列已经锁定发射源，坐标落在月面。",
+    "en": "The Ice-Shell Behemoth is down. The array has pinned down the source. The coordinates put it on the Moon."
+  },
+  {
+    "id": "antarctica.defeat",
+    "stageId": "antarctica",
+    "beat": "defeat",
+    "outcome": "lost",
+    "zh": "测向中断，月面坐标还没算出来。重新部署，再为阵列争取一次机会。",
+    "en": "The scan stopped before the array could fix the source coordinates. Redeploy and give it another chance."
+  },
+  {
+    "id": "antarctica.next-clue",
+    "stageId": "antarctica",
+    "beat": "next-clue",
+    "outcome": "won",
+    "nextStageId": "space-elevator",
+    "zh": "去太空电梯，把坐标和反攻设备送上轨道。上行窗口快关了。",
+    "en": "Take the coordinates and the strike equipment to the space elevator. The ascent window is closing."
+  },
+  {
+    "id": "space-elevator.opening",
+    "stageId": "space-elevator",
+    "beat": "opening",
+    "outcome": "any",
+    "zh": "坐标和设备都已装上升降平台。牵引装置刚启动，轨道井里就出现了追兵。",
+    "en": "The coordinates and equipment are aboard the lift. As the drive starts, pursuers appear in the elevator shaft."
+  },
+  {
+    "id": "space-elevator.objective",
+    "stageId": "space-elevator",
+    "beat": "objective",
+    "outcome": "any",
+    "zh": "在上升途中击退追兵，击败轨道猎手，把设备送入轨道。",
+    "en": "Fight off the pursuers during the ascent. Defeat the Orbital Hunter and get the equipment into orbit."
+  },
+  {
+    "id": "space-elevator.victory",
+    "stageId": "space-elevator",
+    "beat": "victory",
+    "outcome": "won",
+    "zh": "轨道猎手已经被击败。升降平台已经对接，坐标和设备都送到了。",
+    "en": "The Orbital Hunter is down. The lift has docked with the coordinates and equipment aboard."
+  },
+  {
+    "id": "space-elevator.defeat",
+    "stageId": "space-elevator",
+    "beat": "defeat",
+    "outcome": "lost",
+    "zh": "平台没能抵达对接点。重新部署，护住下一次上行。",
+    "en": "The lift never reached the dock. Redeploy and see the next ascent through."
+  },
+  {
+    "id": "space-elevator.next-clue",
+    "stageId": "space-elevator",
+    "beat": "next-clue",
+    "outcome": "won",
+    "nextStageId": "watchtower",
+    "zh": "对接舱外的轨道哨塔正在求援。月球航线还要靠它打开。",
+    "en": "The orbital watchtower beyond the dock is calling for help. We need its relay to open the route to the Moon."
+  },
+  {
+    "id": "watchtower.opening",
+    "stageId": "watchtower",
+    "beat": "opening",
+    "outcome": "any",
+    "zh": "受损空间站只剩这座哨塔还能中继。它正在充能，敌人从对接平台两侧围了上来。",
+    "en": "The watchtower is the damaged station's last working relay. It is charging as attackers close in on both sides of the docking platform."
+  },
+  {
+    "id": "watchtower.objective",
+    "stageId": "watchtower",
+    "beat": "objective",
+    "outcome": "any",
+    "zh": "撑到中继完成充能，击败攻城指挥体。",
+    "en": "Hold out until the relay is charged. Defeat the Siege Commander."
+  },
+  {
+    "id": "watchtower.victory",
+    "stageId": "watchtower",
+    "beat": "victory",
+    "outcome": "won",
+    "zh": "攻城指挥体倒下后，敌潮散了。中继完成充能，月面坐标已发给反攻小队。",
+    "en": "The attack broke when the Siege Commander fell. The relay is charged and has sent the lunar coordinates to the strike team."
+  },
+  {
+    "id": "watchtower.defeat",
+    "stageId": "watchtower",
+    "beat": "defeat",
+    "outcome": "lost",
+    "zh": "这次没能撑到充能完成。重新部署，守住中继周围。",
+    "en": "We fell before the charge was ready. Redeploy and hold the area around the relay."
+  },
+  {
+    "id": "watchtower.next-clue",
+    "stageId": "watchtower",
+    "beat": "next-clue",
+    "outcome": "won",
+    "nextStageId": "lunar-echoes",
+    "zh": "去月球的航线已经打开。外星基地就在南极阵列锁定的位置。",
+    "en": "The route to the Moon is open. The alien base is at the coordinates the Antarctic array identified."
+  },
+  {
+    "id": "lunar-echoes.opening",
+    "stageId": "lunar-echoes",
+    "beat": "opening",
+    "outcome": "any",
+    "zh": "哨塔发来的坐标把我们带到了月球基地。面前的核心正向地球发射那个从沙漠追踪至今的信号。",
+    "en": "The watchtower's coordinates brought us to the lunar base. The core ahead is beaming the signal we've followed since the desert toward Earth."
+  },
+  {
+    "id": "lunar-echoes.objective",
+    "stageId": "lunar-echoes",
+    "beat": "objective",
+    "outcome": "any",
+    "zh": "击退基地守军，击败月面主脑，切断入侵网络。",
+    "en": "Fight off the base defenders. Defeat the Lunar Overmind and shut down the invasion network."
+  },
+  {
+    "id": "lunar-echoes.victory",
+    "stageId": "lunar-echoes",
+    "beat": "victory",
+    "outcome": "won",
+    "zh": "月面主脑倒下，入侵信号消失了。前五站留下的信号片段已归档。无线电里传来地球的回音，最先报到的是沙漠基地。",
+    "en": "The Lunar Overmind fell and the invasion signal went silent. The signal fragments from the five earlier missions are on record. Earth answers over the radio. Desert Base checks in first."
+  },
+  {
+    "id": "lunar-echoes.defeat",
+    "stageId": "lunar-echoes",
+    "beat": "defeat",
+    "outcome": "lost",
+    "zh": "核心还在向地球发射信号。月面坐标仍有效，重新部署。",
+    "en": "The core is still transmitting toward Earth. The lunar coordinates are still good. Redeploy."
+  }
+]

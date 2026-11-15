@@ -2,6 +2,7 @@ import { stageRules } from './stage-rules.js';
 import { type World } from './core.js';
 import { createAtlas } from './art.js';
 import { createDesertMap } from './desert-map.js';
+import { drawCampaignTerrain } from './campaign-maps.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
 export function createRenderer(canvas: HTMLCanvasElement) {
   const context = canvas.getContext('2d', { alpha: false });
@@ -29,7 +30,8 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     ctx.translate(vw / 2 - cameraX, vh / 2 - cameraY);
     const view = { left: cameraX - vw / 2, top: cameraY - vh / 2, width: vw, height: vh };
     if (world.context.stageId === 'rainforest') drawRainforestTerrain(ctx, view);
-    else drawDesertMap(ctx, arena, view);
+    else if (world.context.stageId === 'desert-base') drawDesertMap(ctx, arena, view);
+    else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick);
     for (const crystal of world.crystals) atlas.draw(ctx, 'crystal', crystal.x, crystal.y + Math.sin(time * .004 + crystal.x) * 2, .9);
     for (const enemy of world.enemies) {
       const scale = enemy.kind === 'boss' ? 3.8 : enemy.kind === 'sentry' ? 1.8 : 1.5;
