@@ -5,7 +5,7 @@ import { resolve, extname, sep } from 'node:path';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
 import { embedDesertContent } from './desert-content.mjs';
-import { validateRainforestStory } from './rainforest-story.mjs';
+import { validateLaterStory, validateRainforestStory } from './rainforest-story.mjs';
 
 export async function build(context) {
   await rm('dist', { recursive: true, force: true });
@@ -13,10 +13,12 @@ export async function build(context) {
   await mkdir('dist', { recursive: true });
   const html = embedDesertContent(await readFile('index.html', 'utf8'), JSON.parse(await readFile('content/desert-base.story.json', 'utf8')));
   const rainforestStory = validateRainforestStory(JSON.parse(await readFile('content/rainforest.story.json', 'utf8')));
+  const laterStory = validateLaterStory(JSON.parse(await readFile('content/campaign-later.story.json', 'utf8')));
   await Promise.all([
     writeFile('dist/index.html', html),
     copyFile('style.css', 'dist/style.css'),
-    writeFile('dist/rainforest.story.json', JSON.stringify(rainforestStory))
+    writeFile('dist/rainforest.story.json', JSON.stringify(rainforestStory)),
+    writeFile('dist/campaign-later.story.json', JSON.stringify(laterStory))
   ]);
 }
 
