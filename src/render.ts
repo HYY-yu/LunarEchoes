@@ -31,7 +31,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     const view = { left: cameraX - vw / 2, top: cameraY - vh / 2, width: vw, height: vh };
     if (world.context.stageId === 'rainforest') drawRainforestTerrain(ctx, view);
     else if (world.context.stageId === 'desert-base') drawDesertMap(ctx, arena, view);
-    else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick);
+    else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick, time);
     for (const crystal of world.crystals) atlas.draw(ctx, 'crystal', crystal.x, crystal.y + Math.sin(time * .004 + crystal.x) * 2, .9);
     for (const enemy of world.enemies) {
       const scale = enemy.kind === 'boss' ? 3.8 : enemy.kind === 'sentry' ? 1.8 : 1.5;

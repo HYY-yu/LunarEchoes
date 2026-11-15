@@ -1,17 +1,17 @@
 import type { StageId } from './stage-contract.js';
 
-function context<const Id extends StageId>(stageId: Id): Readonly<{ stageId: Id; rulesVersion: `${Id}-1` }> {
-  return Object.freeze({ stageId, rulesVersion: `${stageId}-1` });
+function context<const Id extends StageId, const Revision extends 1 | 2>(stageId: Id, revision: Revision): Readonly<{ stageId: Id; rulesVersion: `${Id}-${Revision}` }> {
+  return Object.freeze({ stageId, rulesVersion: `${stageId}-${revision}` });
 }
 
-export const DESERT_CONTEXT = context('desert-base');
-export const RAINFOREST_CONTEXT = context('rainforest');
-export const ANTARCTICA_CONTEXT = context('antarctica');
-export const SPACE_ELEVATOR_CONTEXT = context('space-elevator');
-export const WATCHTOWER_CONTEXT = context('watchtower');
-export const LUNAR_ECHOES_CONTEXT = context('lunar-echoes');
+export const DESERT_CONTEXT = context('desert-base', 1);
+export const RAINFOREST_CONTEXT = context('rainforest', 1);
+export const ANTARCTICA_CONTEXT = context('antarctica', 1);
+export const SPACE_ELEVATOR_CONTEXT = context('space-elevator', 1);
+export const WATCHTOWER_CONTEXT = context('watchtower', 1);
+export const LUNAR_ECHOES_CONTEXT = context('lunar-echoes', 1);
 
-const CONTEXTS = Object.freeze({
+const LEGACY_CONTEXTS = Object.freeze({
   'desert-base': DESERT_CONTEXT,
   rainforest: RAINFOREST_CONTEXT,
   antarctica: ANTARCTICA_CONTEXT,
@@ -20,7 +20,16 @@ const CONTEXTS = Object.freeze({
   'lunar-echoes': LUNAR_ECHOES_CONTEXT
 } satisfies { [Id in StageId]: { stageId: Id; rulesVersion: `${Id}-1` } });
 
-export type StageContext = typeof CONTEXTS[StageId];
+const CONTEXTS = Object.freeze({
+  'desert-base': context('desert-base', 2),
+  rainforest: context('rainforest', 2),
+  antarctica: context('antarctica', 2),
+  'space-elevator': context('space-elevator', 2),
+  watchtower: context('watchtower', 2),
+  'lunar-echoes': context('lunar-echoes', 2)
+} satisfies { [Id in StageId]: { stageId: Id; rulesVersion: `${Id}-2` } });
+
+export type StageContext = typeof CONTEXTS[StageId] | typeof LEGACY_CONTEXTS[StageId];
 export type SimulationErrorCode = 'invalid-data' | 'incompatible-version' | 'unavailable-stage' | 'incompatible-rules' | 'nonterminal-replay' | 'checksum-mismatch' | 'incomplete-replay';
 export class SimulationError extends Error {
   constructor(readonly code: SimulationErrorCode) { super(code === 'incompatible-version' ? 'Replay version mismatch' : code); this.name = 'SimulationError'; }
@@ -114,6 +123,8 @@ export function stageContext(stageId: StageId): StageContext {
 
 export function resolveStage(stageId: unknown, rulesVersion: unknown): StageContext {
   if (!isStageId(stageId)) throw new SimulationError('unavailable-stage');
+  const legacy = LEGACY_CONTEXTS[stageId];
+  if (rulesVersion === legacy.rulesVersion) return legacy;
   const stage = stageContext(stageId);
   if (rulesVersion !== stage.rulesVersion) throw new SimulationError('incompatible-rules');
   return stage;

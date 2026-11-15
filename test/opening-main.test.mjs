@@ -7,9 +7,11 @@ import { drawDesertScene } from '../dist/desert-scene.js';
 import { drawRainforestFailure, drawRainforestVictory } from '../dist/rainforest-story-art.js';
 import * as core from '../dist/core.js';
 import { createWorld, normalizeInput, replay, finalChecksum, startRecording } from '../dist/core.js';
-import { RAINFOREST_CONTEXT } from '../dist/stage-rules.js';
+import { stageContext } from '../dist/stage-rules.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
-import { play } from '../scripts/simulate.mjs';
+import { play as simulate } from '../scripts/simulate.mjs';
+const RAINFOREST_CONTEXT = stageContext('rainforest');
+const play = seed => simulate(seed, stageContext('desert-base'));
 import ts from 'typescript';
 import { embedDesertContent } from '../scripts/desert-content.mjs';
 const catalog = JSON.parse(readFileSync('content/desert-base.story.json', 'utf8'));
@@ -58,7 +60,7 @@ function harness(content = embedded, localStorage = memoryStorage(), fetchStory 
     getBoundingClientRect() { return { left: 0, top: 0, width: 110, height: 110 }; }
   }
   class Button extends Element { constructor() { super('button'); } }
-  class Canvas extends Element { constructor() { super('canvas'); this.commands = []; } getContext() { const commands = this.commands; return { fillRect(...rect) { commands.push([this.fillStyle, ...rect]); }, save() {}, restore() {}, scale() {}, translate() {}, beginPath() {}, moveTo() {}, lineTo() {}, closePath() {}, fill() {}, drawImage() {} }; } }
+  class Canvas extends Element { constructor() { super('canvas'); this.commands = []; } getContext() { const commands = this.commands; return { fillRect(...rect) { commands.push([this.fillStyle, ...rect]); }, save() {}, restore() {}, scale() {}, translate() {}, beginPath() {}, moveTo() {}, lineTo() {}, closePath() {}, fill() {}, drawImage() {}, ellipse() {}, arc() {}, stroke() {}, strokeRect() {}, setLineDash() {}, createPattern() { return 'terrain'; } }; } }
   const body = new Element('body');
   for (const id of ['game', 'overlay', 'hud', 'touch', 'armor-cells', 'notice', 'footer-right', 'sound', 'language', 'pause', 'health-label', 'time-label', 'clock', 'sync-fill', 'level', 'kills', 'xp-fill', 'dash', 'footer-left', 'equipment', 'joystick', 'stick', 'desert-content']) {
     const node = id === 'game' ? new Canvas() : ['sound', 'language', 'pause', 'dash'].includes(id) ? new Button() : new Element('div'); node.id = id; if (id === 'desert-content') node.textContent = content; body.append(node);
@@ -198,7 +200,8 @@ test('actual main keeps World, RNG and recording frozen through opening and pres
   app.get('sound').onclick(); app.event('blur'); app.document.hidden = true; app.event('visibilitychange'); app.frame(600000); app.document.hidden = false; app.event('visibilitychange');
   app.pointer('joystick', 'pointerdown'); app.pointer('dash', 'pointerdown');
   const opening = app.snapshot(); assert.deepEqual(opening.world, preview.world); assert.deepEqual(opening.actions, preview.actions); assert.equal(app.seedCalls, 0); assert.equal(opening.screen, 'opening'); assert.equal(app.sessions.at(-1), 'menu');
-  app.activate('opening-skip', 'Space'); assert.equal(app.seedCalls, 1); assert.equal(app.snapshot().world.tick, 0); assert.deepEqual(app.snapshot().actions, []); assert.equal(app.active, app.get('game'));
+  assert.equal(app.get('opening-skip'), null);
+  app.activate('opening-continue', 'Space'); assert.equal(app.seedCalls, 1); assert.equal(app.snapshot().world.tick, 0); assert.deepEqual(app.snapshot().actions, []); assert.equal(app.active, app.get('game'));
   primary.onclick(); assert.equal(app.seedCalls, 1);
   app.key('KeyD', true); app.key('Space', true); app.frame(); app.frame();
   assert.ok(app.snapshot().actions.every(action => action.input.x === 0 && !action.input.dash));
@@ -207,7 +210,7 @@ test('actual main keeps World, RNG and recording frozen through opening and pres
 });
 test('pointer, Enter and Space completion produce the same seeded actions after short and long waits', () => {
   const results = [];
-  for (const [wait, finish, key] of [[0, 'opening-continue', null], [500000, 'opening-continue', 'Enter'], [900000, 'opening-skip', 'Space']]) {
+  for (const [wait, finish, key] of [[0, 'opening-continue', null], [500000, 'opening-continue', 'Enter'], [900000, 'opening-continue', 'Space']]) {
     const app = harness(); app.click('启动任务'); app.frame(wait); if (wait) { app.get('language').onclick(); app.get('sound').onclick(); }
     if (key) assert.equal(app.activate(finish, key).defaultPrevented, undefined); else app.get(finish).onclick();
     app.key('KeyD', true); app.key('Space', true); app.frame(); app.frame(); app.release('KeyD'); app.key('KeyD'); app.frame(); app.release('KeyD'); app.frame();
@@ -215,13 +218,33 @@ test('pointer, Enter and Space completion produce the same seeded actions after 
   }
   assert.deepEqual(results[0], results[1]); assert.deepEqual(results[0], results[2]);
 });
-test('skip retains bilingual objective in pause; pointer capture clears and stale touch cannot refill paused input', () => {
-  const app = harness(); app.click('启动任务'); app.click('跳过开场'); app.pointer('joystick', 'pointerdown'); assert.equal(app.get('joystick').hasPointerCapture(9), true);
+test('deployment retains bilingual objective in pause; pointer capture clears and stale touch cannot refill paused input', () => {
+  const app = harness(); app.click('启动任务'); app.click('部署出发'); app.pointer('joystick', 'pointerdown'); assert.equal(app.get('joystick').hasPointerCapture(9), true);
   app.key('KeyP'); assert.equal(app.snapshot().world.phase.kind, 'paused'); assert.equal(app.get('joystick').hasPointerCapture(9), false); assert.equal(app.get('stick').style.transform, '');
   assert.equal(app.get('overlay').children[0].children.find(node => node.dataset.storyId)?.textContent, catalog[1].zh);
   app.get('language').onclick(); assert.equal(app.get('overlay').children[0].children.find(node => node.dataset.storyId)?.textContent, catalog[1].en);
   app.pointer('joystick', 'pointermove'); app.pointer('dash', 'pointerdown'); app.key('KeyP'); app.frame(); app.frame(); assert.ok(app.snapshot().actions.filter(action => action.kind === 'tick').every(action => action.input.x === 0 && !action.input.dash));
 });
+
+test('countdown is based on combat time and returning from pause preserves progress', () => {
+  const storage = memoryStorage(savedProgress('rainforest'));
+  const app = harness(embedded, storage);
+  app.click('启动任务'); app.click('部署出发');
+  assert.equal(app.get('clock').textContent, '03:00');
+  assert.equal(app.get('armor-cells').attributes['aria-valuenow'], '5');
+  for (let frame = 0; frame < 15; frame++) app.frame();
+  assert.equal(app.get('clock').textContent, '02:59');
+  app.get('pause').onclick();
+  const frozen = app.get('clock').textContent;
+  for (let frame = 0; frame < 30; frame++) app.frame();
+  assert.equal(app.get('clock').textContent, frozen);
+  app.activate('pause-home', 'Enter');
+  assert.equal(app.snapshot().screen, 'title');
+  assert.equal(app.active, app.get('mission-start'));
+  assert.deepEqual(storage.writes, []);
+  assert.equal(storage.raw, savedProgress('rainforest'));
+});
+
 function naturalLoss(app, headerFocus = false) {
   app.click('启动任务'); app.click('部署出发');
   if (headerFocus) app.get('sound').focus();
@@ -263,7 +286,7 @@ test('a selected stage survives deployment, same-stage retry and replay while ho
   let requests = 0;
   const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
   const app = harness(embedded, storage, async () => { requests++; return { ok: true, json: async () => story }; });
-  const selected = { stageId: 'rainforest', rulesVersion: 'rainforest-1' };
+  const selected = { stageId: 'rainforest', rulesVersion: 'rainforest-2' };
   await app.openStage(selected);
   for (const beat of ['opening', 'objective']) {
     const node = app.get(beat === 'opening' ? 'opening-story' : 'opening-objective');
@@ -423,8 +446,8 @@ test('replay end preserves a new verification error for its full duration', () =
 });
 test('natural live victory draws the original scene and keeps full bilingual story, state, nodes, focus and scroll stable', () => {
   const app = harness(), terminal = naturalWin(app), panel = app.get('victory-panel'), retry = app.get('victory-retry'), art = app.get('victory-art');
-  assert.deepEqual(app.overlayButtons(), ['重新部署', '返回选关']);
-  assert.ok(panel); assert.equal(app.active, retry); assert.equal(retry.focusOptions.preventScroll, true); assert.equal(retry.focusCalls, 1);
+  const next = app.get('victory-next');
+  assert.ok(panel); assert.equal(app.active, next); assert.equal(next.focusOptions.preventScroll, true); assert.equal(next.focusCalls, 1);
   assert.equal(art.width, 320); assert.equal(art.height, 180); assert.equal(art.attributes.role, 'img'); assert.equal(panel.attributes['aria-labelledby'], 'victory-heading');
   const original = []; drawDesertScene({ save() {}, restore() {}, fillRect(...rect) { original.push([this.fillStyle, ...rect]); } }, 'victory');
   assert.deepEqual(art.commands, original); assert.equal(art.commands.length, 816);
@@ -435,17 +458,18 @@ test('natural live victory draws the original scene and keeps full bilingual sto
   assert.ok(panel.children.indexOf(story) < panel.children.indexOf(nextClue));
   assert.equal(story.textContent, victory.zh); assert.equal(nextClue.textContent, clue.zh);
   assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('defeat-art'), null);
+  assert.deepEqual(panel.children.at(-1).children.map(button => button.id), ['victory-next', 'victory-retry', 'victory-missions']); assert.equal(retry.textContent, '重新部署');
   assert.ok(app.logs.some(([, name, data]) => name === 'session.finished' && data.outcome === 'won' && data.checksum === terminal.checksum));
   panel.scrollTop = 87;
   for (let i = 0; i < 20; i++) { app.frame(60000); for (const code of ['KeyD', 'Space', 'KeyP', 'Escape', 'Digit1']) app.key(code); }
   app.get('language').focus(); app.get('language').onclick();
-  assert.deepEqual(app.overlayButtons(), ['Redeploy', 'Back to missions']);
+  assert.deepEqual(app.overlayButtons(), ['Next mission · Deep Rainforest', 'Redeploy', 'Back to missions']);
   assert.equal(story.textContent, victory.en); assert.equal(nextClue.textContent, clue.en); assert.ok(art.attributes['aria-label']);
   app.get('sound').onclick(); app.event('blur'); app.document.hidden = true; app.event('visibilitychange'); app.frame(600000); app.document.hidden = false; app.event('visibilitychange');
   app.pointer('joystick', 'pointerdown'); app.pointer('dash', 'pointerdown');
   assert.deepEqual(app.snapshot(), terminal); assert.equal(app.seedCalls, 1); assert.equal(app.sessions.at(-1), 'terminal');
   for (const [id, node] of [['victory-panel', panel], ['victory-retry', retry], ['victory-art', art], ['victory-story', story], ['victory-next-clue', nextClue], ['victory-time', statLabel]]) assert.equal(app.get(id), node);
-  assert.equal(panel.scrollTop, 87); assert.equal(app.active, app.get('language')); assert.equal(retry.focusCalls, 1);
+  assert.equal(panel.scrollTop, 87); assert.equal(app.active, app.get('language')); assert.equal(next.focusCalls, 1);
   app.activate('victory-missions', 'Enter');
   assert.equal(app.active.id, 'stages-heading');
   assert.equal(app.get('stage-list').children[1].children[1].disabled, false);
@@ -466,7 +490,7 @@ test('live victory preserves header focus and internal replay verifies the compl
   assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
 });
 test('direct native victory Retry skips narrative with fresh seed, empty input and a complete initial world', () => {
-  const app = harness(), terminal = naturalWin(app, 'body'); assert.equal(app.active, app.get('victory-retry')); assert.equal(app.get('victory-retry').focusOptions.preventScroll, true);
+  const app = harness(), terminal = naturalWin(app, 'body'); assert.equal(app.active, app.get('victory-next')); assert.equal(app.get('victory-next').focusOptions.preventScroll, true);
   assert.equal(app.activate('victory-retry', 'Enter').defaultPrevented, undefined);
   const retry = app.snapshot(); assert.equal(retry.screen, 'game'); assert.equal(retry.world.phase.kind, 'running'); assert.equal(retry.world.tick, 0); assert.equal(retry.world.level, 1); assert.equal(retry.world.xp, 0); assert.equal(retry.world.player.hp, retry.world.player.maxHp); assert.deepEqual(retry.world, createWorld({ ...retry.world.context, seed: retry.world.seed })); assert.deepEqual(retry.world.context, terminal.world.context); assert.deepEqual(retry.actions, []); assert.equal(app.seedCalls, 2); assert.notEqual(retry.world.seed, terminal.world.seed); assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('opening-panel'), null); assert.equal(app.active, app.get('game')); assertNoVictory(app);
   app.key('KeyD', true); app.key('Space', true); app.frame(); app.frame(); assert.ok(app.snapshot().actions.every(action => action.input.x === 0 && action.input.y === 0 && !action.input.dash));
@@ -739,7 +763,7 @@ test('title loads one local progress session and deployment does not create a sa
   assert.match(app.get('title-progress').textContent, /沙漠基地 · 已解锁/);
   app.get('language').onclick();
   assert.match(app.get('title-progress').textContent, /Desert Base · Unlocked/);
-  app.click('Begin mission'); app.click('Skip opening');
+  app.click('Begin mission'); app.click('Deploy');
   assert.equal(app.snapshot().screen, 'game');
   assert.deepEqual(storage.reads, [progressKey]); assert.deepEqual(storage.writes, []);
 });
@@ -828,7 +852,7 @@ test('the four later missions show their opening, pause objective and defeat act
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(app.get('opening-story')?.dataset.storyId, `${stageId}.opening`, JSON.stringify(app.logs));
     assert.equal(app.get('opening-objective').textContent, objective.zh);
-    app.activate('opening-skip', 'Enter');
+    app.activate('opening-continue', 'Enter');
     assert.equal(app.session().world.context.stageId, stageId);
     app.get('pause').onclick();
     assert.equal(app.get('pause-objective').dataset.storyId, objective.id);
@@ -842,12 +866,25 @@ test('the four later missions show their opening, pause objective and defeat act
   }
 });
 
-test('a live desert victory saves rainforest once and a fresh title restores that unlock', () => {
+test('desert victory saves the unlock and the shortcut opens the rainforest without starting combat', async () => {
   const storage = memoryStorage();
-  const app = harness(embedded, storage);
+  const rainforest = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
+  const app = harness(embedded, storage, async () => ({ ok: true, json: async () => rainforest }));
   naturalWin(app);
   assert.match(app.get('victory-progress').textContent, /雨林深处 · 已解锁.*进度已保存/);
   assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
+  assert.equal(app.get('victory-next').textContent, '下一关 · 雨林深处');
+  app.activate('victory-next', 'Enter');
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(app.get('opening-story').dataset.storyId, 'rainforest.opening');
+  assert.equal(app.seedCalls, 1);
+  app.activate('opening-back', 'Enter');
+  assert.equal(app.active, app.get('victory-next'));
+  app.activate('victory-next', 'Space');
+  await new Promise(resolve => setImmediate(resolve));
+  app.activate('opening-continue', 'Enter');
+  assert.deepEqual(app.snapshot().world.context, RAINFOREST_CONTEXT);
+  assert.equal(app.seedCalls, 2);
   const refreshed = harness(embedded, storage);
   assert.match(refreshed.get('title-progress').textContent, /雨林深处 · 已解锁/);
   naturalWin(refreshed);
@@ -961,7 +998,7 @@ test('rainforest opening load failure preserves the current screen and progress'
   const storage = memoryStorage();
   const app = harness(embedded, storage, async () => ({ ok: false, status: 503 }));
   const before = app.session();
-  await app.openStage({ stageId: 'rainforest', rulesVersion: 'rainforest-1' });
+  await app.openStage({ stageId: 'rainforest', rulesVersion: 'rainforest-2' });
   assert.deepEqual(app.session(), before);
   assert.equal(app.get('opening-panel'), null);
   assert.equal(app.seedCalls, 0);
@@ -975,8 +1012,8 @@ test('invalid rainforest defeat copy leaves opening, the failure illustration an
   const defeat = story.find(entry => entry.beat === 'defeat');
   defeat.outcome = 'won';
   const app = harness(embedded, memoryStorage(), async () => ({ ok: true, json: async () => story }));
-  await app.openStage({ stageId: 'rainforest', rulesVersion: 'rainforest-1' });
-  app.get('opening-skip').onclick();
+  await app.openStage({ stageId: 'rainforest', rulesVersion: 'rainforest-2' });
+  app.get('opening-continue').onclick();
   finishIdle(app);
   assert.equal(app.get('defeat-story').textContent, '');
   assert.equal(app.get('defeat-story').dataset.storyId, undefined);
@@ -1011,12 +1048,12 @@ function finishRainforestVictory(app) {
   return terminal;
 }
 
-test('rainforest pause shows the opening objective in both languages after skipping or retrying', async () => {
+test('rainforest pause shows the opening objective in both languages after deployment or retrying', async () => {
   const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
   const objective = story.find(entry => entry.id === 'rainforest.objective');
   const app = harness(embedded, memoryStorage(savedProgress('rainforest')), async () => ({ ok: true, json: async () => story }));
   await app.openStage(RAINFOREST_CONTEXT);
-  app.activate('opening-skip', 'Enter');
+  app.activate('opening-continue', 'Enter');
 
   app.get('pause').onclick();
   const panel = app.get('pause-panel');
@@ -1106,7 +1143,7 @@ test('an invalid rainforest handoff hides that paragraph and keeps the valid vic
   story.find(entry => entry.beat === 'next-clue').nextStageId = 'watchtower';
   const app = harness(embedded, memoryStorage(savedProgress('rainforest')), async () => ({ ok: true, json: async () => story }));
   await app.openStage(RAINFOREST_CONTEXT);
-  app.activate('opening-skip', 'Enter');
+  app.activate('opening-continue', 'Enter');
   const terminal = finishRainforestVictory(app);
   assert.equal(app.get('victory-story').dataset.storyId, 'rainforest.victory');
   assert.equal(app.get('victory-next-clue').hidden, true);

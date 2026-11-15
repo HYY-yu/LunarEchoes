@@ -56,9 +56,10 @@ export async function check(context) {
 export async function simulate(context) {
   const { play } = await import('./simulation.mjs');
   const { checksum } = await import('../dist/core.js');
+  const { stageContext } = await import('../dist/stage-rules.js');
   let wins = 0;
   for (const seed of [208907, 42, 101]) {
-    const { world } = play(seed);
+    const { world } = play(seed, stageContext('desert-base'));
     if (world.phase.kind === 'won') wins++;
     context.info({ event: 'simulation.finished', seed, phase: world.phase.kind, seconds: world.tick / 60, kills: world.kills, level: world.level, hp: world.player.hp, bossKilled: world.bossKilled, checksum: checksum(world) });
   }
