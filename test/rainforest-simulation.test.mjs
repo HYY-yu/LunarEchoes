@@ -70,7 +70,7 @@ test('rainforest runs its own enemy composition and pause does not advance battl
 
 test('rainforest recording validation requires the exact rule pair and rejects context substitution', () => {
   const { recording } = playArmorCase(core, seed, 'stationary', 'attack', RAINFOREST_CONTEXT);
-  for (const rulesVersion of ['desert-base-1', 'rainforest-2']) {
+  for (const rulesVersion of ['desert-base-1', 'rainforest-3']) {
     assert.throws(() => core.createWorld({ ...request, rulesVersion }), { code: 'incompatible-rules' });
     assert.throws(() => core.prepareReplay({ ...recording, rulesVersion }), { code: 'incompatible-rules' });
   }

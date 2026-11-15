@@ -1,7 +1,9 @@
 import { resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
-export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 10, hullCapacityCells: 2, hullRepairCells: 4, repairEveryTicks: HZ * 30 });
+export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
+const LEGACY_ARMOR_RULES = Object.freeze({ ...ARMOR_RULES, initialCells: 10, hullRepairCells: 4 });
+function armorRules(context: StageContext) { return context.rulesVersion.endsWith('-1') ? LEGACY_ARMOR_RULES : ARMOR_RULES; }
 export type Upgrade = 'pulse' | 'orbit' | 'nova' | 'boots' | 'hull' | 'magnet';
 export type Phase = { kind: 'running' } | { kind: 'upgrading'; offers: Upgrade[] } | { kind: 'paused'; previous: 'running' } | { kind: 'won' } | { kind: 'lost' };
 export type Input = { x: number; y: number; dash: boolean };
@@ -28,9 +30,9 @@ export function createWorld(request: unknown): World {
   if (!object(request)) throw new SimulationError('invalid-data');
   keys(request, ['stageId', 'rulesVersion', 'seed']);
   const context = resolveStage(request.stageId, request.rulesVersion), rules = stageRules(context);
-  const seed = parseSeed(request.seed);
+  const seed = parseSeed(request.seed), armor = armorRules(context);
   const world: World = { context, seed, rng: seed || 1, tick: 0, phase: { kind: 'running' }, nextId: 1,
-    player: { x: rules.arenaSize / 2, y: rules.arenaSize / 2, hp: ARMOR_RULES.initialCells * ARMOR_RULES.hpPerCell, maxHp: ARMOR_RULES.initialCells * ARMOR_RULES.hpPerCell, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
+    player: { x: rules.arenaSize / 2, y: rules.arenaSize / 2, hp: armor.initialCells * armor.hpPerCell, maxHp: armor.initialCells * armor.hpPerCell, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
     enemies: [], shots: [], crystals: [], effects: [], events: [], level: 1, xp: 0, threshold: 5, kills: 0,
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
   Object.defineProperties(world, { context: { writable: false, configurable: false }, seed: { writable: false, configurable: false } });
@@ -93,7 +95,7 @@ export function dispatch(world: World, action: Action): void {
   if (action.kind === 'choose') {
     if (world.phase.kind !== 'upgrading' || !world.phase.offers.includes(action.upgrade)) return;
     world.upgrades[action.upgrade]++;
-    if (action.upgrade === 'hull') { world.player.maxHp += ARMOR_RULES.hullCapacityCells * ARMOR_RULES.hpPerCell; world.player.hp = Math.min(world.player.maxHp, world.player.hp + ARMOR_RULES.hullRepairCells * ARMOR_RULES.hpPerCell); }
+    if (action.upgrade === 'hull') { world.player.maxHp += ARMOR_RULES.hullCapacityCells * ARMOR_RULES.hpPerCell; world.player.hp = Math.min(world.player.maxHp, world.player.hp + armorRules(world.context).hullRepairCells * ARMOR_RULES.hpPerCell); }
     world.phase = { kind: 'running' };
     world.events.push('upgrade');
     return;

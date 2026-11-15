@@ -28,7 +28,7 @@ for (const { stageId, seed, duration, bossSecond } of scenarios) {
       const { world, recording } = core.prepareReplay(result.recording);
       assert.equal(recording.version, 'lunar-2');
       assert.equal(recording.stageId, stageId);
-      assert.equal(recording.rulesVersion, `${stageId}-1`);
+      assert.equal(recording.rulesVersion, `${stageId}-2`);
 
       const bossTicks = [];
       core.dispatch(world, { kind: 'pause' });
