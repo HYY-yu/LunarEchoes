@@ -83,17 +83,17 @@ function harness(content = embedded, localStorage = memoryStorage(), fetchStory 
     if (cache.has(name)) return cache.get(name).exports;
     const module = { exports: {} }; cache.set(name, module);
     let source = readFileSync(`dist/${name}`, 'utf8');
-    if (name === 'main.js') source += '\nglobalThis.inspectMain = (complete = false) => JSON.stringify({ world, actions: recording.actions, screen, checksum: finalChecksum(world), replayVerified, lastRecording, ...(complete ? { recording, playingRecording } : {}) }); globalThis.inspectContentFrozen = () => Object.isFrozen(desertContent) && Object.values(desertContent).every(value => Object.isFrozen(value)); globalThis.inspectNoticeTimer = () => noticeTimer; globalThis.inspectProgress = () => JSON.stringify({ screen, tick: world.tick }); globalThis.invokeReplay = () => startReplay(); globalThis.invokeBegin = () => { try { begin(world.context); } catch (error) { fail(error); } }; globalThis.openStage = value => showOpening(JSON.parse(value)); globalThis.inspectRadio = () => radioState.kind; globalThis.inspectRadioBeat = () => "beat" in radioState ? radioState.beat : null; globalThis.fixtureWorld = value => { const { seed, context, ...mutable } = JSON.parse(value); Object.assign(world, mutable); }; globalThis.replaceRecording = value => { lastRecording = JSON.parse(value); };';
+    if (name === 'main.js') source += '\nglobalThis.inspectMain = (complete = false) => JSON.stringify({ world, actions: recording.actions, screen, checksum: finalChecksum(world), replayVerified, lastRecording, ...(complete ? { recording, playingRecording } : {}) }); globalThis.inspectContentFrozen = () => Object.isFrozen(desertContent) && Object.values(desertContent).every(value => Object.isFrozen(value)); globalThis.inspectNoticeTimer = () => noticeTimer; globalThis.inspectProgress = () => JSON.stringify({ screen, tick: world.tick }); globalThis.invokeBegin = () => { try { begin(world.context); } catch (error) { fail(error); } }; globalThis.openStage = value => showOpening(JSON.parse(value)); globalThis.inspectRadio = () => radioState.kind; globalThis.inspectRadioBeat = () => "beat" in radioState ? radioState.beat : null; globalThis.fixtureWorld = value => { const { seed, context, ...mutable } = JSON.parse(value); Object.assign(world, mutable); }; globalThis.replaceRecording = value => { lastRecording = JSON.parse(value); };';
     const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
     const require = path => path === './render.js' ? { createRenderer: () => () => {} } : path === './audio.js' ? { Synth } : path === './logger.js' ? { log: (...entry) => logs.push(entry) } : load(path.slice(2));
     vm.runInContext(`(function(require,module,exports){${compiled}\n})`, context, { filename: name })(require, module, module.exports);
     return module.exports;
   }
-  load('main.js');
+  const { startReplay: invokeReplay } = load('main.js');
   const snapshot = (complete = false) => JSON.parse(context.inspectMain(complete));
   const event = (name, props = {}) => { const value = { target: active ?? get('game'), repeat: false, preventDefault() { this.defaultPrevented = true; }, ...props }; listeners.get(name)?.(value); return value; };
   const click = label => { const node = all().find(node => node.tagName === 'BUTTON' && node.textContent === label); assert.ok(node, `button ${label}`); node.onclick(); return node; };
-  return { get, click, event, logs, sessions, snapshot, session: () => snapshot(true), progress: () => JSON.parse(context.inspectProgress()), document, advanceTimers, cancelledTimers, get noticeTimer() { return context.inspectNoticeTimer(); }, get pendingTimers() { return [...timers.keys()]; }, rejectAudio() { audioFailure = true; }, failNextSeed() { seedFailure = true; }, invokeBegin() { context.invokeBegin(); }, openStage(value) { return context.openStage(JSON.stringify(value)); }, replaceRecording(value) { context.replaceRecording(JSON.stringify(value)); }, invokeReplay() { context.invokeReplay(); }, get radioState() { return context.inspectRadio(); }, get radioBeat() { return context.inspectRadioBeat(); }, fixtureWorld(value) { context.fixtureWorld(JSON.stringify(value)); }, get audioActivations() { return audioActivations; }, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
+  return { get, click, overlayButtons: () => all(get('overlay')).filter(node => node.tagName === 'BUTTON').map(node => node.textContent), event, logs, sessions, snapshot, session: () => snapshot(true), progress: () => JSON.parse(context.inspectProgress()), document, advanceTimers, cancelledTimers, get noticeTimer() { return context.inspectNoticeTimer(); }, get pendingTimers() { return [...timers.keys()]; }, rejectAudio() { audioFailure = true; }, failNextSeed() { seedFailure = true; }, invokeBegin() { context.invokeBegin(); }, openStage(value) { return context.openStage(JSON.stringify(value)); }, replaceRecording(value) { context.replaceRecording(JSON.stringify(value)); }, invokeReplay, get radioState() { return context.inspectRadio(); }, get radioBeat() { return context.inspectRadioBeat(); }, fixtureWorld(value) { context.fixtureWorld(JSON.stringify(value)); }, get audioActivations() { return audioActivations; }, get active() { return active; }, get seedCalls() { return seedCalls; }, get contentFrozen() { return context.inspectContentFrozen(); }, frame(delta = 100) { now += delta; raf(now); }, key(code, repeat = false, target = get('game')) { return event('keydown', { code, repeat, target }); }, release(code) { event('keyup', { code }); }, pointer(id, name, pointerId = 9, x = 45, y = 0) { get(id).events.get(name)?.({ pointerId, clientX: 55 + x, clientY: 55 + y, preventDefault() {} }); }, activate(id, code) { const node = get(id); node.focus(); const down = event('keydown', { code, target: node }); event('keyup', { code, target: node }); if (!down.defaultPrevented) node.onclick(); return down; } };
 }
 test('actual main expires notice text and visibility at 3500 ms without changing the complete session', () => {
   const app = harness('{'), before = app.session(), notice = app.get('notice');
@@ -124,9 +124,15 @@ test('pause blur visibility language and mute retain the notice and its original
   const paused = app.session(); assert.equal(paused.screen, 'game'); assert.equal(paused.world.phase.kind, 'paused');
   app.advanceTimers(2499); assertNotice(app, '系统异常，请刷新重试。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), paused);
 });
+test('the title offers deployment, mission selection and progress reset in both languages', () => {
+  const app = harness();
+  assert.deepEqual(app.overlayButtons(), ['启动任务', '选择任务', '重置本机进度']);
+  app.get('language').onclick();
+  assert.deepEqual(app.overlayButtons(), ['Begin mission', 'Select mission', 'Reset local progress']);
+});
 test('Replay without a recording keeps the existing notice unchanged', () => {
   const app = harness(), before = app.session(); app.event('error', { message: 'no recording' }); const timer = app.noticeTimer;
-  app.advanceTimers(1000); app.click('回放上一局'); assert.deepEqual(app.session(), before); assertNotice(app, '系统异常，请刷新重试。'); assert.equal(app.noticeTimer, timer); assert.deepEqual(app.cancelledTimers, []);
+  app.advanceTimers(1000); app.invokeReplay(); assert.deepEqual(app.session(), before); assertNotice(app, '系统异常，请刷新重试。'); assert.equal(app.noticeTimer, timer); assert.deepEqual(app.cancelledTimers, []);
   app.advanceTimers(2499); assertNotice(app, '系统异常，请刷新重试。'); app.advanceTimers(1); assertNotice(app, '');
 });
 test('successful deployment cancels the old notice before a fresh bilingual audio error', async () => {
@@ -224,7 +230,8 @@ function naturalLoss(app, headerFocus = false) {
   return app.snapshot();
 }
 test('natural live loss draws the original defeat scene and preserves terminal state, content, nodes, focus and scroll', () => {
-  const app = harness(), terminal = naturalLoss(app), panel = app.get('defeat-panel'), retry = app.get('defeat-retry'), replay = app.get('defeat-replay'), art = app.get('defeat-art');
+  const app = harness(), terminal = naturalLoss(app), panel = app.get('defeat-panel'), retry = app.get('defeat-retry'), art = app.get('defeat-art');
+  assert.deepEqual(app.overlayButtons(), ['重新部署', '返回选关']);
   assert.equal(app.active, retry); assert.equal(art.width, 320); assert.equal(art.height, 180); assert.equal(art.attributes.role, 'img');
   const original = []; drawDesertScene({ save() {}, restore() {}, fillRect(...rect) { original.push([this.fillStyle, ...rect]); } }, 'defeat');
   assert.deepEqual(art.commands, original); assert.equal(art.commands.length, 845);
@@ -234,18 +241,19 @@ test('natural live loss draws the original defeat scene and preserves terminal s
   panel.scrollTop = 81; const story = app.get('defeat-story'), statLabel = app.get('defeat-time');
   for (let i = 0; i < 20; i++) { app.frame(60000); for (const code of ['KeyD', 'Space', 'KeyP', 'Escape', 'Digit1']) app.key(code); }
   app.get('language').focus(); app.get('language').onclick();
+  assert.deepEqual(app.overlayButtons(), ['Redeploy', 'Back to missions']);
   assert.equal(app.active, app.get('language')); assert.equal(app.get('defeat-story').textContent, defeat.en); assert.ok(art.attributes['aria-label']);
   app.get('sound').onclick(); app.event('blur'); app.document.hidden = true; app.event('visibilitychange'); app.frame(600000); app.document.hidden = false; app.event('visibilitychange');
   app.pointer('joystick', 'pointerdown'); app.pointer('dash', 'pointerdown');
   assert.deepEqual(app.snapshot(), terminal); assert.equal(app.seedCalls, 1); assert.equal(app.sessions.at(-1), 'terminal');
-  assert.equal(app.get('defeat-panel'), panel); assert.equal(app.get('defeat-retry'), retry); assert.equal(app.get('defeat-replay'), replay); assert.equal(app.get('defeat-art'), art); assert.equal(app.get('defeat-story'), story); assert.equal(app.get('defeat-time'), statLabel); assert.equal(panel.scrollTop, 81); assert.equal(app.active, app.get('language'));
+  assert.equal(app.get('defeat-panel'), panel); assert.equal(app.get('defeat-retry'), retry); assert.equal(app.get('defeat-art'), art); assert.equal(app.get('defeat-story'), story); assert.equal(app.get('defeat-time'), statLabel); assert.equal(panel.scrollTop, 81); assert.equal(app.active, app.get('language'));
   for (const entry of catalog.filter(entry => ['victory', 'next-clue'].includes(entry.beat))) assert.equal(panel.children.some(node => node.dataset.storyId === entry.id || [entry.zh, entry.en].includes(node.textContent)), false);
 });
-test('natural loss preserves existing header focus and direct Replay verifies the full recording without live narrative', () => {
+test('natural loss preserves existing header focus and internal replay verifies the full recording without live narrative', () => {
   const storage = memoryStorage();
   const app = harness(embedded, storage), terminal = naturalLoss(app, true); assert.equal(app.active, app.get('sound'));
   assert.deepEqual(storage.writes, []);
-  assert.equal(app.activate('defeat-replay', 'Space').defaultPrevented, undefined); assert.equal(app.snapshot().screen, 'replay'); assert.equal(app.seedCalls, 1); assert.equal(app.get('defeat-panel'), null);
+  app.invokeReplay(); assert.equal(app.snapshot().screen, 'replay'); assert.equal(app.seedCalls, 1); assert.equal(app.get('defeat-panel'), null);
   for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) { app.frame(); assert.equal(app.get('defeat-panel'), null); }
   assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assert.equal(app.snapshot().checksum, terminal.checksum); assert.deepEqual(app.snapshot().world, terminal.world); assert.ok(app.logs.some(([, name]) => name === 'replay.finished')); assert.equal(app.get('defeat-panel'), null);
   assert.deepEqual(storage.writes, []);
@@ -309,7 +317,7 @@ test('a selected stage survives deployment, same-stage retry and replay while ho
   finishIdle(app);
   assert.equal(app.get('defeat-story').textContent, defeat.zh);
   assert.equal(requests, 1);
-  app.get('defeat-replay').onclick();
+  app.invokeReplay();
   assert.deepEqual(app.session().world.context, selected);
   assert.equal(app.session().world.seed, retry.world.seed);
   assert.equal(app.get('footer-left').textContent, `雨林深处 · 任务种子 ${retry.world.seed} · 回放中`);
@@ -354,7 +362,7 @@ test('normal Boss notices expire in both languages without changing the full liv
   const bossEntry = catalog.find(entry => entry.beat === 'boss');
   const app = harness(), terminal = noticeTerminal(app); assertNotice(app, bossEntry.zh);
   app.advanceTimers(3499); assertNotice(app, bossEntry.zh); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), terminal);
-  app.get('language').onclick(); app.activate('victory-replay', 'Enter');
+  app.get('language').onclick(); app.invokeReplay();
   for (let i = 0; i < 15000 && app.progress().tick < 8400; i++) app.frame();
   assert.equal(app.session().screen, 'replay'); assertNotice(app, 'Harvester incoming'); const boss = app.session();
   app.advanceTimers(3499); assertNotice(app, 'Harvester incoming'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), boss);
@@ -371,9 +379,9 @@ test('native Retry clears active Boss notice and timer while replacing the compl
   app.advanceTimers(1000); app.event('error', { message: 'new retry error' }); const afterError = app.session();
   app.advanceTimers(1500); assertNotice(app, 'System error. Refresh to retry.'); app.advanceTimers(1999); assertNotice(app, 'System error. Refresh to retry.'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), afterError);
 });
-test('native Replay and Home cancel Boss timers while retaining recordings and complete replay results', async () => {
+test('internal replay and Home cancel Boss timers while retaining recordings and complete replay results', async () => {
   const app = harness(), terminal = noticeTerminal(app), liveTimer = app.noticeTimer;
-  app.advanceTimers(1000); app.rejectAudio(); app.activate('victory-replay', 'Space'); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(liveTimer));
+  app.advanceTimers(1000); app.rejectAudio(); app.invokeReplay(); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(liveTimer));
   const start = app.session(), initial = createWorld({ ...terminal.world.context, seed: terminal.world.seed });
   assert.deepEqual(start, { ...terminal, world: initial, screen: 'replay', playingRecording: terminal.lastRecording, checksum: finalChecksum(initial) }); assert.equal(app.seedCalls, 1);
   await new Promise(resolve => setImmediate(resolve)); assertNotice(app, '音频启动失败，游戏可继续。');
@@ -383,12 +391,12 @@ test('native Replay and Home cancel Boss timers while retaining recordings and c
   const endTimer = app.noticeTimer; app.click('返回基地'); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(endTimer));
   const endHome = app.session(), endPreview = createWorld({ ...terminal.world.context, seed: 208907 });
   assert.deepEqual(endHome, { ...done, world: endPreview, screen: 'title', playingRecording: null, checksum: finalChecksum(endPreview) });
-  app.click('回放上一局'); assertNotice(app, '');
+  app.invokeReplay(); assertNotice(app, '');
   for (let i = 0; i < 15000 && app.progress().tick < 8400; i++) app.frame();
   assertNotice(app, '收割者抵达'); const boss = app.session(), replayTimer = app.noticeTimer; app.advanceTimers(1000); app.get('pause').onclick(); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(replayTimer));
   const home = app.session(), preview = createWorld({ ...terminal.world.context, seed: 208907 });
   assert.deepEqual(home, { ...boss, world: preview, screen: 'title', playingRecording: null, checksum: finalChecksum(preview) }); assert.equal(app.seedCalls, 1);
-  app.click('回放上一局'); app.event('error', { message: 'before home audio failure' }); const prior = app.noticeTimer; app.rejectAudio(); app.get('pause').onclick(); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(prior));
+  app.invokeReplay(); app.event('error', { message: 'before home audio failure' }); const prior = app.noticeTimer; app.rejectAudio(); app.get('pause').onclick(); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(prior));
   await new Promise(resolve => setImmediate(resolve)); assertNotice(app, '音频启动失败，游戏可继续。');
   assert.ok(app.logs.some(([level, name]) => level === 'error' && name === 'audio.activation_failed'));
   const afterError = app.session(); app.advanceTimers(3499); assertNotice(app, '音频启动失败，游戏可继续。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), afterError);
@@ -398,7 +406,7 @@ test('invalid Replay preserves its bilingual rejection notice and the complete c
   for (const language of ['zh', 'en']) {
     if (language === 'en') app.get('language').onclick();
     app.replaceRecording({ ...app.session().lastRecording, actions: 'invalid actions' }); const before = app.session();
-    app.event('error', { message: 'old terminal notice' }); const timer = app.noticeTimer; app.advanceTimers(1000); app.activate('defeat-replay', 'Enter');
+    app.event('error', { message: 'old terminal notice' }); const timer = app.noticeTimer; app.advanceTimers(1000); app.invokeReplay();
     const message = language === 'zh' ? '无法播放，回放数据无效。进度未改变。' : 'Cannot play this replay. Its data is invalid. Progress is unchanged.';
     assertNotice(app, message); assert.ok(app.cancelledTimers.includes(timer)); assert.deepEqual(app.session(), before);
     assert.ok(app.logs.some(([level, name, data]) => level === 'warn' && name === 'replay.rejected' && data.code === 'invalid-data'));
@@ -407,14 +415,15 @@ test('invalid Replay preserves its bilingual rejection notice and the complete c
 });
 test('replay end preserves a new verification error for its full duration', () => {
   const app = harness(), terminal = naturalLoss(app); app.replaceRecording({ ...terminal.lastRecording, finalChecksum: terminal.checksum === '00000000' ? 'ffffffff' : '00000000' });
-  app.activate('defeat-replay', 'Enter');
+  app.invokeReplay();
   for (let i = 0; i < 15000 && app.progress().screen === 'replay'; i++) app.frame();
   const done = app.session(); assert.equal(done.screen, 'replay-end'); assert.equal(done.replayVerified, false); assert.deepEqual(done.world, terminal.world); assert.equal(done.checksum, terminal.checksum); assert.deepEqual(done.actions, terminal.actions);
   assertNotice(app, '回放校验失败。进度未改变。'); assert.ok(app.logs.some(([level, name, data]) => level === 'error' && name === 'replay.rejected' && data.code === 'checksum-mismatch'));
   app.advanceTimers(3499); assertNotice(app, '回放校验失败。进度未改变。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), done);
 });
 test('natural live victory draws the original scene and keeps full bilingual story, state, nodes, focus and scroll stable', () => {
-  const app = harness(), terminal = naturalWin(app), panel = app.get('victory-panel'), retry = app.get('victory-retry'), replay = app.get('victory-replay'), art = app.get('victory-art');
+  const app = harness(), terminal = naturalWin(app), panel = app.get('victory-panel'), retry = app.get('victory-retry'), art = app.get('victory-art');
+  assert.deepEqual(app.overlayButtons(), ['重新部署', '返回选关']);
   assert.ok(panel); assert.equal(app.active, retry); assert.equal(retry.focusOptions.preventScroll, true); assert.equal(retry.focusCalls, 1);
   assert.equal(art.width, 320); assert.equal(art.height, 180); assert.equal(art.attributes.role, 'img'); assert.equal(panel.attributes['aria-labelledby'], 'victory-heading');
   const original = []; drawDesertScene({ save() {}, restore() {}, fillRect(...rect) { original.push([this.fillStyle, ...rect]); } }, 'victory');
@@ -426,16 +435,16 @@ test('natural live victory draws the original scene and keeps full bilingual sto
   assert.ok(panel.children.indexOf(story) < panel.children.indexOf(nextClue));
   assert.equal(story.textContent, victory.zh); assert.equal(nextClue.textContent, clue.zh);
   assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('defeat-art'), null);
-  assert.deepEqual(panel.children.at(-1).children.map(button => button.id), ['victory-retry', 'victory-replay', 'victory-missions']); assert.equal(retry.textContent, '重新部署'); assert.equal(replay.textContent, '回放上一局');
   assert.ok(app.logs.some(([, name, data]) => name === 'session.finished' && data.outcome === 'won' && data.checksum === terminal.checksum));
   panel.scrollTop = 87;
   for (let i = 0; i < 20; i++) { app.frame(60000); for (const code of ['KeyD', 'Space', 'KeyP', 'Escape', 'Digit1']) app.key(code); }
   app.get('language').focus(); app.get('language').onclick();
+  assert.deepEqual(app.overlayButtons(), ['Redeploy', 'Back to missions']);
   assert.equal(story.textContent, victory.en); assert.equal(nextClue.textContent, clue.en); assert.ok(art.attributes['aria-label']);
   app.get('sound').onclick(); app.event('blur'); app.document.hidden = true; app.event('visibilitychange'); app.frame(600000); app.document.hidden = false; app.event('visibilitychange');
   app.pointer('joystick', 'pointerdown'); app.pointer('dash', 'pointerdown');
   assert.deepEqual(app.snapshot(), terminal); assert.equal(app.seedCalls, 1); assert.equal(app.sessions.at(-1), 'terminal');
-  for (const [id, node] of [['victory-panel', panel], ['victory-retry', retry], ['victory-replay', replay], ['victory-art', art], ['victory-story', story], ['victory-next-clue', nextClue], ['victory-time', statLabel]]) assert.equal(app.get(id), node);
+  for (const [id, node] of [['victory-panel', panel], ['victory-retry', retry], ['victory-art', art], ['victory-story', story], ['victory-next-clue', nextClue], ['victory-time', statLabel]]) assert.equal(app.get(id), node);
   assert.equal(panel.scrollTop, 87); assert.equal(app.active, app.get('language')); assert.equal(retry.focusCalls, 1);
   app.activate('victory-missions', 'Enter');
   assert.equal(app.active.id, 'stages-heading');
@@ -446,11 +455,11 @@ test('natural live victory draws the original scene and keeps full bilingual sto
   assert.equal(app.session().world.tick, 0);
   assert.equal(app.session().lastRecording.finalChecksum, terminal.checksum);
 });
-test('live victory preserves header focus and direct native Replay verifies the complete recording with no result narrative', () => {
+test('live victory preserves header focus and internal replay verifies the complete recording with no result narrative', () => {
   const storage = memoryStorage();
   const app = harness(embedded, storage), terminal = naturalWin(app, 'header'); assert.equal(app.active, app.get('sound')); assert.equal(app.get('victory-retry').focusCalls, undefined);
   assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
-  assert.equal(app.activate('victory-replay', 'Space').defaultPrevented, undefined); assert.equal(app.snapshot().screen, 'replay'); assert.equal(app.seedCalls, 1);
+  app.invokeReplay(); assert.equal(app.snapshot().screen, 'replay'); assert.equal(app.seedCalls, 1);
   for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) { assertNoVictory(app); assert.equal(app.get('defeat-panel'), null); app.frame(); }
   assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assert.equal(app.snapshot().checksum, terminal.checksum); assert.deepEqual(app.snapshot().world, terminal.world); assert.deepEqual(app.snapshot().lastRecording, terminal.lastRecording); assert.equal(app.seedCalls, 1);
   assert.ok(app.logs.some(([, name]) => name === 'replay.finished')); assertNoVictory(app); assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('opening-panel'), null);
@@ -470,7 +479,7 @@ function assertNoVictory(app) {
 test('victory content never appears in title, opening, running, paused, upgrading, lost or lost replay', () => {
   const app = harness(); assertNoVictory(app); app.click('启动任务'); assertNoVictory(app); app.click('部署出发'); assertNoVictory(app); app.key('KeyP'); assertNoVictory(app); app.release('KeyP'); app.key('KeyP');
   for (let i = 0; i < 15000 && !['won', 'lost'].includes(app.snapshot().world.phase.kind); i++) { assertNoVictory(app); if (app.snapshot().world.phase.kind === 'upgrading') app.key('Digit1'); app.frame(); }
-  assert.equal(app.snapshot().world.phase.kind, 'lost'); assertNoVictory(app); app.activate('defeat-replay', 'Enter');
+  assert.equal(app.snapshot().world.phase.kind, 'lost'); assertNoVictory(app); app.invokeReplay();
   for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) { assertNoVictory(app); app.frame(); }
   assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assertNoVictory(app);
 });
@@ -592,8 +601,8 @@ test('radio controls paired with untouched presentation preserve full immediate 
 test('terminal clears radio, invalid Replay preserves complete session and error, successful Replay never shows radio, Home clears and Retry resets new seed', () => {
   const app = harness(); firstRadio(app); app.activate('radio-close', 'Enter'); finishIdle(app); const terminal = app.session();
   assert.equal(app.radioState, 'inactive'); assert.equal(app.get('radio-story').textContent, '');
-  app.replaceRecording({ ...terminal.lastRecording, actions: 'invalid' }); const invalid = app.session(); app.activate('defeat-replay', 'Enter'); assert.deepEqual(app.session(), invalid); assert.equal(app.radioState, 'inactive'); assertNotice(app, '无法播放，回放数据无效。进度未改变。');
-  app.replaceRecording(terminal.lastRecording); app.activate('defeat-replay', 'Enter');
+  app.replaceRecording({ ...terminal.lastRecording, actions: 'invalid' }); const invalid = app.session(); app.invokeReplay(); assert.deepEqual(app.session(), invalid); assert.equal(app.radioState, 'inactive'); assertNotice(app, '无法播放，回放数据无效。进度未改变。');
+  app.replaceRecording(terminal.lastRecording); app.invokeReplay();
   for (let i = 0; i < 15000 && app.progress().screen === 'replay'; i++) { app.frame(); assert.equal(app.radioState, 'inactive'); assert.equal(app.get('radio').hidden, true); assert.equal(app.get('radio-story').textContent, ''); }
   assert.equal(app.session().replayVerified, true); assert.deepEqual(app.session().world, terminal.world); assert.equal(app.session().checksum, terminal.checksum); assert.equal(radioStarts(app).length, 1);
   app.click('返回基地'); assert.equal(app.radioState, 'inactive'); assert.equal(app.get('radio-story').textContent, ''); startLive(app); assert.equal(app.radioState, 'waiting'); assert.equal(app.seedCalls, 2); assert.notEqual(app.session().world.seed, terminal.world.seed);
@@ -710,7 +719,7 @@ test('seeded live action pairs observe telemetry beyond midpoint and preserve fu
   assert.ok(firstClosed && telemetryClosed && disabledAtTelemetry); assert.equal(radioStarts(control).length, 1); assert.equal(radioStarts(changed).length, 2); assert.equal(radioStarts(disabled).length, 2);
   const expected = control.session(); assert.equal(expected.world.phase.kind, 'won'); assert.equal(expected.world.tick, 10800);
   for (const app of [changed, disabled]) { assert.deepEqual(app.session(), expected); assert.equal(app.seedCalls, control.seedCalls); assert.deepEqual(app.session().world, JSON.parse(JSON.stringify(replay(app.session().lastRecording)))); }
-  changed.activate('victory-replay', 'Enter');
+  changed.invokeReplay();
   for (let i = 0; i < 15000 && changed.progress().screen === 'replay'; i++) { changed.frame(); assert.equal(changed.radioState, 'inactive'); assert.equal(changed.get('radio').hidden, true); }
   assert.equal(changed.session().replayVerified, true); assert.deepEqual(changed.session().world, expected.world); assert.equal(changed.session().checksum, expected.checksum); assert.equal(radioStarts(changed).length, 2);
 });
@@ -801,7 +810,7 @@ test('rainforest deployment requires a campaign unlock and uses the public stage
   assert.deepEqual(unlocked.session().world.context, RAINFOREST_CONTEXT);
 });
 
-test('the four later missions load from unlocked rows and show the canonical opening and pause objective', async () => {
+test('the four later missions show their opening, pause objective and defeat actions', async () => {
   const catalog = JSON.parse(readFileSync('content/campaign-later.story.json', 'utf8'));
   const stages = ['antarctica', 'space-elevator', 'watchtower', 'lunar-echoes'];
 
@@ -825,6 +834,11 @@ test('the four later missions load from unlocked rows and show the canonical ope
     assert.equal(app.get('pause-objective').dataset.storyId, objective.id);
     app.get('language').onclick();
     assert.equal(app.get('pause-objective').textContent, objective.en);
+    app.get('pause-resume').onclick();
+    finishIdle(app);
+    assert.deepEqual(app.overlayButtons(), ['Redeploy', 'Back to missions']);
+    app.get('language').onclick();
+    assert.deepEqual(app.overlayButtons(), ['重新部署', '返回选关']);
   }
 });
 
@@ -1070,7 +1084,7 @@ test('live rainforest victory presents the canonical bilingual story and Antarct
   assert.deepEqual([app.get('victory-story').textContent, app.get('victory-next-clue').textContent], [victory.en, clue.en]);
   assert.equal(app.get('victory-panel'), panel);
   assert.equal(app.get('victory-art'), art);
-  app.activate('victory-replay', 'Space');
+  app.invokeReplay();
   assert.equal(app.get('victory-panel'), null);
   for (let i = 0; i < 15000 && app.progress().tick < 9300; i++) app.frame();
   assert.equal(app.progress().screen, 'replay');
