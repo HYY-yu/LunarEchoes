@@ -1,10 +1,10 @@
-import { DESERT_CONTEXT, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_CONTEXT, RAINFOREST_CONTEXT, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
 import { dictionary, upgradeLabel, type Language } from './i18n.js';
 import { log } from './logger.js';
-import { STAGE_ORDER } from './stage-contract.js';
+import { STAGE_ORDER, type StageId } from './stage-contract.js';
 import { applyStageResult, isStageUnlocked } from './progress.js';
 import { openProgressStorage, type ProgressStorageResult } from './progress-storage.js';
 import { DESERT_SCENE_SIZE, drawDesertScene } from './desert-scene.js';
@@ -61,6 +61,10 @@ let opening: { context: StageContext; source: OpeningSource; content: OpeningCon
 let openingRequest: symbol | null = null;
 let rainforestMission: RainforestMission | null = null;
 let desertContent: DesertContent | null = null;
+const deployedStages: Partial<Record<StageId, StageContext>> = {
+  'desert-base': DESERT_CONTEXT,
+  rainforest: RAINFOREST_CONTEXT
+};
 let radioState: RadioState = { kind: 'inactive' };
 const radio = document.createElement('aside'); radio.id = 'radio'; radio.hidden = true;
 const radioMessage = document.createElement('div'); radioMessage.setAttribute('role', 'status'); radioMessage.setAttribute('aria-live', 'polite');
@@ -113,7 +117,7 @@ function progressFeedback() {
 function renderProgress(elementId: string) {
   const t = text(), { progress } = progressStorage.snapshot();
   const stage = t.stageNames[progress.highestUnlockedStageId];
-  const availability = progress.highestUnlockedStageId === DESERT_CONTEXT.stageId ? t.progressPlayable : t.progressUnavailable;
+  const availability = deployedStages[progress.highestUnlockedStageId] ? t.progressPlayable : t.progressUnavailable;
   element(elementId).textContent = [`${t.progressHeading} · ${stage} · ${availability}`, progressFeedback()].filter(Boolean).join(' ');
 }
 function resolveProgressReset(decision: 'confirmed' | 'cancelled') {
@@ -339,7 +343,12 @@ function renderStages() {
     for (const stageId of STAGE_ORDER) {
       const row = document.createElement('li'); row.dataset.stageId = stageId;
       const name = document.createElement('strong');
-      const status = stageId === DESERT_CONTEXT.stageId && desertContent ? button('', 'primary', () => showOpening(DESERT_CONTEXT, 'stages')) : document.createElement('span');
+      const context = deployedStages[stageId];
+      const status = context && (stageId !== DESERT_CONTEXT.stageId || desertContent)
+        ? button('', 'primary', () => {
+          if (isStageUnlocked({ progress: progressStorage.snapshot().progress, stageId })) void showOpening(context, 'stages');
+        })
+        : document.createElement('span');
       row.append(name, status); list.append(row);
     }
     const back = button('', 'secondary', closeStages); back.id = 'stages-back';
