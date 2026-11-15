@@ -280,7 +280,7 @@ function begin(context: StageContext, results = context.stageId === world.contex
   if (!desertContent) throw new Error('Desert content unavailable');
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
   const nextWorld = createWorld({ ...context, seed: seedArray[0] });
-  synth.reset(); world = nextWorld; opening = null; rainforestResults = results; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: 'waiting' }, 'begin'); clearCombatInput(); clearNotice();
+  synth.reset(); world = nextWorld; opening = null; rainforestResults = results; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: context.stageId === DESERT_CONTEXT.stageId ? 'waiting' : 'inactive' }, 'begin'); clearCombatInput(); clearNotice();
   log('info', 'session.started', { seed: world.seed, version: VERSION, ...world.context }); updateUi(true); void enableAudio();
   canvasNode.focus();
 }
@@ -505,11 +505,14 @@ function updateUi(force = false) {
       const heading = document.createElement('h3'); heading.id = 'pause-objective-heading';
       const objective = document.createElement('p'); objective.id = 'pause-objective'; objective.dataset.storyId = desertContent.objective.id;
       const resume = button('', 'primary', pause); resume.id = 'pause-resume';
-      const disable = document.createElement('button'); disable.id = 'radio-disable'; disable.type = 'button'; disable.className = 'secondary';
-      disable.onclick = () => { try { if (radioState.kind !== 'disabled') { setRadio({ kind: 'disabled' }, 'disabled'); log('info', 'story.radio.disabled', { id: desertContent?.firstContact.id, seed: world.seed, tick: world.tick }); updateRadio(); } } catch (error) { fail(error); } };
-      const reset = document.createElement('p'); reset.id = 'radio-reset';
-      const actions = document.createElement('div'); actions.className = 'actions'; actions.append(resume, disable);
-      section.append(heading, objective, actions, reset);
+      const actions = document.createElement('div'); actions.className = 'actions'; actions.append(resume);
+      section.append(heading, objective, actions);
+      if (radioState.kind !== 'inactive') {
+        const disable = document.createElement('button'); disable.id = 'radio-disable'; disable.type = 'button'; disable.className = 'secondary';
+        disable.onclick = () => { try { if (radioState.kind !== 'disabled') { setRadio({ kind: 'disabled' }, 'disabled'); log('info', 'story.radio.disabled', { id: desertContent?.firstContact.id, seed: world.seed, tick: world.tick }); updateRadio(); } } catch (error) { fail(error); } };
+        const reset = document.createElement('p'); reset.id = 'radio-reset';
+        actions.append(disable); section.append(reset);
+      }
     }
     const section = element('pause-panel');
     section.children[0].textContent = t.mission; section.children[1].textContent = t.paused; section.children[2].textContent = t.pausedHint;
