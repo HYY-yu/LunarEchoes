@@ -294,7 +294,7 @@ function replayFailure(error: unknown) {
   const t = text();
   notify(code === 'incompatible-version' ? t.replayVersion : code === 'unavailable-stage' ? t.replayStage : code === 'incompatible-rules' ? t.replayRules : terminal ? t.replayFailed : t.replayInvalid);
 }
-function startReplay() {
+export function startReplay() {
   if (!lastRecording) return;
   try {
     const next = prepareReplay(lastRecording);
@@ -456,9 +456,8 @@ function updateUi(force = false) {
       }
       const actions = document.createElement('div'); actions.className = 'actions';
       const retry = button('', 'primary', () => begin(world.context)); retry.id = 'defeat-retry';
-      const replay = button('', 'secondary', startReplay); replay.id = 'defeat-replay';
       const missions = button('', 'secondary', showStages); missions.id = 'defeat-missions';
-      actions.append(retry, replay, missions); section.append(art, eyebrow, heading, story, description, stats, actions); overlay.append(section);
+      actions.append(retry, missions); section.append(art, eyebrow, heading, story, description, stats, actions); overlay.append(section);
       if (focusRetry) retry.focus({ preventScroll: true });
     }
     element('defeat-art').setAttribute('aria-label', defeatStage === 'rainforest' ? t.rainforestDefeatArt : defeatStage && defeatStage !== 'desert-base' ? t.stageNames[defeatStage] : t.defeatArt);
@@ -466,7 +465,7 @@ function updateUi(force = false) {
     element('defeat-heading').textContent = defeatStage && defeatStage !== 'desert-base' ? `${t.stageNames[defeatStage]} · ${t.lost}` : t.lost;
     element('defeat-story').textContent = defeat.story?.[language] ?? ''; element('defeat-description').textContent = t.lostBody;
     element('defeat-time').textContent = t.time; element('defeat-kills').textContent = t.kills; element('defeat-level').textContent = t.level;
-    element('defeat-retry').textContent = t.restart; element('defeat-replay').textContent = t.replay; element('defeat-missions').textContent = t.backToStages;
+    element('defeat-retry').textContent = t.restart; element('defeat-missions').textContent = t.backToStages;
     return;
   }
   const victoryStage = screen === 'game' && world.phase.kind === 'won' ? world.context.stageId : null;
@@ -494,10 +493,9 @@ function updateUi(force = false) {
       }
       const actions = document.createElement('div'); actions.className = 'actions';
       const retry = button('', 'primary', () => begin(world.context)); retry.id = 'victory-retry';
-      const replay = button('', 'secondary', startReplay); replay.id = 'victory-replay';
       const progress = document.createElement('p'); progress.id = 'victory-progress'; progress.setAttribute('role', 'status');
       const missions = button('', 'secondary', showStages); missions.id = 'victory-missions';
-      actions.append(retry, replay, missions); section.append(art, eyebrow, heading, story, nextClue, description, progress, stats, actions); overlay.append(section);
+      actions.append(retry, missions); section.append(art, eyebrow, heading, story, nextClue, description, progress, stats, actions); overlay.append(section);
       if (focusRetry) retry.focus({ preventScroll: true });
     }
     element('victory-art').setAttribute('aria-label', victoryStage === 'rainforest' ? t.rainforestVictoryArt : victoryStage && victoryStage !== 'desert-base' ? t.stageNames[victoryStage] : t.victoryArt);
@@ -507,7 +505,7 @@ function updateUi(force = false) {
     element('victory-description').textContent = victoryStage === 'desert-base' ? t.wonBody : '';
     renderProgress('victory-progress');
     element('victory-time').textContent = t.time; element('victory-kills').textContent = t.kills; element('victory-level').textContent = t.level;
-    element('victory-retry').textContent = t.restart; element('victory-replay').textContent = t.replay; element('victory-missions').textContent = t.backToStages;
+    element('victory-retry').textContent = t.restart; element('victory-missions').textContent = t.backToStages;
     return;
   }
   const pauseObjective = fieldBattle ? fieldMission?.objective : desertContent?.objective;
@@ -540,7 +538,7 @@ function updateUi(force = false) {
     const start = button(t.start, 'primary', () => showOpening(DESERT_CONTEXT)); start.id = 'mission-start';
     const stages = button(t.campaignStages, 'secondary', showStages); stages.id = 'mission-select';
     const actions = document.createElement('div'); actions.className = 'actions'; actions.append(start, stages);
-    const replayButton = button(t.replay, 'secondary', startReplay); replayButton.disabled = !lastRecording; actions.append(replayButton, button(t.progressReset, 'secondary', () => { resetRequested = true; updateUi(true); })); intro.append(actions);
+    actions.append(button(t.progressReset, 'secondary', () => { resetRequested = true; updateUi(true); })); intro.append(actions);
     const controls = document.createElement('p'); controls.className = 'controls'; controls.innerHTML = `<span class="desktop">${t.controls}</span><span class="mobile">${t.touch}</span>`; intro.append(controls);
     const stamp = document.createElement('div'); stamp.className = 'mission-stamp'; stamp.innerHTML = `<strong>${formatTime(stageRules(DESERT_CONTEXT).durationTicks)}<small> MIN</small></strong>${t.stageNames['desert-base']}`;
     overlay.append(intro, stamp); renderProgress('title-progress'); return;
@@ -562,7 +560,7 @@ function updateUi(force = false) {
   if (world.phase.kind === 'won' || world.phase.kind === 'lost') {
     const won = world.phase.kind === 'won'; const section = panel(won ? t.won : t.lost, won ? t.wonBody : t.lostBody);
     const stats = document.createElement('div'); stats.className = 'stats'; stats.innerHTML = `<span>${t.time}<strong>${formatTime(world.tick)}</strong></span><span>${t.kills}<strong>${world.kills}</strong></span><span>${t.level}<strong>${world.level}</strong></span>`;
-    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(button(t.restart, 'primary', () => begin(world.context)), button(t.replay, 'secondary', startReplay));
+    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(button(t.restart, 'primary', () => begin(world.context)));
     section.append(stats, actions); return;
   }
 }
