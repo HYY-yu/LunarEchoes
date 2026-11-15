@@ -51,15 +51,15 @@ type StoryArt = Readonly<{
 }>;
 type ResultContent = Readonly<{ story: StoryEntry | null; art: StoryArt }>;
 type VictoryContent = ResultContent & Readonly<{ nextClue: StoryEntry | null }>;
-type RainforestResults = Readonly<{ defeat: ResultContent; victory: VictoryContent }>;
+type RainforestMission = Readonly<{ objective: StoryEntry; defeat: ResultContent; victory: VictoryContent }>;
 type OpeningContent = StoryArt & Readonly<{
   opening: StoryEntry;
   objective: StoryEntry;
-  rainforestResults?: RainforestResults;
+  rainforestMission?: RainforestMission;
 }>;
 let opening: { context: StageContext; source: OpeningSource; content: OpeningContent } | null = null;
 let openingRequest: symbol | null = null;
-let rainforestResults: RainforestResults | null = null;
+let rainforestMission: RainforestMission | null = null;
 let desertContent: DesertContent | null = null;
 let radioState: RadioState = { kind: 'inactive' };
 const radio = document.createElement('aside'); radio.id = 'radio'; radio.hidden = true;
@@ -246,7 +246,7 @@ async function loadRainforestOpening(): Promise<OpeningContent> {
   const size = art.RAINFOREST_SCENE_SIZE;
   const defeat = { story: optionalResultEntry('defeat'), art: { size, draw: art.drawRainforestFailure } };
   const victory = { story: optionalResultEntry('victory'), nextClue: optionalResultEntry('next-clue'), art: { size, draw: art.drawRainforestVictory } };
-  return { opening, objective, size, draw: art.drawRainforestOpening, rainforestResults: { defeat, victory } };
+  return { opening, objective, size, draw: art.drawRainforestOpening, rainforestMission: { objective, defeat, victory } };
 }
 function showOpening(context: StageContext, source: OpeningSource = 'title') {
   openingRequest = null;
@@ -274,13 +274,13 @@ function presentOpening(context: StageContext, source: OpeningSource, content: O
 }
 function finishOpening(reason: OpeningFinish) {
   if (screen !== 'opening' || !opening) return;
-  log('info', 'story.opening.finished', { id: opening.content.opening.id, reason }); begin(opening.context, opening.content.rainforestResults ?? null);
+  log('info', 'story.opening.finished', { id: opening.content.opening.id, reason }); begin(opening.context, opening.content.rainforestMission ?? null);
 }
-function begin(context: StageContext, results = context.stageId === world.context.stageId ? rainforestResults : null) {
+function begin(context: StageContext, mission = context.stageId === world.context.stageId ? rainforestMission : null) {
   if (!desertContent) throw new Error('Desert content unavailable');
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
   const nextWorld = createWorld({ ...context, seed: seedArray[0] });
-  synth.reset(); world = nextWorld; opening = null; rainforestResults = results; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: context.stageId === DESERT_CONTEXT.stageId ? 'waiting' : 'inactive' }, 'begin'); clearCombatInput(); clearNotice();
+  synth.reset(); world = nextWorld; opening = null; rainforestMission = mission; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: context.stageId === DESERT_CONTEXT.stageId ? 'waiting' : 'inactive' }, 'begin'); clearCombatInput(); clearNotice();
   log('info', 'session.started', { seed: world.seed, version: VERSION, ...world.context }); updateUi(true); void enableAudio();
   canvasNode.focus();
 }
@@ -300,7 +300,7 @@ function startReplay() {
     log('info', 'replay.started', { version: VERSION, ...world.context, seed: world.seed, actions: playingRecording.actions.length }); updateUi(true); void enableAudio();
   } catch (error) { replayFailure(error); }
 }
-function showTitle() { screen = 'title'; playingRecording = null; rainforestResults = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); clearCombatInput(); synth.reset(); setRadio({ kind: 'inactive' }, 'home'); clearNotice(); updateUi(true); void enableAudio(); }
+function showTitle() { screen = 'title'; playingRecording = null; rainforestMission = null; world = createWorld({ ...DESERT_CONTEXT, seed: 208907 }); clearCombatInput(); synth.reset(); setRadio({ kind: 'inactive' }, 'home'); clearNotice(); updateUi(true); void enableAudio(); }
 function pause() {
   if (screen !== 'game') return;
   if (world.phase.kind === 'running') act({ kind: 'pause' }); else if (world.phase.kind === 'paused') { act({ kind: 'resume' }); void enableAudio(); }
@@ -424,7 +424,7 @@ function updateUi(force = false) {
     return;
   }
   const defeatStage = screen === 'game' && world.phase.kind === 'lost' ? world.context.stageId : null;
-  const defeat = defeatStage === 'rainforest' ? rainforestResults?.defeat : defeatStage === 'desert-base' && desertContent ? {
+  const defeat = defeatStage === 'rainforest' ? rainforestMission?.defeat : defeatStage === 'desert-base' && desertContent ? {
     story: desertContent.defeat,
     art: { size: DESERT_SCENE_SIZE, draw: (canvas: CanvasRenderingContext2D) => drawDesertScene(canvas, 'defeat') }
   } : null;
@@ -459,7 +459,7 @@ function updateUi(force = false) {
     return;
   }
   const victoryStage = screen === 'game' && world.phase.kind === 'won' ? world.context.stageId : null;
-  const victory = victoryStage === 'rainforest' ? rainforestResults?.victory : victoryStage === 'desert-base' && desertContent ? {
+  const victory = victoryStage === 'rainforest' ? rainforestMission?.victory : victoryStage === 'desert-base' && desertContent ? {
     story: desertContent.victory,
     nextClue: desertContent.nextClue,
     art: { size: DESERT_SCENE_SIZE, draw: (canvas: CanvasRenderingContext2D) => drawDesertScene(canvas, 'victory') }
@@ -498,12 +498,13 @@ function updateUi(force = false) {
     element('victory-retry').textContent = t.restart; element('victory-replay').textContent = t.replay;
     return;
   }
-  if (screen === 'game' && world.phase.kind === 'paused' && desertContent) {
+  const pauseObjective = rainforestBattle ? rainforestMission?.objective : desertContent?.objective;
+  if (screen === 'game' && world.phase.kind === 'paused' && pauseObjective) {
     if (!document.getElementById('pause-panel')) {
       overlay.replaceChildren();
       const section = panel('', ''); section.id = 'pause-panel';
       const heading = document.createElement('h3'); heading.id = 'pause-objective-heading';
-      const objective = document.createElement('p'); objective.id = 'pause-objective'; objective.dataset.storyId = desertContent.objective.id;
+      const objective = document.createElement('p'); objective.id = 'pause-objective'; objective.dataset.storyId = pauseObjective.id;
       const resume = button('', 'primary', pause); resume.id = 'pause-resume';
       const actions = document.createElement('div'); actions.className = 'actions'; actions.append(resume);
       section.append(heading, objective, actions);
@@ -515,8 +516,8 @@ function updateUi(force = false) {
       }
     }
     const section = element('pause-panel');
-    section.children[0].textContent = t.mission; section.children[1].textContent = t.paused; section.children[2].textContent = t.pausedHint;
-    element('pause-objective-heading').textContent = t.missionObjective; element('pause-objective').textContent = desertContent.objective[language]; element('pause-resume').textContent = t.resume;
+    section.children[0].textContent = rainforestBattle ? t.stageNames.rainforest : t.mission; section.children[1].textContent = t.paused; section.children[2].textContent = t.pausedHint;
+    element('pause-objective-heading').textContent = t.missionObjective; element('pause-objective').textContent = pauseObjective[language]; element('pause-resume').textContent = t.resume;
     updateRadio(); return;
   }
   overlay.replaceChildren();

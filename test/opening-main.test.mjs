@@ -937,6 +937,31 @@ function finishRainforestVictory(app) {
   return terminal;
 }
 
+test('rainforest pause shows the opening objective in both languages after skipping or retrying', async () => {
+  const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
+  const objective = story.find(entry => entry.id === 'rainforest.objective');
+  const app = harness(embedded, memoryStorage(savedProgress('rainforest')), async () => ({ ok: true, json: async () => story }));
+  await app.openStage(RAINFOREST_CONTEXT);
+  app.activate('opening-skip', 'Enter');
+
+  app.get('pause').onclick();
+  const panel = app.get('pause-panel');
+  assert.equal(panel.children[0].textContent, '雨林深处');
+  assert.equal(app.get('pause-objective').dataset.storyId, objective.id);
+  assert.equal(app.get('pause-objective').textContent, objective.zh);
+  app.get('language').onclick();
+  assert.equal(app.get('pause-panel'), panel);
+  assert.equal(panel.children[0].textContent, 'Deep Rainforest');
+  assert.equal(app.get('pause-objective').textContent, objective.en);
+
+  app.get('pause-resume').onclick();
+  finishIdle(app);
+  app.activate('defeat-retry', 'Enter');
+  app.get('pause').onclick();
+  assert.equal(app.get('pause-objective').dataset.storyId, objective.id);
+  assert.equal(app.get('pause-objective').textContent, objective.en);
+});
+
 test('rainforest combat and redeployment omit desert radio and its pause controls', async () => {
   const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
   const app = harness(embedded, memoryStorage(savedProgress('rainforest')), async () => ({ ok: true, json: async () => story }));
