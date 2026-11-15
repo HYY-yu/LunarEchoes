@@ -734,16 +734,16 @@ test('the mission list displays all six stages in order and preserves local prog
   assert.equal(app.get('hud').hidden, true);
   const list = app.get('stage-list');
   assert.deepEqual(list.children.map(row => row.children.map(node => node.textContent)), [
-    ['沙漠基地', '部署出发'], ['雨林深处', '已解锁，暂不可游玩'], ['寒冻南极', '未解锁'],
+    ['沙漠基地', '部署出发'], ['雨林深处', '部署出发'], ['寒冻南极', '未解锁'],
     ['太空电梯', '未解锁'], ['保卫哨塔', '未解锁'], ['月面回响', '未解锁']
   ]);
   app.activate('language', 'Enter');
   assert.equal(app.active.id, 'language');
   assert.deepEqual(list.children.map(row => row.children.map(node => node.textContent)), [
-    ['Desert Base', 'Deploy'], ['Deep Rainforest', 'Unlocked, not yet playable'], ['Frozen Antarctica', 'Locked'],
+    ['Desert Base', 'Deploy'], ['Deep Rainforest', 'Deploy'], ['Frozen Antarctica', 'Locked'],
     ['Space Elevator', 'Locked'], ['Watchtower Defense', 'Locked'], ['Lunar Echoes', 'Locked']
   ]);
-  assert.equal(list.children.filter(row => row.children.some(node => node.tagName === 'BUTTON')).length, 1);
+  assert.equal(list.children.filter(row => row.children.some(node => node.tagName === 'BUTTON')).length, 2);
   app.activate('stages-back', 'Enter');
   assert.equal(app.active.id, 'mission-select');
   assert.deepEqual(app.session(), before);
@@ -768,14 +768,39 @@ test('selecting Desert reaches the existing opening and can return before deploy
   assert.deepEqual(storage.writes, []);
 });
 
+test('rainforest deployment requires a campaign unlock and uses the public stage button', async () => {
+  const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
+  let requests = 0;
+  const fetchStory = async () => { requests++; return { ok: true, json: async () => story }; };
+
+  const locked = harness(embedded, memoryStorage(), fetchStory);
+  locked.click('选择任务');
+  const lockedButton = locked.get('stage-list').children[1].children[1];
+  assert.equal(lockedButton.disabled, true);
+  lockedButton.onclick();
+  assert.equal(requests, 0);
+  assert.equal(locked.progress().screen, 'stages');
+
+  const unlocked = harness(embedded, memoryStorage(savedProgress('rainforest')), fetchStory);
+  unlocked.click('选择任务');
+  const deploy = unlocked.get('stage-list').children[1].children[1];
+  assert.equal(deploy.disabled, false);
+  deploy.onclick();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(requests, 1);
+  assert.equal(unlocked.get('opening-story').dataset.storyId, 'rainforest.opening');
+  unlocked.activate('opening-continue', 'Enter');
+  assert.deepEqual(unlocked.session().world.context, RAINFOREST_CONTEXT);
+});
+
 test('a live desert victory saves rainforest once and a fresh title restores that unlock', () => {
   const storage = memoryStorage();
   const app = harness(embedded, storage);
   naturalWin(app);
-  assert.match(app.get('victory-progress').textContent, /雨林深处 · 已解锁，暂不可游玩.*进度已保存/);
+  assert.match(app.get('victory-progress').textContent, /雨林深处 · 已解锁.*进度已保存/);
   assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
   const refreshed = harness(embedded, storage);
-  assert.match(refreshed.get('title-progress').textContent, /雨林深处 · 已解锁，暂不可游玩/);
+  assert.match(refreshed.get('title-progress').textContent, /雨林深处 · 已解锁/);
   naturalWin(refreshed);
   assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
 });
