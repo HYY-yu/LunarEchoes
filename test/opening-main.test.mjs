@@ -252,6 +252,16 @@ function naturalLoss(app, headerFocus = false) {
   assert.equal(app.snapshot().screen, 'game'); assert.equal(app.snapshot().world.phase.kind, 'lost');
   return app.snapshot();
 }
+for (const [language, expected, forbidden] of [['zh', /装甲已耗尽/, /回放/], ['en', /armor depleted/i, /replay/i]]) {
+  test(`defeat description does not offer replay in ${language}`, () => {
+    const app = harness();
+    naturalLoss(app);
+    if (language === 'en') app.get('language').onclick();
+    const description = app.get('defeat-description').textContent;
+    assert.match(description, expected);
+    assert.doesNotMatch(description, forbidden);
+  });
+}
 test('natural live loss draws the original defeat scene and preserves terminal state, content, nodes, focus and scroll', () => {
   const app = harness(), terminal = naturalLoss(app), panel = app.get('defeat-panel'), retry = app.get('defeat-retry'), art = app.get('defeat-art');
   assert.deepEqual(app.overlayButtons(), ['重新部署', '返回选关']);
