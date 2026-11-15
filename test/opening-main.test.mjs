@@ -937,6 +937,28 @@ function finishRainforestVictory(app) {
   return terminal;
 }
 
+test('rainforest combat and redeployment omit desert radio and its pause controls', async () => {
+  const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
+  const app = harness(embedded, memoryStorage(savedProgress('rainforest')), async () => ({ ok: true, json: async () => story }));
+  await app.openStage(RAINFOREST_CONTEXT);
+  app.activate('opening-continue', 'Enter');
+  for (let i = 0; i < 300 && app.session().world.kills === 0; i++) app.frame();
+  assert.ok(app.session().world.kills > 0);
+  assert.equal(app.get('radio').hidden, true);
+  assert.equal(app.get('radio-story').textContent, '');
+  app.get('pause').onclick();
+  assert.ok(app.get('pause-panel'));
+  assert.equal(app.get('radio-disable'), null);
+  assert.equal(app.get('radio-reset'), null);
+  app.get('pause-resume').onclick();
+  finishIdle(app);
+  app.activate('defeat-retry', 'Enter');
+  for (let i = 0; i < 300 && app.session().world.kills === 0; i++) app.frame();
+  assert.ok(app.session().world.kills > 0);
+  assert.equal(app.get('radio').hidden, true);
+  assert.equal(radioStarts(app).length, 0);
+});
+
 test('live rainforest victory presents the canonical bilingual story and Antarctic handoff once', async () => {
   const story = JSON.parse(readFileSync('content/rainforest.story.json', 'utf8'));
   const storage = memoryStorage(savedProgress('rainforest'));
