@@ -1,5 +1,7 @@
 # Issue #5 合成音与生命周期
 
+本文记录合成音效交付基线 `14969f1`（2026-11-06）。下文的浏览器回放步骤用于该历史版本。当前游戏验收按 [verify-lunar](../.agents/skills/verify-lunar/SKILL.md) 执行。
+
 本任务只修改音频表现、调用边界与瞬态敌人命中事件，不改变数值、动作、Recording、VERSION 或 checksum。`enemy-hit` 在子弹、环绕和新星实际扣血处发出。`hit` 仍只表示玩家受伤。敌人事件不参与模拟判断。
 
 采用单 Synth、显式 menu/running/paused/upgrading/terminal 会话和受追踪的音乐、战斗与反馈声音。备选方案是每帧扫描敌人 HP 快照；该方案增加分配与扫描，因此没有采用。音色表集中在 `src/audio.ts`，QA 导出直接复用该图，不使用另一个样本实现。

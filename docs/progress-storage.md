@@ -1,5 +1,7 @@
 # 可注入的进度存储边界
 
+本文记录 `bde5936`（2026-11-08）引入存储边界时的接口与验收。下文的接入状态对应当时的交付范围。现行玩家存档行为见[战役路线](campaign-plan.md)。
+
 本模块实现 [Issue #32](https://github.com/HYY-yu/LunarEchoes/issues/32) 的同步存储边界，遵循 [Issue #14 已批准方案](https://github.com/HYY-yu/LunarEchoes/issues/14#issuecomment-6684779269)与[协议决定](campaign-protocol-proposal.md)。没有接入主游戏、选关、真实终局或界面提示。当前游戏不会因新增模块读取或写入用户存档，A2 和六关战役尚未完成。
 
 ## 接口与调用方责任

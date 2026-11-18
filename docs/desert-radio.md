@@ -1,5 +1,7 @@
 # 沙漠战斗无线电
 
+本文记录沙漠无线电接入的证据，文档基线为 `d1b4d4c`（2026-11-10）。下文的回放操作对应取证版本，现行玩家操作见 [README](../README.md)。
+
 战斗中的首次击杀展示 `desert-base.radio.first-contact` 的完整中英文原文。第一条显示后经玩家关闭，战斗达到关卡时长中点时展示 `desert-base.radio.telemetry`。当前沙漠时长为 10800 tick，中点为 5400 tick，即 90 战斗秒。内容来自既有剧情目录，经同一 builder 和严格七字段 parser 嵌入。没有新的战斗事件、动作、资源、音频或存档字段。
 
 main 独占每局呈现状态 `inactive | waiting | active | dismissed | disabled`。active 和 dismissed 带有当前 `firstContact | telemetry` 身份。新任务及 Retry 成功准备后恢复 waiting，首次 live kill 转 active(firstContact)，同 tick 终局优先清理。first-contact 未出现或未关闭时，遥测不能抢占。关闭只结束当前条；下一次正常 act 在 running、页面可见且达到中点时才激活遥测，包含返回 running 的 resume 或 choose。关闭、语言切换和纯重绘均不调度下一条。遥测关闭后本局不再重复。

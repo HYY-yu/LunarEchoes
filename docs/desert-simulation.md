@@ -1,5 +1,7 @@
 # 沙漠战斗接入
 
+本文记录沙漠首关接入阶段，文档基线为 `aff3c9a`（2026-11-09）。下文的关卡目录、回放按钮及兼容数据对应当时的实现或取证版本。现行六关与回放说明见 [README](../README.md)。
+
 [Issue #34](https://github.com/HYY-yu/LunarEchoes/issues/34) 将已运行的战斗接入首关身份。唯一可建世界的组合为 `desert-base` 与 `desert-base-1`。其他五个已知 ID、未知 ID、错误规则均拒绝。PR35 验收时使用临时月面美术，界面标记地图与剧情待接入；后续 Issue #36 将其替换为代码像素沙漠战场，见[沙漠基地战场地图](desert-map.md)。后续 Issue #38 接入可跳过开场和暂停目标，见[沙漠开场接入](desert-opening.md)。后续 Issue #40 接入真实失败结算的既有像素画与双语原文，见[沙漠失败结算](desert-defeat.md)。后续 Issue #42 接入真实胜利结算的既有像素画、双语原文与雨林叙事线索，见[沙漠胜利结算](desert-victory.md)。无线电与战役仍待接入。本任务不完成 B1、B2 或 Issue #23。
 
 ## 规则与世界

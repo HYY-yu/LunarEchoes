@@ -1,5 +1,7 @@
 # 解锁进度编解码与纯规则
 
+本文记录 `3d5ab48`（2026-11-08）引入纯规则时的接口与验收。下文的接入状态对应当时的交付范围。现行玩家存档行为见[战役路线](campaign-plan.md)。
+
 本模块实现 [Issue #19](https://github.com/HYY-yu/LunarEchoes/issues/19) 的数据边界和 [Issue #28](https://github.com/HYY-yu/LunarEchoes/issues/28) 的纯解锁计算。协议与规则来源为已批准的 [本机存档决定](campaign-protocol-proposal.md) 和[战役进度决定](campaign-progression-proposal.md)。没有存储适配或游戏入口；六个 ID 可计算和编解码不代表六关可进入，战斗 180–300 秒和剧情单独计时的规则不变。
 
 ## 接口与设计

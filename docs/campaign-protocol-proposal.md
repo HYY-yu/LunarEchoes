@@ -1,8 +1,10 @@
 # 本机解锁存档与按关回放技术决定
 
+本文保留 2026-11-06 批准的协议，以及截至 `6b3ac0a`（2026-11-08）的实施记录。下文的现状和计划对应当时的基线。现行玩家路径见[战役路线](campaign-plan.md)，内部回放取证见 [verify-lunar](../.agents/skills/verify-lunar/SKILL.md)。
+
 本决定服务于 [Issue #14](https://github.com/HYY-yu/LunarEchoes/issues/14)，稳定复现键为 `campaign.protocol.save-replay-v2`。目标是让玩家在当前浏览器保留解锁进度，并让一局回放明确绑定原关卡与规则。HYY-yu 已于 2026-11-06 在[决定评论](https://github.com/HYY-yu/LunarEchoes/issues/14#issuecomment-6684779269)批准两组方案。决定基于文档 head `77e01438e8828e7712277c5358fc60604a0f60ae`，并细化异常恢复为发现坏数据或未知版本时立即请求确认重置，取消则临时游玩且明确不保存。第二组采用不兼容旧数据的新回放协议，重试生成新种子。
 
-本文记录当时决定及细化。后续 Issue #34 已将 [lunar-2 接入沙漠战斗测试](desert-simulation.md)，本机存档仍未接入真实入口。以下现状段落描述决定时的历史基线。文档合并不代表功能已实现，也不批准护塔新耐久、失败条件或本文之外的新语义。
+截至该文档基线，Issue #34 已将 [lunar-2 接入沙漠战斗测试](desert-simulation.md)，本机存档当时尚未接入真实入口。护塔耐久、失败条件或此协议之外的新语义仍需要单独批准。
 
 ## 已确认的边界与现状
 
