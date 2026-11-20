@@ -8,7 +8,7 @@ const digest = value => createHash('sha256').update(value).digest('hex');
 const inputDigest = recording => digest(JSON.stringify(recording));
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const fixture = new URL('./fixtures/checksum-prefix.json', import.meta.url);
-const desertReference = new URL('../docs/evidence/desert34/macos-node24.21.0.json', import.meta.url);
+const desertReference = new URL('../test/fixtures/desert-replay-diagnostic-macos-node24.21.0.json', import.meta.url);
 
 function numericRecord(value, path, numbers, other = []) {
   const keys = [...numbers, ...other];

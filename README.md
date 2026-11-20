@@ -32,6 +32,8 @@ npm run verify
 
 `test` 覆盖模拟、六关流程、进度存储、内部回放和音频生命周期。内部回放重新执行录制的输入并核对终局校验值，录制仅保留在当前页面内存。`check` 检查代码注释、模拟边界和构建目录所有文件逐文件 gzip 合计不超过 150 KiB。`verify` 还用三个种子完整模拟沙漠基地，检查回放一致且至少存在一个胜局。浏览器试玩步骤见 [verify-lunar](.agents/skills/verify-lunar/SKILL.md)。
 
+命令的输出和终局结果保存在终端显示的 `.audit/runs/run-*/` 目录。若异常退出遗留 `.audit/dist-transaction`，先按其中的 `owner.json` 确认该命令及其子进程均已退出，再删除事务目录并重试。
+
 打开地址时添加 `?debug`，控制台会输出渲染计数和实体数量。正常日志记录任务开始、状态切换、升级、结算和回放。错误进入控制台并显示页面通知。
 
 ## 资源与限制
@@ -43,5 +45,5 @@ npm run verify
 ## 团队协作
 
 - [团队运行协议](docs/team-workflow.md) 说明角色、Issue、PR、验收和人类决策。
-- [六关战役路线](docs/campaign-plan.md) 说明当前顺序、任务目标、已批准规则和历史实施依赖。
+- [六关战役路线](docs/campaign-plan.md) 记录关卡顺序、叙事目标和已批准的设计决定。
 - `.codex/agents/` 保存四种角色定义。配置文件不会自行启动常驻团队。

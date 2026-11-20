@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import { createWorld, dispatch, checksum, UPGRADE_ORDER } from '../dist/core.js';
 
 const expected = ['pulse', 'orbit', 'nova', 'boots', 'hull', 'magnet'];
-const candidate = JSON.parse(readFileSync(new URL('../docs/evidence/armor22/catalog-candidate.json', import.meta.url)));
-const baseline = JSON.parse(readFileSync(new URL('../docs/evidence/equipment22/baseline.json', import.meta.url)));
+const candidate = JSON.parse(readFileSync(new URL('./fixtures/armor-upgrade-catalog-candidate.json', import.meta.url)));
+const baseline = JSON.parse(readFileSync(new URL('./fixtures/equipment-upgrade-catalog-baseline.json', import.meta.url)));
 
 test('upgrade catalog matches every world upgrade exactly once in offer order', () => {
   assert.deepEqual(UPGRADE_ORDER, expected);
