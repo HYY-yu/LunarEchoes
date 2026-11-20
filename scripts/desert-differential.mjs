@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { loadCoreRevision } from './load-core-revision.mjs';
 import * as head from '../dist/core.js';
-const baselinePath = new URL('../docs/evidence/desert34/baseline-actions.json.gz', import.meta.url);
+const baselinePath = new URL('../test/fixtures/desert-replay-baseline-actions.json.gz', import.meta.url);
 const captured = JSON.parse(gunzipSync(await readFile(baselinePath)));
 assert.equal(captured.baseline, 'bde5936d13d6890a72d24d36bb0039e48e36df44');
 const { core: base } = await loadCoreRevision(captured.baseline);

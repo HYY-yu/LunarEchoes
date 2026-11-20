@@ -124,7 +124,7 @@ test('CLI fails on missing files, malformed arguments and the wrong required Nod
 });
 
 test('desert compatibility validates the frozen build and rejects cross-build state drift', async () => {
-  const baseline = JSON.parse(await readFile(new URL('../docs/evidence/desert34/macos-node24.21.0.json', import.meta.url), 'utf8'));
+  const baseline = JSON.parse(await readFile(new URL('./fixtures/desert-replay-diagnostic-macos-node24.21.0.json', import.meta.url), 'utf8'));
   const candidate = { ...structuredClone(baseline), coreSha256: '1'.repeat(64), rulesSha256: '2'.repeat(64) };
   const checked = await verifyDesertCompatibility(baseline, candidate);
   assert.deepEqual(checked.compatibility, { result: 'same', actionsCompared: 90, finalTick: 90, checksum: 'c55b6ea8' });

@@ -13,7 +13,7 @@ import { loadCoreRevision } from '../scripts/load-core-revision.mjs';
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
 const request = seed => ({ ...DESERT_CONTEXT, seed });
 const fullTerminal = fullTerminalMode(process.env.LUNAR_FULL_TERMINAL, process.versions);
-const fixtureGzip = readFileSync(new URL('../docs/evidence/desert34/baseline-actions.json.gz', import.meta.url));
+const fixtureGzip = readFileSync(new URL('./fixtures/desert-replay-baseline-actions.json.gz', import.meta.url));
 const captured = JSON.parse(gunzipSync(fixtureGzip));
 assert.equal(captured.baseline, 'bde5936d13d6890a72d24d36bb0039e48e36df44');
 const { core: baseline } = await loadCoreRevision(captured.baseline);
@@ -216,7 +216,7 @@ test('full terminal diagnostic rejects invalid mode and synthetic runtime identi
   assert.throws(() => fullTerminalMode('1', { node: '24.21.0', v8: 'different' }), /full terminal requires V8 13.6.233.17-node.53/);
 });
 test('full terminal diagnostic rejects changed frozen input even with a recomputed declaration', () => {
-  const gzip = readFileSync(new URL('../docs/evidence/desert34/baseline-actions.json.gz', import.meta.url));
+  const gzip = readFileSync(new URL('./fixtures/desert-replay-baseline-actions.json.gz', import.meta.url));
   const fixture = () => ({ baseline: captured.baseline, cases: [structuredClone(sample)] });
   assert.equal(fullTerminalInput(captured, gzip), sample);
   assert.throws(() => fullTerminalInput(captured, Buffer.from('changed')), /full terminal gzip identity mismatch/);
