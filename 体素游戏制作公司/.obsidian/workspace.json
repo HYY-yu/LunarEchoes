@@ -1,0 +1,228 @@
+{
+  "main": {
+    "id": "7459bdcd2ffc39ab",
+    "type": "split",
+    "children": [
+      {
+        "id": "fb6bf1a03e6ac746",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "10dd3d2febb11def",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "艺术家-小悠/小悠.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "小悠"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "6c3b4155f12e1c98",
+    "type": "split",
+    "children": [
+      {
+        "id": "3ef994867eb8e231",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "434fb3334f482ec8",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "byCreatedTime",
+                "autoReveal": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "4882736adc75847b",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "7b93295c5cc6c49d",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "b46784eb985cf98b",
+    "type": "split",
+    "children": [
+      {
+        "id": "19356a3d1d401348",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4e9b4dda1364e0a8",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "艺术家-小悠/小悠.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "反向链接"
+            }
+          },
+          {
+            "id": "3f243556b7a67e49",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "艺术家-小悠/小悠.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "出链"
+            }
+          },
+          {
+            "id": "03919333b5734733",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "a8c5f66766994795",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "87df25cc2b011bcc",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "艺术家-小悠/小悠.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false
+    }
+  },
+  "active": "10dd3d2febb11def",
+  "lastOpenFiles": [
+    "月面回响体素游戏开发公司手册.md",
+    "艺术家-小悠/小悠.md",
+    "游戏开发工程师-长鸣/长鸣.md",
+    "艺术家-小悠/日报/日报.md",
+    "艺术家-小悠/目标与关键结果.md",
+    "艺术家-小悠/日报",
+    "艺术家-小悠/收件箱.md",
+    "艺术家-小悠/工作项.md",
+    "艺术家-小悠/发件箱.md",
+    "艺术家-小悠",
+    "技术审查工程师-寒星/寒星.md",
+    "技术审查工程师-寒星/工作项.md",
+    "未命名.md",
+    "技术审查工程师-寒星/日报/日报.md",
+    "技术审查工程师-寒星/目标与关键结果.md",
+    "技术审查工程师-寒星/日报",
+    "技术审查工程师-寒星/收件箱.md",
+    "技术审查工程师-寒星/发件箱.md",
+    "技术审查工程师-寒星",
+    "元角色.base",
+    "数据/契约条目/目标与关键结果.md",
+    "数据/契约条目/角色实例.md",
+    "数据/契约条目/角色发件箱.md",
+    "数据/契约条目/工作项.md",
+    "数据/角色条目/执行者.md",
+    "记录契约.base",
+    "数据/记录模板/工作项模板.md",
+    "游戏开发工程师-长鸣/收件箱.md",
+    "数据/记录模板/角色收件箱模板.md",
+    "游戏开发工程师-长鸣/发件箱.md",
+    "数据/记录模板/角色发件箱模板.md",
+    "游戏开发工程师-长鸣/工作项.md",
+    "游戏开发工程师-长鸣/日报",
+    "游戏开发工程师-长鸣"
+  ]
+}

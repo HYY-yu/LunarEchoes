@@ -13,6 +13,6 @@
 
 每关战斗用时目标为 180–300 秒，剧情另计。各关用布局、地形和敌潮形成差异。场景装饰应准确传达可通行区域。保卫哨塔以生存及击败 Boss 判定胜负，充能由剧情呈现。
 
-改动关卡顺序、重大剧情、胜负条件、解锁规则、存档或回放协议前，按[团队协议](team-workflow.md)取得批准。现有决定见[关卡解锁和失败重试](https://github.com/HYY-yu/LunarEchoes/issues/8#issuecomment-6679991092)和[存档及内部回放](https://github.com/HYY-yu/LunarEchoes/issues/14#issuecomment-6684779269)。
+改动关卡顺序、重大剧情、胜负条件、解锁规则、存档或回放协议前，须取得批准。现有决定见[关卡解锁和失败重试](https://github.com/HYY-yu/LunarEchoes/issues/8#issuecomment-6679991092)和[存档及内部回放](https://github.com/HYY-yu/LunarEchoes/issues/14#issuecomment-6684779269)。
 
 关卡数值和规则版本见[关卡规则](../src/stage-rules.ts)，中英文剧情见[剧情目录](../content/)。
