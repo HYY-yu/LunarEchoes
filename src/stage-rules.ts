@@ -1,11 +1,12 @@
 import type { StageId } from './stage-contract.js';
 
-function context<const Id extends StageId, const Revision extends 1 | 2 | 3>(stageId: Id, revision: Revision): Readonly<{ stageId: Id; rulesVersion: `${Id}-${Revision}` }> {
+function context<const Id extends StageId, const Revision extends 1 | 2 | 3 | 4>(stageId: Id, revision: Revision): Readonly<{ stageId: Id; rulesVersion: `${Id}-${Revision}` }> {
   return Object.freeze({ stageId, rulesVersion: `${stageId}-${revision}` });
 }
 
 export const DESERT_CONTEXT = context('desert-base', 1);
 export const DESERT_REPAIR_CONTEXT = context('desert-base', 3);
+export const DESERT_TURRET_CONTEXT = context('desert-base', 4);
 export const RAINFOREST_CONTEXT = context('rainforest', 1);
 export const ANTARCTICA_CONTEXT = context('antarctica', 1);
 export const SPACE_ELEVATOR_CONTEXT = context('space-elevator', 1);
@@ -30,7 +31,7 @@ const CONTEXTS = Object.freeze({
   'lunar-echoes': context('lunar-echoes', 2)
 } satisfies { [Id in StageId]: { stageId: Id; rulesVersion: `${Id}-2` } });
 
-export type StageContext = typeof CONTEXTS[StageId] | typeof LEGACY_CONTEXTS[StageId] | typeof DESERT_REPAIR_CONTEXT;
+export type StageContext = typeof CONTEXTS[StageId] | typeof LEGACY_CONTEXTS[StageId] | typeof DESERT_REPAIR_CONTEXT | typeof DESERT_TURRET_CONTEXT;
 export type SimulationErrorCode = 'invalid-data' | 'incompatible-version' | 'unavailable-stage' | 'incompatible-rules' | 'nonterminal-replay' | 'checksum-mismatch' | 'incomplete-replay';
 export class SimulationError extends Error {
   constructor(readonly code: SimulationErrorCode) { super(code === 'incompatible-version' ? 'Replay version mismatch' : code); this.name = 'SimulationError'; }
@@ -119,12 +120,15 @@ function isStageId(stageId: unknown): stageId is StageId {
 }
 
 export function stageContext(stageId: StageId): StageContext {
-  return stageId === DESERT_REPAIR_CONTEXT.stageId ? DESERT_REPAIR_CONTEXT : CONTEXTS[stageId];
+  return stageId === DESERT_TURRET_CONTEXT.stageId ? DESERT_TURRET_CONTEXT : CONTEXTS[stageId];
 }
 
 export function resolveStage(stageId: unknown, rulesVersion: unknown): StageContext {
   if (!isStageId(stageId)) throw new SimulationError('unavailable-stage');
-  if (stageId === DESERT_REPAIR_CONTEXT.stageId && rulesVersion === DESERT_REPAIR_CONTEXT.rulesVersion) return DESERT_REPAIR_CONTEXT;
+  if (stageId === DESERT_TURRET_CONTEXT.stageId) {
+    if (rulesVersion === DESERT_TURRET_CONTEXT.rulesVersion) return DESERT_TURRET_CONTEXT;
+    if (rulesVersion === DESERT_REPAIR_CONTEXT.rulesVersion) return DESERT_REPAIR_CONTEXT;
+  }
   const legacy = LEGACY_CONTEXTS[stageId];
   if (rulesVersion === legacy.rulesVersion) return legacy;
   const stage = CONTEXTS[stageId];

@@ -1,5 +1,5 @@
-import { DESERT_REPAIR_CONTEXT, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
-import { createDesertRepair, stepDesertRepair, type DesertRepair } from './desert-repair.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { createDesertRepair, stepDesertRepair, stepDesertTurret, type DesertRepair } from './desert-repair.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -37,7 +37,10 @@ export function createWorld(request: unknown): World {
     player: { x: rules.arenaSize / 2, y: rules.arenaSize / 2, hp: armor.initialCells * armor.hpPerCell, maxHp: armor.initialCells * armor.hpPerCell, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
     enemies: [], shots: [], crystals: [], effects: [], events: [], level: 1, xp: 0, threshold: 5, kills: 0,
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
-  if (context === DESERT_REPAIR_CONTEXT) world.desertRepair = createDesertRepair();
+  if (context === DESERT_REPAIR_CONTEXT || context === DESERT_TURRET_CONTEXT) {
+    world.desertRepair = createDesertRepair();
+    if (context === DESERT_TURRET_CONTEXT) world.desertRepair.nextTurretShotTick = 0;
+  }
   Object.defineProperties(world, { context: { writable: false, configurable: false }, seed: { writable: false, configurable: false } });
   return world;
 }
@@ -206,6 +209,7 @@ function step(world: World, input: Input): void {
       }
     }
   }
+  stepDesertTurret(world);
   for (const shot of world.shots) {
     shot.x += shot.vx; shot.y += shot.vy; shot.life--;
     if (shot.hostile) {
