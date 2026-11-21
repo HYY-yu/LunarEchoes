@@ -2,3 +2,4 @@ node_modules/
 dist/
 .audit/
 /公司工作台
+.DS_Store
