@@ -183,12 +183,13 @@ radioClose.onclick = () => { try { if (radioState.kind === 'active') { setRadio(
 function act(action: Action, record = true) {
   if (record && screen === 'game') recording.actions.push(action);
   const before = world.phase.kind;
-  const towerBefore = world.desertRepair?.tower.kind;
+  const repair = world.desertRepair;
+  const towerBefore = repair && 'tower' in repair ? repair.tower.kind : undefined;
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
-    if (towerBefore === 'damaged' && world.desertRepair?.tower.kind === 'repaired') {
-      log('info', 'session.turret_repaired', { ...world.context, seed: world.seed, tick: world.tick, ...world.desertRepair.inventory });
+    if (towerBefore === 'damaged' && repair && 'tower' in repair && repair.tower.kind === 'repaired') {
+      log('info', 'session.turret_repaired', { ...world.context, seed: world.seed, tick: world.tick, ...repair.inventory });
     }
     if (world.phase.kind === 'won' || world.phase.kind === 'lost') setRadio({ kind: 'inactive' }, 'terminal');
     else if (radioState.kind === 'waiting' && world.events.includes('kill')) setRadio({ kind: 'active', beat: 'firstContact' }, 'first-kill');
@@ -377,7 +378,7 @@ function renderStages() {
 }
 function updateRepairHud() {
   const panel = element('repair-hud');
-  const repair = world.desertRepair;
+  const repair = world.desertRepair && 'tower' in world.desertRepair ? world.desertRepair : undefined;
   panel.hidden = !repair || (screen !== 'game' && screen !== 'replay') || world.phase.kind !== 'running';
   if (panel.hidden || !repair) return;
   const t = text();

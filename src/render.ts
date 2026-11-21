@@ -40,7 +40,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     if (world.context.stageId === 'rainforest') drawRainforestTerrain(ctx, view);
     else if (world.context.stageId === 'desert-base') drawDesertMap(ctx, arena, view);
     else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick, time);
-    if (!title && world.desertRepair) {
+    if (!title && world.desertRepair && 'tower' in world.desertRepair) {
       const { supplies, tower } = world.desertRepair;
       for (const supply of supplies) drawSupply(ctx, supply);
       const { x, y, kind } = tower;
