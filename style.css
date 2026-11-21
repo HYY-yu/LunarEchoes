@@ -21,6 +21,10 @@ body[data-phase="running"]:has(#touch:not([hidden])) #notice.boss-notice{bottom:
 
 #overlay>.intro{max-height:100%;overflow-y:auto;padding:4px;overscroll-behavior:contain}
 #title-progress,#victory-progress{color:var(--cyan);line-height:1.6}
+
+#repair-hud{position:fixed;z-index:2;top:82px;right:max(24px,env(safe-area-inset-right));display:grid;gap:4px;width:max-content;max-width:220px;padding:7px 10px;background:var(--panel);border-left:2px solid var(--amber);color:#e1eee7;font-size:12px;line-height:1.35;pointer-events:none}
+#repair-inventory{color:var(--amber);font:700 12px var(--mono)}
+@media(max-width:700px){#repair-hud{top:132px;right:max(14px,env(safe-area-inset-right));max-width:min(175px,45vw);font-size:11px}#repair-inventory{font-size:11px}}
 #progress-reset-panel button{min-height:44px}
 
 .stages{width:min(560px,100%)}

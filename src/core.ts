@@ -1,4 +1,5 @@
-import { resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_REPAIR_CONTEXT, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { createDesertRepair, stepDesertRepair, type DesertRepair } from './desert-repair.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -21,6 +22,7 @@ export type World = {
   enemies: Enemy[]; shots: Shot[]; crystals: Crystal[]; effects: Fx[]; events: Event[];
   level: number; xp: number; threshold: number; kills: number; upgrades: Record<Upgrade, number>;
   fireCooldown: number; novaCooldown: number; spawnCooldown: number; bossSpawned: boolean; bossKilled: boolean;
+  desertRepair?: DesertRepair;
 };
 type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
 export type ActionBuffer = RecordingContext & { actions: Action[] };
@@ -35,6 +37,7 @@ export function createWorld(request: unknown): World {
     player: { x: rules.arenaSize / 2, y: rules.arenaSize / 2, hp: armor.initialCells * armor.hpPerCell, maxHp: armor.initialCells * armor.hpPerCell, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
     enemies: [], shots: [], crystals: [], effects: [], events: [], level: 1, xp: 0, threshold: 5, kills: 0,
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
+  if (context === DESERT_REPAIR_CONTEXT) world.desertRepair = createDesertRepair();
   Object.defineProperties(world, { context: { writable: false, configurable: false }, seed: { writable: false, configurable: false } });
   return world;
 }
@@ -118,6 +121,7 @@ function step(world: World, input: Input): void {
     if (world.tick % 2 === 0) world.effects.push({ x: p.x, y: p.y, kind: 'dash', life: 16, size: 10 });
   } else { p.x = clamp(world, p.x + input.x * speed); p.y = clamp(world, p.y + input.y * speed); }
   if (input.x !== 0 || input.y !== 0) { p.dx = input.x; p.dy = input.y; }
+  if (world.desertRepair) stepDesertRepair(world.desertRepair, p);
   if (world.tick % ARMOR_RULES.repairEveryTicks === 0) p.hp = Math.min(p.maxHp, p.hp + ARMOR_RULES.hpPerCell);
   world.spawnCooldown--;
   if (world.spawnCooldown <= 0 && world.enemies.length < 180) {
