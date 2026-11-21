@@ -545,7 +545,7 @@ test('the live desert deployment shows localized repair feedback and logs the fi
   const app = harness();
   assert.equal(app.get('repair-hud').hidden, true);
   startLive(app);
-  assert.equal(app.snapshot().world.context.rulesVersion, 'desert-base-3');
+  assert.equal(app.snapshot().world.context.rulesVersion, 'desert-base-4');
   assert.equal(app.get('repair-inventory').textContent, '木材 0/3 · 铁矿 0/3');
   const world = app.snapshot().world;
   world.player.x = 750;
