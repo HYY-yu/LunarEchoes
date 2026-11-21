@@ -1,6 +1,7 @@
 import { ARMOR_RULES, type Upgrade } from './core.js';
 export type Language = 'zh' | 'en';
 const zh = {
+  wood: '木材', iron: '铁矿', repairGuide: '拾取木铁，靠近炮塔修复', repairMissing: '修复还缺', repairDone: '炮塔已修复',
   stageNames: { 'desert-base': '沙漠基地', rainforest: '雨林深处', antarctica: '寒冻南极', 'space-elevator': '太空电梯', watchtower: '保卫哨塔', 'lunar-echoes': '月面回响' },
   campaignStages: '选择任务', backToTitle: '返回标题', backToStages: '返回选关', stageLocked: '未解锁',
   progressHeading: '本机解锁进度', progressPlayable: '已解锁', progressUnavailable: '已解锁，暂不可游玩',
@@ -22,6 +23,7 @@ const zh = {
   report: '任务报告 / MISSION REPORT', name: '月面回响', subtitle: '六个战区。从沙漠失联的基地出发，追踪信号至月球。', mission: '沙漠基地 · 战斗测试', start: '启动任务', replaying: '回放中', pause: '暂停', resume: '继续任务', restart: '重新部署', home: '返回基地', muted: '声音关', sound: '声音开', lang: 'EN', time: '战斗用时', countdown: '战斗倒计时', nextMission: '下一关', backToReport: '返回任务报告', health: '装甲', level: '等级', kills: '击破', dash: '冲刺', ready: '就绪', upgrading: '选择技术升级', upgradeHint: '战斗已暂停。选择一个模块继续任务。', won: '信号已送达', lost: '信号中断', wonBody: '战斗测试完成。后续剧情与战役待接入。', lostBody: '装甲已耗尽，信号未能送达。', paused: '任务已暂停', controls: 'WASD / 方向键移动 · 空格冲刺 · P 暂停', touch: '左侧拖动移动 · 右侧冲刺', brief: '自动开火。收集能源，升级装备。坚持 3 分钟并击败收割者。', seed: '任务种子', boss: '收割者抵达', error: '系统异常，请刷新重试。', replayDone: '回放结束', replayVerified: '回放校验一致', replayFailed: '回放校验失败。进度未改变。', noReplay: '完成一次任务即可回放', select: '装配模块', warning: '最终信号窗口开启', brand: 'LUNAR / RELAY', prototype: '沙漠开场与战斗测试', objective: '生存 03:00 · 击败收割者', recovered: '采集能源', replayEnd: '已到达录制终点', pausedHint: '战斗已暂停。准备好后继续。'
 };
 const en: typeof zh = {
+  wood: 'Wood', iron: 'Iron', repairGuide: 'Collect supplies and approach the turret', repairMissing: 'Still needed', repairDone: 'Turret repaired',
   stageNames: { 'desert-base': 'Desert Base', rainforest: 'Deep Rainforest', antarctica: 'Frozen Antarctica', 'space-elevator': 'Space Elevator', watchtower: 'Watchtower Defense', 'lunar-echoes': 'Lunar Echoes' },
   campaignStages: 'Select mission', backToTitle: 'Back to title', backToStages: 'Back to missions', stageLocked: 'Locked',
   progressHeading: 'Local unlock progress', progressPlayable: 'Unlocked', progressUnavailable: 'Unlocked, not yet playable',

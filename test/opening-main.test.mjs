@@ -62,7 +62,7 @@ function harness(content = embedded, localStorage = memoryStorage(), fetchStory 
   class Button extends Element { constructor() { super('button'); } }
   class Canvas extends Element { constructor() { super('canvas'); this.commands = []; } getContext() { const commands = this.commands; return { fillRect(...rect) { commands.push([this.fillStyle, ...rect]); }, save() {}, restore() {}, scale() {}, translate() {}, beginPath() {}, moveTo() {}, lineTo() {}, closePath() {}, fill() {}, drawImage() {}, ellipse() {}, arc() {}, stroke() {}, strokeRect() {}, setLineDash() {}, createPattern() { return 'terrain'; } }; } }
   const body = new Element('body');
-  for (const id of ['game', 'overlay', 'hud', 'touch', 'armor-cells', 'notice', 'footer-right', 'sound', 'language', 'pause', 'health-label', 'time-label', 'clock', 'sync-fill', 'level', 'kills', 'xp-fill', 'dash', 'footer-left', 'equipment', 'joystick', 'stick', 'desert-content']) {
+  for (const id of ['game', 'overlay', 'hud', 'touch', 'armor-cells', 'notice', 'footer-right', 'sound', 'language', 'pause', 'health-label', 'time-label', 'clock', 'sync-fill', 'level', 'kills', 'xp-fill', 'dash', 'footer-left', 'equipment', 'joystick', 'stick', 'desert-content', 'repair-hud', 'repair-inventory', 'repair-status']) {
     const node = id === 'game' ? new Canvas() : ['sound', 'language', 'pause', 'dash'].includes(id) ? new Button() : new Element('div'); node.id = id; if (id === 'desert-content') node.textContent = content; body.append(node);
   }
   const all = (node = body) => [node, ...node.children.flatMap(child => all(child))];
@@ -541,6 +541,28 @@ test('header focus preserves combat movement, pause and upgrade shortcuts while 
 });
 
 function startLive(app) { app.click('启动任务'); app.click('部署出发'); }
+test('the live desert deployment shows localized repair feedback and logs the first repair', () => {
+  const app = harness();
+  assert.equal(app.get('repair-hud').hidden, true);
+  startLive(app);
+  assert.equal(app.snapshot().world.context.rulesVersion, 'desert-base-3');
+  assert.equal(app.get('repair-inventory').textContent, '木材 0/3 · 铁矿 0/3');
+  const world = app.snapshot().world;
+  world.player.x = 750;
+  world.player.y = 670;
+  app.fixtureWorld(world);
+  for (let i = 0; i < 6; i++) app.frame();
+  assert.equal(app.get('repair-status').textContent, '修复还缺 · 木材 ×2 · 铁矿 ×1');
+  app.get('language').onclick();
+  assert.equal(app.get('repair-status').textContent, 'Still needed · Wood ×2 · Iron ×1');
+  const supplied = app.snapshot().world;
+  supplied.desertRepair.inventory = { wood: 2, iron: 1 };
+  app.fixtureWorld(supplied);
+  for (let i = 0; i < 12; i++) app.frame();
+  assert.equal(app.get('repair-status').textContent, 'Turret repaired');
+  assert.equal(app.get('repair-inventory').textContent, 'Wood 0/3 · Iron 0/3');
+  assert.equal(app.logs.filter(([, event]) => event === 'session.turret_repaired').length, 1);
+});
 function firstRadio(app) {
   startLive(app);
   for (let i = 0; i < 300 && app.radioState === 'waiting'; i++) app.frame();

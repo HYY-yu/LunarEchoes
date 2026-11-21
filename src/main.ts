@@ -9,6 +9,7 @@ import { applyStageResult, isStageUnlocked } from './progress.js';
 import { openProgressStorage, type ProgressStorageResult } from './progress-storage.js';
 import { DESERT_SCENE_SIZE, drawDesertScene } from './desert-scene.js';
 import { loadLaterOpening } from './campaign-scenes.js';
+import { REPAIR_COST, REPAIR_RADIUS, SUPPLY_CAPACITY } from './desert-repair.js';
 type Screen = 'title' | 'stages' | 'opening' | 'game' | 'replay' | 'replay-end';
 type RadioBeat = 'firstContact' | 'telemetry';
 type RadioState = Readonly<{ kind: 'inactive' | 'waiting' | 'disabled' }> | Readonly<{ kind: 'active' | 'dismissed'; beat: RadioBeat }>;
@@ -182,9 +183,13 @@ radioClose.onclick = () => { try { if (radioState.kind === 'active') { setRadio(
 function act(action: Action, record = true) {
   if (record && screen === 'game') recording.actions.push(action);
   const before = world.phase.kind;
+  const towerBefore = world.desertRepair?.tower.kind;
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
+    if (towerBefore === 'damaged' && world.desertRepair?.tower.kind === 'repaired') {
+      log('info', 'session.turret_repaired', { ...world.context, seed: world.seed, tick: world.tick, ...world.desertRepair.inventory });
+    }
     if (world.phase.kind === 'won' || world.phase.kind === 'lost') setRadio({ kind: 'inactive' }, 'terminal');
     else if (radioState.kind === 'waiting' && world.events.includes('kill')) setRadio({ kind: 'active', beat: 'firstContact' }, 'first-kill');
     else if (radioState.kind === 'dismissed' && radioState.beat === 'firstContact' && world.phase.kind === 'running' && !document.hidden && world.tick >= stageRules(world.context).durationTicks / 2) setRadio({ kind: 'active', beat: 'telemetry' }, 'midpoint');
@@ -370,6 +375,25 @@ function renderStages() {
     }
   });
 }
+function updateRepairHud() {
+  const panel = element('repair-hud');
+  const repair = world.desertRepair;
+  panel.hidden = !repair || (screen !== 'game' && screen !== 'replay') || world.phase.kind !== 'running';
+  if (panel.hidden || !repair) return;
+  const t = text();
+  const { inventory, tower } = repair;
+  const supplies = `${t.wood} ${inventory.wood}/${SUPPLY_CAPACITY} · ${t.iron} ${inventory.iron}/${SUPPLY_CAPACITY}`;
+  const missing = (['wood', 'iron'] as const).flatMap(material => {
+    const count = REPAIR_COST[material] - inventory[material];
+    return count > 0 ? [`${t[material]} ×${count}`] : [];
+  });
+  const nearby = Math.hypot(world.player.x - tower.x, world.player.y - tower.y) <= REPAIR_RADIUS;
+  const status = tower.kind === 'repaired' ? t.repairDone
+    : nearby && missing.length ? `${t.repairMissing} · ${missing.join(' · ')}` : t.repairGuide;
+  const inventoryNode = element('repair-inventory'), statusNode = element('repair-status');
+  if (inventoryNode.textContent !== supplies) inventoryNode.textContent = supplies;
+  if (statusNode.textContent !== status) statusNode.textContent = status;
+}
 function updateUi(force = false) {
   const t = text(), menu = screen === 'title' || screen === 'stages' || screen === 'opening';
   document.body.dataset.screen = screen; document.body.dataset.phase = world.phase.kind;
@@ -387,6 +411,7 @@ function updateUi(force = false) {
   element('health-label').textContent = t.health; element('time-label').textContent = screen === 'replay' ? t.replaying : t.countdown;
   updateRadio();
   updateArmor();
+  updateRepairHud();
   const duration = stageRules(world.context).durationTicks;
   const remaining = Math.max(0, duration - world.tick);
   element('clock').textContent = formatTime(Math.ceil(remaining / HZ) * HZ); element('sync-fill').style.width = `${remaining / duration * 100}%`;
