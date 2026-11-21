@@ -121,7 +121,7 @@ function isStageId(stageId: unknown): stageId is StageId {
 }
 
 export function stageContext(stageId: StageId): StageContext {
-  return stageId === DESERT_TURRET_CONTEXT.stageId ? DESERT_TURRET_CONTEXT : CONTEXTS[stageId];
+  return stageId === DESERT_FOUR_TOWERS_CONTEXT.stageId ? DESERT_FOUR_TOWERS_CONTEXT : CONTEXTS[stageId];
 }
 
 export function resolveStage(stageId: unknown, rulesVersion: unknown): StageContext {

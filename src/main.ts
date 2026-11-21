@@ -184,11 +184,18 @@ function act(action: Action, record = true) {
   if (record && screen === 'game') recording.actions.push(action);
   const before = world.phase.kind;
   const repair = world.desertRepair;
-  const towerBefore = repair && 'tower' in repair ? repair.tower.kind : undefined;
+  const towersBefore = repair && 'towers' in repair ? repair.towers : undefined;
+  const towerBefore = repair && 'tower' in repair ? repair.tower : undefined;
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
-    if (towerBefore === 'damaged' && repair && 'tower' in repair && repair.tower.kind === 'repaired') {
+    if (repair && 'towers' in repair && towersBefore !== repair.towers) {
+      for (const [index, tower] of repair.towers.entries()) {
+        if (towersBefore?.[index]?.kind === 'damaged' && tower.kind === 'repaired') {
+          log('info', 'session.turret_repaired', { ...world.context, seed: world.seed, tick: world.tick, direction: tower.direction, ...repair.inventory });
+        }
+      }
+    } else if (towerBefore?.kind === 'damaged' && repair && 'tower' in repair && repair.tower.kind === 'repaired') {
       log('info', 'session.turret_repaired', { ...world.context, seed: world.seed, tick: world.tick, ...repair.inventory });
     }
     if (world.phase.kind === 'won' || world.phase.kind === 'lost') setRadio({ kind: 'inactive' }, 'terminal');
@@ -378,19 +385,23 @@ function renderStages() {
 }
 function updateRepairHud() {
   const panel = element('repair-hud');
-  const repair = world.desertRepair && 'tower' in world.desertRepair ? world.desertRepair : undefined;
+  const repair = world.desertRepair;
   panel.hidden = !repair || (screen !== 'game' && screen !== 'replay') || world.phase.kind !== 'running';
   if (panel.hidden || !repair) return;
   const t = text();
-  const { inventory, tower } = repair;
+  const { inventory } = repair;
+  const fourTowers = 'towers' in repair;
+  const towers = fourTowers ? repair.towers : [repair.tower];
+  const repaired = towers.filter(tower => tower.kind === 'repaired').length;
   const supplies = `${t.wood} ${inventory.wood}/${SUPPLY_CAPACITY} · ${t.iron} ${inventory.iron}/${SUPPLY_CAPACITY}`;
   const missing = (['wood', 'iron'] as const).flatMap(material => {
     const count = REPAIR_COST[material] - inventory[material];
     return count > 0 ? [`${t[material]} ×${count}`] : [];
   });
-  const nearby = Math.hypot(world.player.x - tower.x, world.player.y - tower.y) <= REPAIR_RADIUS;
-  const status = tower.kind === 'repaired' ? t.repairDone
-    : nearby && missing.length ? `${t.repairMissing} · ${missing.join(' · ')}` : t.repairGuide;
+  const nearby = towers.some(tower => tower.kind === 'damaged' && Math.hypot(world.player.x - tower.x, world.player.y - tower.y) <= REPAIR_RADIUS);
+  const detail = repaired === towers.length ? (fourTowers ? t.repairFourDone : t.repairDone)
+    : nearby && missing.length ? `${t.repairMissing} · ${missing.join(' · ')}` : (fourTowers ? t.repairFourGuide : t.repairGuide);
+  const status = fourTowers ? `${t.repairProgress} ${repaired}/${towers.length} · ${detail}` : detail;
   const inventoryNode = element('repair-inventory'), statusNode = element('repair-status');
   if (inventoryNode.textContent !== supplies) inventoryNode.textContent = supplies;
   if (statusNode.textContent !== status) statusNode.textContent = status;
