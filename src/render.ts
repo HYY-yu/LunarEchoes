@@ -4,6 +4,8 @@ import { createAtlas } from './art.js';
 import { createDesertMap } from './desert-map.js';
 import { drawCampaignTerrain } from './campaign-maps.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
+import { createDesertSupplyArt } from './desert-supply-art.js';
+import { createDesertTowerArt } from './desert-tower-art.js';
 export function createRenderer(canvas: HTMLCanvasElement) {
   const context = canvas.getContext('2d', { alpha: false });
   if (!context) throw new Error('Canvas 2D is unavailable');
@@ -11,6 +13,8 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const atlas = createAtlas();
   let playerMotion: { world: World; tick: number; x: number; y: number; animationTick: number } | undefined;
   const drawDesertMap = createDesertMap();
+  const drawSupply = createDesertSupplyArt();
+  const drawTower = createDesertTowerArt();
   return function render(world: World, time: number, title = false) {
     const p = world.player, arena = stageRules(world.context).arenaSize;
     if (!playerMotion || playerMotion.world !== world || world.tick < playerMotion.tick) {
@@ -34,24 +38,12 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick, time);
     if (!title && world.desertRepair) {
       const { supplies, tower } = world.desertRepair;
-      for (const { x, y, material } of supplies) {
-        ctx.fillStyle = '#26313b'; ctx.fillRect(x - 8, y + 3, 17, 5);
-        ctx.fillStyle = material === 'wood' ? '#824b32' : '#485f72'; ctx.fillRect(x - 7, y - 4, 14, 8);
-        ctx.fillStyle = material === 'wood' ? '#f0ae6a' : '#a8d9ec'; ctx.fillRect(x - 5, y - 5, 11, 3);
-        ctx.fillRect(x - 4, y + 1, material === 'wood' ? 10 : 5, 2);
-      }
+      for (const supply of supplies) drawSupply(ctx, supply);
       const { x, y, kind } = tower;
       ctx.strokeStyle = kind === 'repaired' ? '#7ef5d1' : '#ffe09b';
       ctx.setLineDash(kind === 'damaged' ? [4, 4] : []);
       ctx.beginPath(); ctx.ellipse(x, y, 21, 12, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = '#283343'; ctx.fillRect(x - 12, y - 5, 24, 10);
-      ctx.fillStyle = '#647d87'; ctx.fillRect(x - 9, y - 12, 18, 10);
-      ctx.fillStyle = kind === 'repaired' ? '#7ef5d1' : '#ebb27a'; ctx.fillRect(x - 4, y - 11, 8, 4);
-      if (kind === 'repaired') {
-        ctx.fillStyle = '#a0b8bd'; ctx.fillRect(x - 3, y - 22, 6, 10);
-      } else {
-        ctx.fillStyle = '#283343'; ctx.fillRect(x + 5, y - 12, 5, 6);
-      }
+      drawTower(ctx, tower);
     }
     for (const crystal of world.crystals) atlas.draw(ctx, 'crystal', crystal.x, crystal.y + Math.sin(time * .004 + crystal.x) * 2, .9);
     for (const enemy of world.enemies) {
