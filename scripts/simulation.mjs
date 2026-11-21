@@ -2,10 +2,11 @@ import { DESERT_CONTEXT, stageRules } from '../dist/stage-rules.js';
 const DURATION = stageRules(DESERT_CONTEXT).durationTicks;
 import assert from 'node:assert/strict';
 import { createWorld, dispatch, replay, checksum, startRecording, finishRecording } from '../dist/core.js';
-export function play(seed, context = DESERT_CONTEXT) {
+export function play(seed, context = DESERT_CONTEXT, opening = []) {
   const world = createWorld({ ...context, seed });
   const buffer = startRecording(world);
   function act(action) { buffer.actions.push(action); dispatch(world, action); }
+  for (const action of opening) act(action);
   let iterations = 0;
   while (world.phase.kind !== 'won' && world.phase.kind !== 'lost' && iterations++ < DURATION * 2) {
     if (world.phase.kind === 'upgrading') {

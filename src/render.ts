@@ -19,6 +19,14 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
+  function renderTower(tower: Parameters<typeof drawTower>[1], tick: number, shotTick?: number) {
+    const { x, y, kind } = tower;
+    ctx.strokeStyle = kind === 'repaired' ? '#7ef5d1' : '#ffe09b';
+    ctx.setLineDash(kind === 'damaged' ? [4, 4] : []);
+    ctx.beginPath(); ctx.ellipse(x, y, 21, 12, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    const flash = shotTick !== undefined && tick >= shotTick && tick < shotTick + TURRET_FLASH_TICKS;
+    drawTower(ctx, tower, flash);
+  }
   return function render(world: World, time: number, title = false) {
     const p = world.player, arena = stageRules(world.context).arenaSize;
     if (!playerMotion || playerMotion.world !== world || world.tick < playerMotion.tick) {
@@ -40,16 +48,16 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     if (world.context.stageId === 'rainforest') drawRainforestTerrain(ctx, view);
     else if (world.context.stageId === 'desert-base') drawDesertMap(ctx, arena, view);
     else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick, time);
-    if (!title && world.desertRepair) {
-      const { supplies, tower } = world.desertRepair;
-      for (const supply of supplies) drawSupply(ctx, supply);
-      const { x, y, kind } = tower;
-      ctx.strokeStyle = kind === 'repaired' ? '#7ef5d1' : '#ffe09b';
-      ctx.setLineDash(kind === 'damaged' ? [4, 4] : []);
-      ctx.beginPath(); ctx.ellipse(x, y, 21, 12, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-      const shotTick = lastDesertTurretShotTick(world.desertRepair);
-      const flash = shotTick !== undefined && world.tick >= shotTick && world.tick < shotTick + TURRET_FLASH_TICKS;
-      drawTower(ctx, tower, flash);
+    const repair = world.desertRepair;
+    if (!title && repair) {
+      for (const supply of repair.supplies) drawSupply(ctx, supply);
+      if ('towers' in repair) {
+        for (const tower of repair.towers) {
+          renderTower(tower, world.tick, tower.kind === 'repaired' ? lastDesertTurretShotTick(tower) : undefined);
+        }
+      } else {
+        renderTower(repair.tower, world.tick, lastDesertTurretShotTick(repair));
+      }
     }
     for (const crystal of world.crystals) atlas.draw(ctx, 'crystal', crystal.x, crystal.y + Math.sin(time * .004 + crystal.x) * 2, .9);
     for (const enemy of world.enemies) {
