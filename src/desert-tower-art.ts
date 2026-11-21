@@ -128,6 +128,18 @@ export function createDesertTowerArt() {
     damaged: towerSprite(frames.damaged.pixels),
     repaired: towerSprite(frames.repaired.pixels)
   };
-  return (ctx: CanvasRenderingContext2D, tower: Tower) =>
-    ctx.drawImage(sprites[tower.kind], Math.round(tower.x) - GROUND_X, Math.round(tower.y) - frames[tower.kind].groundY);
+  return (ctx: CanvasRenderingContext2D, tower: Tower, flash: boolean) => {
+    const x = Math.round(tower.x), y = Math.round(tower.y);
+    ctx.drawImage(sprites[tower.kind], x - GROUND_X, y - frames[tower.kind].groundY);
+    if (tower.kind !== 'repaired' || !flash) return;
+
+    const muzzleX = x + 15, muzzleY = y - 24;
+    ctx.fillStyle = '#d66b40';
+    ctx.fillRect(muzzleX - 6, muzzleY, 12, 3);
+    ctx.fillStyle = '#ffad54';
+    ctx.fillRect(muzzleX - 3, muzzleY - 5, 7, 7);
+    ctx.fillRect(muzzleX - 6, muzzleY - 2, 13, 3);
+    ctx.fillStyle = '#fff0b5';
+    ctx.fillRect(muzzleX - 1, muzzleY - 3, 3, 4);
+  };
 }
