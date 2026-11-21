@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createWorld, dispatch, finishRecording, replay } from '../dist/core.js';
+import { lastDesertTurretShotTick } from '../dist/desert-repair.js';
 import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT } from '../dist/stage-rules.js';
 
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
@@ -75,6 +76,7 @@ test('Desert repair records limited pickups and charges only for the first repai
   const recording = finishRecording(world, actions);
   assert.deepEqual(replay(recording), world);
   assert.equal(Object.hasOwn(repair, 'nextTurretShotTick'), false);
+  assert.equal(lastDesertTurretShotTick(repair), undefined);
   assert.equal(createWorld({ ...DESERT_REPAIR_CONTEXT, seed: 42 }).desertRepair.tower.kind, 'damaged');
 });
 
@@ -92,6 +94,7 @@ test('a damaged or repaired but idle turret leaves the first shot ready', () => 
   dispatch(world, idle);
   assert.equal(world.desertRepair.tower.kind, 'repaired');
   assert.equal(world.desertRepair.nextTurretShotTick, 0);
+  assert.equal(lastDesertTurretShotTick(world.desertRepair), undefined);
   assert.deepEqual(world.shots, []);
   assert.deepEqual(world.events, []);
 
@@ -140,13 +143,17 @@ test('same-tick repair fires after enemy movement and reuses damage and loot at 
   assert.equal(world.desertRepair.tower.kind, 'repaired');
   assert.deepEqual(world.events, ['shot']);
   assert.deepEqual(world.shots, [{ x, y: y - 8, vx: 0, vy: -8, life: 29, damage: 18, hostile: false }]);
+  const firstShotTick = world.tick;
+  assert.equal(lastDesertTurretShotTick(world.desertRepair), firstShotTick);
   for (let tick = 0; tick < 53; tick++) {
     dispatch(world, idle);
     assert.equal(world.events.includes('shot'), false);
   }
   assert.equal(target.hp, 18);
+  assert.equal(lastDesertTurretShotTick(world.desertRepair), firstShotTick);
   dispatch(world, idle);
   assert.deepEqual(world.events, ['shot']);
+  assert.equal(lastDesertTurretShotTick(world.desertRepair), world.tick);
   for (let tick = 0; tick < 30 && !world.kills; tick++) dispatch(world, idle);
   assert.deepEqual(world.events, ['enemy-hit', 'kill']);
   assert.equal(world.kills, 1);
