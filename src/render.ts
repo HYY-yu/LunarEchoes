@@ -6,6 +6,10 @@ import { drawCampaignTerrain } from './campaign-maps.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
 import { createDesertSupplyArt } from './desert-supply-art.js';
 import { createDesertTowerArt } from './desert-tower-art.js';
+import { lastDesertTurretShotTick } from './desert-repair.js';
+
+const TURRET_FLASH_TICKS = 8;
+
 export function createRenderer(canvas: HTMLCanvasElement) {
   const context = canvas.getContext('2d', { alpha: false });
   if (!context) throw new Error('Canvas 2D is unavailable');
@@ -43,7 +47,9 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       ctx.strokeStyle = kind === 'repaired' ? '#7ef5d1' : '#ffe09b';
       ctx.setLineDash(kind === 'damaged' ? [4, 4] : []);
       ctx.beginPath(); ctx.ellipse(x, y, 21, 12, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-      drawTower(ctx, tower);
+      const shotTick = lastDesertTurretShotTick(world.desertRepair);
+      const flash = shotTick !== undefined && world.tick >= shotTick && world.tick < shotTick + TURRET_FLASH_TICKS;
+      drawTower(ctx, tower, flash);
     }
     for (const crystal of world.crystals) atlas.draw(ctx, 'crystal', crystal.x, crystal.y + Math.sin(time * .004 + crystal.x) * 2, .9);
     for (const enemy of world.enemies) {

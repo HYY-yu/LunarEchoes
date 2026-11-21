@@ -62,6 +62,11 @@ function distance(a: Position, b: Position): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
+export function lastDesertTurretShotTick(repair: DesertRepair): number | undefined {
+  const next = repair.nextTurretShotTick;
+  return next === undefined || next === 0 ? undefined : next - TURRET_CADENCE;
+}
+
 export function stepDesertTurret(world: Pick<World, 'desertRepair' | 'enemies' | 'shots' | 'events' | 'tick'>): void {
   const repair = world.desertRepair;
   if (!repair || repair.tower.kind !== 'repaired' || repair.nextTurretShotTick === undefined || world.tick < repair.nextTurretShotTick) return;
