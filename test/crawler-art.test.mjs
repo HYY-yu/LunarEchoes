@@ -4,15 +4,18 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createAtlas } from '../dist/art.js';
+import { createAstronautArt } from '../dist/astronaut-art.js';
 import { createRenderer } from '../dist/render.js';
 import { createWorld, dispatch } from '../dist/core.js';
 
 class Canvas {
-  width = 0; height = 0; clientWidth = 1280; clientHeight = 720; pixels = new Map(); calls = []; arcs = []; ellipses = [];
+  width = 0; height = 0; rgba = undefined; clientWidth = 1280; clientHeight = 720; pixels = new Map(); calls = []; arcs = []; ellipses = [];
   constructor(rasterize = false) {
     const canvas = this;
     this.context = {
       fillStyle: '', globalAlpha: 1,
+      createImageData(width, height) { return { data: new Uint8ClampedArray(width * height * 4) }; },
+      putImageData(image) { canvas.rgba = image.data; },
       fillRect(x, y, width, height) { if (!rasterize) return; for (let row = y; row < y + height; row++) for (let col = x; col < x + width; col++) canvas.pixels.set(`${col},${row}`, this.fillStyle); },
       drawImage(...args) { canvas.calls.push({ args, alpha: this.globalAlpha }); },
       arc(...args) { canvas.arcs.push(args); },
@@ -95,11 +98,16 @@ test('astronaut preserves its torso and palette across three contained leg poses
 });
 function astronautScene(t) {
   environment(t); const canvas = new Canvas(), render = createRenderer(canvas);
+  const reference = createAstronautArt();
+  const poses = new Map();
+  for (const tick of [0, 6, 18]) reference({ drawImage(frame) { poses.set(hash(frame.rgba), tick); } }, 0, 0, tick);
+  assert.equal(poses.size, 3);
   function fresh() { const world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 }); world.fireCooldown = 1000000; world.spawnCooldown = 1000000; return world; }
   function draw(world, time = 0) {
     canvas.calls.length = 0; canvas.ellipses.length = 0;
     const before = structuredClone(world); render(world, time); assert.deepEqual(world, before);
-    return canvas.calls.find(call => call.args[1] === 0);
+    const call = canvas.calls.find(call => call.args[0].width === 32 && call.args[0].height === 36);
+    return { ...call, pose: poses.get(hash(call.args[0].rgba)) };
   }
   function ticks(world, count, x = 0, y = 0) { for (let i = 0; i < count; i++) dispatch(world, { kind: 'tick', input: { x, y, dash: false } }); }
   return { canvas, fresh, draw, ticks };
@@ -107,36 +115,36 @@ function astronautScene(t) {
 test('astronaut walks only after observed movement, remains stable within one tick and stops at idle', t => {
   const { fresh, draw, ticks } = astronautScene(t), world = fresh(); draw(world);
   ticks(world, 6); const idle = draw(world);
-  assert.equal(idle.args[2], 0); assert.equal(idle.args[6], Math.round(world.player.y - 8 * 1.7));
-  ticks(world, 1, 1); const walking = draw(world); assert.equal(walking.args[2], 16);
+  assert.equal(idle.pose, 0); assert.equal(idle.args[2], Math.round(world.player.y) - 24);
+  ticks(world, 1, 1); const walking = draw(world); assert.equal(walking.pose, 6);
   for (let i = 0; i < 100; i++) assert.deepEqual(draw(world, i * 1000).args, walking.args);
-  ticks(world, 1); assert.equal(draw(world).args[2], 0); assert.equal(world.player.dx, 1);
+  ticks(world, 1); assert.equal(draw(world).pose, 0); assert.equal(world.player.dx, 1);
   const movingPoses = new Set();
-  for (let i = 0; i < 24; i++) { ticks(world, 1, 1); movingPoses.add(draw(world).args[2]); }
-  assert.deepEqual([...movingPoses].sort((a, b) => a - b), [0, 16, 32]);
-  for (let i = 0; i < 24; i++) { ticks(world, 1); assert.equal(draw(world, i * 300).args[2], 0); }
+  for (let i = 0; i < 24; i++) { ticks(world, 1, 1); movingPoses.add(draw(world).pose); }
+  assert.deepEqual([...movingPoses].sort((a, b) => a - b), [0, 6, 18]);
+  for (let i = 0; i < 24; i++) { ticks(world, 1); assert.equal(draw(world, i * 300).pose, 0); }
 });
 test('astronaut freezes its selected pose through pause upgrade and terminal states', t => {
   const { fresh, draw, ticks } = astronautScene(t), world = fresh(); draw(world); ticks(world, 6, 1);
-  const walking = draw(world); assert.equal(walking.args[2], 16);
+  const walking = draw(world); assert.equal(walking.pose, 6);
   dispatch(world, { kind: 'pause' });
-  for (let i = 0; i < 10; i++) { ticks(world, 1, 1); assert.equal(draw(world, i * 1000).args[2], walking.args[2]); }
-  dispatch(world, { kind: 'resume' }); assert.equal(draw(world).args[2], walking.args[2]);
+  for (let i = 0; i < 10; i++) { ticks(world, 1, 1); assert.equal(draw(world, i * 1000).pose, walking.pose); }
+  dispatch(world, { kind: 'resume' }); assert.equal(draw(world).pose, walking.pose);
   world.xp = world.threshold; ticks(world, 1, 1); assert.equal(world.phase.kind, 'upgrading');
-  for (let i = 0; i < 10; i++) { ticks(world, 1, 1); assert.equal(draw(world, i * 2000).args[2], walking.args[2]); }
-  dispatch(world, { kind: 'choose', upgrade: world.phase.offers[0] }); ticks(world, 1); assert.equal(draw(world).args[2], 0);
-  ticks(world, 10, 1); const selected = draw(world).args[2]; assert.equal(selected, 32);
-  for (const kind of ['won', 'lost']) { world.phase = { kind }; ticks(world, 1, 1); assert.equal(draw(world, 99999).args[2], selected); }
+  for (let i = 0; i < 10; i++) { ticks(world, 1, 1); assert.equal(draw(world, i * 2000).pose, walking.pose); }
+  dispatch(world, { kind: 'choose', upgrade: world.phase.offers[0] }); ticks(world, 1); assert.equal(draw(world).pose, 0);
+  ticks(world, 10, 1); const selected = draw(world).pose; assert.equal(selected, 18);
+  for (const kind of ['won', 'lost']) { world.phase = { kind }; ticks(world, 1, 1); assert.equal(draw(world, 99999).pose, selected); }
 });
 test('astronaut sampling resets on world replacement and rewind, and handles skipped ticks without history guesses', t => {
   const { fresh, draw, ticks } = astronautScene(t), world = fresh(); draw(world); ticks(world, 102, 1);
-  assert.equal(draw(world).args[2], 16); ticks(world, 6); assert.equal(draw(world).args[2], 0);
-  const next = fresh(); assert.equal(draw(next, 90000).args[2], 0); ticks(next, 6, 1); assert.equal(draw(next).args[2], 16);
-  next.tick = 1; assert.equal(draw(next).args[2], 0); ticks(next, 6, 1); assert.equal(draw(next).args[2], 16);
+  assert.equal(draw(world).pose, 6); ticks(world, 6); assert.equal(draw(world).pose, 0);
+  const next = fresh(); assert.equal(draw(next, 90000).pose, 0); ticks(next, 6, 1); assert.equal(draw(next).pose, 6);
+  next.tick = 1; assert.equal(draw(next).pose, 0); ticks(next, 6, 1); assert.equal(draw(next).pose, 6);
 });
 test('astronaut boundary input stays idle and preserves hurt alpha and shadow anchor', t => {
   const { canvas, fresh, draw, ticks } = astronautScene(t), world = fresh(); world.player.x = ARENA - 36; draw(world);
-  ticks(world, 24, 1); const idle = draw(world); assert.equal(idle.args[2], 0); assert.equal(world.player.x, ARENA - 36);
+  ticks(world, 24, 1); const idle = draw(world); assert.equal(idle.pose, 0); assert.equal(world.player.x, ARENA - 36);
   assert.deepEqual(canvas.ellipses[0].slice(0, 4), [world.player.x + 3, world.player.y + 12, 12, 5]);
   world.player.invincible = 10; assert.equal(draw(world).alpha, .45);
   ticks(world, 3); assert.equal(draw(world).alpha, 1);
