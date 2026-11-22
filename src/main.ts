@@ -548,7 +548,14 @@ function updateUi(force = false) {
           }
         }); back.id = 'opening-back'; actions.append(back);
       }
-      section.append(art, heading, story, objectiveHeading, objective, actions); overlay.append(section);
+      if (stageId === 'rainforest') {
+        section.classList.add('opening-rainforest');
+        const body = document.createElement('div'); body.className = 'opening-body';
+        body.setAttribute('tabindex', '0'); body.setAttribute('role', 'region'); body.setAttribute('aria-labelledby', heading.id);
+        body.append(art, heading, story, objectiveHeading, objective);
+        section.append(body, actions);
+      } else section.append(art, heading, story, objectiveHeading, objective, actions);
+      overlay.append(section);
     }
     element('opening-art').setAttribute('aria-label', stageId === 'rainforest' ? t.rainforestOpeningArt : stageId === 'desert-base' ? t.openingArt : t.stageNames[stageId]);
     element('opening-heading').textContent = stageId === 'desert-base' ? t.opening : t.stageNames[stageId];
