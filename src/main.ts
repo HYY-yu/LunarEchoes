@@ -569,7 +569,6 @@ function updateUi(force = false) {
       const heading = document.createElement('h2'); heading.id = 'victory-heading';
       const story = document.createElement('p'); story.id = 'victory-story'; story.hidden = !victory.story; if (victory.story) story.dataset.storyId = victory.story.id;
       const nextClue = document.createElement('p'); nextClue.id = 'victory-next-clue'; nextClue.hidden = !victory.nextClue; if (victory.nextClue) nextClue.dataset.storyId = victory.nextClue.id;
-      const description = document.createElement('p'); description.id = 'victory-description'; description.hidden = victoryStage !== 'desert-base';
       const stats = document.createElement('div'); stats.className = 'stats';
       for (const [id, value] of [['time', formatTime(world.tick)], ['kills', String(world.kills)], ['level', String(world.level)]]) {
         const stat = document.createElement('span'); const label = document.createElement('span'); label.id = `victory-${id}`;
@@ -581,14 +580,23 @@ function updateUi(force = false) {
       const retry = button('', onward ? 'secondary' : 'primary', () => begin(world.context)); retry.id = 'victory-retry';
       const progress = document.createElement('p'); progress.id = 'victory-progress'; progress.setAttribute('role', 'status');
       const missions = button('', 'secondary', showStages); missions.id = 'victory-missions';
-      actions.append(retry, missions); section.append(art, eyebrow, heading, story, nextClue, description, progress, stats, actions); overlay.append(section);
+      actions.append(retry, missions);
+      if (victoryStage === 'desert-base') {
+        section.classList.add('victory-desert');
+        const body = document.createElement('div'); body.className = 'victory-body';
+        body.tabIndex = 0;
+        body.append(art, eyebrow, heading, story, nextClue, progress, stats);
+        section.append(body, actions);
+      } else {
+        section.append(art, eyebrow, heading, story, nextClue, progress, stats, actions);
+      }
+      overlay.append(section);
       if (focusRetry) (onward ?? retry).focus({ preventScroll: true });
     }
     element('victory-art').setAttribute('aria-label', victoryStage === 'rainforest' ? t.rainforestVictoryArt : victoryStage && victoryStage !== 'desert-base' ? t.stageNames[victoryStage] : t.victoryArt);
     element('victory-report').textContent = t.report;
     element('victory-heading').textContent = victoryStage && victoryStage !== 'desert-base' ? `${t.stageNames[victoryStage]} · ${t.won}` : t.won;
     element('victory-story').textContent = victory.story?.[language] ?? ''; element('victory-next-clue').textContent = victory.nextClue?.[language] ?? '';
-    element('victory-description').textContent = victoryStage === 'desert-base' ? t.wonBody : '';
     renderProgress('victory-progress');
     element('victory-time').textContent = t.time; element('victory-kills').textContent = t.kills; element('victory-level').textContent = t.level;
     if (next) element('victory-next').textContent = `${t.nextMission} · ${t.stageNames[next.stageId]}`;
