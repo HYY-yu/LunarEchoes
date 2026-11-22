@@ -470,12 +470,14 @@ test('natural live victory draws the original scene and keeps full bilingual sto
   const victory = catalog.find(entry => entry.beat === 'victory'), clue = catalog.find(entry => entry.beat === 'next-clue');
   const story = app.get('victory-story'), nextClue = app.get('victory-next-clue'), statLabel = app.get('victory-time');
   assert.equal(story.dataset.storyId, victory.id); assert.equal(nextClue.dataset.storyId, clue.id);
-  assert.ok(panel.children.indexOf(story) < panel.children.indexOf(nextClue));
+  const report = panel.children[0];
+  assert.ok(report.children.indexOf(story) < report.children.indexOf(nextClue));
+  assert.equal(report.tabIndex, 0); assert.equal(app.get('victory-description'), null);
   assert.equal(story.textContent, victory.zh); assert.equal(nextClue.textContent, clue.zh);
   assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('defeat-art'), null);
   assert.deepEqual(panel.children.at(-1).children.map(button => button.id), ['victory-next', 'victory-retry', 'victory-missions']); assert.equal(retry.textContent, '重新部署');
   assert.ok(app.logs.some(([, name, data]) => name === 'session.finished' && data.outcome === 'won' && data.checksum === terminal.checksum));
-  panel.scrollTop = 87;
+  report.scrollTop = 87;
   for (let i = 0; i < 20; i++) { app.frame(60000); for (const code of ['KeyD', 'Space', 'KeyP', 'Escape', 'Digit1']) app.key(code); }
   app.get('language').focus(); app.get('language').onclick();
   assert.deepEqual(app.overlayButtons(), ['Next mission · Deep Rainforest', 'Redeploy', 'Back to missions']);
@@ -484,7 +486,7 @@ test('natural live victory draws the original scene and keeps full bilingual sto
   app.pointer('joystick', 'pointerdown'); app.pointer('dash', 'pointerdown');
   assert.deepEqual(app.snapshot(), terminal); assert.equal(app.seedCalls, 1); assert.equal(app.sessions.at(-1), 'terminal');
   for (const [id, node] of [['victory-panel', panel], ['victory-retry', retry], ['victory-art', art], ['victory-story', story], ['victory-next-clue', nextClue], ['victory-time', statLabel]]) assert.equal(app.get(id), node);
-  assert.equal(panel.scrollTop, 87); assert.equal(app.active, app.get('language')); assert.equal(next.focusCalls, 1);
+  assert.equal(report.scrollTop, 87); assert.equal(app.active, app.get('language')); assert.equal(next.focusCalls, 1);
   app.activate('victory-missions', 'Enter');
   assert.equal(app.active.id, 'stages-heading');
   assert.equal(app.get('stage-list').children[1].children[1].disabled, false);
@@ -1186,7 +1188,7 @@ test('live rainforest victory presents the canonical bilingual story and Antarct
   const original = [];
   drawRainforestVictory({ save() {}, restore() {}, fillRect(...rect) { original.push([this.fillStyle, ...rect]); } });
   assert.deepEqual(art.commands, original);
-  assert.equal(app.get('victory-description').hidden, true);
+  assert.equal(app.get('victory-description'), null);
   assert.deepEqual(storage.writes, [[progressKey, savedProgress('antarctica')]]);
   assert.match(app.get('victory-progress').textContent, /寒冻南极 · 已解锁/);
   app.get('language').onclick();
