@@ -19,6 +19,7 @@ export const ANTARCTIC_RELAY_CONTEXT = context('antarctica', 3);
 export const SPACE_ELEVATOR_CONTEXT = context('space-elevator', 1);
 export const ELEVATOR_RELAY_CONTEXT = context('space-elevator', 3);
 export const WATCHTOWER_CONTEXT = context('watchtower', 1);
+export const WATCHTOWER_RELAY_CONTEXT = context('watchtower', 3);
 export const LUNAR_ECHOES_CONTEXT = context('lunar-echoes', 1);
 
 const LEGACY_CONTEXTS = Object.freeze({
@@ -39,20 +40,34 @@ const CONTEXTS = Object.freeze({
   'lunar-echoes': context('lunar-echoes', 2)
 } satisfies { [Id in StageId]: { stageId: Id; rulesVersion: `${Id}-2` } });
 
-export type StageContext = typeof CONTEXTS[StageId] | typeof LEGACY_CONTEXTS[StageId] | typeof DESERT_REPAIR_CONTEXT | typeof DESERT_TURRET_CONTEXT | typeof DESERT_FOUR_TOWERS_CONTEXT | typeof DESERT_ASSAULT_CONTEXT | typeof DESERT_RELAY_CONTEXT | typeof DESERT_CONTINUOUS_CONTEXT | typeof RAINFOREST_RELAY_CONTEXT | typeof ANTARCTIC_RELAY_CONTEXT | typeof ELEVATOR_RELAY_CONTEXT;
+export type StageContext =
+  | typeof CONTEXTS[StageId]
+  | typeof LEGACY_CONTEXTS[StageId]
+  | typeof DESERT_REPAIR_CONTEXT
+  | typeof DESERT_TURRET_CONTEXT
+  | typeof DESERT_FOUR_TOWERS_CONTEXT
+  | typeof DESERT_ASSAULT_CONTEXT
+  | typeof DESERT_RELAY_CONTEXT
+  | typeof DESERT_CONTINUOUS_CONTEXT
+  | typeof RAINFOREST_RELAY_CONTEXT
+  | typeof ANTARCTIC_RELAY_CONTEXT
+  | typeof ELEVATOR_RELAY_CONTEXT
+  | typeof WATCHTOWER_RELAY_CONTEXT;
 
 type FourDeliveries = readonly [number, number, number, number];
 const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rulesVersion'], FourDeliveries>>> = Object.freeze({
   'rainforest-3': Object.freeze([1, 35 * 60, 70 * 60, 108 * 60] as const),
   'antarctica-3': Object.freeze([1, 42 * 60, 84 * 60, 126 * 60] as const),
-  'space-elevator-3': Object.freeze([1, 29 * 60, 76 * 60, 120 * 60] as const)
+  'space-elevator-3': Object.freeze([1, 29 * 60, 76 * 60, 120 * 60] as const),
+  'watchtower-3': Object.freeze([1, 42 * 60, 89 * 60, 118 * 60] as const)
 });
 
 const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object.freeze({
   'desert-base': DESERT_CONTINUOUS_CONTEXT,
   rainforest: RAINFOREST_RELAY_CONTEXT,
   antarctica: ANTARCTIC_RELAY_CONTEXT,
-  'space-elevator': ELEVATOR_RELAY_CONTEXT
+  'space-elevator': ELEVATOR_RELAY_CONTEXT,
+  watchtower: WATCHTOWER_RELAY_CONTEXT
 });
 export type SimulationErrorCode = 'invalid-data' | 'incompatible-version' | 'unavailable-stage' | 'incompatible-rules' | 'nonterminal-replay' | 'checksum-mismatch' | 'incomplete-replay';
 export class SimulationError extends Error {
