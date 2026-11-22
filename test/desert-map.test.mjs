@@ -11,6 +11,8 @@ function context() {
     ...state, calls,
     save() { stack.push(Object.fromEntries(Object.keys(state).map(key => [key, this[key]]))); },
     restore() { Object.assign(this, stack.pop()); },
+    createImageData(width, height) { return { data: new Uint8ClampedArray(width * height * 4) }; },
+    putImageData() {},
     fillRect(...args) { calls.push(['rect', this.fillStyle, this.globalAlpha, ...args]); },
     drawImage(canvas, ...args) { calls.push(['image', canvas.width, canvas.height, ...args]); },
     createPattern(canvas) { calls.push(['pattern', canvas.width, canvas.height]); return 'sand-pattern'; },

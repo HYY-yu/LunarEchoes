@@ -1,6 +1,7 @@
 import { hasDesertRelay, stageRules } from './stage-rules.js';
 import { type World } from './core.js';
 import { createAtlas } from './art.js';
+import { astronautVisorBounds, createAstronautArt } from './astronaut-art.js';
 import { createDesertMap } from './desert-map.js';
 import { drawCampaignTerrain } from './campaign-maps.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
@@ -22,6 +23,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   if (!context) throw new Error('Canvas 2D is unavailable');
   const ctx = context;
   const atlas = createAtlas();
+  const drawAstronaut = createAstronautArt();
   let playerMotion: { world: World; tick: number; x: number; y: number; animationTick: number } | undefined;
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
@@ -96,9 +98,17 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     }
     ctx.fillStyle = '#1c344455'; ctx.beginPath(); ctx.ellipse(p.x + 3, p.y + 12, 12, 5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = p.invincible > 0 && world.tick % 6 < 3 ? .45 : 1;
-    atlas.draw(ctx, 'astronaut', p.x, p.y, 1.7, playerMotion.animationTick); ctx.globalAlpha = 1;
+    drawAstronaut(ctx, p.x, p.y, playerMotion.animationTick);
+    ctx.globalAlpha = 1;
     if (!title && world.materialMotions) {
+      const visor = astronautVisorBounds(p.x, p.y);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(view.left, view.top, view.width, view.height);
+      ctx.rect(visor.x, visor.y, visor.width, visor.height);
+      ctx.clip('evenodd');
       for (const motion of world.materialMotions) drawMaterialMotion(ctx, motion, world.tick, p);
+      ctx.restore();
     }
     for (let i = 0; i < Math.min(4, world.upgrades.orbit); i++) {
       const angle = world.tick * .055 + i * Math.PI * 2 / Math.min(4, world.upgrades.orbit);

@@ -7,6 +7,8 @@ function scene(t) {
   const pixels = [], arcs = [], hits = [];
   const context = {
     fillStyle: '', globalAlpha: 1,
+    createImageData(width, height) { return { data: new Uint8ClampedArray(width * height * 4) }; },
+    putImageData() {},
     fillRect(x, y, width, height) {
       const pixel = { x, y, width, height, color: this.fillStyle, alpha: this.globalAlpha };
       if (this.fillStyle === '#50d9ee' || this.fillStyle === '#d9fff2') pixels.push(pixel);
