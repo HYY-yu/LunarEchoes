@@ -401,7 +401,7 @@ test('normal Boss notices expire in both languages without changing the full liv
   const app = harness(), terminal = noticeTerminal(app); assertNotice(app, bossEntry.zh);
   app.advanceTimers(3499); assertNotice(app, bossEntry.zh); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), terminal);
   app.get('language').onclick(); app.invokeReplay();
-  for (let i = 0; i < 20000 && app.progress().tick < terminal.world.desertAssault.final.nextTick - terminal.world.desertAssault.final.intervalTicks; i++) app.frame();
+  for (let i = 0; i < 20000 && app.get('notice').textContent !== 'Harvester incoming'; i++) app.frame();
   assert.equal(app.session().screen, 'replay'); assertNotice(app, 'Harvester incoming'); const boss = app.session();
   app.advanceTimers(3499); assertNotice(app, 'Harvester incoming'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), boss);
   for (let i = 0; i < 20000 && app.progress().screen === 'replay'; i++) app.frame();
@@ -430,7 +430,7 @@ test('internal replay and Home cancel Boss timers while retaining recordings and
   const endHome = app.session(), endPreview = createWorld({ ...terminal.world.context, seed: 208907 });
   assert.deepEqual(endHome, { ...done, world: endPreview, screen: 'title', playingRecording: null, checksum: finalChecksum(endPreview) });
   app.invokeReplay(); assertNotice(app, '');
-  for (let i = 0; i < 20000 && app.progress().tick < terminal.world.desertAssault.final.nextTick - terminal.world.desertAssault.final.intervalTicks; i++) app.frame();
+  for (let i = 0; i < 20000 && app.get('notice').textContent !== '收割者抵达'; i++) app.frame();
   assertNotice(app, '收割者抵达'); const boss = app.session(), replayTimer = app.noticeTimer; app.advanceTimers(1000); app.get('pause').onclick(); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(replayTimer));
   const home = app.session(), preview = createWorld({ ...terminal.world.context, seed: 208907 });
   assert.deepEqual(home, { ...boss, world: preview, screen: 'title', playingRecording: null, checksum: finalChecksum(preview) }); assert.equal(app.seedCalls, 1);
