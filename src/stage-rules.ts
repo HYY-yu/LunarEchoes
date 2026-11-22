@@ -14,8 +14,8 @@ export const DESERT_CONTINUOUS_CONTEXT = context('desert-base', 8);
 export const DESERT_ASSAULT_DURATION_TICKS = 60 * 300;
 export const RAINFOREST_CONTEXT = context('rainforest', 1);
 export const RAINFOREST_RELAY_CONTEXT = context('rainforest', 3);
-export const RAINFOREST_DELIVERY_TICKS = [1, 35 * 60, 70 * 60, 108 * 60] as const;
 export const ANTARCTICA_CONTEXT = context('antarctica', 1);
+export const ANTARCTIC_RELAY_CONTEXT = context('antarctica', 3);
 export const SPACE_ELEVATOR_CONTEXT = context('space-elevator', 1);
 export const WATCHTOWER_CONTEXT = context('watchtower', 1);
 export const LUNAR_ECHOES_CONTEXT = context('lunar-echoes', 1);
@@ -38,7 +38,19 @@ const CONTEXTS = Object.freeze({
   'lunar-echoes': context('lunar-echoes', 2)
 } satisfies { [Id in StageId]: { stageId: Id; rulesVersion: `${Id}-2` } });
 
-export type StageContext = typeof CONTEXTS[StageId] | typeof LEGACY_CONTEXTS[StageId] | typeof DESERT_REPAIR_CONTEXT | typeof DESERT_TURRET_CONTEXT | typeof DESERT_FOUR_TOWERS_CONTEXT | typeof DESERT_ASSAULT_CONTEXT | typeof DESERT_RELAY_CONTEXT | typeof DESERT_CONTINUOUS_CONTEXT | typeof RAINFOREST_RELAY_CONTEXT;
+export type StageContext = typeof CONTEXTS[StageId] | typeof LEGACY_CONTEXTS[StageId] | typeof DESERT_REPAIR_CONTEXT | typeof DESERT_TURRET_CONTEXT | typeof DESERT_FOUR_TOWERS_CONTEXT | typeof DESERT_ASSAULT_CONTEXT | typeof DESERT_RELAY_CONTEXT | typeof DESERT_CONTINUOUS_CONTEXT | typeof RAINFOREST_RELAY_CONTEXT | typeof ANTARCTIC_RELAY_CONTEXT;
+
+type FourDeliveries = readonly [number, number, number, number];
+const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rulesVersion'], FourDeliveries>>> = Object.freeze({
+  'rainforest-3': Object.freeze([1, 35 * 60, 70 * 60, 108 * 60] as const),
+  'antarctica-3': Object.freeze([1, 42 * 60, 84 * 60, 126 * 60] as const)
+});
+
+const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object.freeze({
+  'desert-base': DESERT_CONTINUOUS_CONTEXT,
+  rainforest: RAINFOREST_RELAY_CONTEXT,
+  antarctica: ANTARCTIC_RELAY_CONTEXT
+});
 export type SimulationErrorCode = 'invalid-data' | 'incompatible-version' | 'unavailable-stage' | 'incompatible-rules' | 'nonterminal-replay' | 'checksum-mismatch' | 'incomplete-replay';
 export class SimulationError extends Error {
   constructor(readonly code: SimulationErrorCode) { super(code === 'incompatible-version' ? 'Replay version mismatch' : code); this.name = 'SimulationError'; }
@@ -132,7 +144,11 @@ export function hasDesertRelay(context: StageContext): boolean {
 }
 
 export function hasRelayBase(context: StageContext): boolean {
-  return hasDesertRelay(context) || context === RAINFOREST_RELAY_CONTEXT;
+  return hasDesertRelay(context) || campaignRelayDeliveryTicks(context) !== undefined;
+}
+
+export function campaignRelayDeliveryTicks(context: StageContext): FourDeliveries | undefined {
+  return CAMPAIGN_RELAY_DELIVERY_TICKS[context.rulesVersion];
 }
 
 export function hasDesertAssault(context: StageContext): boolean {
@@ -140,22 +156,20 @@ export function hasDesertAssault(context: StageContext): boolean {
 }
 
 export function stageContext(stageId: StageId): StageContext {
-  if (stageId === 'desert-base') return DESERT_CONTINUOUS_CONTEXT;
-  if (stageId === 'rainforest') return RAINFOREST_RELAY_CONTEXT;
-  return CONTEXTS[stageId];
+  return LATEST_CONTEXTS[stageId] ?? CONTEXTS[stageId];
 }
 
 export function resolveStage(stageId: unknown, rulesVersion: unknown): StageContext {
   if (!isStageId(stageId)) throw new SimulationError('unavailable-stage');
+  const latest = stageContext(stageId);
+  if (rulesVersion === latest.rulesVersion) return latest;
   if (stageId === DESERT_TURRET_CONTEXT.stageId) {
-    if (rulesVersion === DESERT_CONTINUOUS_CONTEXT.rulesVersion) return DESERT_CONTINUOUS_CONTEXT;
     if (rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion) return DESERT_RELAY_CONTEXT;
     if (rulesVersion === DESERT_ASSAULT_CONTEXT.rulesVersion) return DESERT_ASSAULT_CONTEXT;
     if (rulesVersion === DESERT_FOUR_TOWERS_CONTEXT.rulesVersion) return DESERT_FOUR_TOWERS_CONTEXT;
     if (rulesVersion === DESERT_TURRET_CONTEXT.rulesVersion) return DESERT_TURRET_CONTEXT;
     if (rulesVersion === DESERT_REPAIR_CONTEXT.rulesVersion) return DESERT_REPAIR_CONTEXT;
   }
-  if (stageId === 'rainforest' && rulesVersion === RAINFOREST_RELAY_CONTEXT.rulesVersion) return RAINFOREST_RELAY_CONTEXT;
   const legacy = LEGACY_CONTEXTS[stageId];
   if (rulesVersion === legacy.rulesVersion) return legacy;
   const stage = CONTEXTS[stageId];

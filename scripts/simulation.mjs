@@ -15,7 +15,7 @@ export function play(seed, context = DESERT_CONTEXT, opening = [], assaultOption
       act({ kind: 'choose', upgrade: priority.find(id => world.phase.offers.includes(id)) });
       continue;
     }
-    if (world.desertAssault || world.rainforestRelay) {
+    if (world.desertAssault || world.campaignRelay) {
       act({ kind: 'tick', input: planDesertAssaultInput(world, assaultOptions) });
       continue;
     }

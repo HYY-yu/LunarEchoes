@@ -84,6 +84,7 @@ test('rainforest v3 supplies four corner towers early while retaining the stage 
   assert.equal(context, RAINFOREST_RELAY_CONTEXT);
   const whole = play(42, context);
   const world = core.createWorld({ ...context, seed: 42 });
+  assert.equal(core.finalChecksum(world), '047840c6');
   const repair = world.desertRepair;
   assert.deepEqual(repair.towers.map(({ x, y }) => [x, y]), [[590, 590], [910, 590], [910, 910], [590, 910]]);
   const deliveries = [];
@@ -91,12 +92,12 @@ test('rainforest v3 supplies four corner towers early while retaining the stage 
   let bossTick;
   let towersFiredBeforeBoss;
   for (const action of whole.recording.actions) {
-    const previousDelivery = world.rainforestRelay.deliveries;
+    const previousDelivery = world.campaignRelay.deliveries;
     const previousRepaired = repair.towers.filter(tower => tower.kind === 'repaired').length;
     const previousShots = Object.keys(world.desertTurretShots ?? {});
     const nextEnemy = world.nextId;
     core.dispatch(world, action);
-    if (world.rainforestRelay.deliveries > previousDelivery) deliveries.push(world.tick);
+    if (world.campaignRelay.deliveries > previousDelivery) deliveries.push(world.tick);
     if (repair.towers.filter(tower => tower.kind === 'repaired').length > previousRepaired) {
       repairs.push(world.tick);
       assert.deepEqual(world.enemies.filter(enemy => enemy.id >= nextEnemy).slice(0, 3).map(enemy => enemy.kind),

@@ -1,9 +1,10 @@
-import { hasDesertRelay, hasRelayBase, RAINFOREST_RELAY_CONTEXT, stageRules } from './stage-rules.js';
+import { ANTARCTIC_RELAY_CONTEXT, hasDesertRelay, hasRelayBase, RAINFOREST_RELAY_CONTEXT, stageRules } from './stage-rules.js';
 import { type World } from './core.js';
 import { createAtlas } from './art.js';
 import { astronautVisorBounds, createAstronautArt } from './astronaut-art.js';
 import { createDesertMap } from './desert-map.js';
 import { drawCampaignTerrain } from './campaign-maps.js';
+import { createAntarcticBearingArt } from './antarctic-bearing-art.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
 import { createRainforestArchiveArt } from './rainforest-archive-art.js';
 import { createDesertSupplyArt } from './desert-supply-art.js';
@@ -30,6 +31,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
   let drawDesertRelay: ReturnType<typeof createDesertRelayArt> | undefined;
+  let drawAntarcticBearing: ReturnType<typeof createAntarcticBearingArt> | undefined;
   let drawRainforestArchive: ReturnType<typeof createRainforestArchiveArt> | undefined;
   function renderTower(tower: Parameters<typeof drawTower>[1], world: World, direction?: TowerDirection) {
     const { x, y, kind } = tower;
@@ -71,6 +73,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       }
     } else if (world.context.stageId === 'desert-base') drawDesertMap(ctx, arena, view);
     else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick, time);
+    if (world.context.rulesVersion === ANTARCTIC_RELAY_CONTEXT.rulesVersion) {
+      drawAntarcticBearing ??= createAntarcticBearingArt();
+      drawAntarcticBearing(ctx, world.tick);
+    }
     if (hasDesertRelay(world.context)) {
       drawDesertRelay ??= createDesertRelayArt();
       drawDesertRelay(ctx, world.tick);
