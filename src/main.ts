@@ -1,4 +1,4 @@
-import { DESERT_RELAY_CONTEXT, hasDesertAssault, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { hasDesertAssault, hasDesertRelay, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
@@ -192,12 +192,14 @@ function act(action: Action, record = true) {
   const tickBefore = world.tick;
   const deliveriesBefore = world.desertAssault?.deliveries;
   const finalBefore = world.desertAssault?.final.kind;
+  const bossKilledBefore = world.bossKilled;
   const repair = world.desertRepair;
   const towersBefore = repair && 'towers' in repair ? repair.towers : undefined;
   const towerBefore = repair && 'tower' in repair ? repair.tower : undefined;
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
+    const assault = world.desertAssault;
     if (repair && 'towers' in repair && towersBefore !== repair.towers) {
       for (const [index, tower] of repair.towers.entries()) {
         if (towersBefore?.[index]?.kind === 'damaged' && tower.kind === 'repaired') {
@@ -207,21 +209,28 @@ function act(action: Action, record = true) {
     } else if (towerBefore?.kind === 'damaged' && repair && 'tower' in repair && repair.tower.kind === 'repaired') {
       log('info', 'session.turret_repaired', { ...world.context, seed: world.seed, tick: world.tick, ...repair.inventory });
     }
+    const continuousFinal = assault && 'mode' in assault && assault.final.kind === 'active' ? assault.final : undefined;
+    const reinforcementsStopped = continuousFinal && tickBefore < continuousFinal.reinforcementEnd && world.tick >= continuousFinal.reinforcementEnd;
+    if (reinforcementsStopped) log('info', 'session.assault_reinforcements_stopped', { ...world.context, seed: world.seed, tick: world.tick });
     if (world.phase.kind === 'won' || world.phase.kind === 'lost') setRadio({ kind: 'inactive' }, 'terminal');
-    else if (world.desertAssault) {
-      const { deliveries, final } = world.desertAssault;
+    else if (assault) {
+      const { deliveries, final } = assault;
       const repairedTower = repair && 'towers' in repair && towersBefore !== repair.towers;
-      const beat = final.kind === 'active' && finalBefore !== 'active' ? 'assault'
+      const finalStarted = final.kind === 'active' && finalBefore !== 'active';
+      const clearing = continuousFinal && world.bossKilled && world.tick >= continuousFinal.reinforcementEnd
+        && (!bossKilledBefore || reinforcementsStopped);
+      const beat = finalStarted ? ('mode' in assault ? 'surge' : 'assault')
+        : clearing ? 'clearAssault'
         : repairedTower && final.kind === 'scheduled' ? 'repaired'
         : final.kind === 'waiting' && world.tick !== tickBefore && world.tick === DESERT_LATE_REPAIR_TICK ? 'lateRepair'
         : repairedTower ? 'raid'
         : deliveries !== deliveriesBefore ? DESERT_SUPPLY_DIRECTIONS[deliveries - 1] : undefined;
       if (deliveries !== deliveriesBefore) {
-        const drop = world.context === DESERT_RELAY_CONTEXT ? repair?.supplies.slice(-SUPPLY_CAPACITY) : undefined;
+        const drop = hasDesertRelay(world.context) ? repair?.supplies.slice(-SUPPLY_CAPACITY) : undefined;
         log('info', 'session.supplies_delivered', { ...world.context, seed: world.seed, tick: world.tick,
           direction: DESERT_SUPPLY_DIRECTIONS[deliveries - 1], ...(drop && { drop, playerX: world.player.x, playerY: world.player.y }) });
       }
-      if (final.kind === 'active' && finalBefore !== 'active') log('info', 'session.final_assault_started', { ...world.context, seed: world.seed, tick: world.tick });
+      if (finalStarted) log('info', 'session.final_assault_started', { ...world.context, seed: world.seed, tick: world.tick });
       if (beat && radioState.kind !== 'disabled') setRadio({ kind: 'active', beat }, beat);
     } else if (radioState.kind === 'waiting' && world.events.includes('kill')) setRadio({ kind: 'active', beat: 'firstContact' }, 'first-kill');
     else if (radioState.kind === 'dismissed' && radioState.beat === 'firstContact' && world.phase.kind === 'running' && !document.hidden && world.tick >= stageRules(world.context).durationTicks / 2) setRadio({ kind: 'active', beat: 'telemetry' }, 'midpoint');
@@ -431,11 +440,18 @@ function updateRepairHud() {
     const labels = assaultLabels[language];
     const progress = `${t.repairProgress} ${repaired}/${towers.length}`;
     if (assault.final.kind === 'active') {
-      const { batches } = assault.final;
-      status = `${progress} · ${labels.waves} ${batches}/${FINAL_BATCH_COUNT}`;
-      if (batches === FINAL_BATCH_COUNT) status += ` · ${labels.clear}`;
+      if ('mode' in assault) {
+        const order = world.bossSpawned && !world.bossKilled ? labels.defeatBoss
+          : world.bossKilled && world.tick >= assault.final.reinforcementEnd ? labels.clearAssault
+          : labels.hold;
+        status = `${progress} · ${order}`;
+      } else {
+        const { batches } = assault.final;
+        status = `${progress} · ${labels.waves} ${batches}/${FINAL_BATCH_COUNT}`;
+        if (batches === FINAL_BATCH_COUNT) status += ` · ${labels.clear}`;
+      }
     } else if (assault.final.kind === 'scheduled') status = `${progress} · ${labels.preparing}`;
-    else if (world.context === DESERT_RELAY_CONTEXT && fourTowers) {
+    else if (hasDesertRelay(world.context) && fourTowers) {
       const objective = relayObjective(repair, world.player);
       status = `${progress} · ${objective?.kind === 'repair' ? labels.repair
         : objective?.kind === 'supply' ? `${labels.find}${t[objective.target.material]}` : labels.awaiting}`;

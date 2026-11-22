@@ -1,4 +1,4 @@
-import { DESERT_RELAY_CONTEXT, stageRules } from './stage-rules.js';
+import { hasDesertRelay, stageRules } from './stage-rules.js';
 import { type World } from './core.js';
 import { createAtlas } from './art.js';
 import { createDesertMap } from './desert-map.js';
@@ -34,7 +34,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     const shot = direction === undefined ? undefined : world.desertTurretShots?.[direction];
     let angle = direction === undefined ? undefined : TURRET_IDLE_ANGLE[direction];
     if (shot) angle = Math.atan2(shot.vy, shot.vx);
-    else if (world.context.rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion) {
+    else if (hasDesertRelay(world.context)) {
       angle = Math.atan2(y - DESERT_RELAY_CENTER.y, x - DESERT_RELAY_CENTER.x);
     }
     const flash = shot !== undefined && world.tick - shot.tick < TURRET_FLASH_TICKS;
@@ -61,7 +61,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     if (world.context.stageId === 'rainforest') drawRainforestTerrain(ctx, view);
     else if (world.context.stageId === 'desert-base') drawDesertMap(ctx, arena, view);
     else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick, time);
-    if (world.context.rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion) {
+    if (hasDesertRelay(world.context)) {
       drawDesertRelay ??= createDesertRelayArt();
       drawDesertRelay(ctx, world.tick);
     }
@@ -132,7 +132,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     }
     ctx.globalAlpha = 1; ctx.restore();
     const shade = ctx.createRadialGradient(width / 2, height / 2, width * .15, width / 2, height / 2, width * .7); shade.addColorStop(0, '#04141b00'); shade.addColorStop(1, '#06182799'); ctx.fillStyle = shade; ctx.fillRect(0, 0, width, height);
-    if (!title && world.phase.kind === 'running' && world.context.rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion && repair && 'towers' in repair) {
+    if (!title && world.phase.kind === 'running' && hasDesertRelay(world.context) && repair && 'towers' in repair) {
       const objective = relayObjective(repair, p);
       if (objective) drawRelayObjective(ctx, objective, view.left, view.top, zoom, width, height);
     }

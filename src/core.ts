@@ -1,6 +1,6 @@
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_RELAY_CONTEXT, hasDesertAssault, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, hasDesertRelay, hasDesertAssault, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createDesertRepair, createDesertFourTowers, desertShipment, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
-import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, stepDesertAssault, type DesertAssault } from './desert-assault.js';
+import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -41,8 +41,10 @@ export function createWorld(request: unknown): World {
     enemies: [], shots: [], crystals: [], effects: [], events: [], level: 1, xp: 0, threshold: 5, kills: 0,
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
   if (hasDesertAssault(context)) {
-    world.desertRepair = createDesertFourTowers([], context === DESERT_RELAY_CONTEXT);
-    world.desertAssault = { deliveries: 0, final: { kind: 'waiting' } };
+    world.desertRepair = createDesertFourTowers([], hasDesertRelay(context));
+    world.desertAssault = context === DESERT_CONTINUOUS_CONTEXT
+      ? { mode: 'continuous', deliveries: 0, final: { kind: 'waiting' } }
+      : { deliveries: 0, final: { kind: 'waiting' } };
   } else if (context === DESERT_FOUR_TOWERS_CONTEXT) {
     world.desertRepair = createDesertFourTowers();
   } else if (context === DESERT_REPAIR_CONTEXT || context === DESERT_TURRET_CONTEXT) {
@@ -135,7 +137,7 @@ function step(world: World, input: Input): void {
   if (input.x !== 0 || input.y !== 0) { p.dx = input.x; p.dy = input.y; }
   const { desertRepair, desertAssault } = world;
   if (desertRepair) {
-    const relay = world.context === DESERT_RELAY_CONTEXT;
+    const relay = hasDesertRelay(world.context);
     const deliveryTicks = relay ? DESERT_RELAY_SUPPLY_TICKS : DESERT_SUPPLY_TICKS;
     if (desertAssault && world.tick === deliveryTicks[desertAssault.deliveries]) {
       desertRepair.supplies = [...desertRepair.supplies, ...desertShipment(desertAssault.deliveries, relay ? p : undefined)];
@@ -152,7 +154,7 @@ function step(world: World, input: Input): void {
   }
   if (world.tick % ARMOR_RULES.repairEveryTicks === 0) p.hp = Math.min(p.maxHp, p.hp + ARMOR_RULES.hpPerCell);
   world.spawnCooldown--;
-  if (world.spawnCooldown <= 0 && world.enemies.length < 180 && desertAssault?.final.kind !== 'active') {
+  if (world.spawnCooldown <= 0 && world.enemies.length < 180 && desertSpawnsReinforcements(desertAssault, world.tick)) {
     const t = world.tick / HZ;
     if (rules.kind === 'rainforest') {
       const chance = world.tick >= rules.lateWaveTick ? rules.lateSentryChance : rules.sentryChance;
@@ -172,7 +174,7 @@ function step(world: World, input: Input): void {
     } else {
       const kind: EnemyKind = t > 30 && random(world) < .2 ? 'sentry' : t > 12 && random(world) < .35 ? 'drone' : 'crawler';
       spawn(world, kind);
-      world.spawnCooldown = Math.max(13, 60 - Math.floor(t / 3));
+      world.spawnCooldown = desertSpawnInterval(desertAssault, world.tick);
     }
   }
   const campaignBoss = rules.kind === 'campaign' ? rules.boss : undefined;
@@ -266,7 +268,7 @@ function step(world: World, input: Input): void {
     world.phase = { kind: 'upgrading', offers: offers(world) };
   }
   if (desertAssault && world.phase.kind !== 'lost') {
-    const outcome = desertAssaultOutcome(desertAssault, world.tick, world.enemies);
+    const outcome = desertAssaultOutcome(desertAssault, world.tick, world.enemies, world.bossKilled);
     if (outcome) {
       world.phase = { kind: outcome };
       world.events.push(outcome);
