@@ -7,7 +7,7 @@ import { drawDesertScene } from '../dist/desert-scene.js';
 import { drawRainforestFailure, drawRainforestVictory } from '../dist/rainforest-story-art.js';
 import * as core from '../dist/core.js';
 import { createWorld, normalizeInput, replay, finalChecksum, startRecording } from '../dist/core.js';
-import { DESERT_FOUR_TOWERS_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
+import { DESERT_FOUR_TOWERS_CONTEXT, DESERT_RELAY_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
 import { assaultObjective } from '../dist/desert-guidance.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play as simulate } from '../scripts/simulate.mjs';
@@ -396,9 +396,36 @@ function naturalWin(app, focus = 'canvas', language = 'zh') {
   return app.snapshot();
 }
 function noticeTerminal(app) { naturalWin(app); return app.session(); }
+test('continuous assault dismisses the incoming notice when the Boss falls in live play and replay', () => {
+  const app = harness();
+  const terminal = naturalWin(app);
+  assertNotice(app, '');
+
+  app.get('language').onclick();
+  app.invokeReplay();
+  for (let i = 0; i < 20000 && app.get('notice').textContent !== 'Harvester incoming'; i++) app.frame();
+  assertNotice(app, 'Harvester incoming');
+  const incoming = app.noticeTimer;
+  for (let i = 0; i < 20000 && app.progress().screen === 'replay'; i++) app.frame();
+  const done = app.session();
+  assertNotice(app, '');
+  assert.ok(app.cancelledTimers.includes(incoming));
+  assert.equal(done.replayVerified, true);
+  assert.equal(done.checksum, terminal.checksum);
+
+  app.invokeReplay();
+  for (let i = 0; i < 20000 && app.get('notice').textContent !== 'Harvester incoming'; i++) app.frame();
+  assertNotice(app, 'Harvester incoming');
+  app.event('error', { message: 'replay warning replacement' });
+  const replacement = app.noticeTimer;
+  for (let i = 0; i < 20000 && app.progress().screen === 'replay'; i++) app.frame();
+  assertNotice(app, 'System error. Refresh to retry.');
+  assert.equal(app.noticeTimer, replacement);
+});
+
 test('normal Boss notices expire in both languages without changing the full live or replay session', () => {
   const bossEntry = catalog.find(entry => entry.beat === 'boss');
-  const app = harness(), terminal = noticeTerminal(app); assertNotice(app, bossEntry.zh);
+  const app = harness(undefined, undefined, undefined, DESERT_RELAY_CONTEXT), terminal = noticeTerminal(app); assertNotice(app, bossEntry.zh);
   app.advanceTimers(3499); assertNotice(app, bossEntry.zh); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), terminal);
   app.get('language').onclick(); app.invokeReplay();
   for (let i = 0; i < 20000 && app.get('notice').textContent !== 'Harvester incoming'; i++) app.frame();
@@ -408,7 +435,7 @@ test('normal Boss notices expire in both languages without changing the full liv
   const done = app.session(); assert.equal(done.replayVerified, true); assert.deepEqual(done.world, terminal.world); assert.equal(done.checksum, terminal.checksum); assert.deepEqual(done.recording, terminal.recording); assert.deepEqual(done.lastRecording, terminal.lastRecording);
 });
 test('native Retry clears active Boss notice and timer while replacing the complete live session', () => {
-  const app = harness(); naturalWin(app, 'canvas', 'en');
+  const app = harness(undefined, undefined, undefined, DESERT_RELAY_CONTEXT); naturalWin(app, 'canvas', 'en');
   const terminal = app.session(), timer = app.noticeTimer; assertNotice(app, catalog.find(entry => entry.beat === 'boss').en);
   app.advanceTimers(1000); app.activate('victory-retry', 'Enter'); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(timer));
   const actual = app.session(), world = createWorld({ ...terminal.world.context, seed: actual.world.seed });
@@ -418,7 +445,7 @@ test('native Retry clears active Boss notice and timer while replacing the compl
   app.advanceTimers(1500); assertNotice(app, 'System error. Refresh to retry.'); app.advanceTimers(1999); assertNotice(app, 'System error. Refresh to retry.'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), afterError);
 });
 test('internal replay and Home cancel Boss timers while retaining recordings and complete replay results', async () => {
-  const app = harness(), terminal = noticeTerminal(app), liveTimer = app.noticeTimer;
+  const app = harness(undefined, undefined, undefined, DESERT_RELAY_CONTEXT), terminal = noticeTerminal(app), liveTimer = app.noticeTimer;
   app.advanceTimers(1000); app.rejectAudio(); app.invokeReplay(); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(liveTimer));
   const start = app.session(), initial = createWorld({ ...terminal.world.context, seed: terminal.world.seed });
   assert.deepEqual(start, { ...terminal, world: initial, screen: 'replay', playingRecording: terminal.lastRecording, checksum: finalChecksum(initial) }); assert.equal(app.seedCalls, 1);
