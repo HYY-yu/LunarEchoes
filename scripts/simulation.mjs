@@ -1,17 +1,22 @@
 import { DESERT_CONTEXT, stageRules } from '../dist/stage-rules.js';
-const DURATION = stageRules(DESERT_CONTEXT).durationTicks;
+import { planDesertAssaultInput } from './desert-assault-pilot.mjs';
 import assert from 'node:assert/strict';
 import { createWorld, dispatch, replay, checksum, startRecording, finishRecording } from '../dist/core.js';
-export function play(seed, context = DESERT_CONTEXT, opening = []) {
+export function play(seed, context = DESERT_CONTEXT, opening = [], assaultOptions) {
   const world = createWorld({ ...context, seed });
   const buffer = startRecording(world);
   function act(action) { buffer.actions.push(action); dispatch(world, action); }
   for (const action of opening) act(action);
+  const duration = stageRules(context).durationTicks;
   let iterations = 0;
-  while (world.phase.kind !== 'won' && world.phase.kind !== 'lost' && iterations++ < DURATION * 2) {
+  while (world.phase.kind !== 'won' && world.phase.kind !== 'lost' && iterations++ < duration * 2) {
     if (world.phase.kind === 'upgrading') {
       const priority = world.player.hp < 50 ? ['hull', 'pulse', 'orbit', 'nova', 'boots', 'magnet'] : ['pulse', 'orbit', 'nova', 'hull', 'magnet', 'boots'];
       act({ kind: 'choose', upgrade: priority.find(id => world.phase.offers.includes(id)) });
+      continue;
+    }
+    if (world.desertAssault) {
+      act({ kind: 'tick', input: planDesertAssaultInput(world, assaultOptions) });
       continue;
     }
     const p = world.player;

@@ -7,11 +7,12 @@ import { drawDesertScene } from '../dist/desert-scene.js';
 import { drawRainforestFailure, drawRainforestVictory } from '../dist/rainforest-story-art.js';
 import * as core from '../dist/core.js';
 import { createWorld, normalizeInput, replay, finalChecksum, startRecording } from '../dist/core.js';
-import { stageContext } from '../dist/stage-rules.js';
+import { DESERT_FOUR_TOWERS_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { assaultObjective } from '../dist/desert-guidance.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play as simulate } from '../scripts/simulate.mjs';
 const RAINFOREST_CONTEXT = stageContext('rainforest');
-const play = seed => simulate(seed, stageContext('desert-base'));
+const playLegacyDesert = seed => simulate(seed, DESERT_FOUR_TOWERS_CONTEXT);
 import ts from 'typescript';
 import { embedDesertContent } from '../scripts/desert-content.mjs';
 const catalog = JSON.parse(readFileSync('content/desert-base.story.json', 'utf8'));
@@ -28,7 +29,7 @@ function memoryStorage(raw = null) {
     setItem(key, value) { this.writes.push([key, value]); this.raw = value; }
   };
 }
-function harness(content = embedded, localStorage = memoryStorage(), fetchStory = async () => ({ ok: true, json: async () => JSON.parse(readFileSync('dist/rainforest.story.json', 'utf8')) })) {
+function harness(content = embedded, localStorage = memoryStorage(), fetchStory = async () => ({ ok: true, json: async () => JSON.parse(readFileSync('dist/rainforest.story.json', 'utf8')) }), desertContext = stageContext('desert-base')) {
   const listeners = new Map(), logs = [], sessions = [], timers = new Map(), cancelledTimers = [];
   let active, raf, seedCalls = 0, now = 1000, timerNow = 0, nextTimer = 1, audioFailure = false, seedFailure = false, audioActivations = 0;
   const setTimeout = (callback, delay) => { const id = nextTimer++; timers.set(id, { callback, at: timerNow + delay }); return id; };
@@ -87,7 +88,11 @@ function harness(content = embedded, localStorage = memoryStorage(), fetchStory 
     let source = readFileSync(`dist/${name}`, 'utf8');
     if (name === 'main.js') source += '\nglobalThis.inspectMain = (complete = false) => JSON.stringify({ world, actions: recording.actions, screen, checksum: finalChecksum(world), replayVerified, lastRecording, ...(complete ? { recording, playingRecording } : {}) }); globalThis.inspectContentFrozen = () => Object.isFrozen(desertContent) && Object.values(desertContent).every(value => Object.isFrozen(value)); globalThis.inspectNoticeTimer = () => noticeTimer; globalThis.inspectProgress = () => JSON.stringify({ screen, tick: world.tick }); globalThis.invokeBegin = () => { try { begin(world.context); } catch (error) { fail(error); } }; globalThis.openStage = value => showOpening(JSON.parse(value)); globalThis.inspectRadio = () => radioState.kind; globalThis.inspectRadioBeat = () => "beat" in radioState ? radioState.beat : null; globalThis.fixtureWorld = value => { const { seed, context, ...mutable } = JSON.parse(value); Object.assign(world, mutable); }; globalThis.replaceRecording = value => { lastRecording = JSON.parse(value); };';
     const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-    const require = path => path === './render.js' ? { createRenderer: () => () => {} } : path === './audio.js' ? { Synth } : path === './logger.js' ? { log: (...entry) => logs.push(entry) } : load(path.slice(2));
+    const require = path => name === 'main.js' && path === './stage-rules.js'
+      ? { ...load('stage-rules.js'), stageContext: stageId => stageId === 'desert-base'
+        ? load('stage-rules.js').resolveStage(stageId, desertContext.rulesVersion)
+        : load('stage-rules.js').stageContext(stageId) }
+      : path === './render.js' ? { createRenderer: () => () => {} } : path === './audio.js' ? { Synth } : path === './logger.js' ? { log: (...entry) => logs.push(entry) } : load(path.slice(2));
     vm.runInContext(`(function(require,module,exports){${compiled}\n})`, context, { filename: name })(require, module, module.exports);
     return module.exports;
   }
@@ -196,7 +201,7 @@ test('actual main keeps World, RNG and recording frozen through opening and pres
   for (let i = 0; i < 20; i++) { app.frame(60000); app.key('KeyD'); app.key('Space'); }
   app.get('language').focus(); app.get('language').onclick();
   assert.equal(app.active, app.get('language')); assert.equal(app.get('opening-panel').scrollTop, 72); assert.equal(app.get('opening-continue'), primary);
-  assert.equal(app.get('opening-story').textContent, catalog[0].en); assert.equal(app.get('opening-objective').textContent, catalog[1].en);
+  assert.equal(app.get('opening-story').textContent, catalog[0].en); assert.equal(app.get('opening-objective').textContent, assaultObjective.en);
   app.get('sound').onclick(); app.event('blur'); app.document.hidden = true; app.event('visibilitychange'); app.frame(600000); app.document.hidden = false; app.event('visibilitychange');
   app.pointer('joystick', 'pointerdown'); app.pointer('dash', 'pointerdown');
   const opening = app.snapshot(); assert.deepEqual(opening.world, preview.world); assert.deepEqual(opening.actions, preview.actions); assert.equal(app.seedCalls, 0); assert.equal(opening.screen, 'opening'); assert.equal(app.sessions.at(-1), 'menu');
@@ -221,8 +226,8 @@ test('pointer, Enter and Space completion produce the same seeded actions after 
 test('deployment retains bilingual objective in pause; pointer capture clears and stale touch cannot refill paused input', () => {
   const app = harness(); app.click('启动任务'); app.click('部署出发'); app.pointer('joystick', 'pointerdown'); assert.equal(app.get('joystick').hasPointerCapture(9), true);
   app.key('KeyP'); assert.equal(app.snapshot().world.phase.kind, 'paused'); assert.equal(app.get('joystick').hasPointerCapture(9), false); assert.equal(app.get('stick').style.transform, '');
-  assert.equal(app.get('overlay').children[0].children.find(node => node.dataset.storyId)?.textContent, catalog[1].zh);
-  app.get('language').onclick(); assert.equal(app.get('overlay').children[0].children.find(node => node.dataset.storyId)?.textContent, catalog[1].en);
+  assert.equal(app.get('overlay').children[0].children.find(node => node.dataset.storyId)?.textContent, assaultObjective.zh);
+  app.get('language').onclick(); assert.equal(app.get('overlay').children[0].children.find(node => node.dataset.storyId)?.textContent, assaultObjective.en);
   app.pointer('joystick', 'pointermove'); app.pointer('dash', 'pointerdown'); app.key('KeyP'); app.frame(); app.frame(); assert.ok(app.snapshot().actions.filter(action => action.kind === 'tick').every(action => action.input.x === 0 && !action.input.dash));
 });
 
@@ -230,10 +235,10 @@ test('countdown is based on combat time and returning from pause preserves progr
   const storage = memoryStorage(savedProgress('rainforest'));
   const app = harness(embedded, storage);
   app.click('启动任务'); app.click('部署出发');
-  assert.equal(app.get('clock').textContent, '03:00');
+  assert.equal(app.get('clock').textContent, '05:00');
   assert.equal(app.get('armor-cells').attributes['aria-valuenow'], '5');
   for (let frame = 0; frame < 15; frame++) app.frame();
-  assert.equal(app.get('clock').textContent, '02:59');
+  assert.equal(app.get('clock').textContent, '04:59');
   app.get('pause').onclick();
   const frozen = app.get('clock').textContent;
   for (let frame = 0; frame < 30; frame++) app.frame();
@@ -248,7 +253,7 @@ test('countdown is based on combat time and returning from pause preserves progr
 function naturalLoss(app, headerFocus = false) {
   app.click('启动任务'); app.click('部署出发');
   if (headerFocus) app.get('sound').focus();
-  for (let i = 0; i < 15000 && !['won', 'lost'].includes(app.snapshot().world.phase.kind); i++) { if (app.snapshot().world.phase.kind === 'upgrading') app.key('Digit1'); app.frame(); }
+  for (let i = 0; i < 20000 && !['won', 'lost'].includes(app.snapshot().world.phase.kind); i++) { if (app.snapshot().world.phase.kind === 'upgrading') app.key('Digit1'); app.frame(); }
   assert.equal(app.snapshot().screen, 'game'); assert.equal(app.snapshot().world.phase.kind, 'lost');
   return app.snapshot();
 }
@@ -287,7 +292,7 @@ test('natural loss preserves existing header focus and internal replay verifies 
   const app = harness(embedded, storage), terminal = naturalLoss(app, true); assert.equal(app.active, app.get('sound'));
   assert.deepEqual(storage.writes, []);
   app.invokeReplay(); assert.equal(app.snapshot().screen, 'replay'); assert.equal(app.seedCalls, 1); assert.equal(app.get('defeat-panel'), null);
-  for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) { app.frame(); assert.equal(app.get('defeat-panel'), null); }
+  for (let i = 0; i < 20000 && app.snapshot().screen === 'replay'; i++) { app.frame(); assert.equal(app.get('defeat-panel'), null); }
   assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assert.equal(app.snapshot().checksum, terminal.checksum); assert.deepEqual(app.snapshot().world, terminal.world); assert.ok(app.logs.some(([, name]) => name === 'replay.finished')); assert.equal(app.get('defeat-panel'), null);
   assert.deepEqual(storage.writes, []);
 });
@@ -376,7 +381,7 @@ function naturalWin(app, focus = 'canvas', language = 'zh') {
   if (language === 'en') app.get('language').onclick();
   if (focus === 'body') app.document.body.focus();
   if (focus === 'header') app.get('sound').focus();
-  const { recording } = play(42);
+  const { recording } = simulate(42, app.snapshot().world.context);
   for (const action of recording.actions) {
     if (action.kind === 'choose') { const state = app.snapshot(); assert.equal(state.world.phase.kind, 'upgrading', `tick ${state.world.tick}`); const offers = state.world.phase.offers; app.key(`Digit${offers.indexOf(action.upgrade) + 1}`); }
     else if (action.kind === 'tick') { const input = normalizeInput(action.input); app.pointer('joystick', 'pointermove', 9, input.x * 40, input.y * 40); if (action.input.dash) { app.key('Space'); app.release('Space'); } app.frame(1000 / 60 + .000001); }
@@ -387,7 +392,7 @@ function naturalWin(app, focus = 'canvas', language = 'zh') {
   assert.deepEqual(terminal.actions, terminal.lastRecording.actions);
   assert.equal(terminal.checksum, finalChecksum(replayed));
   assert.equal(terminal.checksum, terminal.lastRecording.finalChecksum);
-  assert.equal(app.snapshot().world.tick, 10800); assert.equal(app.snapshot().world.bossKilled, true);
+  assert.equal(app.snapshot().world.tick, recording.actions.filter(action => action.kind === 'tick').length); assert.equal(app.snapshot().world.bossKilled, true);
   return app.snapshot();
 }
 function noticeTerminal(app) { naturalWin(app); return app.session(); }
@@ -396,10 +401,10 @@ test('normal Boss notices expire in both languages without changing the full liv
   const app = harness(), terminal = noticeTerminal(app); assertNotice(app, bossEntry.zh);
   app.advanceTimers(3499); assertNotice(app, bossEntry.zh); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), terminal);
   app.get('language').onclick(); app.invokeReplay();
-  for (let i = 0; i < 15000 && app.progress().tick < 8400; i++) app.frame();
+  for (let i = 0; i < 20000 && app.progress().tick < terminal.world.desertAssault.final.nextTick - terminal.world.desertAssault.final.intervalTicks; i++) app.frame();
   assert.equal(app.session().screen, 'replay'); assertNotice(app, 'Harvester incoming'); const boss = app.session();
   app.advanceTimers(3499); assertNotice(app, 'Harvester incoming'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), boss);
-  for (let i = 0; i < 15000 && app.progress().screen === 'replay'; i++) app.frame();
+  for (let i = 0; i < 20000 && app.progress().screen === 'replay'; i++) app.frame();
   const done = app.session(); assert.equal(done.replayVerified, true); assert.deepEqual(done.world, terminal.world); assert.equal(done.checksum, terminal.checksum); assert.deepEqual(done.recording, terminal.recording); assert.deepEqual(done.lastRecording, terminal.lastRecording);
 });
 test('native Retry clears active Boss notice and timer while replacing the complete live session', () => {
@@ -419,13 +424,13 @@ test('internal replay and Home cancel Boss timers while retaining recordings and
   assert.deepEqual(start, { ...terminal, world: initial, screen: 'replay', playingRecording: terminal.lastRecording, checksum: finalChecksum(initial) }); assert.equal(app.seedCalls, 1);
   await new Promise(resolve => setImmediate(resolve)); assertNotice(app, '音频启动失败，游戏可继续。');
   app.advanceTimers(2500); assertNotice(app, '音频启动失败，游戏可继续。'); app.advanceTimers(999); assertNotice(app, '音频启动失败，游戏可继续。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), start);
-  for (let i = 0; i < 15000 && app.progress().screen === 'replay'; i++) app.frame();
+  for (let i = 0; i < 20000 && app.progress().screen === 'replay'; i++) app.frame();
   const done = app.session(); assert.equal(done.replayVerified, true); assert.equal(done.checksum, terminal.checksum); assert.deepEqual(done.world, terminal.world); assert.deepEqual(done.recording, terminal.recording); assert.deepEqual(done.lastRecording, terminal.lastRecording); assertNotice(app, '收割者抵达');
   const endTimer = app.noticeTimer; app.click('返回基地'); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(endTimer));
   const endHome = app.session(), endPreview = createWorld({ ...terminal.world.context, seed: 208907 });
   assert.deepEqual(endHome, { ...done, world: endPreview, screen: 'title', playingRecording: null, checksum: finalChecksum(endPreview) });
   app.invokeReplay(); assertNotice(app, '');
-  for (let i = 0; i < 15000 && app.progress().tick < 8400; i++) app.frame();
+  for (let i = 0; i < 20000 && app.progress().tick < terminal.world.desertAssault.final.nextTick - terminal.world.desertAssault.final.intervalTicks; i++) app.frame();
   assertNotice(app, '收割者抵达'); const boss = app.session(), replayTimer = app.noticeTimer; app.advanceTimers(1000); app.get('pause').onclick(); assertNotice(app, ''); assert.ok(app.cancelledTimers.includes(replayTimer));
   const home = app.session(), preview = createWorld({ ...terminal.world.context, seed: 208907 });
   assert.deepEqual(home, { ...boss, world: preview, screen: 'title', playingRecording: null, checksum: finalChecksum(preview) }); assert.equal(app.seedCalls, 1);
@@ -449,7 +454,7 @@ test('invalid Replay preserves its bilingual rejection notice and the complete c
 test('replay end preserves a new verification error for its full duration', () => {
   const app = harness(), terminal = naturalLoss(app); app.replaceRecording({ ...terminal.lastRecording, finalChecksum: terminal.checksum === '00000000' ? 'ffffffff' : '00000000' });
   app.invokeReplay();
-  for (let i = 0; i < 15000 && app.progress().screen === 'replay'; i++) app.frame();
+  for (let i = 0; i < 20000 && app.progress().screen === 'replay'; i++) app.frame();
   const done = app.session(); assert.equal(done.screen, 'replay-end'); assert.equal(done.replayVerified, false); assert.deepEqual(done.world, terminal.world); assert.equal(done.checksum, terminal.checksum); assert.deepEqual(done.actions, terminal.actions);
   assertNotice(app, '回放校验失败。进度未改变。'); assert.ok(app.logs.some(([level, name, data]) => level === 'error' && name === 'replay.rejected' && data.code === 'checksum-mismatch'));
   app.advanceTimers(3499); assertNotice(app, '回放校验失败。进度未改变。'); app.advanceTimers(1); assertNotice(app, ''); assert.deepEqual(app.session(), done);
@@ -494,7 +499,7 @@ test('live victory preserves header focus and internal replay verifies the compl
   const app = harness(embedded, storage), terminal = naturalWin(app, 'header'); assert.equal(app.active, app.get('sound')); assert.equal(app.get('victory-retry').focusCalls, undefined);
   assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
   app.invokeReplay(); assert.equal(app.snapshot().screen, 'replay'); assert.equal(app.seedCalls, 1);
-  for (let i = 0; i < 15000 && app.snapshot().screen === 'replay'; i++) { assertNoVictory(app); assert.equal(app.get('defeat-panel'), null); app.frame(); }
+  for (let i = 0; i < 20000 && app.snapshot().screen === 'replay'; i++) { assertNoVictory(app); assert.equal(app.get('defeat-panel'), null); app.frame(); }
   assert.equal(app.snapshot().screen, 'replay-end'); assert.equal(app.snapshot().replayVerified, true); assert.equal(app.snapshot().checksum, terminal.checksum); assert.deepEqual(app.snapshot().world, terminal.world); assert.deepEqual(app.snapshot().lastRecording, terminal.lastRecording); assert.equal(app.seedCalls, 1);
   assert.ok(app.logs.some(([, name]) => name === 'replay.finished')); assertNoVictory(app); assert.equal(app.get('defeat-panel'), null); assert.equal(app.get('opening-panel'), null);
   assert.deepEqual(storage.writes, [[progressKey, savedProgress('rainforest')]]);
@@ -541,8 +546,41 @@ test('header focus preserves combat movement, pause and upgrade shortcuts while 
 });
 
 function startLive(app) { app.click('启动任务'); app.click('部署出发'); }
-test('the live desert deployment shows localized repair feedback and logs the first repair', () => {
+test('desert assault guidance advances after dismissal and retains localized HUD when radio is disabled', () => {
   const app = harness();
+  startLive(app);
+  assert.equal(app.snapshot().world.context.rulesVersion, 'desert-base-6');
+  assert.equal(app.radioBeat, 'briefing');
+  assert.match(app.get('repair-status').textContent, /炮塔 0\/4 · 等待补给/);
+  app.activate('radio-close', 'Enter');
+  app.frame();
+  atRadioTick(app, 6299);
+  app.frame(1000 / 60 + .000001);
+  assert.equal(app.radioBeat, 'north');
+  assert.match(app.get('radio-story').textContent, /北侧补给到了/);
+  app.get('language').onclick();
+  assert.match(app.get('repair-status').textContent, /Turrets 0\/4 · Latest supplies North/);
+  app.get('pause').onclick();
+  app.activate('radio-disable', 'Space');
+  app.get('pause-resume').onclick();
+  atRadioTick(app, 7199);
+  for (let frame = 0; frame < 7; frame++) app.frame();
+  assert.equal(app.get('radio').hidden, true);
+  assert.match(app.get('repair-status').textContent, /Latest supplies East/);
+  const world = app.snapshot().world;
+  world.desertAssault.final = { kind: 'scheduled', firstTick: world.tick + 1 };
+  world.desertRepair.towers = world.desertRepair.towers.map(tower => ({ ...tower, kind: 'repaired', nextTurretShotTick: 0 }));
+  app.fixtureWorld(world);
+  for (let frame = 0; frame < 7; frame++) app.frame();
+  assert.equal(app.get('radio').hidden, true);
+  assert.match(app.get('repair-status').textContent, /Turrets 4\/4 · Assault waves 1\/6/);
+});
+
+function legacyDesertHarness() {
+  return harness(undefined, undefined, undefined, DESERT_FOUR_TOWERS_CONTEXT);
+}
+test('the live desert deployment shows localized repair feedback and logs the first repair', () => {
+  const app = legacyDesertHarness();
   assert.equal(app.get('repair-hud').hidden, true);
   startLive(app);
   assert.equal(app.snapshot().world.context.rulesVersion, 'desert-base-5');
@@ -581,7 +619,7 @@ function finishIdle(app) {
   assert.equal(app.session().world.phase.kind, 'lost'); return app.session();
 }
 test('first live kill starts exactly one stable full canonical radio outside overlay with no timer', () => {
-  const app = harness(), entry = catalog.find(value => value.beat === 'radio.first-contact');
+  const app = legacyDesertHarness(), entry = catalog.find(value => value.beat === 'radio.first-contact');
   assert.equal(app.radioState, 'inactive'); assert.equal(app.get('radio').hidden, true); assert.equal(app.get('radio-story').textContent, '');
   const first = firstRadio(app), radio = app.get('radio'), story = app.get('radio-story'), close = app.get('radio-close');
   assert.ok(first.world.kills > 0); assert.equal(story.textContent, entry.zh); assert.equal(story.dataset.storyId, entry.id);
@@ -597,7 +635,7 @@ test('first live kill starts exactly one stable full canonical radio outside ove
 });
 test('native radio Close Enter and Space leave full World RNG recording inputs seed and audio unchanged and preserve critical notice deadline', () => {
   for (const code of ['Enter', 'Space']) {
-    const app = harness(); firstRadio(app); app.key('KeyD'); app.event('error', { message: 'radio overlap error' }); const timer = app.noticeTimer;
+    const app = legacyDesertHarness(); firstRadio(app); app.key('KeyD'); app.event('error', { message: 'radio overlap error' }); const timer = app.noticeTimer;
     app.advanceTimers(1000); const before = app.session(), audio = app.audioActivations;
     const key = app.activate('radio-close', code); assert.equal(key.defaultPrevented, undefined);
     assert.equal(app.radioState, 'dismissed'); assert.equal(app.get('radio').hidden, true); assert.equal(app.get('radio-story').textContent, ''); assert.equal(app.active, app.get('game'));
@@ -608,7 +646,7 @@ test('native radio Close Enter and Space leave full World RNG recording inputs s
   }
 });
 test('radio visibility follows pause upgrade blur and hidden without forgetting consumed first kill or leaving hidden focus', () => {
-  const app = harness(); firstRadio(app); const close = app.get('radio-close'); close.focus(); app.key('KeyP', false, close);
+  const app = legacyDesertHarness(); firstRadio(app); const close = app.get('radio-close'); close.focus(); app.key('KeyP', false, close);
   assert.equal(app.radioState, 'active'); assert.equal(app.get('radio').hidden, true); assert.equal(app.active, app.get('game'));
   app.release('KeyP'); app.key('KeyP'); assert.equal(app.get('radio').hidden, false);
   app.event('blur'); assert.equal(app.get('radio').hidden, true); assert.equal(app.session().world.phase.kind, 'paused');
@@ -617,7 +655,7 @@ test('radio visibility follows pause upgrade blur and hidden without forgetting 
 });
 test('pause can disable radio before or after first kill while preserving panel objective nodes focus scroll notice audio and complete session', () => {
   for (const afterKill of [false, true]) {
-    const app = harness(); if (afterKill) firstRadio(app); else startLive(app);
+    const app = legacyDesertHarness(); if (afterKill) firstRadio(app); else startLive(app);
     app.key('KeyP'); const panel = app.get('pause-panel'), objective = app.get('pause-objective'), disable = app.get('radio-disable'); panel.scrollTop = 32; disable.focus();
     app.event('error', { message: 'pause error' }); const timer = app.noticeTimer, before = app.session(), audio = app.audioActivations;
     disable.onclick(); assert.equal(app.radioState, 'disabled'); assert.equal(disable.disabled, true); assert.equal(disable.textContent, '本局无线电已关闭');
@@ -636,7 +674,7 @@ function fixtureKill(app, mode) {
 }
 test('actual dispatch multi-kill starts once, same tick upgrade retains hidden radio and terminal has priority', () => {
   for (const mode of ['multi', 'upgrade', 'terminal']) {
-    const app = harness(), result = fixtureKill(app, mode); assert.equal(result.world.kills, 2); assert.equal(result.world.events.filter(value => value === 'kill').length, 2);
+    const app = legacyDesertHarness(), result = fixtureKill(app, mode); assert.equal(result.world.kills, 2); assert.equal(result.world.events.filter(value => value === 'kill').length, 2);
     if (mode === 'terminal') { assert.equal(result.world.phase.kind, 'lost'); assert.equal(app.radioState, 'inactive'); assert.equal(radioStarts(app).length, 0); assert.equal(app.get('radio-story').textContent, ''); }
     else { assert.equal(app.radioState, 'active'); assert.equal(radioStarts(app).length, 1); assert.equal(app.get('radio').hidden, mode === 'upgrade');
       if (mode === 'upgrade') { assert.equal(result.world.phase.kind, 'upgrading'); app.key('Digit1'); assert.equal(app.get('radio').hidden, false); assert.equal(radioStarts(app).length, 1); }
@@ -646,7 +684,7 @@ test('actual dispatch multi-kill starts once, same tick upgrade retains hidden r
 });
 test('radio controls paired with untouched presentation preserve full immediate sessions and identical terminal result recording and checksum', () => {
   for (const operation of ['close', 'disable']) {
-    const control = harness(), changed = harness(); firstRadio(control); firstRadio(changed); assert.deepEqual(changed.session(), control.session());
+    const control = legacyDesertHarness(), changed = legacyDesertHarness(); firstRadio(control); firstRadio(changed); assert.deepEqual(changed.session(), control.session());
     if (operation === 'disable') { control.key('KeyP'); changed.key('KeyP'); }
     const before = changed.session(), audio = changed.audioActivations;
     changed.activate(operation === 'close' ? 'radio-close' : 'radio-disable', 'Space');
@@ -657,7 +695,7 @@ test('radio controls paired with untouched presentation preserve full immediate 
   }
 });
 test('terminal clears radio, invalid Replay preserves complete session and error, successful Replay never shows radio, Home clears and Retry resets new seed', () => {
-  const app = harness(); firstRadio(app); app.activate('radio-close', 'Enter'); finishIdle(app); const terminal = app.session();
+  const app = legacyDesertHarness(); firstRadio(app); app.activate('radio-close', 'Enter'); finishIdle(app); const terminal = app.session();
   assert.equal(app.radioState, 'inactive'); assert.equal(app.get('radio-story').textContent, '');
   app.replaceRecording({ ...terminal.lastRecording, actions: 'invalid' }); const invalid = app.session(); app.invokeReplay(); assert.deepEqual(app.session(), invalid); assert.equal(app.radioState, 'inactive'); assertNotice(app, '无法播放，回放数据无效。进度未改变。');
   app.replaceRecording(terminal.lastRecording); app.invokeReplay();
@@ -668,13 +706,13 @@ test('terminal clears radio, invalid Replay preserves complete session and error
 });
 
 test('failed Replay preparation retains an active radio and complete current session while reporting the new error', () => {
-  const app = harness(); firstRadio(app); app.replaceRecording({ ...app.session().recording, version: 'bad', finalChecksum: app.session().checksum }); const before = app.session(), story = app.get('radio-story');
+  const app = legacyDesertHarness(); firstRadio(app); app.replaceRecording({ ...app.session().recording, version: 'bad', finalChecksum: app.session().checksum }); const before = app.session(), story = app.get('radio-story');
   app.invokeReplay(); assert.deepEqual(app.session(), before); assert.equal(app.radioState, 'active'); assert.equal(app.get('radio').hidden, false); assert.equal(app.get('radio-story'), story);
   assertNotice(app, '无法播放，回放版本不兼容。进度未改变。'); app.advanceTimers(3499); assertNotice(app, '无法播放，回放版本不兼容。进度未改变。'); app.advanceTimers(1); assertNotice(app, '');
 });
 test('native radio handlers publish synchronous UI failures through runtime failure notice without swallowing errors', () => {
   for (const control of ['radio-close', 'radio-disable']) {
-    const app = harness(); firstRadio(app); if (control === 'radio-disable') app.key('KeyP');
+    const app = legacyDesertHarness(); firstRadio(app); if (control === 'radio-disable') app.key('KeyP');
     const node = app.get('radio-close'), original = node.getAttribute.bind(node); let throwOnce = true;
     node.getAttribute = key => { if (throwOnce) { throwOnce = false; throw new Error('radio control test failure'); } return original(key); };
     app.get(control).onclick(); assert.ok(app.logs.some(([level, name, data]) => level === 'error' && name === 'runtime.failure' && data.message.includes('radio control test failure')));
@@ -686,14 +724,14 @@ function atRadioTick(app, tick, phase = { kind: 'running' }) {
   app.fixtureWorld(world);
 }
 function telemetryFixture() {
-  const app = harness(); firstRadio(app); app.activate('radio-close', 'Enter'); atRadioTick(app, 5399); app.frame(1000 / 60 + .000001);
+  const app = legacyDesertHarness(); firstRadio(app); app.activate('radio-close', 'Enter'); atRadioTick(app, 5399); app.frame(1000 / 60 + .000001);
   assert.equal(app.radioBeat, 'telemetry'); return app;
 }
 test('midpoint boundary preserves waiting and unread first contact and only the next action schedules telemetry', () => {
   const first = catalog.find(entry => entry.beat === 'radio.first-contact'), next = catalog.find(entry => entry.beat === 'radio.telemetry');
-  const waiting = harness(); startLive(waiting); waiting.frame(); atRadioTick(waiting, 5400); waiting.key('KeyP'); waiting.release('KeyP'); waiting.key('KeyP');
+  const waiting = legacyDesertHarness(); startLive(waiting); waiting.frame(); atRadioTick(waiting, 5400); waiting.key('KeyP'); waiting.release('KeyP'); waiting.key('KeyP');
   assert.equal(waiting.radioState, 'waiting'); assert.equal(radioStarts(waiting).length, 0);
-  const app = harness(); firstRadio(app); atRadioTick(app, 5398); app.frame(1000 / 60 + .000001); assert.equal(app.session().world.tick, 5399);
+  const app = legacyDesertHarness(); firstRadio(app); atRadioTick(app, 5398); app.frame(1000 / 60 + .000001); assert.equal(app.session().world.tick, 5399);
   assert.equal(app.get('radio-story').textContent, first.zh); app.frame(1000 / 60 + .000001); assert.equal(app.session().world.tick, 5400);
   assert.equal(app.get('radio-story').dataset.storyId, first.id); assert.equal(radioStarts(app).length, 1);
   const before = app.session(); app.activate('radio-close', 'Space'); assert.deepEqual(app.session(), before); assert.equal(app.radioBeat, 'firstContact'); assert.equal(app.get('radio').hidden, true);
@@ -701,12 +739,12 @@ test('midpoint boundary preserves waiting and unread first contact and only the 
   app.frame(1000 / 60 + .000001); assert.equal(app.radioBeat, 'telemetry'); assert.equal(app.get('radio-story').textContent, next.en); assert.equal(app.get('radio-story').dataset.storyId, next.id);
   assert.deepEqual(radioStarts(app).map(([, , data]) => data.id), [first.id, next.id]);
   app.activate('radio-close', 'Enter'); for (let i = 0; i < 5; i++) app.frame(); assert.equal(app.get('radio').hidden, true); assert.equal(radioStarts(app).length, 2);
-  const early = harness(); firstRadio(early); early.activate('radio-close', 'Enter'); atRadioTick(early, 5398); early.frame(1000 / 60 + .000001); assert.equal(early.radioState, 'dismissed'); early.frame(1000 / 60 + .000001); assert.equal(early.radioBeat, 'telemetry');
+  const early = legacyDesertHarness(); firstRadio(early); early.activate('radio-close', 'Enter'); atRadioTick(early, 5398); early.frame(1000 / 60 + .000001); assert.equal(early.radioState, 'dismissed'); early.frame(1000 / 60 + .000001); assert.equal(early.radioBeat, 'telemetry');
 });
 test('normal resume and choose actions schedule eligible telemetry while hidden and upgrading actions do not', () => {
   for (const phase of ['paused', 'upgrading']) {
-    const app = harness(); firstRadio(app); app.activate('radio-close', 'Enter');
-    const offer = play(42).recording.actions.find(action => action.kind === 'choose').upgrade;
+    const app = legacyDesertHarness(); firstRadio(app); app.activate('radio-close', 'Enter');
+    const offer = playLegacyDesert(42).recording.actions.find(action => action.kind === 'choose').upgrade;
     atRadioTick(app, 5400, phase === 'paused' ? { kind: 'paused' } : { kind: 'upgrading', offers: [offer] });
     app.document.hidden = true;
     if (phase === 'paused') app.key('KeyP'); else app.key('Digit1');
@@ -715,8 +753,8 @@ test('normal resume and choose actions schedule eligible telemetry while hidden 
     app.key('KeyP'); app.release('KeyP'); app.key('KeyP'); assert.equal(app.radioBeat, 'telemetry'); assert.equal(app.get('radio').hidden, false);
   }
   for (const phase of ['paused', 'upgrading']) {
-    const app = harness(); firstRadio(app); app.activate('radio-close', 'Enter');
-    const offer = play(42).recording.actions.find(action => action.kind === 'choose').upgrade;
+    const app = legacyDesertHarness(); firstRadio(app); app.activate('radio-close', 'Enter');
+    const offer = playLegacyDesert(42).recording.actions.find(action => action.kind === 'choose').upgrade;
     atRadioTick(app, 5400, phase === 'paused' ? { kind: 'paused' } : { kind: 'upgrading', offers: [offer] });
     if (phase === 'paused') app.key('KeyP'); else app.key('Digit1');
     assert.equal(app.radioBeat, 'telemetry'); assert.equal(app.get('radio').hidden, false);
@@ -743,7 +781,7 @@ test('telemetry native close preserves complete session held input audio seed an
 });
 test('run disable covers waiting first dismissed and telemetry and terminal always clears eligible state', () => {
   for (const stage of ['waiting', 'first', 'dismissed', 'telemetry']) {
-    const app = stage === 'telemetry' ? telemetryFixture() : harness(); if (stage !== 'telemetry') { if (stage === 'waiting') { startLive(app); app.frame(); } else firstRadio(app); if (stage === 'dismissed') app.activate('radio-close', 'Enter'); }
+    const app = stage === 'telemetry' ? telemetryFixture() : legacyDesertHarness(); if (stage !== 'telemetry') { if (stage === 'waiting') { startLive(app); app.frame(); } else firstRadio(app); if (stage === 'dismissed') app.activate('radio-close', 'Enter'); }
     const started = radioStarts(app).length; app.key('KeyP'); const before = app.session(), audio = app.audioActivations; app.activate('radio-disable', 'Space'); assert.deepEqual(app.session(), before); assert.equal(app.audioActivations, audio);
     atRadioTick(app, 5400, { kind: 'paused' }); app.get('pause-resume').onclick(); assert.equal(app.radioState, 'disabled'); assert.equal(radioStarts(app).length, started); assert.equal(app.get('radio').hidden, true);
   }
@@ -753,10 +791,10 @@ test('run disable covers waiting first dismissed and telemetry and terminal alwa
   }
 });
 test('seeded live action pairs observe telemetry beyond midpoint and preserve full terminal recording and real replay', () => {
-  const control = harness(), changed = harness(), disabled = harness(), apps = [control, changed, disabled];
+  const control = legacyDesertHarness(), changed = legacyDesertHarness(), disabled = legacyDesertHarness(), apps = [control, changed, disabled];
   for (const app of apps) { startLive(app); app.pointer('joystick', 'pointerdown'); app.frame(); }
   let firstClosed = false, telemetryClosed = false, disabledAtTelemetry = false;
-  for (const action of play(42).recording.actions) {
+  for (const action of playLegacyDesert(42).recording.actions) {
     for (const app of apps) {
       if (action.kind === 'choose') { const state = app.snapshot(); app.key(`Digit${state.world.phase.offers.indexOf(action.upgrade) + 1}`); }
       else if (action.kind === 'tick') { const input = normalizeInput(action.input); app.pointer('joystick', 'pointermove', 9, input.x * 40, input.y * 40); if (action.input.dash) { app.key('Space'); app.release('Space'); } app.frame(1000 / 60 + .000001); }
@@ -782,12 +820,12 @@ test('seeded live action pairs observe telemetry beyond midpoint and preserve fu
   assert.equal(changed.session().replayVerified, true); assert.deepEqual(changed.session().world, expected.world); assert.equal(changed.session().checksum, expected.checksum); assert.equal(radioStarts(changed).length, 2);
 });
 test('late first kill still owns the unread slot and failed new preparation preserves telemetry and full session', () => {
-  const app = harness(); startLive(app); app.frame(); atRadioTick(app, 5400); const world = app.session().world;
+  const app = legacyDesertHarness(); startLive(app); app.frame(); atRadioTick(app, 5400); const world = app.session().world;
   world.enemies = [{ id: 1, kind: 'crawler', x: world.player.x + 80, y: world.player.y, hp: 0, maxHp: 30, radius: 11, attack: 100, flash: 0 }]; world.nextId = 2; app.fixtureWorld(world); app.frame(1000 / 60 + .000001);
   assert.equal(app.radioBeat, 'firstContact'); assert.equal(app.get('radio-story').dataset.storyId, 'desert-base.radio.first-contact'); assert.equal(radioStarts(app).length, 1);
   app.activate('radio-close', 'Enter'); app.frame(1000 / 60 + .000001); assert.equal(app.radioBeat, 'telemetry');
   const active = app.session(); app.failNextSeed(); app.invokeBegin(); assert.deepEqual(app.session(), active); assert.equal(app.radioBeat, 'telemetry'); assert.equal(app.get('radio').hidden, false); assertNotice(app, '系统异常，请刷新重试。');
-  const offer = play(42).recording.actions.find(action => action.kind === 'choose').upgrade;
+  const offer = playLegacyDesert(42).recording.actions.find(action => action.kind === 'choose').upgrade;
   atRadioTick(app, 5500, { kind: 'upgrading', offers: [offer] }); app.get('language').onclick(); assert.equal(app.get('radio').hidden, true); assert.equal(app.radioBeat, 'telemetry'); app.key('Digit1'); assert.equal(app.get('radio').hidden, false); assert.equal(radioStarts(app).length, 2);
 });
 
