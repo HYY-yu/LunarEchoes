@@ -1,4 +1,7 @@
-import { ANTARCTIC_RELAY_CONTEXT, ELEVATOR_RELAY_CONTEXT, hasDesertRelay, hasRelayBase, RAINFOREST_RELAY_CONTEXT, stageRules } from './stage-rules.js';
+import {
+  ANTARCTIC_RELAY_CONTEXT, ELEVATOR_RELAY_CONTEXT, hasDesertRelay, hasRelayBase,
+  RAINFOREST_RELAY_CONTEXT, stageRules, WATCHTOWER_RELAY_CONTEXT
+} from './stage-rules.js';
 import { type World } from './core.js';
 import { createAtlas } from './art.js';
 import { astronautVisorBounds, createAstronautArt } from './astronaut-art.js';
@@ -6,6 +9,7 @@ import { createDesertMap } from './desert-map.js';
 import { drawCampaignTerrain } from './campaign-maps.js';
 import { createAntarcticBearingArt } from './antarctic-bearing-art.js';
 import { createOrbitalLiftArt } from './orbital-lift-art.js';
+import { createWatchtowerChargeArt } from './watchtower-charge-art.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
 import { createRainforestArchiveArt } from './rainforest-archive-art.js';
 import { createDesertSupplyArt } from './desert-supply-art.js';
@@ -34,6 +38,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   let drawDesertRelay: ReturnType<typeof createDesertRelayArt> | undefined;
   let drawAntarcticBearing: ReturnType<typeof createAntarcticBearingArt> | undefined;
   let drawOrbitalLift: ReturnType<typeof createOrbitalLiftArt> | undefined;
+  let drawWatchtowerCharge: ReturnType<typeof createWatchtowerChargeArt> | undefined;
   let drawRainforestArchive: ReturnType<typeof createRainforestArchiveArt> | undefined;
   function renderTower(tower: Parameters<typeof drawTower>[1], world: World, direction?: TowerDirection) {
     const { x, y, kind } = tower;
@@ -82,6 +87,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     if (world.context.rulesVersion === ELEVATOR_RELAY_CONTEXT.rulesVersion) {
       drawOrbitalLift ??= createOrbitalLiftArt();
       drawOrbitalLift(ctx, world.tick);
+    }
+    if (world.context.rulesVersion === WATCHTOWER_RELAY_CONTEXT.rulesVersion) {
+      drawWatchtowerCharge ??= createWatchtowerChargeArt();
+      drawWatchtowerCharge(ctx, world.tick);
     }
     if (hasDesertRelay(world.context)) {
       drawDesertRelay ??= createDesertRelayArt();
