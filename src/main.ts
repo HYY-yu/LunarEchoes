@@ -199,6 +199,13 @@ function act(action: Action, record = true) {
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
+    if (world.tick !== tickBefore) {
+      for (const motion of world.materialMotions ?? []) {
+        if (motion.kind !== 'pickup' || motion.tick !== world.tick) continue;
+        log('debug', 'session.material_picked_up', { ...world.context, seed: world.seed, tick: motion.tick,
+          material: motion.material, ...motion.source });
+      }
+    }
     const assault = world.desertAssault;
     if (repair && 'towers' in repair && towersBefore !== repair.towers) {
       for (const [index, tower] of repair.towers.entries()) {

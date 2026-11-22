@@ -2,8 +2,9 @@ import type { Enemy, Shot, World } from './core.js';
 import { hasDesertRelay } from './stage-rules.js';
 import { DESERT_RELAY_CENTER, DESERT_RELAY_CORNERS } from './desert-relay-layout.js';
 
+import { materialMotionDuration, type Material } from './material-motion.js';
+
 type Position = Readonly<{ x: number; y: number }>;
-type Material = 'wood' | 'iron';
 type Materials = Record<Material, number>;
 type Supply = Position & Readonly<{ material: Material }>;
 type Tower = Position & Readonly<{ kind: 'damaged' | 'repaired' }>;
@@ -128,28 +129,40 @@ function nearest<T extends Position>(player: Position, targets: readonly T[]): T
   return closest;
 }
 
-export function stepDesertRepair(repair: DesertRepair, player: Position): boolean {
+export function stepDesertRepair(repair: DesertRepair, world: Pick<World, 'player' | 'tick' | 'materialMotions'>): boolean {
+  const { player, tick } = world;
+  if (world.materialMotions) {
+    const recent = world.materialMotions.filter(motion => tick - motion.tick < materialMotionDuration(motion.kind));
+    if (recent.length) world.materialMotions = recent;
+    else delete world.materialMotions;
+  }
+
   const { inventory, supplies } = repair;
   repair.supplies = supplies.filter(supply => {
     if (inventory[supply.material] >= SUPPLY_CAPACITY || distance(player, supply) > PICKUP_RADIUS) return true;
     inventory[supply.material]++;
+    (world.materialMotions ??= []).push({ kind: 'pickup', tick, material: supply.material, source: { x: supply.x, y: supply.y } });
     return false;
   });
   if (inventory.wood < REPAIR_COST.wood || inventory.iron < REPAIR_COST.iron) return false;
 
+  const target = 'towers' in repair
+    ? repair.towers.find(tower => tower.kind === 'damaged' && distance(player, tower) <= REPAIR_RADIUS)
+    : repair.tower.kind === 'damaged' && distance(player, repair.tower) <= REPAIR_RADIUS ? repair.tower : undefined;
+  if (!target) return false;
+
   if ('towers' in repair) {
-    const target = repair.towers.find(tower => tower.kind === 'damaged' && distance(player, tower) <= REPAIR_RADIUS);
-    if (!target) return false;
     repair.towers = repair.towers.map(tower => tower === target
       ? { ...tower, kind: 'repaired', nextTurretShotTick: 0 }
       : tower);
   } else {
-    const { tower } = repair;
-    if (tower.kind !== 'damaged' || distance(player, tower) > REPAIR_RADIUS) return false;
-    repair.tower = { ...tower, kind: 'repaired' };
+    repair.tower = { ...target, kind: 'repaired' };
   }
   inventory.wood -= REPAIR_COST.wood;
   inventory.iron -= REPAIR_COST.iron;
+  (world.materialMotions ??= []).push({
+    kind: 'deposit', tick, source: { x: player.x, y: player.y }, tower: { x: target.x, y: target.y }
+  });
   return true;
 }
 
