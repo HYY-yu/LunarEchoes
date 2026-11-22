@@ -1,6 +1,6 @@
 export function planDesertAssaultInput(world, { skipFourth = false, fourthRepairAfter = 0, stationaryFinal = false } = {}) {
   const position = world.player;
-  const deliveries = (world.desertAssault ?? world.rainforestRelay).deliveries;
+  const deliveries = (world.desertAssault ?? world.campaignRelay).deliveries;
   const final = world.desertAssault?.final;
   const { towers, inventory, supplies } = world.desertRepair;
   const repaired = towers.filter(tower => tower.kind === 'repaired').length;

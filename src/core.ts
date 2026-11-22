@@ -1,4 +1,4 @@
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, RAINFOREST_RELAY_CONTEXT, RAINFOREST_DELIVERY_TICKS, hasDesertRelay, hasRelayBase, hasDesertAssault, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, RAINFOREST_RELAY_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createDesertRepair, createDesertFourTowers, desertShipment, RELAY_REPAIR_RAID, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
 import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 import type { MaterialMotion } from './material-motion.js';
@@ -26,7 +26,7 @@ export type World = {
   fireCooldown: number; novaCooldown: number; spawnCooldown: number; bossSpawned: boolean; bossKilled: boolean;
   desertRepair?: DesertRepair;
   desertAssault?: DesertAssault;
-  rainforestRelay?: { deliveries: number };
+  campaignRelay?: { deliveries: number };
   desertTurretShots?: DesertTurretShots;
   materialMotions?: MaterialMotion[];
 };
@@ -48,9 +48,9 @@ export function createWorld(request: unknown): World {
     world.desertAssault = context === DESERT_CONTINUOUS_CONTEXT
       ? { mode: 'continuous', deliveries: 0, final: { kind: 'waiting' } }
       : { deliveries: 0, final: { kind: 'waiting' } };
-  } else if (context === RAINFOREST_RELAY_CONTEXT) {
+  } else if (campaignRelayDeliveryTicks(context)) {
     world.desertRepair = createDesertFourTowers([], true);
-    world.rainforestRelay = { deliveries: 0 };
+    world.campaignRelay = { deliveries: 0 };
   } else if (context === DESERT_FOUR_TOWERS_CONTEXT) {
     world.desertRepair = createDesertFourTowers();
   } else if (context === DESERT_REPAIR_CONTEXT || context === DESERT_TURRET_CONTEXT) {
@@ -141,17 +141,19 @@ function step(world: World, input: Input): void {
     if (world.tick % 2 === 0) world.effects.push({ x: p.x, y: p.y, kind: 'dash', life: 16, size: 10 });
   } else { p.x = clamp(world, p.x + input.x * speed); p.y = clamp(world, p.y + input.y * speed); }
   if (input.x !== 0 || input.y !== 0) { p.dx = input.x; p.dy = input.y; }
-  const { desertRepair, desertAssault, rainforestRelay } = world;
+  const { desertRepair, desertAssault, campaignRelay } = world;
   if (desertRepair) {
-    const relay = hasRelayBase(world.context);
-    const delivery = rainforestRelay ?? desertAssault;
-    const deliveryTicks = rainforestRelay ? RAINFOREST_DELIVERY_TICKS : relay ? DESERT_RELAY_SUPPLY_TICKS : DESERT_SUPPLY_TICKS;
-    if (delivery && world.tick === deliveryTicks[delivery.deliveries]) {
-      desertRepair.supplies = [...desertRepair.supplies, ...desertShipment(delivery.deliveries, relay ? p : undefined)];
-      delivery.deliveries++;
+    const delivery = campaignRelay ?? desertAssault;
+    if (delivery) {
+      const relay = campaignRelay !== undefined || hasDesertRelay(world.context);
+      const deliveryTicks = campaignRelayDeliveryTicks(world.context) ?? (relay ? DESERT_RELAY_SUPPLY_TICKS : DESERT_SUPPLY_TICKS);
+      if (world.tick === deliveryTicks[delivery.deliveries]) {
+        desertRepair.supplies = [...desertRepair.supplies, ...desertShipment(delivery.deliveries, relay ? p : undefined)];
+        delivery.deliveries++;
+      }
     }
     const repaired = stepDesertRepair(desertRepair, world);
-    if (rainforestRelay && repaired) for (const kind of RELAY_REPAIR_RAID) spawn(world, kind);
+    if (campaignRelay && repaired) for (const kind of RELAY_REPAIR_RAID) spawn(world, kind);
     if (desertAssault && 'towers' in desertRepair) {
       const repairedCount = repaired ? desertRepair.towers.filter(tower => tower.kind === 'repaired').length : 0;
       if (stepDesertAssault(desertAssault, world.tick, repairedCount, world.nextId, (kind, origin) => spawn(world, kind, undefined, origin))) {
@@ -292,8 +294,9 @@ function hash(data: string): string {
   return (value >>> 0).toString(16).padStart(8, '0');
 }
 export function checksum(world: World): string {
-  const { context, desertTurretShots, materialMotions, ...battle } = world;
-  return hash(JSON.stringify({ ...battle, events: [] }));
+  const { context, desertTurretShots, materialMotions, campaignRelay, ...battle } = world;
+  const relayField = context === RAINFOREST_RELAY_CONTEXT ? 'rainforestRelay' : 'campaignRelay';
+  return hash(JSON.stringify({ ...battle, ...(campaignRelay && { [relayField]: campaignRelay }), events: [] }));
 }
 export function finalChecksum(world: World): string {
   return hash(JSON.stringify([VERSION, world.context.stageId, world.context.rulesVersion, world.seed, checksum(world)]));

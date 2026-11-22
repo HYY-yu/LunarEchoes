@@ -199,7 +199,7 @@ function act(action: Action, record = true) {
   if (record && screen === 'game') recording.actions.push(action);
   const before = world.phase.kind;
   const tickBefore = world.tick;
-  const deliveriesBefore = (world.desertAssault ?? world.rainforestRelay)?.deliveries;
+  const deliveriesBefore = (world.desertAssault ?? world.campaignRelay)?.deliveries;
   const finalBefore = world.desertAssault?.final.kind;
   const bossKilledBefore = world.bossKilled;
   const repair = world.desertRepair;
@@ -225,7 +225,7 @@ function act(action: Action, record = true) {
     } else if (towerBefore?.kind === 'damaged' && repair && 'tower' in repair && repair.tower.kind === 'repaired') {
       log('info', 'session.turret_repaired', { ...world.context, seed: world.seed, tick: world.tick, ...repair.inventory });
     }
-    const deliveries = (assault ?? world.rainforestRelay)?.deliveries;
+    const deliveries = (assault ?? world.campaignRelay)?.deliveries;
     if (deliveries !== undefined && deliveries !== deliveriesBefore) {
       const drop = hasRelayBase(world.context) ? repair?.supplies.slice(-SUPPLY_CAPACITY) : undefined;
       log('info', 'session.supplies_delivered', { ...world.context, seed: world.seed, tick: world.tick,
