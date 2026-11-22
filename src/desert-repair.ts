@@ -1,4 +1,6 @@
 import type { Enemy, Shot, World } from './core.js';
+import { DESERT_RELAY_CONTEXT } from './stage-rules.js';
+import { DESERT_RELAY_CENTER, DESERT_RELAY_CORNERS } from './desert-relay-layout.js';
 
 type Position = Readonly<{ x: number; y: number }>;
 type Material = 'wood' | 'iron';
@@ -17,7 +19,7 @@ type SingleTowerRepair = InventoryState & {
 export type TowerDirection = 'north' | 'east' | 'south' | 'west';
 export type DesertTurretShot = Readonly<Pick<Shot, 'vx' | 'vy'> & { tick: number }>;
 export type DesertTurretShots = Partial<Record<TowerDirection, DesertTurretShot>>;
-type TurretWorld = Pick<World, 'desertRepair' | 'desertTurretShots' | 'enemies' | 'shots' | 'events' | 'tick'>;
+type TurretWorld = Pick<World, 'context' | 'desertRepair' | 'desertTurretShots' | 'enemies' | 'shots' | 'events' | 'tick'>;
 type DirectionalTower = Position & Readonly<{ direction: TowerDirection }> & (
   Readonly<{ kind: 'damaged' }> | { readonly kind: 'repaired'; nextTurretShotTick: number }
 );
@@ -46,12 +48,22 @@ const SUPPLIES = [
   { material: 'iron', x: 950, y: 750 }
 ] satisfies Supply[];
 
+type TowerSite = Position & { direction: TowerDirection; wood: readonly [Position, Position]; iron: Position };
+
 const FOUR_TOWER_LAYOUT = [
   { direction: 'north', x: 750, y: 670, wood: [{ x: 750, y: 620 }, { x: 750, y: 578 }], iron: { x: 750, y: 536 } },
   { direction: 'east', x: 830, y: 750, wood: [{ x: 880, y: 750 }, { x: 922, y: 750 }], iron: { x: 964, y: 750 } },
   { direction: 'south', x: 750, y: 830, wood: [{ x: 750, y: 880 }, { x: 750, y: 922 }], iron: { x: 750, y: 964 } },
   { direction: 'west', x: 670, y: 750, wood: [{ x: 620, y: 775 }, { x: 578, y: 775 }], iron: { x: 536, y: 775 } }
-] satisfies readonly (Position & { direction: TowerDirection; wood: readonly [Position, Position]; iron: Position })[];
+] satisfies readonly TowerSite[];
+
+const RELAY_TOWER_LAYOUT = DESERT_RELAY_CORNERS.map<TowerSite>((corner, index) => {
+  const x = DESERT_RELAY_CENTER.x + corner.x;
+  const y = DESERT_RELAY_CENTER.y + corner.y;
+  const legacy = FOUR_TOWER_LAYOUT[index];
+  const shift = (point: Position) => ({ x: point.x + x - legacy.x, y: point.y + y - legacy.y });
+  return { direction: corner.direction, x, y, wood: [shift(legacy.wood[0]), shift(legacy.wood[1])], iron: shift(legacy.iron) };
+});
 
 export function createDesertRepair(): SingleTowerRepair {
   return {
@@ -63,17 +75,57 @@ export function createDesertRepair(): SingleTowerRepair {
 
 export const DESERT_SUPPLY_DIRECTIONS = FOUR_TOWER_LAYOUT.map(tower => tower.direction);
 
-export function desertShipment(index: number): Supply[] {
-  const { wood, iron } = FOUR_TOWER_LAYOUT[index];
-  return [...wood.map<Supply>(point => ({ ...point, material: 'wood' })), { ...iron, material: 'iron' }];
+const DESERT_WIDE_DROP_VIEW = { halfWidth: 310, halfHeight: 195 };
+const DESERT_TALL_DROP_VIEW = { halfWidth: 130, halfHeight: 225 };
+const DESERT_DROP_VIEWS = [DESERT_WIDE_DROP_VIEW, DESERT_TALL_DROP_VIEW];
+const DESERT_DROP_CLEARANCE = 12;
+
+export function desertShipment(index: number, relayPlayer?: Position): Supply[] {
+  const { wood, iron, direction } = (relayPlayer ? RELAY_TOWER_LAYOUT : FOUR_TOWER_LAYOUT)[index];
+  const supplies: Supply[] = [...wood.map<Supply>(point => ({ ...point, material: 'wood' })), { ...iron, material: 'iron' }];
+  if (!relayPlayer || supplies.every(supply => DESERT_DROP_VIEWS.every(({ halfWidth, halfHeight }) =>
+    Math.abs(supply.x - relayPlayer.x) > halfWidth || Math.abs(supply.y - relayPlayer.y) > halfHeight))) return supplies;
+
+  if (direction === 'north' || direction === 'south') {
+    const sign = relayPlayer.x < DESERT_RELAY_CENTER.x ? 1 : -1;
+    const x = Math.round(relayPlayer.x + sign * (DESERT_WIDE_DROP_VIEW.halfWidth + DESERT_DROP_CLEARANCE));
+    return supplies.map(supply => ({ ...supply, x }));
+  }
+  const sign = relayPlayer.y < DESERT_RELAY_CENTER.y ? 1 : -1;
+  const y = Math.round(relayPlayer.y + sign * (DESERT_TALL_DROP_VIEW.halfHeight + DESERT_DROP_CLEARANCE));
+  return supplies.map(supply => ({ ...supply, y }));
 }
 
-export function createDesertFourTowers(supplies = FOUR_TOWER_LAYOUT.flatMap((_, index) => desertShipment(index))): FourTowerRepair {
+export function createDesertFourTowers(supplies = FOUR_TOWER_LAYOUT.flatMap((_, index) => desertShipment(index)), relay = false): FourTowerRepair {
   return {
     inventory: { wood: 0, iron: 0 },
     supplies,
-    towers: FOUR_TOWER_LAYOUT.map(({ direction, x, y }) => ({ direction, x, y, kind: 'damaged' }))
+    towers: (relay ? RELAY_TOWER_LAYOUT : FOUR_TOWER_LAYOUT).map(({ direction, x, y }) => ({ direction, x, y, kind: 'damaged' }))
   };
+}
+
+export type RelayObjective = { kind: 'supply'; target: Supply } | { kind: 'repair'; target: Position };
+
+export function relayObjective(repair: FourTowerRepair, player: Position): RelayObjective | undefined {
+  const { inventory, supplies, towers } = repair;
+  if (inventory.wood >= REPAIR_COST.wood && inventory.iron >= REPAIR_COST.iron) {
+    const target = nearest(player, towers.filter(tower => tower.kind === 'damaged'));
+    return target && { kind: 'repair', target };
+  }
+  const target = nearest(player, supplies.filter(supply => inventory[supply.material] < REPAIR_COST[supply.material]));
+  return target && { kind: 'supply', target };
+}
+
+function nearest<T extends Position>(player: Position, targets: readonly T[]): T | undefined {
+  let closest: T | undefined;
+  let bestDistance = Infinity;
+  for (const target of targets) {
+    const candidate = (player.x - target.x) ** 2 + (player.y - target.y) ** 2;
+    if (candidate >= bestDistance) continue;
+    closest = target;
+    bestDistance = candidate;
+  }
+  return closest;
 }
 
 export function stepDesertRepair(repair: DesertRepair, player: Position): boolean {
@@ -126,12 +178,17 @@ function fireTurret(world: TurretWorld, tower: Position, direction: TowerDirecti
   const boundaryRoundoff = 2 * Number.EPSILON * Math.max(tower.x, tower.y);
   let nearestDistanceSquared = (TURRET_RANGE + boundaryRoundoff) ** 2;
   let target: Enemy | undefined;
+  const relay = world.context === DESERT_RELAY_CONTEXT;
+  const outwardX = Math.sign(tower.x - DESERT_RELAY_CENTER.x);
+  const outwardY = Math.sign(tower.y - DESERT_RELAY_CENTER.y);
   for (const enemy of world.enemies) {
     if (enemy.hp <= 0) continue;
     const dx = enemy.x - tower.x;
     const dy = enemy.y - tower.y;
-    const forward = direction === 'north' ? -dy : direction === 'east' ? dx : direction === 'south' ? dy : -dx;
-    const sideways = direction === 'north' || direction === 'south' ? dx : dy;
+    const forward = relay ? (dx * outwardX + dy * outwardY) * Math.SQRT1_2
+      : direction === 'north' ? -dy : direction === 'east' ? dx : direction === 'south' ? dy : -dx;
+    const sideways = relay ? (dy * outwardX - dx * outwardY) * Math.SQRT1_2
+      : direction === 'north' || direction === 'south' ? dx : dy;
     if (forward <= 0 || Math.abs(sideways) > forward * TURRET_SECTOR_SLOPE + boundaryRoundoff) continue;
     const distanceSquared = dx * dx + dy * dy;
     if (distanceSquared > nearestDistanceSquared ||

@@ -30,8 +30,8 @@ export const assaultObjective = { id: 'desert-base.objective',
   en: 'Repair all four turrets and clear the final assault. Keep moving and dash clear of attacks.' };
 
 export const assaultLabels = {
-  zh: { awaiting: '等待补给', supply: '最新补给', preparing: '准备迎接敌潮', waves: '敌潮批次', clear: '清剿剩余敌人', timeout: '未能在时限内完成防守。' },
-  en: { awaiting: 'Awaiting supplies', supply: 'Latest supplies', preparing: 'Assault incoming', waves: 'Assault waves', clear: 'Clear remaining enemies', timeout: 'The defense was not completed in time.' }
+  zh: { awaiting: '等待补给', find: '寻找', repair: '材料齐全，靠近标记炮塔', supply: '最新补给', preparing: '准备迎接敌潮', waves: '敌潮批次', clear: '清剿剩余敌人', timeout: '未能在时限内完成防守。' },
+  en: { awaiting: 'Awaiting supplies', find: 'Find ', repair: 'Materials ready. Approach the marked turret', supply: 'Latest supplies', preparing: 'Assault incoming', waves: 'Assault waves', clear: 'Clear remaining enemies', timeout: 'The defense was not completed in time.' }
 };
 
 export function supplyDirection(direction: TowerDirection, language: 'zh' | 'en') {

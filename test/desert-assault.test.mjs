@@ -1,13 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createWorld, dispatch, HZ } from '../dist/core.js';
-import { DESERT_ASSAULT_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { relayObjective } from '../dist/desert-repair.js';
+import { DESERT_ASSAULT_CONTEXT, DESERT_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { play } from '../scripts/simulation.mjs';
 
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
 
-test('current desert rules unlock four shipments and spawn exactly one short raid per repair', () => {
-  assert.equal(stageContext('desert-base'), DESERT_ASSAULT_CONTEXT);
+test('v6 desert rules unlock four shipments and spawn exactly one short raid per repair', () => {
+  assert.equal(stageContext('desert-base'), DESERT_RELAY_CONTEXT);
   const world = createWorld({ ...DESERT_ASSAULT_CONTEXT, seed: 42 });
   const repair = world.desertRepair;
   assert.equal(repair.supplies.length, 0);
@@ -64,4 +65,50 @@ test('full desert runs resolve the final assault, running out of time and armor 
       assert.ok(world.enemies.every(enemy => enemy.id < final.firstEnemyId));
     } else if (alive) assert.equal(world.tick, 300 * HZ);
   }
+});
+
+test('v7 starts with reachable supplies and uses the relay corners for repairs and outward fire', () => {
+  const world = createWorld({ ...DESERT_RELAY_CONTEXT, seed: 42 });
+  const { desertRepair: repair, player } = world;
+  const corners = [[590, 590], [910, 590], [910, 910], [590, 910]];
+  assert.deepEqual(repair.towers.map(({ x, y }) => [x, y]), corners);
+  assert.equal(relayObjective(repair, player), undefined);
+
+  for (const [index, deliveryTick] of [1, 45 * HZ, 100 * HZ, 160 * HZ].entries()) {
+    world.tick = deliveryTick - 1;
+    world.spawnCooldown = 1000;
+    world.enemies = [];
+    world.shots = [];
+    Object.assign(player, { x: 750, y: 750 });
+    dispatch(world, idle);
+    assert.equal(world.desertAssault.deliveries, index + 1);
+    assert.deepEqual(repair.supplies.map(supply => supply.material), ['wood', 'wood', 'iron']);
+    for (const [halfWidth, halfHeight] of [[300, 188], [122, 217]]) {
+      assert(repair.supplies.every(supply => Math.abs(supply.x - player.x) > halfWidth || Math.abs(supply.y - player.y) > halfHeight));
+    }
+    assert.equal(relayObjective(repair, player).kind, 'supply');
+    const [x, y] = corners[index];
+    Object.assign(player, { x, y });
+    dispatch(world, idle);
+    assert.equal(repair.towers[index].kind, 'damaged');
+
+    for (const point of repair.supplies) {
+      Object.assign(player, { x: point.x, y: point.y });
+      dispatch(world, idle);
+    }
+    assert.deepEqual(repair.inventory, { wood: 2, iron: 1 });
+    assert.equal(relayObjective(repair, { x, y }).target, repair.towers[index]);
+    Object.assign(player, { x, y });
+    const sx = Math.sign(x - 750), sy = Math.sign(y - 750);
+    const enemy = (id, x, y) => ({ id, kind: 'sentry', x, y, hp: 50, maxHp: 50, radius: 15, attack: 1000, flash: 0 });
+    world.enemies = [enemy(1000, x - sx * 25, y - sy * 25), enemy(1001, x + sx * 85, y + sy * 85)];
+    dispatch(world, idle);
+    assert.equal(repair.towers[index].kind, 'repaired');
+    assert.deepEqual(repair.inventory, { wood: 0, iron: 0 });
+    const shot = world.desertTurretShots[repair.towers[index].direction];
+    assert.equal(Math.sign(shot.vx), sx);
+    assert.equal(Math.sign(shot.vy), sy);
+  }
+  assert.equal(relayObjective(repair, player), undefined);
+  assert.equal(world.desertAssault.final.kind, 'scheduled');
 });

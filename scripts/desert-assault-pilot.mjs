@@ -56,9 +56,10 @@ export function planDesertAssaultInput(world, { skipFourth = false, fourthRepair
       y = position.y - nearest.y;
     }
   }
-  if (delayFourth && Math.hypot(position.x - 670, position.y - 750) < 105) {
-    x = position.x - 670;
-    y = position.y - 750;
+  const lastTower = towers.at(-1);
+  if (delayFourth && Math.hypot(position.x - lastTower.x, position.y - lastTower.y) < 105) {
+    x = position.x - lastTower.x;
+    y = position.y - lastTower.y;
   }
   if (stationaryFinal && final.kind === 'active') return { x: 0, y: 0, dash: false };
   return { x, y, dash: !permitRepair && nearestDistance < 45 && world.tick % 30 === 0 };

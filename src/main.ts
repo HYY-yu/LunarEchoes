@@ -1,4 +1,4 @@
-import { DESERT_ASSAULT_CONTEXT, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_RELAY_CONTEXT, hasDesertAssault, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
@@ -9,7 +9,7 @@ import { applyStageResult, isStageUnlocked } from './progress.js';
 import { openProgressStorage, type ProgressStorageResult } from './progress-storage.js';
 import { DESERT_SCENE_SIZE, drawDesertScene } from './desert-scene.js';
 import { loadLaterOpening } from './campaign-scenes.js';
-import { DESERT_SUPPLY_DIRECTIONS, REPAIR_COST, REPAIR_RADIUS, SUPPLY_CAPACITY } from './desert-repair.js';
+import { DESERT_SUPPLY_DIRECTIONS, REPAIR_COST, REPAIR_RADIUS, SUPPLY_CAPACITY, relayObjective } from './desert-repair.js';
 import { DESERT_LATE_REPAIR_TICK, FINAL_BATCH_COUNT } from './desert-assault.js';
 import { assaultLabels, assaultObjective, assaultRadio, supplyDirection, type AssaultRadioBeat } from './desert-guidance.js';
 type Screen = 'title' | 'stages' | 'opening' | 'game' | 'replay' | 'replay-end';
@@ -216,7 +216,11 @@ function act(action: Action, record = true) {
         : final.kind === 'waiting' && world.tick !== tickBefore && world.tick === DESERT_LATE_REPAIR_TICK ? 'lateRepair'
         : repairedTower ? 'raid'
         : deliveries !== deliveriesBefore ? DESERT_SUPPLY_DIRECTIONS[deliveries - 1] : undefined;
-      if (deliveries !== deliveriesBefore) log('info', 'session.supplies_delivered', { ...world.context, seed: world.seed, tick: world.tick, direction: DESERT_SUPPLY_DIRECTIONS[deliveries - 1] });
+      if (deliveries !== deliveriesBefore) {
+        const drop = world.context === DESERT_RELAY_CONTEXT ? repair?.supplies.slice(-SUPPLY_CAPACITY) : undefined;
+        log('info', 'session.supplies_delivered', { ...world.context, seed: world.seed, tick: world.tick,
+          direction: DESERT_SUPPLY_DIRECTIONS[deliveries - 1], ...(drop && { drop, playerX: world.player.x, playerY: world.player.y }) });
+      }
       if (final.kind === 'active' && finalBefore !== 'active') log('info', 'session.final_assault_started', { ...world.context, seed: world.seed, tick: world.tick });
       if (beat && radioState.kind !== 'disabled') setRadio({ kind: 'active', beat }, beat);
     } else if (radioState.kind === 'waiting' && world.events.includes('kill')) setRadio({ kind: 'active', beat: 'firstContact' }, 'first-kill');
@@ -286,7 +290,7 @@ function showOpening(context: StageContext, source: OpeningSource = 'title') {
   openingRequest = null;
   if (context.stageId === 'desert-base') {
     if (!desertContent) throw new Error('Desert content unavailable');
-    presentOpening(context, source, { opening: desertContent.opening, objective: context === DESERT_ASSAULT_CONTEXT ? assaultObjective : desertContent.objective, size: DESERT_SCENE_SIZE, draw: canvas => drawDesertScene(canvas, 'opening') });
+    presentOpening(context, source, { opening: desertContent.opening, objective: hasDesertAssault(context) ? assaultObjective : desertContent.objective, size: DESERT_SCENE_SIZE, draw: canvas => drawDesertScene(canvas, 'opening') });
     return;
   }
   const request = Symbol(), previousScreen = screen;
@@ -431,7 +435,12 @@ function updateRepairHud() {
       status = `${progress} · ${labels.waves} ${batches}/${FINAL_BATCH_COUNT}`;
       if (batches === FINAL_BATCH_COUNT) status += ` · ${labels.clear}`;
     } else if (assault.final.kind === 'scheduled') status = `${progress} · ${labels.preparing}`;
-    else if (assault.deliveries === 0) status = `${progress} · ${labels.awaiting}`;
+    else if (world.context === DESERT_RELAY_CONTEXT && fourTowers) {
+      const objective = relayObjective(repair, world.player);
+      status = `${progress} · ${objective?.kind === 'repair' ? labels.repair
+        : objective?.kind === 'supply' ? `${labels.find}${t[objective.target.material]}` : labels.awaiting}`;
+      if (nearby && missing.length) status += ` · ${t.repairMissing} ${missing.join(' · ')}`;
+    } else if (assault.deliveries === 0) status = `${progress} · ${labels.awaiting}`;
     else {
       const direction = supplyDirection(DESERT_SUPPLY_DIRECTIONS[assault.deliveries - 1], language);
       status = `${progress} · ${labels.supply} ${direction}`;
@@ -629,7 +638,7 @@ function updateUi(force = false) {
   overlay.replaceChildren();
   if (screen === 'title') {
     const intro = document.createElement('section'); intro.className = 'intro';
-    intro.innerHTML = `<h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${DESERT_CONTEXT === DESERT_ASSAULT_CONTEXT ? assaultObjective[language] : t.brief}</p>`;
+    intro.innerHTML = `<h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${hasDesertAssault(DESERT_CONTEXT) ? assaultObjective[language] : t.brief}</p>`;
     const progress = document.createElement('p'); progress.id = 'title-progress'; progress.setAttribute('role', 'status'); intro.append(progress);
     const start = button(t.start, 'primary', () => showOpening(DESERT_CONTEXT)); start.id = 'mission-start';
     const stages = button(t.campaignStages, 'secondary', showStages); stages.id = 'mission-select';
