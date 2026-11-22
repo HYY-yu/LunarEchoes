@@ -21,6 +21,7 @@ export const ELEVATOR_RELAY_CONTEXT = context('space-elevator', 3);
 export const WATCHTOWER_CONTEXT = context('watchtower', 1);
 export const WATCHTOWER_RELAY_CONTEXT = context('watchtower', 3);
 export const LUNAR_ECHOES_CONTEXT = context('lunar-echoes', 1);
+export const LUNAR_RELAY_CONTEXT = context('lunar-echoes', 3);
 
 const LEGACY_CONTEXTS = Object.freeze({
   'desert-base': DESERT_CONTEXT,
@@ -52,14 +53,16 @@ export type StageContext =
   | typeof RAINFOREST_RELAY_CONTEXT
   | typeof ANTARCTIC_RELAY_CONTEXT
   | typeof ELEVATOR_RELAY_CONTEXT
-  | typeof WATCHTOWER_RELAY_CONTEXT;
+  | typeof WATCHTOWER_RELAY_CONTEXT
+  | typeof LUNAR_RELAY_CONTEXT;
 
 type FourDeliveries = readonly [number, number, number, number];
 const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rulesVersion'], FourDeliveries>>> = Object.freeze({
   'rainforest-3': Object.freeze([1, 35 * 60, 70 * 60, 108 * 60] as const),
   'antarctica-3': Object.freeze([1, 42 * 60, 84 * 60, 126 * 60] as const),
   'space-elevator-3': Object.freeze([1, 29 * 60, 76 * 60, 120 * 60] as const),
-  'watchtower-3': Object.freeze([1, 42 * 60, 89 * 60, 118 * 60] as const)
+  'watchtower-3': Object.freeze([1, 42 * 60, 89 * 60, 118 * 60] as const),
+  'lunar-echoes-3': Object.freeze([1, 44 * 60, 112 * 60, 142 * 60] as const)
 });
 
 const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object.freeze({
@@ -67,7 +70,8 @@ const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object
   rainforest: RAINFOREST_RELAY_CONTEXT,
   antarctica: ANTARCTIC_RELAY_CONTEXT,
   'space-elevator': ELEVATOR_RELAY_CONTEXT,
-  watchtower: WATCHTOWER_RELAY_CONTEXT
+  watchtower: WATCHTOWER_RELAY_CONTEXT,
+  'lunar-echoes': LUNAR_RELAY_CONTEXT
 });
 export type SimulationErrorCode = 'invalid-data' | 'incompatible-version' | 'unavailable-stage' | 'incompatible-rules' | 'nonterminal-replay' | 'checksum-mismatch' | 'incomplete-replay';
 export class SimulationError extends Error {
