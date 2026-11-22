@@ -1,5 +1,5 @@
 import type { Enemy, Shot, World } from './core.js';
-import { DESERT_RELAY_CONTEXT } from './stage-rules.js';
+import { hasDesertRelay } from './stage-rules.js';
 import { DESERT_RELAY_CENTER, DESERT_RELAY_CORNERS } from './desert-relay-layout.js';
 
 type Position = Readonly<{ x: number; y: number }>;
@@ -178,7 +178,7 @@ function fireTurret(world: TurretWorld, tower: Position, direction: TowerDirecti
   const boundaryRoundoff = 2 * Number.EPSILON * Math.max(tower.x, tower.y);
   let nearestDistanceSquared = (TURRET_RANGE + boundaryRoundoff) ** 2;
   let target: Enemy | undefined;
-  const relay = world.context === DESERT_RELAY_CONTEXT;
+  const relay = hasDesertRelay(world.context);
   const outwardX = Math.sign(tower.x - DESERT_RELAY_CENTER.x);
   const outwardY = Math.sign(tower.y - DESERT_RELAY_CENTER.y);
   for (const enemy of world.enemies) {

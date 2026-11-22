@@ -1,6 +1,6 @@
 import type { StageId } from './stage-contract.js';
 
-function context<const Id extends StageId, const Revision extends 1 | 2 | 3 | 4 | 5 | 6 | 7>(stageId: Id, revision: Revision): Readonly<{ stageId: Id; rulesVersion: `${Id}-${Revision}` }> {
+function context<const Id extends StageId, const Revision extends 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8>(stageId: Id, revision: Revision): Readonly<{ stageId: Id; rulesVersion: `${Id}-${Revision}` }> {
   return Object.freeze({ stageId, rulesVersion: `${stageId}-${revision}` });
 }
 
@@ -10,6 +10,7 @@ export const DESERT_TURRET_CONTEXT = context('desert-base', 4);
 export const DESERT_FOUR_TOWERS_CONTEXT = context('desert-base', 5);
 export const DESERT_ASSAULT_CONTEXT = context('desert-base', 6);
 export const DESERT_RELAY_CONTEXT = context('desert-base', 7);
+export const DESERT_CONTINUOUS_CONTEXT = context('desert-base', 8);
 export const DESERT_ASSAULT_DURATION_TICKS = 60 * 300;
 export const RAINFOREST_CONTEXT = context('rainforest', 1);
 export const ANTARCTICA_CONTEXT = context('antarctica', 1);
@@ -35,7 +36,7 @@ const CONTEXTS = Object.freeze({
   'lunar-echoes': context('lunar-echoes', 2)
 } satisfies { [Id in StageId]: { stageId: Id; rulesVersion: `${Id}-2` } });
 
-export type StageContext = typeof CONTEXTS[StageId] | typeof LEGACY_CONTEXTS[StageId] | typeof DESERT_REPAIR_CONTEXT | typeof DESERT_TURRET_CONTEXT | typeof DESERT_FOUR_TOWERS_CONTEXT | typeof DESERT_ASSAULT_CONTEXT | typeof DESERT_RELAY_CONTEXT;
+export type StageContext = typeof CONTEXTS[StageId] | typeof LEGACY_CONTEXTS[StageId] | typeof DESERT_REPAIR_CONTEXT | typeof DESERT_TURRET_CONTEXT | typeof DESERT_FOUR_TOWERS_CONTEXT | typeof DESERT_ASSAULT_CONTEXT | typeof DESERT_RELAY_CONTEXT | typeof DESERT_CONTINUOUS_CONTEXT;
 export type SimulationErrorCode = 'invalid-data' | 'incompatible-version' | 'unavailable-stage' | 'incompatible-rules' | 'nonterminal-replay' | 'checksum-mismatch' | 'incomplete-replay';
 export class SimulationError extends Error {
   constructor(readonly code: SimulationErrorCode) { super(code === 'incompatible-version' ? 'Replay version mismatch' : code); this.name = 'SimulationError'; }
@@ -124,17 +125,22 @@ function isStageId(stageId: unknown): stageId is StageId {
   return typeof stageId === 'string' && Object.hasOwn(CONTEXTS, stageId);
 }
 
+export function hasDesertRelay(context: StageContext): boolean {
+  return context === DESERT_RELAY_CONTEXT || context === DESERT_CONTINUOUS_CONTEXT;
+}
+
 export function hasDesertAssault(context: StageContext): boolean {
-  return context === DESERT_ASSAULT_CONTEXT || context === DESERT_RELAY_CONTEXT;
+  return context === DESERT_ASSAULT_CONTEXT || hasDesertRelay(context);
 }
 
 export function stageContext(stageId: StageId): StageContext {
-  return stageId === DESERT_RELAY_CONTEXT.stageId ? DESERT_RELAY_CONTEXT : CONTEXTS[stageId];
+  return stageId === DESERT_CONTINUOUS_CONTEXT.stageId ? DESERT_CONTINUOUS_CONTEXT : CONTEXTS[stageId];
 }
 
 export function resolveStage(stageId: unknown, rulesVersion: unknown): StageContext {
   if (!isStageId(stageId)) throw new SimulationError('unavailable-stage');
   if (stageId === DESERT_TURRET_CONTEXT.stageId) {
+    if (rulesVersion === DESERT_CONTINUOUS_CONTEXT.rulesVersion) return DESERT_CONTINUOUS_CONTEXT;
     if (rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion) return DESERT_RELAY_CONTEXT;
     if (rulesVersion === DESERT_ASSAULT_CONTEXT.rulesVersion) return DESERT_ASSAULT_CONTEXT;
     if (rulesVersion === DESERT_FOUR_TOWERS_CONTEXT.rulesVersion) return DESERT_FOUR_TOWERS_CONTEXT;

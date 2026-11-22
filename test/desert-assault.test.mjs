@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createWorld, dispatch, HZ } from '../dist/core.js';
 import { relayObjective } from '../dist/desert-repair.js';
-import { DESERT_ASSAULT_CONTEXT, DESERT_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { DESERT_ASSAULT_CONTEXT, DESERT_CONTINUOUS_CONTEXT, DESERT_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { play } from '../scripts/simulation.mjs';
 
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
 
 test('v6 desert rules unlock four shipments and spawn exactly one short raid per repair', () => {
-  assert.equal(stageContext('desert-base'), DESERT_RELAY_CONTEXT);
+  assert.equal(stageContext('desert-base'), DESERT_CONTINUOUS_CONTEXT);
   const world = createWorld({ ...DESERT_ASSAULT_CONTEXT, seed: 42 });
   const repair = world.desertRepair;
   assert.equal(repair.supplies.length, 0);
@@ -111,4 +111,60 @@ test('v7 starts with reachable supplies and uses the relay corners for repairs a
   }
   assert.equal(relayObjective(repair, player), undefined);
   assert.equal(world.desertAssault.final.kind, 'scheduled');
+});
+
+test('v8 keeps the existing spawn clock and enemies when pressure rises, then clears the assault', () => {
+  const world = createWorld({ ...DESERT_CONTINUOUS_CONTEXT, seed: 42 });
+  const assault = world.desertAssault;
+  const repair = world.desertRepair;
+  repair.towers = repair.towers.map((tower, index) => index === 3 ? tower : { ...tower, kind: 'repaired', nextTurretShotTick: 0 });
+  const lastTower = repair.towers[3];
+  Object.assign(world.player, { x: lastTower.x, y: lastTower.y });
+  Object.assign(repair.inventory, { wood: 2, iron: 1 });
+  world.tick = 165 * HZ;
+  world.spawnCooldown = 20;
+  world.fireCooldown = 9999;
+  assault.deliveries = 4;
+  const before = { id: 1, kind: 'sentry', x: 1100, y: 680, hp: 50, maxHp: 50, radius: 15, attack: 1000, flash: 0 };
+  world.enemies = [before];
+  world.nextId = 2;
+  dispatch(world, idle);
+  assert.equal(assault.final.kind, 'scheduled');
+  assert.equal(world.enemies.length, 4);
+
+  world.tick = assault.final.firstTick - 1;
+  world.spawnCooldown = 2;
+  dispatch(world, idle);
+  assert.equal(assault.final.kind, 'active');
+  assert.equal(world.spawnCooldown, 1);
+  assert(world.enemies.includes(before));
+  assert.equal(world.enemies.length, 4);
+  dispatch(world, idle);
+  assert.equal(world.spawnCooldown, 13);
+  assert.equal(world.enemies.length, 5);
+
+  const { bossTick, reinforcementEnd, firstEnemyId } = assault.final;
+  world.tick = bossTick - 1;
+  world.spawnCooldown = 1;
+  dispatch(world, idle);
+  assert(world.events.includes('boss'));
+  assert.equal(world.enemies.filter(enemy => enemy.kind === 'boss').length, 1);
+  assert.equal(world.spawnCooldown, 9);
+  dispatch(world, idle);
+  assert(!world.events.includes('boss'));
+
+  const boss = world.enemies.find(enemy => enemy.kind === 'boss');
+  boss.hp = 0;
+  world.tick = reinforcementEnd - 1;
+  world.spawnCooldown = 1;
+  const lastEnemyId = world.nextId;
+  dispatch(world, idle);
+  assert.equal(world.bossKilled, true);
+  assert.equal(world.nextId, lastEnemyId);
+  assert.equal(world.phase.kind, 'running');
+  assert(world.enemies.some(enemy => enemy.id >= firstEnemyId));
+  world.enemies = world.enemies.filter(enemy => enemy.id < firstEnemyId);
+  dispatch(world, idle);
+  assert.equal(world.phase.kind, 'won');
+  assert(world.enemies.includes(before));
 });
