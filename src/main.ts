@@ -1,4 +1,4 @@
-import { DESERT_CONTINUOUS_CONTEXT, hasDesertAssault, hasRelayBase, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { ANTARCTIC_FROST_CONTEXT, DESERT_CONTINUOUS_CONTEXT, hasDesertAssault, hasRelayBase, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
@@ -199,6 +199,7 @@ function act(action: Action, record = true) {
   if (record && screen === 'game') recording.actions.push(action);
   const before = world.phase.kind;
   const tickBefore = world.tick;
+  const nextEnemyId = world.nextId;
   const deliveriesBefore = (world.desertAssault ?? world.campaignRelay)?.deliveries;
   const finalBefore = world.desertAssault?.final.kind;
   const bossKilledBefore = world.bossKilled;
@@ -208,6 +209,10 @@ function act(action: Action, record = true) {
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
+    if (world.context === ANTARCTIC_FROST_CONTEXT && world.nextId !== nextEnemyId) {
+      const guard = world.enemies.find(enemy => enemy.kind === 'frost-guard' && enemy.id >= nextEnemyId);
+      if (guard) log('debug', 'session.frost_guard_spawned', { ...world.context, seed: world.seed, tick: world.tick, enemyId: guard.id });
+    }
     if (world.tick !== tickBefore) {
       for (const motion of world.materialMotions ?? []) {
         if (motion.kind !== 'pickup' || motion.tick !== world.tick) continue;
