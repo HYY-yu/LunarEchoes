@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../dist/core.js';
-import { ANTARCTIC_RELAY_CONTEXT, ELEVATOR_RELAY_CONTEXT, WATCHTOWER_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { ANTARCTIC_RELAY_CONTEXT, ELEVATOR_RELAY_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play } from '../scripts/simulation.mjs';
 
@@ -9,7 +9,7 @@ const scenarios = [
   { stageId: 'antarctica', rulesVersion: 'antarctica-3', seed: 101, duration: 210, bossSecond: 162, health: 1050, shots: 7, fan: true },
   { stageId: 'space-elevator', rulesVersion: 'space-elevator-3', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
   { stageId: 'watchtower', rulesVersion: 'watchtower-3', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
-  { stageId: 'lunar-echoes', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
+  { stageId: 'lunar-echoes', rulesVersion: 'lunar-echoes-3', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
 ];
 
 for (const { stageId, rulesVersion = `${stageId}-2`, seed, duration, bossSecond } of scenarios) {
@@ -50,7 +50,8 @@ for (const { stageId, rulesVersion = `${stageId}-2`, seed, duration, bossSecond 
 const relayScenarios = [
   { context: ANTARCTIC_RELAY_CONTEXT, seed: 101, duration: 210, bossSecond: 162, shipments: [1, 42 * core.HZ, 84 * core.HZ, 126 * core.HZ] },
   { context: ELEVATOR_RELAY_CONTEXT, seed: 42, duration: 205, bossSecond: 158, shipments: [1, 29 * core.HZ, 76 * core.HZ, 120 * core.HZ] },
-  { context: WATCHTOWER_RELAY_CONTEXT, seed: 42, duration: 225, bossSecond: 173, shipments: [1, 42 * core.HZ, 89 * core.HZ, 118 * core.HZ] }
+  { context: WATCHTOWER_RELAY_CONTEXT, seed: 42, duration: 225, bossSecond: 173, shipments: [1, 42 * core.HZ, 89 * core.HZ, 118 * core.HZ] },
+  { context: LUNAR_RELAY_CONTEXT, seed: 42, duration: 240, bossSecond: 185, shipments: [1, 44 * core.HZ, 112 * core.HZ, 142 * core.HZ] }
 ];
 
 for (const { context, seed, duration, bossSecond, shipments } of relayScenarios) {
