@@ -1,5 +1,6 @@
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
-import { createDesertRepair, createDesertFourTowers, stepDesertRepair, stepDesertTurret, type DesertRepair } from './desert-repair.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_ASSAULT_CONTEXT, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { createDesertRepair, createDesertFourTowers, desertShipment, stepDesertRepair, stepDesertTurret, type DesertRepair } from './desert-repair.js';
+import { DESERT_SUPPLY_TICKS, desertAssaultOutcome, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -23,6 +24,7 @@ export type World = {
   level: number; xp: number; threshold: number; kills: number; upgrades: Record<Upgrade, number>;
   fireCooldown: number; novaCooldown: number; spawnCooldown: number; bossSpawned: boolean; bossKilled: boolean;
   desertRepair?: DesertRepair;
+  desertAssault?: DesertAssault;
 };
 type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
 export type ActionBuffer = RecordingContext & { actions: Action[] };
@@ -37,7 +39,10 @@ export function createWorld(request: unknown): World {
     player: { x: rules.arenaSize / 2, y: rules.arenaSize / 2, hp: armor.initialCells * armor.hpPerCell, maxHp: armor.initialCells * armor.hpPerCell, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
     enemies: [], shots: [], crystals: [], effects: [], events: [], level: 1, xp: 0, threshold: 5, kills: 0,
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
-  if (context === DESERT_FOUR_TOWERS_CONTEXT) {
+  if (context === DESERT_ASSAULT_CONTEXT) {
+    world.desertRepair = createDesertFourTowers([]);
+    world.desertAssault = { deliveries: 0, final: { kind: 'waiting' } };
+  } else if (context === DESERT_FOUR_TOWERS_CONTEXT) {
     world.desertRepair = createDesertFourTowers();
   } else if (context === DESERT_REPAIR_CONTEXT || context === DESERT_TURRET_CONTEXT) {
     const repair = createDesertRepair();
@@ -61,12 +66,12 @@ export function normalizeInput(input: Input): Input {
 }
 function clamp(world: World, n: number): number { return Math.max(36, Math.min(stageRules(world.context).arenaSize - 36, n)); }
 function distance(x: number, y: number, bx: number, by: number): number { return Math.hypot(x - bx, y - by); }
-function spawn(world: World, kind: EnemyKind, hitPoints?: number): void {
+function spawn(world: World, kind: EnemyKind, hitPoints?: number, origin: Readonly<{ x: number; y: number }> = world.player): void {
   const angle = random(world) * Math.PI * 2;
   const d = kind === 'boss' ? 350 : 400 + random(world) * 100;
   const hp = hitPoints ?? (kind === 'boss' ? 950 : kind === 'sentry' ? 50 : kind === 'drone' ? 22 : 30);
-  let x = clamp(world, world.player.x + Math.cos(angle) * d), y = clamp(world, world.player.y + Math.sin(angle) * d);
-  if (distance(x, y, world.player.x, world.player.y) < 250) { x = clamp(world, world.player.x - Math.cos(angle) * d); y = clamp(world, world.player.y - Math.sin(angle) * d); }
+  let x = clamp(world, origin.x + Math.cos(angle) * d), y = clamp(world, origin.y + Math.sin(angle) * d);
+  if (distance(x, y, origin.x, origin.y) < 250) { x = clamp(world, origin.x - Math.cos(angle) * d); y = clamp(world, origin.y - Math.sin(angle) * d); }
   world.enemies.push({ id: world.nextId++, kind, x, y, hp, maxHp: hp, radius: kind === 'boss' ? 27 : kind === 'sentry' ? 15 : 11, attack: 75 + Math.floor(random(world) * 120), flash: 0 });
 }
 function kill(world: World, enemy: Enemy): void {
@@ -127,10 +132,24 @@ function step(world: World, input: Input): void {
     if (world.tick % 2 === 0) world.effects.push({ x: p.x, y: p.y, kind: 'dash', life: 16, size: 10 });
   } else { p.x = clamp(world, p.x + input.x * speed); p.y = clamp(world, p.y + input.y * speed); }
   if (input.x !== 0 || input.y !== 0) { p.dx = input.x; p.dy = input.y; }
-  if (world.desertRepair) stepDesertRepair(world.desertRepair, p);
+  const { desertRepair, desertAssault } = world;
+  if (desertRepair) {
+    if (desertAssault && world.tick === DESERT_SUPPLY_TICKS[desertAssault.deliveries]) {
+      desertRepair.supplies = [...desertRepair.supplies, ...desertShipment(desertAssault.deliveries)];
+      desertAssault.deliveries++;
+    }
+    const repaired = stepDesertRepair(desertRepair, p);
+    if (desertAssault && 'towers' in desertRepair) {
+      const repairedCount = repaired ? desertRepair.towers.filter(tower => tower.kind === 'repaired').length : 0;
+      if (stepDesertAssault(desertAssault, world.tick, repairedCount, world.nextId, (kind, origin) => spawn(world, kind, undefined, origin))) {
+        world.bossSpawned = true;
+        world.events.push('boss');
+      }
+    }
+  }
   if (world.tick % ARMOR_RULES.repairEveryTicks === 0) p.hp = Math.min(p.maxHp, p.hp + ARMOR_RULES.hpPerCell);
   world.spawnCooldown--;
-  if (world.spawnCooldown <= 0 && world.enemies.length < 180) {
+  if (world.spawnCooldown <= 0 && world.enemies.length < 180 && desertAssault?.final.kind !== 'active') {
     const t = world.tick / HZ;
     if (rules.kind === 'rainforest') {
       const chance = world.tick >= rules.lateWaveTick ? rules.lateSentryChance : rules.sentryChance;
@@ -154,7 +173,7 @@ function step(world: World, input: Input): void {
     }
   }
   const campaignBoss = rules.kind === 'campaign' ? rules.boss : undefined;
-  if (world.tick >= rules.bossSpawnTick && !world.bossSpawned) {
+  if (!desertAssault && world.tick >= rules.bossSpawnTick && !world.bossSpawned) {
     spawn(world, 'boss', campaignBoss?.hp);
     world.bossSpawned = true;
     world.events.push('boss');
@@ -243,7 +262,13 @@ function step(world: World, input: Input): void {
     world.xp -= world.threshold; world.level++; world.threshold = Math.floor(world.threshold * 1.24) + 2;
     world.phase = { kind: 'upgrading', offers: offers(world) };
   }
-  if (world.phase.kind === 'running' && world.tick >= rules.durationTicks) {
+  if (desertAssault && world.phase.kind !== 'lost') {
+    const outcome = desertAssaultOutcome(desertAssault, world.tick, world.enemies);
+    if (outcome) {
+      world.phase = { kind: outcome };
+      world.events.push(outcome);
+    }
+  } else if (!desertAssault && world.phase.kind === 'running' && world.tick >= rules.durationTicks) {
     world.phase = { kind: world.bossKilled ? 'won' : 'lost' };
     world.events.push(world.bossKilled ? 'won' : 'lost');
   }

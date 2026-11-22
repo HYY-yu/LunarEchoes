@@ -1,4 +1,4 @@
-import { stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_ASSAULT_CONTEXT, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
@@ -9,9 +9,11 @@ import { applyStageResult, isStageUnlocked } from './progress.js';
 import { openProgressStorage, type ProgressStorageResult } from './progress-storage.js';
 import { DESERT_SCENE_SIZE, drawDesertScene } from './desert-scene.js';
 import { loadLaterOpening } from './campaign-scenes.js';
-import { REPAIR_COST, REPAIR_RADIUS, SUPPLY_CAPACITY } from './desert-repair.js';
+import { DESERT_SUPPLY_DIRECTIONS, REPAIR_COST, REPAIR_RADIUS, SUPPLY_CAPACITY } from './desert-repair.js';
+import { DESERT_LATE_REPAIR_TICK, FINAL_BATCH_COUNT } from './desert-assault.js';
+import { assaultLabels, assaultObjective, assaultRadio, supplyDirection, type AssaultRadioBeat } from './desert-guidance.js';
 type Screen = 'title' | 'stages' | 'opening' | 'game' | 'replay' | 'replay-end';
-type RadioBeat = 'firstContact' | 'telemetry';
+type RadioBeat = 'firstContact' | 'telemetry' | AssaultRadioBeat;
 type RadioState = Readonly<{ kind: 'inactive' | 'waiting' | 'disabled' }> | Readonly<{ kind: 'active' | 'dismissed'; beat: RadioBeat }>;
 const DESERT_CONTEXT = stageContext('desert-base');
 type DesertContent = Readonly<{
@@ -155,17 +157,21 @@ function notify(message: string, kind: 'general' | 'boss' = 'general') {
 }
 function fail(error: unknown) { log('error', 'runtime.failure', { message: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : '', seed: world.seed, tick: world.tick }); notify(text().error); }
 async function enableAudio(confirm = false) { try { return await synth.activate(confirm ? 'ui-confirm' : undefined); } catch (error) { log('error', 'audio.activation_failed', { error: String(error) }); notify(language === 'zh' ? '音频启动失败，游戏可继续。' : 'Audio unavailable. You can keep playing.'); return false; } }
+function radioEntry(beat: RadioBeat) {
+  return beat === 'firstContact' || beat === 'telemetry' ? desertContent?.[beat] : assaultRadio(beat);
+}
 function setRadio(next: RadioState, reason: string) {
   if (radioState.kind === next.kind && (!('beat' in radioState) || ('beat' in next && radioState.beat === next.beat))) return;
-  if (radioState.kind === 'active') log('info', 'story.radio.ended', { id: desertContent?.[radioState.beat].id, seed: world.seed, tick: world.tick, reason });
+  if (radioState.kind === 'active') log('info', 'story.radio.ended', { id: radioEntry(radioState.beat)?.id, seed: world.seed, tick: world.tick, reason });
   radioState = next;
-  if (next.kind === 'active') log('info', 'story.radio.started', { id: desertContent?.[next.beat].id, seed: world.seed, tick: world.tick });
+  if (next.kind === 'active') log('info', 'story.radio.started', { id: radioEntry(next.beat)?.id, seed: world.seed, tick: world.tick });
 }
 function updateRadio() {
   const visible = radioState.kind === 'active' && screen === 'game' && world.phase.kind === 'running' && !document.hidden;
   if (!visible && document.activeElement === radioClose) canvasNode.focus({ preventScroll: true });
   if (radio.hidden === visible) radio.hidden = !visible;
-  const t = text(), entry = radioState.kind === 'active' ? desertContent?.[radioState.beat] : null, story = entry ? entry[language] : '';
+  radio.classList.toggle('assault-radio', !!world.desertAssault);
+  const t = text(), entry = radioState.kind === 'active' ? radioEntry(radioState.beat) : null, story = entry ? entry[language] : '';
   if (radioStory.textContent !== story) radioStory.textContent = story;
   if (entry && radioStory.dataset.storyId !== entry.id) radioStory.dataset.storyId = entry.id;
   if (radioLabel.textContent !== t.radio) radioLabel.textContent = t.radio;
@@ -183,6 +189,9 @@ radioClose.onclick = () => { try { if (radioState.kind === 'active') { setRadio(
 function act(action: Action, record = true) {
   if (record && screen === 'game') recording.actions.push(action);
   const before = world.phase.kind;
+  const tickBefore = world.tick;
+  const deliveriesBefore = world.desertAssault?.deliveries;
+  const finalBefore = world.desertAssault?.final.kind;
   const repair = world.desertRepair;
   const towersBefore = repair && 'towers' in repair ? repair.towers : undefined;
   const towerBefore = repair && 'tower' in repair ? repair.tower : undefined;
@@ -199,7 +208,18 @@ function act(action: Action, record = true) {
       log('info', 'session.turret_repaired', { ...world.context, seed: world.seed, tick: world.tick, ...repair.inventory });
     }
     if (world.phase.kind === 'won' || world.phase.kind === 'lost') setRadio({ kind: 'inactive' }, 'terminal');
-    else if (radioState.kind === 'waiting' && world.events.includes('kill')) setRadio({ kind: 'active', beat: 'firstContact' }, 'first-kill');
+    else if (world.desertAssault) {
+      const { deliveries, final } = world.desertAssault;
+      const repairedTower = repair && 'towers' in repair && towersBefore !== repair.towers;
+      const beat = final.kind === 'active' && finalBefore !== 'active' ? 'assault'
+        : repairedTower && final.kind === 'scheduled' ? 'repaired'
+        : final.kind === 'waiting' && world.tick !== tickBefore && world.tick === DESERT_LATE_REPAIR_TICK ? 'lateRepair'
+        : repairedTower ? 'raid'
+        : deliveries !== deliveriesBefore ? DESERT_SUPPLY_DIRECTIONS[deliveries - 1] : undefined;
+      if (deliveries !== deliveriesBefore) log('info', 'session.supplies_delivered', { ...world.context, seed: world.seed, tick: world.tick, direction: DESERT_SUPPLY_DIRECTIONS[deliveries - 1] });
+      if (final.kind === 'active' && finalBefore !== 'active') log('info', 'session.final_assault_started', { ...world.context, seed: world.seed, tick: world.tick });
+      if (beat && radioState.kind !== 'disabled') setRadio({ kind: 'active', beat }, beat);
+    } else if (radioState.kind === 'waiting' && world.events.includes('kill')) setRadio({ kind: 'active', beat: 'firstContact' }, 'first-kill');
     else if (radioState.kind === 'dismissed' && radioState.beat === 'firstContact' && world.phase.kind === 'running' && !document.hidden && world.tick >= stageRules(world.context).durationTicks / 2) setRadio({ kind: 'active', beat: 'telemetry' }, 'midpoint');
   }
   updateRadio();
@@ -266,7 +286,7 @@ function showOpening(context: StageContext, source: OpeningSource = 'title') {
   openingRequest = null;
   if (context.stageId === 'desert-base') {
     if (!desertContent) throw new Error('Desert content unavailable');
-    presentOpening(context, source, { opening: desertContent.opening, objective: desertContent.objective, size: DESERT_SCENE_SIZE, draw: canvas => drawDesertScene(canvas, 'opening') });
+    presentOpening(context, source, { opening: desertContent.opening, objective: context === DESERT_ASSAULT_CONTEXT ? assaultObjective : desertContent.objective, size: DESERT_SCENE_SIZE, draw: canvas => drawDesertScene(canvas, 'opening') });
     return;
   }
   const request = Symbol(), previousScreen = screen;
@@ -295,7 +315,7 @@ function begin(context: StageContext, mission = context.stageId === world.contex
   if (!desertContent) throw new Error('Desert content unavailable');
   const seedArray = new Uint32Array(1); crypto.getRandomValues(seedArray);
   const nextWorld = createWorld({ ...context, seed: seedArray[0] });
-  synth.reset(); world = nextWorld; opening = null; fieldMission = mission; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio({ kind: context.stageId === DESERT_CONTEXT.stageId ? 'waiting' : 'inactive' }, 'begin'); clearCombatInput(); clearNotice();
+  synth.reset(); world = nextWorld; opening = null; fieldMission = mission; recording = startRecording(world); playingRecording = null; screen = 'game'; setRadio(nextWorld.desertAssault ? { kind: 'active', beat: 'briefing' } : { kind: context.stageId === DESERT_CONTEXT.stageId ? 'waiting' : 'inactive' }, 'begin'); clearCombatInput(); clearNotice();
   log('info', 'session.started', { seed: world.seed, version: VERSION, ...world.context }); updateUi(true); void enableAudio();
   canvasNode.focus();
 }
@@ -401,7 +421,23 @@ function updateRepairHud() {
   const nearby = towers.some(tower => tower.kind === 'damaged' && Math.hypot(world.player.x - tower.x, world.player.y - tower.y) <= REPAIR_RADIUS);
   const detail = repaired === towers.length ? (fourTowers ? t.repairFourDone : t.repairDone)
     : nearby && missing.length ? `${t.repairMissing} · ${missing.join(' · ')}` : (fourTowers ? t.repairFourGuide : t.repairGuide);
-  const status = fourTowers ? `${t.repairProgress} ${repaired}/${towers.length} · ${detail}` : detail;
+  let status = fourTowers ? `${t.repairProgress} ${repaired}/${towers.length} · ${detail}` : detail;
+  const assault = world.desertAssault;
+  if (assault) {
+    const labels = assaultLabels[language];
+    const progress = `${t.repairProgress} ${repaired}/${towers.length}`;
+    if (assault.final.kind === 'active') {
+      const { batches } = assault.final;
+      status = `${progress} · ${labels.waves} ${batches}/${FINAL_BATCH_COUNT}`;
+      if (batches === FINAL_BATCH_COUNT) status += ` · ${labels.clear}`;
+    } else if (assault.final.kind === 'scheduled') status = `${progress} · ${labels.preparing}`;
+    else if (assault.deliveries === 0) status = `${progress} · ${labels.awaiting}`;
+    else {
+      const direction = supplyDirection(DESERT_SUPPLY_DIRECTIONS[assault.deliveries - 1], language);
+      status = `${progress} · ${labels.supply} ${direction}`;
+      if (nearby && missing.length) status += ` · ${t.repairMissing} ${missing.join(' · ')}`;
+    }
+  }
   const inventoryNode = element('repair-inventory'), statusNode = element('repair-status');
   if (inventoryNode.textContent !== supplies) inventoryNode.textContent = supplies;
   if (statusNode.textContent !== status) statusNode.textContent = status;
@@ -433,6 +469,7 @@ function updateUi(force = false) {
   const menuLabel = activeStage ? t.stageNames[activeStage] : t.campaignStages;
   const battleLabel = fieldBattle ? t.stageNames[stageId] : t.prototype;
   let battleObjective = stageId === 'rainforest' ? t.rainforestFooterObjective : fieldBattle ? fieldMission?.objective[language] ?? t.missionObjective : t.objective;
+  if (world.desertAssault) battleObjective = assaultObjective[language];
   if (screen === 'replay') battleObjective = t.replaying;
   if (fieldBattle && screen === 'replay-end') battleObjective = t.replayDone;
   element('footer-left').textContent = menu ? menuLabel : `${battleLabel} · ${t.seed} ${world.seed} · ${battleObjective}`;
@@ -507,7 +544,7 @@ function updateUi(force = false) {
     element('defeat-art').setAttribute('aria-label', defeatStage === 'rainforest' ? t.rainforestDefeatArt : defeatStage && defeatStage !== 'desert-base' ? t.stageNames[defeatStage] : t.defeatArt);
     element('defeat-report').textContent = t.report;
     element('defeat-heading').textContent = defeatStage && defeatStage !== 'desert-base' ? `${t.stageNames[defeatStage]} · ${t.lost}` : t.lost;
-    element('defeat-story').textContent = defeat.story?.[language] ?? ''; element('defeat-description').textContent = t.lostBody;
+    element('defeat-story').textContent = defeat.story?.[language] ?? ''; element('defeat-description').textContent = world.desertAssault && world.player.hp > 0 ? assaultLabels[language].timeout : t.lostBody;
     element('defeat-time').textContent = t.time; element('defeat-kills').textContent = t.kills; element('defeat-level').textContent = t.level;
     element('defeat-retry').textContent = t.restart; element('defeat-missions').textContent = t.backToStages;
     return;
@@ -558,7 +595,7 @@ function updateUi(force = false) {
     element('victory-retry').textContent = t.restart; element('victory-missions').textContent = t.backToStages;
     return;
   }
-  const pauseObjective = fieldBattle ? fieldMission?.objective : desertContent?.objective;
+  const pauseObjective = fieldBattle ? fieldMission?.objective : world.desertAssault ? assaultObjective : desertContent?.objective;
   if (screen === 'game' && world.phase.kind === 'paused' && pauseObjective) {
     if (!document.getElementById('pause-panel')) {
       overlay.replaceChildren();
@@ -571,7 +608,7 @@ function updateUi(force = false) {
       section.append(heading, objective, actions);
       if (radioState.kind !== 'inactive') {
         const disable = document.createElement('button'); disable.id = 'radio-disable'; disable.type = 'button'; disable.className = 'secondary';
-        disable.onclick = () => { try { if (radioState.kind !== 'disabled') { setRadio({ kind: 'disabled' }, 'disabled'); log('info', 'story.radio.disabled', { id: desertContent?.firstContact.id, seed: world.seed, tick: world.tick }); updateRadio(); } } catch (error) { fail(error); } };
+        disable.onclick = () => { try { if (radioState.kind !== 'disabled') { setRadio({ kind: 'disabled' }, 'disabled'); log('info', 'story.radio.disabled', { id: radioEntry(world.desertAssault ? 'briefing' : 'firstContact')?.id, seed: world.seed, tick: world.tick }); updateRadio(); } } catch (error) { fail(error); } };
         const reset = document.createElement('p'); reset.id = 'radio-reset';
         actions.append(disable); section.append(reset);
       }
@@ -584,7 +621,7 @@ function updateUi(force = false) {
   overlay.replaceChildren();
   if (screen === 'title') {
     const intro = document.createElement('section'); intro.className = 'intro';
-    intro.innerHTML = `<h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${t.brief}</p>`;
+    intro.innerHTML = `<h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${DESERT_CONTEXT === DESERT_ASSAULT_CONTEXT ? assaultObjective[language] : t.brief}</p>`;
     const progress = document.createElement('p'); progress.id = 'title-progress'; progress.setAttribute('role', 'status'); intro.append(progress);
     const start = button(t.start, 'primary', () => showOpening(DESERT_CONTEXT)); start.id = 'mission-start';
     const stages = button(t.campaignStages, 'secondary', showStages); stages.id = 'mission-select';

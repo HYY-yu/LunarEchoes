@@ -14,7 +14,7 @@ type SingleTowerRepair = InventoryState & {
   tower: Tower;
   nextTurretShotTick?: number;
 };
-type TowerDirection = 'north' | 'east' | 'south' | 'west';
+export type TowerDirection = 'north' | 'east' | 'south' | 'west';
 type DirectionalTower = Position & Readonly<{ direction: TowerDirection }> & (
   Readonly<{ kind: 'damaged' }> | { readonly kind: 'repaired'; nextTurretShotTick: number }
 );
@@ -58,39 +58,44 @@ export function createDesertRepair(): SingleTowerRepair {
   };
 }
 
-export function createDesertFourTowers(): FourTowerRepair {
+export const DESERT_SUPPLY_DIRECTIONS = FOUR_TOWER_LAYOUT.map(tower => tower.direction);
+
+export function desertShipment(index: number): Supply[] {
+  const { wood, iron } = FOUR_TOWER_LAYOUT[index];
+  return [...wood.map<Supply>(point => ({ ...point, material: 'wood' })), { ...iron, material: 'iron' }];
+}
+
+export function createDesertFourTowers(supplies = FOUR_TOWER_LAYOUT.flatMap((_, index) => desertShipment(index))): FourTowerRepair {
   return {
     inventory: { wood: 0, iron: 0 },
-    supplies: FOUR_TOWER_LAYOUT.flatMap<Supply>(({ wood, iron }) => [
-      ...wood.map<Supply>(point => ({ ...point, material: 'wood' })),
-      { ...iron, material: 'iron' }
-    ]),
+    supplies,
     towers: FOUR_TOWER_LAYOUT.map(({ direction, x, y }) => ({ direction, x, y, kind: 'damaged' }))
   };
 }
 
-export function stepDesertRepair(repair: DesertRepair, player: Position): void {
+export function stepDesertRepair(repair: DesertRepair, player: Position): boolean {
   const { inventory, supplies } = repair;
   repair.supplies = supplies.filter(supply => {
     if (inventory[supply.material] >= SUPPLY_CAPACITY || distance(player, supply) > PICKUP_RADIUS) return true;
     inventory[supply.material]++;
     return false;
   });
-  if (inventory.wood < REPAIR_COST.wood || inventory.iron < REPAIR_COST.iron) return;
+  if (inventory.wood < REPAIR_COST.wood || inventory.iron < REPAIR_COST.iron) return false;
 
   if ('towers' in repair) {
     const target = repair.towers.find(tower => tower.kind === 'damaged' && distance(player, tower) <= REPAIR_RADIUS);
-    if (!target) return;
+    if (!target) return false;
     repair.towers = repair.towers.map(tower => tower === target
       ? { ...tower, kind: 'repaired', nextTurretShotTick: 0 }
       : tower);
   } else {
     const { tower } = repair;
-    if (tower.kind !== 'damaged' || distance(player, tower) > REPAIR_RADIUS) return;
+    if (tower.kind !== 'damaged' || distance(player, tower) > REPAIR_RADIUS) return false;
     repair.tower = { ...tower, kind: 'repaired' };
   }
   inventory.wood -= REPAIR_COST.wood;
   inventory.iron -= REPAIR_COST.iron;
+  return true;
 }
 
 function distance(a: Position, b: Position): number {
