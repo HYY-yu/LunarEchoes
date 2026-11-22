@@ -1,6 +1,7 @@
 export function planDesertAssaultInput(world, { skipFourth = false, fourthRepairAfter = 0, stationaryFinal = false } = {}) {
   const position = world.player;
-  const { deliveries, final } = world.desertAssault;
+  const deliveries = (world.desertAssault ?? world.rainforestRelay).deliveries;
+  const final = world.desertAssault?.final;
   const { towers, inventory, supplies } = world.desertRepair;
   const repaired = towers.filter(tower => tower.kind === 'repaired').length;
   const fourth = repaired === 3;
@@ -61,6 +62,6 @@ export function planDesertAssaultInput(world, { skipFourth = false, fourthRepair
     x = position.x - lastTower.x;
     y = position.y - lastTower.y;
   }
-  if (stationaryFinal && final.kind === 'active') return { x: 0, y: 0, dash: false };
+  if (stationaryFinal && final?.kind === 'active') return { x: 0, y: 0, dash: false };
   return { x, y, dash: !permitRepair && nearestDistance < 45 && world.tick % 30 === 0 };
 }

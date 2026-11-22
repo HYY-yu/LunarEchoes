@@ -1,6 +1,6 @@
 import type { Enemy, Shot, World } from './core.js';
-import { hasDesertRelay } from './stage-rules.js';
-import { DESERT_RELAY_CENTER, DESERT_RELAY_CORNERS } from './desert-relay-layout.js';
+import { hasRelayBase } from './stage-rules.js';
+import { RELAY_CENTER, RELAY_CORNERS } from './relay-layout.js';
 
 import { materialMotionDuration, type Material } from './material-motion.js';
 
@@ -30,6 +30,7 @@ export type DesertRepair = SingleTowerRepair | FourTowerRepair;
 export const REPAIR_COST: Readonly<Materials> = Object.freeze({ wood: 2, iron: 1 });
 export const SUPPLY_CAPACITY = 3;
 export const REPAIR_RADIUS = 28;
+export const RELAY_REPAIR_RAID = ['crawler', 'crawler', 'drone'] as const;
 const PICKUP_RADIUS = 20;
 const TURRET_RANGE = 240;
 const TURRET_SECTOR_SLOPE = Math.sqrt(3);
@@ -58,9 +59,9 @@ const FOUR_TOWER_LAYOUT = [
   { direction: 'west', x: 670, y: 750, wood: [{ x: 620, y: 775 }, { x: 578, y: 775 }], iron: { x: 536, y: 775 } }
 ] satisfies readonly TowerSite[];
 
-const RELAY_TOWER_LAYOUT = DESERT_RELAY_CORNERS.map<TowerSite>((corner, index) => {
-  const x = DESERT_RELAY_CENTER.x + corner.x;
-  const y = DESERT_RELAY_CENTER.y + corner.y;
+const RELAY_TOWER_LAYOUT = RELAY_CORNERS.map<TowerSite>((corner, index) => {
+  const x = RELAY_CENTER.x + corner.x;
+  const y = RELAY_CENTER.y + corner.y;
   const legacy = FOUR_TOWER_LAYOUT[index];
   const shift = (point: Position) => ({ x: point.x + x - legacy.x, y: point.y + y - legacy.y });
   return { direction: corner.direction, x, y, wood: [shift(legacy.wood[0]), shift(legacy.wood[1])], iron: shift(legacy.iron) };
@@ -88,11 +89,11 @@ export function desertShipment(index: number, relayPlayer?: Position): Supply[] 
     Math.abs(supply.x - relayPlayer.x) > halfWidth || Math.abs(supply.y - relayPlayer.y) > halfHeight))) return supplies;
 
   if (direction === 'north' || direction === 'south') {
-    const sign = relayPlayer.x < DESERT_RELAY_CENTER.x ? 1 : -1;
+    const sign = relayPlayer.x < RELAY_CENTER.x ? 1 : -1;
     const x = Math.round(relayPlayer.x + sign * (DESERT_WIDE_DROP_VIEW.halfWidth + DESERT_DROP_CLEARANCE));
     return supplies.map(supply => ({ ...supply, x }));
   }
-  const sign = relayPlayer.y < DESERT_RELAY_CENTER.y ? 1 : -1;
+  const sign = relayPlayer.y < RELAY_CENTER.y ? 1 : -1;
   const y = Math.round(relayPlayer.y + sign * (DESERT_TALL_DROP_VIEW.halfHeight + DESERT_DROP_CLEARANCE));
   return supplies.map(supply => ({ ...supply, y }));
 }
@@ -191,9 +192,9 @@ function fireTurret(world: TurretWorld, tower: Position, direction: TowerDirecti
   const boundaryRoundoff = 2 * Number.EPSILON * Math.max(tower.x, tower.y);
   let nearestDistanceSquared = (TURRET_RANGE + boundaryRoundoff) ** 2;
   let target: Enemy | undefined;
-  const relay = hasDesertRelay(world.context);
-  const outwardX = Math.sign(tower.x - DESERT_RELAY_CENTER.x);
-  const outwardY = Math.sign(tower.y - DESERT_RELAY_CENTER.y);
+  const relay = hasRelayBase(world.context);
+  const outwardX = Math.sign(tower.x - RELAY_CENTER.x);
+  const outwardY = Math.sign(tower.y - RELAY_CENTER.y);
   for (const enemy of world.enemies) {
     if (enemy.hp <= 0) continue;
     const dx = enemy.x - tower.x;

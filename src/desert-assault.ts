@@ -1,5 +1,6 @@
 import type { Enemy, EnemyKind } from './core.js';
 import { DESERT_ASSAULT_DURATION_TICKS } from './stage-rules.js';
+import { RELAY_REPAIR_RAID } from './desert-repair.js';
 
 const TICKS_PER_SECOND = 60;
 const TOWER_COUNT = 4;
@@ -39,9 +40,7 @@ export function stepDesertAssault(
   assault: DesertAssault, tick: number, repairedCount: number, nextEnemyId: number, spawn: SpawnEnemy
 ): boolean {
   if (repairedCount !== 0) {
-    spawn('crawler');
-    spawn('crawler');
-    spawn('drone');
+    for (const kind of RELAY_REPAIR_RAID) spawn(kind);
     if (repairedCount === TOWER_COUNT) assault.final = { kind: 'scheduled', firstTick: tick + FINAL_DELAY_TICKS };
   }
   if ('mode' in assault) {
