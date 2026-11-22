@@ -11,7 +11,14 @@ export type Upgrade = 'pulse' | 'orbit' | 'nova' | 'boots' | 'hull' | 'magnet';
 export type Phase = { kind: 'running' } | { kind: 'upgrading'; offers: Upgrade[] } | { kind: 'paused'; previous: 'running' } | { kind: 'won' } | { kind: 'lost' };
 export type Input = { x: number; y: number; dash: boolean };
 export type Action = { kind: 'tick'; input: Input } | { kind: 'choose'; upgrade: Upgrade } | { kind: 'pause' } | { kind: 'resume' };
-export type EnemyKind = 'crawler' | 'drone' | 'sentry' | 'boss';
+export type EnemyKind = 'crawler' | 'drone' | 'sentry' | 'boss' | 'frost-guard';
+const ENEMY_STATS = {
+  crawler: { hp: 30, radius: 11, speed: .8, xp: 1 },
+  drone: { hp: 22, radius: 11, speed: 1.45, xp: 1 },
+  sentry: { hp: 50, radius: 15, speed: .35, xp: 3 },
+  boss: { hp: 950, radius: 27, speed: .65, xp: 20 },
+  'frost-guard': { hp: 78, radius: 13, speed: .56, xp: 2 }
+} satisfies Record<EnemyKind, { hp: number; radius: number; speed: number; xp: number }>;
 export type Enemy = { id: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number; radius: number; attack: number; flash: number };
 export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean };
 export type Crystal = { x: number; y: number; value: number };
@@ -78,14 +85,15 @@ function distance(x: number, y: number, bx: number, by: number): number { return
 function spawn(world: World, kind: EnemyKind, hitPoints?: number, origin: Readonly<{ x: number; y: number }> = world.player): void {
   const angle = random(world) * Math.PI * 2;
   const d = kind === 'boss' ? 350 : 400 + random(world) * 100;
-  const hp = hitPoints ?? (kind === 'boss' ? 950 : kind === 'sentry' ? 50 : kind === 'drone' ? 22 : 30);
+  const stats = ENEMY_STATS[kind];
+  const hp = hitPoints ?? stats.hp;
   let x = clamp(world, origin.x + Math.cos(angle) * d), y = clamp(world, origin.y + Math.sin(angle) * d);
   if (distance(x, y, origin.x, origin.y) < 250) { x = clamp(world, origin.x - Math.cos(angle) * d); y = clamp(world, origin.y - Math.sin(angle) * d); }
-  world.enemies.push({ id: world.nextId++, kind, x, y, hp, maxHp: hp, radius: kind === 'boss' ? 27 : kind === 'sentry' ? 15 : 11, attack: 75 + Math.floor(random(world) * 120), flash: 0 });
+  world.enemies.push({ id: world.nextId++, kind, x, y, hp, maxHp: hp, radius: stats.radius, attack: 75 + Math.floor(random(world) * 120), flash: 0 });
 }
 function kill(world: World, enemy: Enemy): void {
   world.kills++;
-  world.crystals.push({ x: enemy.x, y: enemy.y, value: enemy.kind === 'boss' ? 20 : enemy.kind === 'sentry' ? 3 : 1 });
+  world.crystals.push({ x: enemy.x, y: enemy.y, value: ENEMY_STATS[enemy.kind].xp });
   world.effects.push({ x: enemy.x, y: enemy.y, kind: 'kill', life: 24, size: enemy.radius });
   world.events.push('kill');
   if (enemy.kind === 'boss') world.bossKilled = true;
@@ -177,8 +185,12 @@ function step(world: World, input: Input): void {
         currentWave = wave;
       }
       const roll = random(world);
+      const crawlerThreshold = currentWave.sentryChance + currentWave.droneChance;
+      const frostGuard = rules.frostGuard;
+      const guardShare = frostGuard && world.tick >= frostGuard.startTick ? frostGuard.crawlerShare : 0;
+      const guardThreshold = crawlerThreshold + (1 - crawlerThreshold) * guardShare;
       const kind = roll < currentWave.sentryChance ? 'sentry'
-        : roll < currentWave.sentryChance + currentWave.droneChance ? 'drone' : 'crawler';
+        : roll < crawlerThreshold ? 'drone' : roll < guardThreshold ? 'frost-guard' : 'crawler';
       spawn(world, kind, kind === 'crawler' ? rules.crawlerHp : undefined);
       world.spawnCooldown = currentWave.intervalTicks;
     } else {
@@ -222,7 +234,7 @@ function step(world: World, input: Input): void {
     const angle = Math.atan2(p.y - enemy.y, p.x - enemy.x);
     const d = distance(p.x, p.y, enemy.x, enemy.y);
     const boss = enemy.kind === 'boss' ? campaignBoss : undefined;
-    const speed = enemy.kind === 'boss' ? boss?.speed ?? .65 : enemy.kind === 'drone' ? 1.45 : enemy.kind === 'sentry' ? .35 : .8;
+    const speed = boss?.speed ?? ENEMY_STATS[enemy.kind].speed;
     if (enemy.kind !== 'sentry' || d > 230) { enemy.x += Math.cos(angle) * speed; enemy.y += Math.sin(angle) * speed; }
     enemy.attack--;
     if ((enemy.kind === 'sentry' || enemy.kind === 'boss') && enemy.attack <= 0) {

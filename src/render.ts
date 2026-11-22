@@ -1,5 +1,5 @@
 import {
-  ANTARCTIC_RELAY_CONTEXT, ELEVATOR_RELAY_CONTEXT, hasDesertRelay, hasRelayBase, LUNAR_RELAY_CONTEXT,
+  ELEVATOR_RELAY_CONTEXT, hasDesertRelay, hasRelayBase, LUNAR_RELAY_CONTEXT,
   RAINFOREST_RELAY_CONTEXT, stageRules, WATCHTOWER_RELAY_CONTEXT
 } from './stage-rules.js';
 import { type World } from './core.js';
@@ -15,6 +15,7 @@ import { drawRainforestTerrain } from './rainforest-map.js';
 import { createRainforestArchiveArt } from './rainforest-archive-art.js';
 import { createDesertSupplyArt } from './desert-supply-art.js';
 import { createDesertTowerArt } from './desert-tower-art.js';
+import { createFrostGuardArt } from './frost-guard-art.js';
 import { createDesertRelayArt } from './desert-relay-art.js';
 import { RELAY_CENTER } from './relay-layout.js';
 import { relayObjective, type TowerDirection } from './desert-repair.js';
@@ -36,6 +37,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
+  let drawFrostGuard: ReturnType<typeof createFrostGuardArt> | undefined;
   let drawDesertRelay: ReturnType<typeof createDesertRelayArt> | undefined;
   let drawAntarcticBearing: ReturnType<typeof createAntarcticBearingArt> | undefined;
   let drawOrbitalLift: ReturnType<typeof createOrbitalLiftArt> | undefined;
@@ -82,7 +84,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       }
     } else if (world.context.stageId === 'desert-base') drawDesertMap(ctx, arena, view);
     else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick, time);
-    if (world.context.rulesVersion === ANTARCTIC_RELAY_CONTEXT.rulesVersion) {
+    if (world.context.stageId === 'antarctica' && hasRelayBase(world.context)) {
       drawAntarcticBearing ??= createAntarcticBearingArt();
       drawAntarcticBearing(ctx, world.tick);
     }
@@ -121,7 +123,13 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         ctx.strokeStyle = '#ffd499'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.arc(enemy.x, enemy.y, enemy.radius + 10 + (36 - enemy.attack) / 3, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
       }
       ctx.globalAlpha = enemy.flash > 0 ? .45 : 1;
-      atlas.draw(ctx, enemy.kind, enemy.x, enemy.y + (enemy.kind === 'drone' ? Math.sin(time * .006 + enemy.id) * 3 - 5 : 0), scale, world.tick + enemy.id * 7);
+      const tick = world.tick + enemy.id * 7;
+      if (enemy.kind === 'frost-guard') {
+        drawFrostGuard ??= createFrostGuardArt();
+        drawFrostGuard(ctx, enemy.x, enemy.y, tick, scale);
+      } else {
+        atlas.draw(ctx, enemy.kind, enemy.x, enemy.y + (enemy.kind === 'drone' ? Math.sin(time * .006 + enemy.id) * 3 - 5 : 0), scale, tick);
+      }
       ctx.globalAlpha = 1;
       if (enemy.kind === 'boss') { ctx.fillStyle = '#172c3d'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60, 3); ctx.fillStyle = '#f5ba78'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60 * Math.max(0, enemy.hp / enemy.maxHp), 3); }
     }
