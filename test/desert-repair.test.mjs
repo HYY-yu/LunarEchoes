@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createWorld, dispatch, finishRecording, replay } from '../dist/core.js';
-import { lastDesertTurretShotTick, stepDesertTurret } from '../dist/desert-repair.js';
+import { stepDesertTurret } from '../dist/desert-repair.js';
 import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT } from '../dist/stage-rules.js';
 import { play } from '../scripts/simulation.mjs';
 
@@ -77,7 +77,7 @@ test('Desert repair records limited pickups and charges only for the first repai
   const recording = finishRecording(world, actions);
   assert.deepEqual(replay(recording), world);
   assert.equal(Object.hasOwn(repair, 'nextTurretShotTick'), false);
-  assert.equal(lastDesertTurretShotTick(repair), undefined);
+  assert.equal(world.desertTurretShots, undefined);
   assert.equal(createWorld({ ...DESERT_REPAIR_CONTEXT, seed: 42 }).desertRepair.tower.kind, 'damaged');
 });
 
@@ -95,7 +95,7 @@ test('a damaged or repaired but idle turret leaves the first shot ready', () => 
   dispatch(world, idle);
   assert.equal(world.desertRepair.tower.kind, 'repaired');
   assert.equal(world.desertRepair.nextTurretShotTick, 0);
-  assert.equal(lastDesertTurretShotTick(world.desertRepair), undefined);
+  assert.equal(world.desertTurretShots?.north?.tick, undefined);
   assert.deepEqual(world.shots, []);
   assert.deepEqual(world.events, []);
 
@@ -131,6 +131,7 @@ test('turret picks the nearest living enemy and breaks distance ties by lower id
   assert.equal(world.shots.length, 1);
   const shot = world.shots[0];
   assert.deepEqual([shot.vx, shot.vy], [-4.8, -6.4]);
+  assert.deepEqual(world.desertTurretShots.north, { tick: world.tick, vx: shot.vx, vy: shot.vy });
 });
 
 test('same-tick repair fires after enemy movement and reuses damage and loot at the fixed cadence', () => {
@@ -145,16 +146,16 @@ test('same-tick repair fires after enemy movement and reuses damage and loot at 
   assert.deepEqual(world.events, ['shot']);
   assert.deepEqual(world.shots, [{ x, y: y - 8, vx: 0, vy: -8, life: 29, damage: 18, hostile: false }]);
   const firstShotTick = world.tick;
-  assert.equal(lastDesertTurretShotTick(world.desertRepair), firstShotTick);
+  assert.equal(world.desertTurretShots?.north?.tick, firstShotTick);
   for (let tick = 0; tick < 53; tick++) {
     dispatch(world, idle);
     assert.equal(world.events.includes('shot'), false);
   }
   assert.equal(target.hp, 18);
-  assert.equal(lastDesertTurretShotTick(world.desertRepair), firstShotTick);
+  assert.equal(world.desertTurretShots?.north?.tick, firstShotTick);
   dispatch(world, idle);
   assert.deepEqual(world.events, ['shot']);
-  assert.equal(lastDesertTurretShotTick(world.desertRepair), world.tick);
+  assert.equal(world.desertTurretShots?.north?.tick, world.tick);
   for (let tick = 0; tick < 30 && !world.kills; tick++) dispatch(world, idle);
   assert.deepEqual(world.events, ['enemy-hit', 'kill']);
   assert.equal(world.kills, 1);
@@ -165,6 +166,7 @@ test('same-tick repair fires after enemy movement and reuses damage and loot at 
   assert.equal(fresh.desertRepair.tower.kind, 'damaged');
   assert.equal(fresh.desertRepair.nextTurretShotTick, 0);
   assert.deepEqual(fresh.shots, []);
+  assert.equal(fresh.desertTurretShots, undefined);
 });
 
 test('a fixed-seed v4 recording repairs and fires, then verifies to the same terminal world', () => {
@@ -231,7 +233,7 @@ test('v5 towers fire on repair in their own sectors and keep independent cooldow
     Object.assign(world.player, { x: tower.x, y: tower.y });
     world.enemies.push(enemy(1, tower.x + x * 100, tower.y + y * 100), enemy(2, tower.x - x * 40, tower.y - y * 40));
     dispatch(world, idle);
-    assert.equal(lastDesertTurretShotTick(repair.towers[index]), world.tick);
+    assert.equal(world.desertTurretShots[tower.direction].tick, world.tick);
     assert.equal(world.shots.length, 1);
     assert.deepEqual([world.shots[0].x, world.shots[0].y], [tower.x + x * 8, tower.y + y * 8]);
 
@@ -244,6 +246,9 @@ test('v5 towers fire on repair in their own sectors and keep independent cooldow
       world.enemies = [enemy(1, tower.x + x * forward - y * sideways, tower.y + y * forward + x * sideways)];
       stepDesertTurret(world);
       assert.equal(world.shots.length, Number(fires), `${tower.direction}: ${forward}, ${sideways}`);
+      const [shot] = world.shots;
+      if (fires) assert.deepEqual(world.desertTurretShots[tower.direction], { tick: world.tick, vx: shot.vx, vy: shot.vy });
+      else assert(world.desertTurretShots[tower.direction].tick < world.tick);
     }
   }
 
@@ -274,7 +279,7 @@ test('two fixed-seed v5 routes repair all four towers and replay a full win', ()
     assert.equal(world.tick, 10800);
     assert.deepEqual(world.desertRepair.supplies, []);
     assert.deepEqual(world.desertRepair.inventory, { wood: 0, iron: 0 });
-    assert(world.desertRepair.towers.every(tower => tower.kind === 'repaired' && lastDesertTurretShotTick(tower) !== undefined));
+    assert(world.desertRepair.towers.every(tower => tower.kind === 'repaired' && world.desertTurretShots?.[tower.direction] !== undefined));
     assert.deepEqual(replay(JSON.parse(JSON.stringify(recording))), world);
 
     const fresh = createWorld({ ...DESERT_FOUR_TOWERS_CONTEXT, seed });

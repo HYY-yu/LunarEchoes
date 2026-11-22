@@ -1,5 +1,5 @@
 import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_ASSAULT_CONTEXT, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
-import { createDesertRepair, createDesertFourTowers, desertShipment, stepDesertRepair, stepDesertTurret, type DesertRepair } from './desert-repair.js';
+import { createDesertRepair, createDesertFourTowers, desertShipment, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
 import { DESERT_SUPPLY_TICKS, desertAssaultOutcome, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
@@ -25,6 +25,7 @@ export type World = {
   fireCooldown: number; novaCooldown: number; spawnCooldown: number; bossSpawned: boolean; bossKilled: boolean;
   desertRepair?: DesertRepair;
   desertAssault?: DesertAssault;
+  desertTurretShots?: DesertTurretShots;
 };
 type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
 export type ActionBuffer = RecordingContext & { actions: Action[] };
@@ -279,7 +280,7 @@ function hash(data: string): string {
   return (value >>> 0).toString(16).padStart(8, '0');
 }
 export function checksum(world: World): string {
-  const { context, ...battle } = world;
+  const { context, desertTurretShots, ...battle } = world;
   return hash(JSON.stringify({ ...battle, events: [] }));
 }
 export function finalChecksum(world: World): string {

@@ -128,18 +128,28 @@ export function createDesertTowerArt() {
     damaged: towerSprite(frames.damaged.pixels),
     repaired: towerSprite(frames.repaired.pixels)
   };
-  return (ctx: CanvasRenderingContext2D, tower: Tower, flash: boolean) => {
+  return (ctx: CanvasRenderingContext2D, tower: Tower, angle: number | undefined, flash: boolean) => {
     const x = Math.round(tower.x), y = Math.round(tower.y);
     ctx.drawImage(sprites[tower.kind], x - GROUND_X, y - frames[tower.kind].groundY);
-    if (tower.kind !== 'repaired' || !flash) return;
+    if (tower.kind !== 'repaired' || angle === undefined) return;
 
-    const muzzleX = x + 15, muzzleY = y - 24;
-    ctx.fillStyle = '#d66b40';
-    ctx.fillRect(muzzleX - 6, muzzleY, 12, 3);
-    ctx.fillStyle = '#ffad54';
-    ctx.fillRect(muzzleX - 3, muzzleY - 5, 7, 7);
-    ctx.fillRect(muzzleX - 6, muzzleY - 2, 13, 3);
-    ctx.fillStyle = '#fff0b5';
-    ctx.fillRect(muzzleX - 1, muzzleY - 3, 3, 4);
+    ctx.save();
+    ctx.translate(x + 1, y - 25);
+    ctx.rotate(angle);
+    ctx.fillStyle = '#344b59';
+    ctx.fillRect(0, -3, 13, 6);
+    ctx.fillStyle = '#b6ccd2';
+    ctx.fillRect(1, -2, 11, 3);
+    ctx.fillStyle = '#425d69';
+    ctx.fillRect(10, -3, 3, 6);
+    if (flash) {
+      ctx.fillStyle = '#d66b40';
+      ctx.fillRect(13, -1, 9, 3);
+      ctx.fillStyle = '#ffad54';
+      ctx.fillRect(14, -4, 5, 8);
+      ctx.fillStyle = '#fff0b5';
+      ctx.fillRect(13, -2, 4, 4);
+    }
+    ctx.restore();
   };
 }

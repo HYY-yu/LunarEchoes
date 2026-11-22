@@ -6,9 +6,12 @@ import { drawCampaignTerrain } from './campaign-maps.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
 import { createDesertSupplyArt } from './desert-supply-art.js';
 import { createDesertTowerArt } from './desert-tower-art.js';
-import { lastDesertTurretShotTick } from './desert-repair.js';
+import type { TowerDirection } from './desert-repair.js';
 
 const TURRET_FLASH_TICKS = 8;
+const TURRET_IDLE_ANGLE: Readonly<Record<TowerDirection, number>> = {
+  north: -Math.PI / 2, east: 0, south: Math.PI / 2, west: Math.PI
+};
 
 export function createRenderer(canvas: HTMLCanvasElement) {
   const context = canvas.getContext('2d', { alpha: false });
@@ -19,13 +22,15 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
-  function renderTower(tower: Parameters<typeof drawTower>[1], tick: number, shotTick?: number) {
+  function renderTower(tower: Parameters<typeof drawTower>[1], world: World, direction?: TowerDirection) {
     const { x, y, kind } = tower;
     ctx.strokeStyle = kind === 'repaired' ? '#7ef5d1' : '#ffe09b';
     ctx.setLineDash(kind === 'damaged' ? [4, 4] : []);
     ctx.beginPath(); ctx.ellipse(x, y, 21, 12, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-    const flash = shotTick !== undefined && tick >= shotTick && tick < shotTick + TURRET_FLASH_TICKS;
-    drawTower(ctx, tower, flash);
+    const shot = direction === undefined ? undefined : world.desertTurretShots?.[direction];
+    const angle = shot ? Math.atan2(shot.vy, shot.vx) : direction === undefined ? undefined : TURRET_IDLE_ANGLE[direction];
+    const flash = shot !== undefined && world.tick - shot.tick < TURRET_FLASH_TICKS;
+    drawTower(ctx, tower, angle, flash);
   }
   return function render(world: World, time: number, title = false) {
     const p = world.player, arena = stageRules(world.context).arenaSize;
@@ -53,10 +58,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       for (const supply of repair.supplies) drawSupply(ctx, supply);
       if ('towers' in repair) {
         for (const tower of repair.towers) {
-          renderTower(tower, world.tick, tower.kind === 'repaired' ? lastDesertTurretShotTick(tower) : undefined);
+          renderTower(tower, world, tower.direction);
         }
       } else {
-        renderTower(repair.tower, world.tick, lastDesertTurretShotTick(repair));
+        renderTower(repair.tower, world, repair.nextTurretShotTick === undefined ? undefined : 'north');
       }
     }
     for (const crystal of world.crystals) atlas.draw(ctx, 'crystal', crystal.x, crystal.y + Math.sin(time * .004 + crystal.x) * 2, .9);
