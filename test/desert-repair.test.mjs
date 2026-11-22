@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createWorld, dispatch, finishRecording, replay } from '../dist/core.js';
+import { checksum, createWorld, dispatch, finishRecording, replay } from '../dist/core.js';
 import { stepDesertTurret } from '../dist/desert-repair.js';
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT } from '../dist/stage-rules.js';
+import { DESERT_CONTINUOUS_CONTEXT, DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT } from '../dist/stage-rules.js';
 import { play } from '../scripts/simulation.mjs';
 
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
@@ -286,4 +286,49 @@ test('two fixed-seed v5 routes repair all four towers and replay a full win', ()
     assert(fresh.desertRepair.towers.every(tower => tower.kind === 'damaged' && !Object.hasOwn(tower, 'nextTurretShotTick')));
     assert.equal(fresh.desertRepair.supplies.length, 12);
   }
+});
+
+test('material motion records each successful pickup and a same-tick deposit without changing battle checksum', () => {
+  const world = createWorld({ ...DESERT_CONTINUOUS_CONTEXT, seed: 42 });
+  const repair = world.desertRepair;
+  const tower = repair.towers[0];
+  world.tick = 500;
+  world.spawnCooldown = 1000;
+  Object.assign(world.player, { x: tower.x + 10, y: tower.y });
+  const firstWood = { material: 'wood', x: tower.x + 14, y: tower.y };
+  repair.supplies = [firstWood];
+  repair.inventory.wood = 3;
+  dispatch(world, idle);
+  assert.deepEqual(repair.supplies, [firstWood]);
+  assert.equal(repair.towers[0].kind, 'damaged');
+  assert.equal(world.materialMotions, undefined);
+
+  repair.inventory.wood = 0;
+  const secondWood = { material: 'wood', x: tower.x + 17, y: tower.y + 2 };
+  const iron = { material: 'iron', x: tower.x + 20, y: tower.y - 2 };
+  repair.supplies = [firstWood, secondWood, iron];
+  dispatch(world, idle);
+  const tick = world.tick;
+  const motions = [
+    { kind: 'pickup', tick, material: 'wood', source: { x: firstWood.x, y: firstWood.y } },
+    { kind: 'pickup', tick, material: 'wood', source: { x: secondWood.x, y: secondWood.y } },
+    { kind: 'pickup', tick, material: 'iron', source: { x: iron.x, y: iron.y } },
+    { kind: 'deposit', tick, source: { x: tower.x + 10, y: tower.y }, tower: { x: tower.x, y: tower.y } }
+  ];
+  assert.deepEqual(world.materialMotions, motions);
+  assert.equal(repair.towers[0].kind, 'repaired');
+  assert.deepEqual(repair.inventory, { wood: 0, iron: 0 });
+  const { materialMotions, ...withoutVisuals } = world;
+  assert.equal(checksum(world), checksum(withoutVisuals));
+
+  dispatch(world, { kind: 'pause' });
+  dispatch(world, idle);
+  assert.equal(world.tick, tick);
+  assert.deepEqual(world.materialMotions, motions);
+  dispatch(world, { kind: 'resume' });
+  for (let age = 1; age <= 30; age++) {
+    dispatch(world, idle);
+    assert.deepEqual(world.materialMotions, age < 18 ? motions : age < 30 ? motions.slice(3) : undefined);
+  }
+  assert.equal(createWorld({ ...DESERT_CONTINUOUS_CONTEXT, seed: 43 }).materialMotions, undefined);
 });

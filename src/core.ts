@@ -1,6 +1,7 @@
 import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, hasDesertRelay, hasDesertAssault, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createDesertRepair, createDesertFourTowers, desertShipment, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
 import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
+import type { MaterialMotion } from './material-motion.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -26,6 +27,7 @@ export type World = {
   desertRepair?: DesertRepair;
   desertAssault?: DesertAssault;
   desertTurretShots?: DesertTurretShots;
+  materialMotions?: MaterialMotion[];
 };
 type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
 export type ActionBuffer = RecordingContext & { actions: Action[] };
@@ -143,7 +145,7 @@ function step(world: World, input: Input): void {
       desertRepair.supplies = [...desertRepair.supplies, ...desertShipment(desertAssault.deliveries, relay ? p : undefined)];
       desertAssault.deliveries++;
     }
-    const repaired = stepDesertRepair(desertRepair, p);
+    const repaired = stepDesertRepair(desertRepair, world);
     if (desertAssault && 'towers' in desertRepair) {
       const repairedCount = repaired ? desertRepair.towers.filter(tower => tower.kind === 'repaired').length : 0;
       if (stepDesertAssault(desertAssault, world.tick, repairedCount, world.nextId, (kind, origin) => spawn(world, kind, undefined, origin))) {
@@ -284,7 +286,7 @@ function hash(data: string): string {
   return (value >>> 0).toString(16).padStart(8, '0');
 }
 export function checksum(world: World): string {
-  const { context, desertTurretShots, ...battle } = world;
+  const { context, desertTurretShots, materialMotions, ...battle } = world;
   return hash(JSON.stringify({ ...battle, events: [] }));
 }
 export function finalChecksum(world: World): string {
