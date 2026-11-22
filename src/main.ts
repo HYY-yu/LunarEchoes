@@ -1,4 +1,4 @@
-import { hasDesertAssault, hasDesertRelay, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_CONTINUOUS_CONTEXT, hasDesertAssault, hasDesertRelay, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
@@ -78,6 +78,7 @@ let playingRecording: Recording | null = null;
 let replayVerified = false;
 let replayIndex = 0;
 let accumulator = 0, lastFrame = 0, lastUi = '', noticeTimer = 0;
+let noticeEndsWithBoss = false;
 const armorNode = element('armor-cells');
 const armorSpans: HTMLSpanElement[] = [];
 let lastArmorCurrent = -1, lastArmorMaximum = -1, lastArmorLanguage: Language | null = null;
@@ -146,7 +147,15 @@ function renderProgressReset() {
   element('progress-reset-cancel').textContent = reason ? t.progressPlayTemporary : t.progressCancel;
   element('progress-reset-confirm').textContent = t.progressResetConfirm;
 }
-function clearNotice() { window.clearTimeout(noticeTimer); noticeTimer = 0; const node = element('notice'); node.classList.remove('visible'); node.classList.remove('boss-notice'); node.textContent = ''; }
+function clearNotice() {
+  window.clearTimeout(noticeTimer);
+  noticeTimer = 0;
+  noticeEndsWithBoss = false;
+  const node = element('notice');
+  node.classList.remove('visible');
+  node.classList.remove('boss-notice');
+  node.textContent = '';
+}
 function notify(message: string, kind: 'general' | 'boss' = 'general') {
   clearNotice();
   const node = element('notice');
@@ -250,7 +259,9 @@ function act(action: Action, record = true) {
       if (!desertContent) throw new Error('Desert content unavailable');
       notify(desertContent.boss[language], 'boss');
     } else notify(text().boss);
+    noticeEndsWithBoss = world.context === DESERT_CONTINUOUS_CONTEXT;
   }
+  if (noticeEndsWithBoss && !bossKilledBefore && world.bossKilled) clearNotice();
   if (before !== world.phase.kind) {
     log('info', 'session.phase', { seed: world.seed, tick: world.tick, before, phase: world.phase.kind });
     if (screen === 'game' && (world.phase.kind === 'won' || world.phase.kind === 'lost')) {
