@@ -39,7 +39,7 @@ test('a desert world retains its validated stage and seed identity', () => {
   assert.throws(() => { world.seed = 42; }, TypeError);
   for (const stageId of ['unknown', null]) rejects(() => createWorld({ ...request(42), stageId }), 'unavailable-stage');
   for (const stageId of STAGE_ORDER.slice(1)) rejects(() => createWorld({ ...request(42), stageId }), 'incompatible-rules');
-  for (const rulesVersion of ['desert-base-7', 'rainforest-1']) rejects(() => createWorld({ ...request(42), rulesVersion }), 'incompatible-rules');
+  for (const rulesVersion of ['desert-base-8', 'rainforest-1']) rejects(() => createWorld({ ...request(42), rulesVersion }), 'incompatible-rules');
   for (const seed of [-1, 4294967296, .5, NaN, Infinity, '42', null]) rejects(() => createWorld(request(seed)), 'invalid-data');
   for (const input of [null, 42, {}, { ...request(42), rules: { durationTicks: 1 } }]) rejects(() => createWorld(input), 'invalid-data');
 });

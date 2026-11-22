@@ -7,7 +7,7 @@ import { drawDesertScene } from '../dist/desert-scene.js';
 import { drawRainforestFailure, drawRainforestVictory } from '../dist/rainforest-story-art.js';
 import * as core from '../dist/core.js';
 import { createWorld, normalizeInput, replay, finalChecksum, startRecording } from '../dist/core.js';
-import { DESERT_FOUR_TOWERS_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { DESERT_FOUR_TOWERS_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
 import { assaultObjective } from '../dist/desert-guidance.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play as simulate } from '../scripts/simulate.mjs';
@@ -549,7 +549,7 @@ test('header focus preserves combat movement, pause and upgrade shortcuts while 
 
 function startLive(app) { app.click('启动任务'); app.click('部署出发'); }
 test('desert assault guidance advances after dismissal and retains localized HUD when radio is disabled', () => {
-  const app = harness();
+  const app = harness(undefined, undefined, undefined, resolveStage('desert-base', 'desert-base-6'));
   startLive(app);
   assert.equal(app.snapshot().world.context.rulesVersion, 'desert-base-6');
   assert.equal(app.radioBeat, 'briefing');

@@ -1,4 +1,4 @@
-import { stageRules } from './stage-rules.js';
+import { DESERT_RELAY_CONTEXT, stageRules } from './stage-rules.js';
 import { type World } from './core.js';
 import { createAtlas } from './art.js';
 import { createDesertMap } from './desert-map.js';
@@ -6,7 +6,10 @@ import { drawCampaignTerrain } from './campaign-maps.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
 import { createDesertSupplyArt } from './desert-supply-art.js';
 import { createDesertTowerArt } from './desert-tower-art.js';
-import type { TowerDirection } from './desert-repair.js';
+import { createDesertRelayArt } from './desert-relay-art.js';
+import { DESERT_RELAY_CENTER } from './desert-relay-layout.js';
+import { relayObjective, type TowerDirection } from './desert-repair.js';
+import { drawRelayObjective } from './desert-relay-guidance-art.js';
 
 const TURRET_FLASH_TICKS = 8;
 const TURRET_IDLE_ANGLE: Readonly<Record<TowerDirection, number>> = {
@@ -22,13 +25,18 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
+  let drawDesertRelay: ReturnType<typeof createDesertRelayArt> | undefined;
   function renderTower(tower: Parameters<typeof drawTower>[1], world: World, direction?: TowerDirection) {
     const { x, y, kind } = tower;
     ctx.strokeStyle = kind === 'repaired' ? '#7ef5d1' : '#ffe09b';
     ctx.setLineDash(kind === 'damaged' ? [4, 4] : []);
     ctx.beginPath(); ctx.ellipse(x, y, 21, 12, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
     const shot = direction === undefined ? undefined : world.desertTurretShots?.[direction];
-    const angle = shot ? Math.atan2(shot.vy, shot.vx) : direction === undefined ? undefined : TURRET_IDLE_ANGLE[direction];
+    let angle = direction === undefined ? undefined : TURRET_IDLE_ANGLE[direction];
+    if (shot) angle = Math.atan2(shot.vy, shot.vx);
+    else if (world.context.rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion) {
+      angle = Math.atan2(y - DESERT_RELAY_CENTER.y, x - DESERT_RELAY_CENTER.x);
+    }
     const flash = shot !== undefined && world.tick - shot.tick < TURRET_FLASH_TICKS;
     drawTower(ctx, tower, angle, flash);
   }
@@ -53,6 +61,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     if (world.context.stageId === 'rainforest') drawRainforestTerrain(ctx, view);
     else if (world.context.stageId === 'desert-base') drawDesertMap(ctx, arena, view);
     else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick, time);
+    if (world.context.rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion) {
+      drawDesertRelay ??= createDesertRelayArt();
+      drawDesertRelay(ctx, world.tick);
+    }
     const repair = world.desertRepair;
     if (!title && repair) {
       for (const supply of repair.supplies) drawSupply(ctx, supply);
@@ -120,6 +132,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     }
     ctx.globalAlpha = 1; ctx.restore();
     const shade = ctx.createRadialGradient(width / 2, height / 2, width * .15, width / 2, height / 2, width * .7); shade.addColorStop(0, '#04141b00'); shade.addColorStop(1, '#06182799'); ctx.fillStyle = shade; ctx.fillRect(0, 0, width, height);
+    if (!title && world.phase.kind === 'running' && world.context.rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion && repair && 'towers' in repair) {
+      const objective = relayObjective(repair, p);
+      if (objective) drawRelayObjective(ctx, objective, view.left, view.top, zoom, width, height);
+    }
     if (title) {
       ctx.fillStyle = '#071420aa'; ctx.fillRect(0, 0, width, height);
     }

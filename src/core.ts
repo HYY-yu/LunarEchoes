@@ -1,6 +1,6 @@
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_ASSAULT_CONTEXT, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_RELAY_CONTEXT, hasDesertAssault, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createDesertRepair, createDesertFourTowers, desertShipment, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
-import { DESERT_SUPPLY_TICKS, desertAssaultOutcome, stepDesertAssault, type DesertAssault } from './desert-assault.js';
+import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -40,8 +40,8 @@ export function createWorld(request: unknown): World {
     player: { x: rules.arenaSize / 2, y: rules.arenaSize / 2, hp: armor.initialCells * armor.hpPerCell, maxHp: armor.initialCells * armor.hpPerCell, invincible: 0, dashCooldown: 0, dashTicks: 0, dx: 1, dy: 0 },
     enemies: [], shots: [], crystals: [], effects: [], events: [], level: 1, xp: 0, threshold: 5, kills: 0,
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
-  if (context === DESERT_ASSAULT_CONTEXT) {
-    world.desertRepair = createDesertFourTowers([]);
+  if (hasDesertAssault(context)) {
+    world.desertRepair = createDesertFourTowers([], context === DESERT_RELAY_CONTEXT);
     world.desertAssault = { deliveries: 0, final: { kind: 'waiting' } };
   } else if (context === DESERT_FOUR_TOWERS_CONTEXT) {
     world.desertRepair = createDesertFourTowers();
@@ -135,8 +135,10 @@ function step(world: World, input: Input): void {
   if (input.x !== 0 || input.y !== 0) { p.dx = input.x; p.dy = input.y; }
   const { desertRepair, desertAssault } = world;
   if (desertRepair) {
-    if (desertAssault && world.tick === DESERT_SUPPLY_TICKS[desertAssault.deliveries]) {
-      desertRepair.supplies = [...desertRepair.supplies, ...desertShipment(desertAssault.deliveries)];
+    const relay = world.context === DESERT_RELAY_CONTEXT;
+    const deliveryTicks = relay ? DESERT_RELAY_SUPPLY_TICKS : DESERT_SUPPLY_TICKS;
+    if (desertAssault && world.tick === deliveryTicks[desertAssault.deliveries]) {
+      desertRepair.supplies = [...desertRepair.supplies, ...desertShipment(desertAssault.deliveries, relay ? p : undefined)];
       desertAssault.deliveries++;
     }
     const repaired = stepDesertRepair(desertRepair, p);
