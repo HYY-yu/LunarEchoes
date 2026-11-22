@@ -66,8 +66,7 @@ export async function simulate(context) {
   assert(wins > 0, 'A real input-only bot must win at least one full run');
 }
 
-export async function serve(root, context) {
-  const port = Number(process.env.PORT || 4173);
+export async function serve(root, context, port = Number(process.env.PORT || 4173)) {
   const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json' };
   const server = createServer(async (req, res) => {
     try {

@@ -8,9 +8,11 @@
     "dev": "node scripts/task.mjs dev",
     "test": "node scripts/task.mjs test",
     "check": "node scripts/task.mjs check",
-    "verify": "node scripts/task.mjs verify"
+    "verify": "node scripts/task.mjs verify",
+    "test:browser": "node scripts/browser-acceptance.mjs"
   },
   "devDependencies": {
+    "playwright-core": "1.65.1",
     "typescript": "^5.9.3"
   }
 }
