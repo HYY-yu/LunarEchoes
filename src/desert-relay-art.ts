@@ -1,4 +1,4 @@
-import { DESERT_RELAY_CENTER, DESERT_RELAY_CORNERS } from './desert-relay-layout.js';
+import { RELAY_CENTER, RELAY_CORNERS } from './relay-layout.js';
 
 const TILE_HALF_SIZE = 180;
 const FLOOR_COLORS = ['#897d66', '#847a65', '#8b806b'];
@@ -52,7 +52,7 @@ export function createDesertRelayArt() {
       rect(x + 2, y + 7, 28, 1, '#b6a488');
     }
   }
-  for (const { x, y } of DESERT_RELAY_CORNERS) {
+  for (const { x, y } of RELAY_CORNERS) {
     block(x - 14, y - 9, 28, 18, 2, '#898a7d', '#545e5c');
   }
   block(-26, -43, 52, 27, 4, '#a7997d', '#585f60');
@@ -73,7 +73,7 @@ export function createDesertRelayArt() {
 
   return function drawDesertRelay(ctx: CanvasRenderingContext2D, tick: number): void {
     ctx.save();
-    ctx.translate(DESERT_RELAY_CENTER.x, DESERT_RELAY_CENTER.y);
+    ctx.translate(RELAY_CENTER.x, RELAY_CENTER.y);
     ctx.drawImage(tile, -TILE_HALF_SIZE, -TILE_HALF_SIZE);
     const phase = Math.floor(tick / 3) % 144;
     for (const side of SIDES) {

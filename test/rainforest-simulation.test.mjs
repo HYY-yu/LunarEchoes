@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../dist/core.js';
-import { DESERT_CONTEXT, RAINFOREST_CONTEXT } from '../dist/stage-rules.js';
+import { DESERT_CONTEXT, RAINFOREST_CONTEXT, RAINFOREST_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
+import { play } from '../scripts/simulation.mjs';
 
 const seed = 42;
 const request = { ...RAINFOREST_CONTEXT, seed };
@@ -70,10 +71,51 @@ test('rainforest runs its own enemy composition and pause does not advance battl
 
 test('rainforest recording validation requires the exact rule pair and rejects context substitution', () => {
   const { recording } = playArmorCase(core, seed, 'stationary', 'attack', RAINFOREST_CONTEXT);
-  for (const rulesVersion of ['desert-base-1', 'rainforest-3']) {
+  for (const rulesVersion of ['desert-base-1', 'rainforest-4']) {
     assert.throws(() => core.createWorld({ ...request, rulesVersion }), { code: 'incompatible-rules' });
     assert.throws(() => core.prepareReplay({ ...recording, rulesVersion }), { code: 'incompatible-rules' });
   }
   assert.throws(() => core.replay({ ...recording, ...DESERT_CONTEXT }), error =>
     ['checksum-mismatch', 'nonterminal-replay'].includes(error.code));
+});
+
+test('rainforest v3 supplies four corner towers early while retaining the stage outcome and replay', () => {
+  const context = stageContext('rainforest');
+  assert.equal(context, RAINFOREST_RELAY_CONTEXT);
+  const whole = play(42, context);
+  const world = core.createWorld({ ...context, seed: 42 });
+  const repair = world.desertRepair;
+  assert.deepEqual(repair.towers.map(({ x, y }) => [x, y]), [[590, 590], [910, 590], [910, 910], [590, 910]]);
+  const deliveries = [];
+  const repairs = [];
+  let bossTick;
+  let towersFiredBeforeBoss;
+  for (const action of whole.recording.actions) {
+    const previousDelivery = world.rainforestRelay.deliveries;
+    const previousRepaired = repair.towers.filter(tower => tower.kind === 'repaired').length;
+    const previousShots = Object.keys(world.desertTurretShots ?? {});
+    const nextEnemy = world.nextId;
+    core.dispatch(world, action);
+    if (world.rainforestRelay.deliveries > previousDelivery) deliveries.push(world.tick);
+    if (repair.towers.filter(tower => tower.kind === 'repaired').length > previousRepaired) {
+      repairs.push(world.tick);
+      assert.deepEqual(world.enemies.filter(enemy => enemy.id >= nextEnemy).slice(0, 3).map(enemy => enemy.kind),
+        ['crawler', 'crawler', 'drone']);
+    }
+    if (world.events.includes('boss')) {
+      bossTick = world.tick;
+      towersFiredBeforeBoss = previousShots;
+    }
+  }
+  assert.deepEqual(deliveries, [1, 35 * core.HZ, 70 * core.HZ, 108 * core.HZ]);
+  assert.equal(repairs.length, 4);
+  assert.equal(bossTick, 155 * core.HZ);
+  assert(repairs[3] < bossTick);
+  assert.deepEqual(towersFiredBeforeBoss, ['north', 'east', 'south', 'west']);
+  assert.equal(world.phase.kind, 'won');
+  assert.equal(world.tick, 195 * core.HZ);
+  assert.deepEqual(core.replay(whole.recording), world);
+  const skipped = play(42, context, [], { skipFourth: true }).world;
+  assert.equal(skipped.desertRepair.towers.filter(tower => tower.kind === 'repaired').length, 3);
+  assert.equal(skipped.phase.kind, 'won');
 });
