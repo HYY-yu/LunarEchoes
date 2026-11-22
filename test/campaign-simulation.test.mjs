@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../dist/core.js';
-import { ANTARCTIC_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { ANTARCTIC_RELAY_CONTEXT, ELEVATOR_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play } from '../scripts/simulation.mjs';
 
 const scenarios = [
   { stageId: 'antarctica', rulesVersion: 'antarctica-3', seed: 101, duration: 210, bossSecond: 162, health: 1050, shots: 7, fan: true },
-  { stageId: 'space-elevator', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
+  { stageId: 'space-elevator', rulesVersion: 'space-elevator-3', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
   { stageId: 'watchtower', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
   { stageId: 'lunar-echoes', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
 ];
@@ -47,33 +47,41 @@ for (const { stageId, rulesVersion = `${stageId}-2`, seed, duration, bossSecond 
   });
 }
 
-test('Antarctica v3 can field all four corner towers before the existing boss and victory', () => {
-  const context = stageContext('antarctica');
-  assert.equal(context, ANTARCTIC_RELAY_CONTEXT);
-  const seed = 101;
-  const { recording, world: terminal } = play(seed, context);
-  const world = core.createWorld({ ...context, seed });
-  assert.deepEqual(world.desertRepair.towers.map(({ x, y }) => [x, y]), [[590, 590], [910, 590], [910, 910], [590, 910]]);
-  const shipments = [];
-  for (const action of recording.actions) {
-    const deliveries = world.campaignRelay.deliveries;
-    const previousShots = Object.keys(world.desertTurretShots ?? {});
-    core.dispatch(world, action);
-    if (world.campaignRelay.deliveries > deliveries) shipments.push(world.tick);
-    if (world.events.includes('boss')) {
-      assert.equal(world.tick, 162 * core.HZ);
-      assert.equal(previousShots.length, 4);
-      assert(world.desertRepair.towers.every(tower => tower.kind === 'repaired'));
+const relayScenarios = [
+  { context: ANTARCTIC_RELAY_CONTEXT, seed: 101, duration: 210, bossSecond: 162, shipments: [1, 42 * core.HZ, 84 * core.HZ, 126 * core.HZ] },
+  { context: ELEVATOR_RELAY_CONTEXT, seed: 42, duration: 205, bossSecond: 158, shipments: [1, 29 * core.HZ, 76 * core.HZ, 120 * core.HZ] }
+];
+
+for (const { context, seed, duration, bossSecond, shipments } of relayScenarios) {
+  const { stageId, rulesVersion } = context;
+  test(`${rulesVersion} fields four corner towers before the existing boss and victory`, () => {
+    assert.equal(stageContext(stageId), context);
+    const { recording, world: terminal } = play(seed, context);
+    const world = core.createWorld({ ...context, seed });
+    assert.deepEqual(world.desertRepair.towers.map(({ x, y }) => [x, y]), [[590, 590], [910, 590], [910, 910], [590, 910]]);
+    const delivered = [];
+    let bossTick;
+    for (const action of recording.actions) {
+      const deliveries = world.campaignRelay.deliveries;
+      const previousShots = Object.keys(world.desertTurretShots ?? {});
+      core.dispatch(world, action);
+      if (world.campaignRelay.deliveries > deliveries) delivered.push(world.tick);
+      if (world.events.includes('boss')) {
+        bossTick = world.tick;
+        assert.equal(previousShots.length, 4);
+        assert(world.desertRepair.towers.every(tower => tower.kind === 'repaired'));
+      }
     }
-  }
-  assert.deepEqual(shipments, [1, 42 * core.HZ, 84 * core.HZ, 126 * core.HZ]);
-  assert.equal(world.phase.kind, 'won');
-  assert.equal(world.tick, 210 * core.HZ);
-  assert.deepEqual(core.replay(recording), terminal);
-  for (const rulesVersion of ['antarctica-1', 'antarctica-2']) {
-    assert.equal(core.createWorld({ stageId: 'antarctica', rulesVersion, seed }).desertRepair, undefined);
-  }
-});
+    assert.deepEqual(delivered, shipments);
+    assert.equal(bossTick, bossSecond * core.HZ);
+    assert.equal(world.phase.kind, 'won');
+    assert.equal(world.tick, duration * core.HZ);
+    assert.deepEqual(core.replay(recording), terminal);
+    for (const revision of [1, 2]) {
+      assert.equal(core.createWorld({ stageId, rulesVersion: `${stageId}-${revision}`, seed }).desertRepair, undefined);
+    }
+  });
+}
 
 test('the outer four Bosses fire distinct volleys with their existing attack warning timer', () => {
   for (const { stageId, seed, bossSecond, health, shots, fan } of scenarios) {
