@@ -1,4 +1,4 @@
-import type { Enemy, World } from './core.js';
+import type { Enemy, Shot, World } from './core.js';
 
 type Position = Readonly<{ x: number; y: number }>;
 type Material = 'wood' | 'iron';
@@ -15,6 +15,9 @@ type SingleTowerRepair = InventoryState & {
   nextTurretShotTick?: number;
 };
 export type TowerDirection = 'north' | 'east' | 'south' | 'west';
+export type DesertTurretShot = Readonly<Pick<Shot, 'vx' | 'vy'> & { tick: number }>;
+export type DesertTurretShots = Partial<Record<TowerDirection, DesertTurretShot>>;
+type TurretWorld = Pick<World, 'desertRepair' | 'desertTurretShots' | 'enemies' | 'shots' | 'events' | 'tick'>;
 type DirectionalTower = Position & Readonly<{ direction: TowerDirection }> & (
   Readonly<{ kind: 'damaged' }> | { readonly kind: 'repaired'; nextTurretShotTick: number }
 );
@@ -102,12 +105,7 @@ function distance(a: Position, b: Position): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-export function lastDesertTurretShotTick(repair: Readonly<Pick<SingleTowerRepair, 'nextTurretShotTick'>>): number | undefined {
-  const next = repair.nextTurretShotTick;
-  return next === undefined || next === 0 ? undefined : next - TURRET_CADENCE;
-}
-
-export function stepDesertTurret(world: Pick<World, 'desertRepair' | 'enemies' | 'shots' | 'events' | 'tick'>): void {
+export function stepDesertTurret(world: TurretWorld): void {
   const repair = world.desertRepair;
   if (!repair) return;
   if ('towers' in repair) {
@@ -124,7 +122,7 @@ export function stepDesertTurret(world: Pick<World, 'desertRepair' | 'enemies' |
   }
 }
 
-function fireTurret(world: Pick<World, 'enemies' | 'shots' | 'events'>, tower: Position, direction: TowerDirection): boolean {
+function fireTurret(world: TurretWorld, tower: Position, direction: TowerDirection): boolean {
   const boundaryRoundoff = 2 * Number.EPSILON * Math.max(tower.x, tower.y);
   let nearestDistanceSquared = (TURRET_RANGE + boundaryRoundoff) ** 2;
   let target: Enemy | undefined;
@@ -144,11 +142,13 @@ function fireTurret(world: Pick<World, 'enemies' | 'shots' | 'events'>, tower: P
   if (!target) return false;
 
   const velocityScale = TURRET_SHOT_SPEED / Math.sqrt(nearestDistanceSquared);
+  const vx = (target.x - tower.x) * velocityScale;
+  const vy = (target.y - tower.y) * velocityScale;
   world.shots.push({
-    x: tower.x, y: tower.y,
-    vx: (target.x - tower.x) * velocityScale, vy: (target.y - tower.y) * velocityScale,
+    x: tower.x, y: tower.y, vx, vy,
     life: TURRET_SHOT_LIFE, damage: TURRET_SHOT_DAMAGE, hostile: false
   });
+  (world.desertTurretShots ??= {})[direction] = { tick: world.tick, vx, vy };
   world.events.push('shot');
   return true;
 }
