@@ -978,6 +978,10 @@ test('desert victory saves the unlock and the shortcut opens the rainforest with
   app.activate('victory-next', 'Enter');
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(app.get('opening-story').dataset.storyId, 'rainforest.opening');
+  const body = app.get('opening-story').parentElement;
+  assert.equal(body.getAttribute('tabindex'), '0');
+  assert.equal(body.getAttribute('aria-labelledby'), 'opening-heading');
+  assert.equal(app.get('opening-back').parentElement.parentElement, body.parentElement);
   assert.equal(app.seedCalls, 1);
   app.activate('opening-back', 'Enter');
   assert.equal(app.active, app.get('victory-next'));
