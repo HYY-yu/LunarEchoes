@@ -9,6 +9,19 @@ const HIT_TICKS = 8;
 const BREAK_TICKS = 22;
 const RETRACT_TICKS = 18;
 
+function armorHitGleam(armor: ElevatorBossArmor, tick: number): boolean {
+  if (armor.kind !== 'active' || armor.hitTick === undefined) return false;
+  const age = tick - armor.hitTick;
+  return age >= 0 && age < HIT_TICKS;
+}
+
+export function elevatorArmorImpact(armor: ElevatorBossArmor | undefined, tick: number): boolean {
+  if (!armor) return false;
+  if (armor.kind === 'active') return armorHitGleam(armor, tick);
+  const age = tick - armor.atTick;
+  return armor.reason === 'broken' && age >= 0 && age < BREAK_TICKS;
+}
+
 const plates = [
   { y: 3, rows: ['.DDDD', 'DTHHD', 'THGS.', 'TGSR.', 'DRR..'], crack: [[3, 0], [2, 1], [2, 2], [1, 3]] },
   { y: 8, rows: ['DDDD.', 'THHSD', 'TGGSD', 'DSSR.', '.RR..'], crack: [[3, 0], [3, 1], [2, 2], [1, 3]] }
@@ -26,8 +39,7 @@ export function drawElevatorBossArmor(ctx: CanvasRenderingContext2D, x: number, 
   const retracting = armor.kind === 'spent' && armor.reason === 'expired';
   if (age >= (breaking ? BREAK_TICKS : RETRACT_TICKS)) return;
 
-  const hitAge = armor.kind === 'active' && armor.hitTick !== undefined ? tick - armor.hitTick : HIT_TICKS;
-  const gleam = hitAge >= 0 && hitAge < HIT_TICKS;
+  const gleam = armorHitGleam(armor, tick);
   const retract = retracting ? age / RETRACT_TICKS : 0;
   const fracture = breaking ? age / BREAK_TICKS : 0;
   const { a: zoomX, d: zoomY, e: cameraX, f: cameraY } = ctx.getTransform();
