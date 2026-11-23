@@ -1,4 +1,4 @@
-import { DESERT_CONTINUOUS_CONTEXT, hasDesertAssault, hasRelayBase, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { hasContinuousDesertAssault, hasDesertAssault, hasRelayBase, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
@@ -204,6 +204,7 @@ function act(action: Action, record = true) {
   const deliveriesBefore = (world.desertAssault ?? world.campaignRelay)?.deliveries;
   const finalBefore = world.desertAssault?.final.kind;
   const bossKilledBefore = world.bossKilled;
+  const stasisBefore = world.desertStasis;
   const strikeBefore = world.watchtowerStrike;
   const lunarCastBefore = world.lunarEchoCast;
   const armoredBoss = screen === 'game' && world.context.stageId === 'space-elevator' && world.bossSpawned && !world.bossKilled
@@ -215,6 +216,15 @@ function act(action: Action, record = true) {
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
+    const stasis = world.desertStasis;
+    if (world.tick !== tickBefore) {
+      if (stasis && !stasisBefore) log('info', 'session.desert_stasis_warning', { ...world.context, seed: world.seed, tick: world.tick, ...stasis });
+      if (stasis?.beginsAt === world.tick) log('info', 'session.desert_stasis_started', { ...world.context, seed: world.seed, tick: world.tick, ...stasis });
+      if (!stasis && stasisBefore) {
+        const reason = world.tick >= stasisBefore.endsAt ? 'expired' : world.bossKilled ? 'boss-defeated' : 'player-defeated';
+        log('info', 'session.desert_stasis_ended', { ...world.context, seed: world.seed, tick: world.tick, ...stasisBefore, reason });
+      }
+    }
     const strike = world.watchtowerStrike;
     if (world.tick !== tickBefore && strike !== strikeBefore) {
       const fields = { ...world.context, seed: world.seed, tick: world.tick };
@@ -318,7 +328,7 @@ function act(action: Action, record = true) {
       if (!desertContent) throw new Error('Desert content unavailable');
       notify(desertContent.boss[language], 'boss');
     } else notify(text().boss);
-    noticeEndsWithBoss = world.context === DESERT_CONTINUOUS_CONTEXT;
+    noticeEndsWithBoss = hasContinuousDesertAssault(world.context);
   }
   if (noticeEndsWithBoss && !bossKilledBefore && world.bossKilled) clearNotice();
   if (before !== world.phase.kind) {
