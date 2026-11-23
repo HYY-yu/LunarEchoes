@@ -1,4 +1,4 @@
-import { ANTARCTIC_FROST_CONTEXT, DESERT_CONTINUOUS_CONTEXT, hasDesertAssault, hasRelayBase, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_CONTINUOUS_CONTEXT, hasDesertAssault, hasRelayBase, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
@@ -209,9 +209,13 @@ function act(action: Action, record = true) {
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
-    if (world.context === ANTARCTIC_FROST_CONTEXT && world.nextId !== nextEnemyId) {
-      const guard = world.enemies.find(enemy => enemy.kind === 'frost-guard' && enemy.id >= nextEnemyId);
-      if (guard) log('debug', 'session.frost_guard_spawned', { ...world.context, seed: world.seed, tick: world.tick, enemyId: guard.id });
+    if (world.nextId !== nextEnemyId) {
+      const rules = stageRules(world.context);
+      const reinforcement = rules.kind === 'campaign' ? rules.groundReinforcement : undefined;
+      if (reinforcement) {
+        const enemy = world.enemies.find(enemy => enemy.kind === reinforcement.kind && enemy.id >= nextEnemyId);
+        if (enemy) log('debug', `session.${enemy.kind.replaceAll('-', '_')}_spawned`, { ...world.context, seed: world.seed, tick: world.tick, enemyId: enemy.id });
+      }
     }
     if (world.tick !== tickBefore) {
       for (const motion of world.materialMotions ?? []) {

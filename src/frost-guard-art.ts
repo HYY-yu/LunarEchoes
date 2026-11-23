@@ -1,6 +1,4 @@
-const FRAME_WIDTH = 32;
-const FRAME_HEIGHT = 36;
-const WALK_FRAMES = [0, 1, 0, 2];
+import { createInfantryAtlas } from './infantry-atlas.js';
 
 const palette = new Map([
   ['A', '#9bbec5'],
@@ -139,25 +137,5 @@ const frames = [
 ];
 
 export function createFrostGuardArt() {
-  const atlas = document.createElement('canvas');
-  atlas.width = FRAME_WIDTH;
-  atlas.height = FRAME_HEIGHT * frames.length;
-  const paint = atlas.getContext('2d');
-  if (!paint) throw new Error('Frost Guard atlas canvas unavailable');
-  for (const [frame, rows] of frames.entries()) {
-    for (const [y, row] of rows.entries()) {
-      for (let x = 0; x < row.length; x++) {
-        const color = palette.get(row[x]);
-        if (!color) continue;
-        paint.fillStyle = color;
-        paint.fillRect(x, frame * FRAME_HEIGHT + y, 1, 1);
-      }
-    }
-  }
-  return (ctx: CanvasRenderingContext2D, x: number, y: number, tick: number, scale = 1.5) => {
-    const frame = WALK_FRAMES[Math.floor(tick / 6) % WALK_FRAMES.length];
-    const k = scale * .82;
-    ctx.drawImage(atlas, 0, frame * FRAME_HEIGHT, FRAME_WIDTH, FRAME_HEIGHT,
-      Math.round(x - 16 * k), Math.round(y + 10 - 29 * k), FRAME_WIDTH * k, FRAME_HEIGHT * k);
-  };
+  return createInfantryAtlas(palette, frames, 'strip');
 }

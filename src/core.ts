@@ -1,4 +1,4 @@
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, RAINFOREST_RELAY_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, resolveStage, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, RAINFOREST_RELAY_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, resolveStage, stageRules, SimulationError, type GroundReinforcementKind, type StageContext } from './stage-rules.js';
 import { createDesertRepair, createDesertFourTowers, desertShipment, RELAY_REPAIR_RAID, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
 import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 import type { MaterialMotion } from './material-motion.js';
@@ -11,13 +11,14 @@ export type Upgrade = 'pulse' | 'orbit' | 'nova' | 'boots' | 'hull' | 'magnet';
 export type Phase = { kind: 'running' } | { kind: 'upgrading'; offers: Upgrade[] } | { kind: 'paused'; previous: 'running' } | { kind: 'won' } | { kind: 'lost' };
 export type Input = { x: number; y: number; dash: boolean };
 export type Action = { kind: 'tick'; input: Input } | { kind: 'choose'; upgrade: Upgrade } | { kind: 'pause' } | { kind: 'resume' };
-export type EnemyKind = 'crawler' | 'drone' | 'sentry' | 'boss' | 'frost-guard';
+export type EnemyKind = 'crawler' | 'drone' | 'sentry' | 'boss' | GroundReinforcementKind;
 const ENEMY_STATS = {
   crawler: { hp: 30, radius: 11, speed: .8, xp: 1 },
   drone: { hp: 22, radius: 11, speed: 1.45, xp: 1 },
   sentry: { hp: 50, radius: 15, speed: .35, xp: 3 },
   boss: { hp: 950, radius: 27, speed: .65, xp: 20 },
-  'frost-guard': { hp: 78, radius: 13, speed: .56, xp: 2 }
+  'frost-guard': { hp: 78, radius: 13, speed: .56, xp: 2 },
+  'insulated-suit': { hp: 46, radius: 12, speed: 1.02, xp: 2 }
 } satisfies Record<EnemyKind, { hp: number; radius: number; speed: number; xp: number }>;
 export type Enemy = { id: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number; radius: number; attack: number; flash: number };
 export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean };
@@ -186,11 +187,11 @@ function step(world: World, input: Input): void {
       }
       const roll = random(world);
       const crawlerThreshold = currentWave.sentryChance + currentWave.droneChance;
-      const frostGuard = rules.frostGuard;
-      const guardShare = frostGuard && world.tick >= frostGuard.startTick ? frostGuard.crawlerShare : 0;
-      const guardThreshold = crawlerThreshold + (1 - crawlerThreshold) * guardShare;
+      const reinforcement = rules.groundReinforcement;
+      const groundKind = reinforcement && world.tick >= reinforcement.startTick &&
+        roll < crawlerThreshold + (1 - crawlerThreshold) * reinforcement.crawlerShare ? reinforcement.kind : 'crawler';
       const kind = roll < currentWave.sentryChance ? 'sentry'
-        : roll < crawlerThreshold ? 'drone' : roll < guardThreshold ? 'frost-guard' : 'crawler';
+        : roll < crawlerThreshold ? 'drone' : groundKind;
       spawn(world, kind, kind === 'crawler' ? rules.crawlerHp : undefined);
       world.spawnCooldown = currentWave.intervalTicks;
     } else {

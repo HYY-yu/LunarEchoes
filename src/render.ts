@@ -1,5 +1,5 @@
 import {
-  ELEVATOR_RELAY_CONTEXT, hasDesertRelay, hasRelayBase, LUNAR_RELAY_CONTEXT,
+  hasDesertRelay, hasRelayBase, LUNAR_RELAY_CONTEXT,
   RAINFOREST_RELAY_CONTEXT, stageRules, WATCHTOWER_RELAY_CONTEXT
 } from './stage-rules.js';
 import { type World } from './core.js';
@@ -16,6 +16,7 @@ import { createRainforestArchiveArt } from './rainforest-archive-art.js';
 import { createDesertSupplyArt } from './desert-supply-art.js';
 import { createDesertTowerArt } from './desert-tower-art.js';
 import { createFrostGuardArt } from './frost-guard-art.js';
+import { createInsulatedSuitArt } from './insulated-suit-art.js';
 import { createDesertRelayArt } from './desert-relay-art.js';
 import { RELAY_CENTER } from './relay-layout.js';
 import { relayObjective, type TowerDirection } from './desert-repair.js';
@@ -37,6 +38,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
+  let drawInsulatedSuit: ReturnType<typeof createInsulatedSuitArt> | undefined;
   let drawFrostGuard: ReturnType<typeof createFrostGuardArt> | undefined;
   let drawDesertRelay: ReturnType<typeof createDesertRelayArt> | undefined;
   let drawAntarcticBearing: ReturnType<typeof createAntarcticBearingArt> | undefined;
@@ -88,7 +90,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       drawAntarcticBearing ??= createAntarcticBearingArt();
       drawAntarcticBearing(ctx, world.tick);
     }
-    if (world.context.rulesVersion === ELEVATOR_RELAY_CONTEXT.rulesVersion) {
+    if (world.context.stageId === 'space-elevator' && hasRelayBase(world.context)) {
       drawOrbitalLift ??= createOrbitalLiftArt();
       drawOrbitalLift(ctx, world.tick);
     }
@@ -127,6 +129,9 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       if (enemy.kind === 'frost-guard') {
         drawFrostGuard ??= createFrostGuardArt();
         drawFrostGuard(ctx, enemy.x, enemy.y, tick, scale);
+      } else if (enemy.kind === 'insulated-suit') {
+        drawInsulatedSuit ??= createInsulatedSuitArt();
+        drawInsulatedSuit(ctx, enemy.x, enemy.y, tick, scale);
       } else {
         atlas.draw(ctx, enemy.kind, enemy.x, enemy.y + (enemy.kind === 'drone' ? Math.sin(time * .006 + enemy.id) * 3 - 5 : 0), scale, tick);
       }
