@@ -26,8 +26,13 @@ body[data-phase="running"]:has(#touch:not([hidden])) #notice.boss-notice{bottom:
 #boss-health{display:none}
 #repair-hud{position:fixed;z-index:2;top:82px;right:max(24px,env(safe-area-inset-right));display:grid;gap:4px;width:max-content;max-width:220px;padding:7px 10px;background:var(--panel);border-left:2px solid var(--amber);color:#e1eee7;font-size:12px;line-height:1.35;pointer-events:none}
 #repair-inventory{color:var(--amber);font:700 12px var(--mono)}
+#salvage-module{color:var(--cyan)}
+#tower-actions{display:grid;grid-template-columns:repeat(2,minmax(44px,1fr));gap:6px;margin-block-start:2px}
+#tower-actions button{min-block-size:44px;min-inline-size:44px;padding:4px;border:1px solid var(--cyan);background:#091b26;color:#e1eee7;font:700 11px/1.25 var(--mono);pointer-events:auto}
+#tower-actions button:disabled{border-color:var(--line);background:var(--panel);color:var(--muted)}
+#tower-actions button:not(:disabled):hover{background:#1a3d48}
 @media(max-width:700px){
-  #mission-hud{position:absolute;inset-block-start:calc(max(14px,env(safe-area-inset-top)) + 56px);inset-inline-end:max(14px,env(safe-area-inset-right));display:flex;flex-direction:column;align-items:flex-end;row-gap:6px}
+  #mission-hud{position:absolute;inset-block-start:calc(max(14px,env(safe-area-inset-top)) + 56px);inset-inline-end:max(14px,env(safe-area-inset-right));display:flex;flex-direction:column;align-items:flex-end;row-gap:6px;pointer-events:none}
   .timer{position:static;transform:none;min-inline-size:103px;padding:4px 8px}
   .timer:has(#boss-health:not([hidden])){
     display:grid;grid-template-columns:minmax(87px,max-content) minmax(38px,max-content);
@@ -41,6 +46,7 @@ body[data-phase="running"]:has(#touch:not([hidden])) #notice.boss-notice{bottom:
   #boss-health-fill{block-size:100%;background:var(--amber)}
   #repair-hud{position:static;max-inline-size:min(175px,45vw);font-size:11px}
   #repair-inventory{font-size:11px}
+  #mission-hud:has(#tower-actions:not([hidden])) > #radio{position:static;width:min(440px,calc(100vw - max(14px,env(safe-area-inset-left)) - max(14px,env(safe-area-inset-right))))}
 }
 #progress-reset-panel button{min-height:44px}
 

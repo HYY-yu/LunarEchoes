@@ -20,7 +20,7 @@ type LegacyDesertAssault = {
 };
 
 type ContinuousDesertAssault = {
-  mode: 'continuous';
+  mode: 'continuous' | 'salvage';
   deliveries: number;
   final: { kind: 'waiting' }
     | { kind: 'scheduled'; firstTick: number }
@@ -39,7 +39,7 @@ type SpawnEnemy = (kind: EnemyKind, origin?: Readonly<{ x: number; y: number }>)
 export function stepDesertAssault(
   assault: DesertAssault, tick: number, repairedCount: number, nextEnemyId: number, spawn: SpawnEnemy
 ): boolean {
-  if (repairedCount !== 0) {
+  if (repairedCount !== 0 && (!('mode' in assault) || assault.mode !== 'salvage' || assault.final.kind === 'waiting')) {
     for (const kind of RELAY_REPAIR_RAID) spawn(kind);
     if (repairedCount === TOWER_COUNT) assault.final = { kind: 'scheduled', firstTick: tick + FINAL_DELAY_TICKS };
   }
@@ -81,10 +81,11 @@ export function desertSpawnInterval(assault: DesertAssault | undefined, tick: nu
   return Math.max(8, baseline - Math.floor((tick - assault.final.pressureStart) / PRESSURE_STEP_TICKS));
 }
 
-export function desertAssaultOutcome(assault: DesertAssault, tick: number, enemies: readonly Enemy[], bossKilled: boolean): 'won' | 'lost' | undefined {
+export function desertAssaultOutcome(assault: DesertAssault, tick: number, enemies: readonly Enemy[], bossKilled: boolean, allTowersRepaired = false): 'won' | 'lost' | undefined {
   if ('mode' in assault) {
     const { final } = assault;
     if (final.kind === 'active' && bossKilled && tick >= final.reinforcementEnd &&
+      (assault.mode !== 'salvage' || allTowersRepaired) &&
       enemies.every(enemy => enemy.id < final.firstEnemyId)) return 'won';
   } else {
     const { final } = assault;

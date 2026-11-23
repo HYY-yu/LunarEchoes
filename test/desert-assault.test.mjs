@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createWorld, dispatch, HZ } from '../dist/core.js';
 import { relayObjective } from '../dist/desert-repair.js';
-import { DESERT_ASSAULT_CONTEXT, DESERT_CONTINUOUS_CONTEXT, DESERT_RELAY_CONTEXT, DESERT_STASIS_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { DESERT_ASSAULT_CONTEXT, DESERT_CONTINUOUS_CONTEXT, DESERT_RELAY_CONTEXT, DESERT_STASIS_CONTEXT } from '../dist/stage-rules.js';
 import { play } from '../scripts/simulation.mjs';
 
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
@@ -169,7 +169,6 @@ test('v8 keeps the existing spawn clock and enemies when pressure rises, then cl
 });
 
 test('desert boss stasis pauses hostile projectiles while player and friendly shots continue', () => {
-  assert.equal(stageContext('desert-base'), DESERT_STASIS_CONTEXT);
   function ready(context = DESERT_STASIS_CONTEXT) {
     const world = createWorld({ ...context, seed: 42 });
     const arrival = 255 * HZ;

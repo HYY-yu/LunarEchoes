@@ -1,6 +1,7 @@
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_STASIS_CONTEXT, RAINFOREST_RELAY_CONTEXT, ELEVATOR_ARMOR_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, hasContinuousDesertAssault, resolveStage, stageRules, SimulationError, type CampaignReinforcementKind, type StageContext } from './stage-rules.js';
-import { createDesertRepair, createDesertFourTowers, desertShipment, RELAY_REPAIR_RAID, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_STASIS_CONTEXT, DESERT_SALVAGE_CONTEXT, RAINFOREST_RELAY_CONTEXT, ELEVATOR_ARMOR_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, hasContinuousDesertAssault, resolveStage, stageRules, SimulationError, type CampaignReinforcementKind, type StageContext } from './stage-rules.js';
+import { applyTowerAction, createDesertRepair, createDesertFourTowers, desertShipment, hitTowerWithShot, RELAY_REPAIR_RAID, stepDesertRepair, stepDesertTurret, stepTowerContact, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
 import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
+import { createDesertSalvage, dropDesertSalvage, hitWithPlayerSideShot, pulseFireInterval, stepModulePickup, stepTowerBurn, type DesertSalvage, type TowerAction, type TowerAmmo, type TowerBurn } from './desert-salvage.js';
 import type { MaterialMotion } from './material-motion.js';
 import { rainforestBroodReleases, rainforestBroodSites, type RainforestBrood } from './rainforest-brood.js';
 import { stepAntarcticBarrage, type AntarcticBarrage } from './antarctic-barrage.js';
@@ -16,7 +17,7 @@ function armorRules(context: StageContext) { return context.rulesVersion.endsWit
 export type Upgrade = 'pulse' | 'orbit' | 'nova' | 'boots' | 'hull' | 'magnet';
 export type Phase = { kind: 'running' } | { kind: 'upgrading'; offers: Upgrade[] } | { kind: 'paused'; previous: 'running' } | { kind: 'won' } | { kind: 'lost' };
 export type Input = { x: number; y: number; dash: boolean };
-export type Action = { kind: 'tick'; input: Input } | { kind: 'choose'; upgrade: Upgrade } | { kind: 'pause' } | { kind: 'resume' };
+export type Action = { kind: 'tick'; input: Input } | { kind: 'choose'; upgrade: Upgrade } | { kind: 'pause' } | { kind: 'resume' } | { kind: TowerAction };
 export type EnemyKind = 'crawler' | 'drone' | 'sentry' | 'boss' | 'boss-echo' | CampaignReinforcementKind;
 const ENEMY_LIMIT = 180;
 const ENEMY_STATS = {
@@ -31,11 +32,12 @@ const ENEMY_STATS = {
 } satisfies Record<EnemyKind, { hp: number; radius: number; speed: number; xp: number }>;
 const ROCKET_BOT = Object.freeze({ stopRange: 245, shotSpeed: 1.85, attackInterval: 220 });
 export const ROCKET_WARNING_TICKS = 48;
-export type Enemy = { id: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number; radius: number; attack: number; flash: number; armor?: ElevatorBossArmor };
-export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean; kind?: 'rocket' | 'ice-shard' };
+export type Enemy = { id: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number; radius: number; attack: number; flash: number; armor?: ElevatorBossArmor; towerBurn?: TowerBurn };
+export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean; kind?: 'rocket' | 'ice-shard' | TowerAmmo; piercedEnemyId?: number };
 export type Crystal = { x: number; y: number; value: number };
 export type Fx = { x: number; y: number; kind: 'hit' | 'kill' | 'nova' | 'dash' | 'echo-dispersal'; life: number; size: number };
-export type Event = 'enemy-hit' | 'shot' | 'hit' | 'kill' | 'pickup' | 'upgrade' | 'dash' | 'won' | 'lost' | 'boss';
+export type Event = 'enemy-hit' | 'shot' | 'hit' | 'kill' | 'pickup' | 'upgrade' | 'dash' | 'won' | 'lost' | 'boss'
+  | 'tower-fortified' | 'tower-modded' | 'tower-damaged' | 'tower-destroyed';
 export type World = {
   readonly context: StageContext;
   readonly seed: number; rng: number; tick: number; phase: Phase; nextId: number;
@@ -53,6 +55,7 @@ export type World = {
   watchtowerStrike?: WatchtowerStrike;
   lunarEchoCast?: LunarEchoCast;
   desertStasis?: DesertStasis;
+  desertSalvage?: DesertSalvage;
 };
 type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
 export type ActionBuffer = RecordingContext & { actions: Action[] };
@@ -69,9 +72,12 @@ export function createWorld(request: unknown): World {
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
   if (hasDesertAssault(context)) {
     world.desertRepair = createDesertFourTowers([], hasDesertRelay(context));
-    world.desertAssault = hasContinuousDesertAssault(context)
+    world.desertAssault = context === DESERT_SALVAGE_CONTEXT
+      ? { mode: 'salvage', deliveries: 0, final: { kind: 'waiting' } }
+      : hasContinuousDesertAssault(context)
       ? { mode: 'continuous', deliveries: 0, final: { kind: 'waiting' } }
       : { deliveries: 0, final: { kind: 'waiting' } };
+    if (context === DESERT_SALVAGE_CONTEXT) world.desertSalvage = createDesertSalvage(seed);
   } else if (campaignRelayDeliveryTicks(context)) {
     world.desertRepair = createDesertFourTowers([], true);
     world.campaignRelay = { deliveries: 0 };
@@ -127,6 +133,7 @@ function kill(world: World, enemy: Enemy): void {
   world.crystals.push({ x: enemy.x, y: enemy.y, value: ENEMY_STATS[enemy.kind].xp });
   world.effects.push({ x: enemy.x, y: enemy.y, kind: 'kill', life: 24, size: enemy.radius });
   world.events.push('kill');
+  if (world.desertSalvage && world.desertRepair) dropDesertSalvage(world.desertSalvage, world.desertRepair, enemy);
   if (enemy.kind === 'boss') world.bossKilled = true;
 }
 function damagePlayer(world: World): void {
@@ -163,7 +170,8 @@ export function dispatch(world: World, action: Action): void {
     return;
   }
   if (world.phase.kind !== 'running') return;
-  step(world, normalizeInput(action.input));
+  if (action.kind === 'tick') step(world, normalizeInput(action.input));
+  else applyTowerAction(world, action.kind);
 }
 function step(world: World, input: Input): void {
   world.tick++;
@@ -180,10 +188,10 @@ function step(world: World, input: Input): void {
     if (world.tick % 2 === 0) world.effects.push({ x: p.x, y: p.y, kind: 'dash', life: 16, size: 10 });
   } else { p.x = clamp(world, p.x + input.x * speed); p.y = clamp(world, p.y + input.y * speed); }
   if (input.x !== 0 || input.y !== 0) { p.dx = input.x; p.dy = input.y; }
-  const { desertRepair, desertAssault, campaignRelay } = world;
+  const { desertRepair, desertAssault, campaignRelay, desertSalvage } = world;
   if (desertRepair) {
     const delivery = campaignRelay ?? desertAssault;
-    if (delivery) {
+    if (delivery && !desertSalvage) {
       const relay = campaignRelay !== undefined || hasDesertRelay(world.context);
       const deliveryTicks = campaignRelayDeliveryTicks(world.context) ?? (relay ? DESERT_RELAY_SUPPLY_TICKS : DESERT_SUPPLY_TICKS);
       if (world.tick === deliveryTicks[delivery.deliveries]) {
@@ -192,13 +200,16 @@ function step(world: World, input: Input): void {
       }
     }
     const repaired = stepDesertRepair(desertRepair, world);
+    if (desertSalvage) stepModulePickup(world, desertSalvage);
     if (campaignRelay && repaired) for (const kind of RELAY_REPAIR_RAID) spawn(world, kind);
     if (desertAssault && 'towers' in desertRepair) {
       const repairedCount = repaired ? desertRepair.towers.filter(tower => tower.kind === 'repaired').length : 0;
-      if (stepDesertAssault(desertAssault, world.tick, repairedCount, world.nextId, (kind, origin) => spawn(world, kind, undefined, origin))) {
+      if (stepDesertAssault(desertAssault, world.tick, repairedCount, world.nextId, (kind, origin) => {
+        spawn(world, kind, desertSalvage && kind === 'boss' ? 2850 : undefined, origin);
+      })) {
         world.bossSpawned = true;
         world.events.push('boss');
-        if (world.context === DESERT_STASIS_CONTEXT) {
+        if (world.context === DESERT_STASIS_CONTEXT || desertSalvage) {
           const boss = world.enemies.find(enemy => enemy.kind === 'boss');
           if (boss) world.desertStasis = planDesertStasis(boss.id, world.tick);
         }
@@ -256,7 +267,7 @@ function step(world: World, input: Input): void {
       const a = angle + (i - (count - 1) / 2) * .15;
       world.shots.push({ x: p.x, y: p.y, vx: Math.cos(a) * 8, vy: Math.sin(a) * 8, life: 70, damage: 17 + world.upgrades.pulse * 6, hostile: false });
     }
-    world.fireCooldown = Math.max(8, 31 - world.upgrades.pulse * 3);
+    world.fireCooldown = pulseFireInterval(world.upgrades.pulse);
     world.events.push('shot');
   }
   world.novaCooldown--;
@@ -266,8 +277,13 @@ function step(world: World, input: Input): void {
     world.effects.push({ x: p.x, y: p.y, kind: 'nova', life: 30, size: radius });
     world.novaCooldown = Math.max(90, 240 - world.upgrades.nova * 15);
   }
+  const applyDamage = (enemy: Enemy, damage: number, flash: number) => damageEnemy(world, enemy, damage, flash);
   for (const enemy of world.enemies) {
     if (enemy.armor) expireElevatorBossArmor(enemy, world.tick);
+    if (enemy.towerBurn) {
+      stepTowerBurn(enemy, world.tick, applyDamage);
+      if (enemy.hp <= 0) continue;
+    }
     if (enemy.flash > 0) enemy.flash--;
     const angle = Math.atan2(p.y - enemy.y, p.x - enemy.x);
     const d = distance(p.x, p.y, enemy.x, enemy.y);
@@ -305,15 +321,18 @@ function step(world: World, input: Input): void {
     if (frozen && shot.hostile) continue;
     shot.x += shot.vx; shot.y += shot.vy; shot.life--;
     if (shot.hostile) {
-      if (distance(shot.x, shot.y, p.x, p.y) < 12) { damagePlayer(world); shot.life = 0; }
+      if (desertSalvage && hitTowerWithShot(world, desertRepair, shot)) shot.life = 0;
+      else if (distance(shot.x, shot.y, p.x, p.y) < 12) { damagePlayer(world); shot.life = 0; }
     } else {
       for (const enemy of world.enemies) {
-        if (enemy.hp > 0 && distance(shot.x, shot.y, enemy.x, enemy.y) < enemy.radius + 5) {
-          damageEnemy(world, enemy, shot.damage, 6); shot.life = 0; break;
+        if (enemy.hp > 0 && enemy.id !== shot.piercedEnemyId && distance(shot.x, shot.y, enemy.x, enemy.y) < enemy.radius + 5) {
+          hitWithPlayerSideShot(shot, enemy, world, applyDamage);
+          break;
         }
       }
     }
   }
+  if (desertSalvage) stepTowerContact(world, desertRepair);
   for (const enemy of world.enemies) if (enemy.hp <= 0) kill(world, enemy);
   world.enemies = world.enemies.filter(enemy => enemy.hp > 0);
   const stasis = world.desertStasis;
@@ -348,7 +367,8 @@ function step(world: World, input: Input): void {
     world.phase = { kind: 'upgrading', offers: offers(world) };
   }
   if (desertAssault && world.phase.kind !== 'lost') {
-    const outcome = desertAssaultOutcome(desertAssault, world.tick, world.enemies, world.bossKilled);
+    const allTowersRepaired = desertRepair && 'towers' in desertRepair && desertRepair.towers.every(tower => tower.kind === 'repaired');
+    const outcome = desertAssaultOutcome(desertAssault, world.tick, world.enemies, world.bossKilled, allTowersRepaired === true);
     if (outcome) {
       world.phase = { kind: outcome };
       world.events.push(outcome);
@@ -381,7 +401,7 @@ function parseSeed(value: unknown): number {
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 4294967295) throw new SimulationError('invalid-data');
   return value;
 }
-function parseAction(value: unknown): Action {
+function parseAction(value: unknown, context: StageContext): Action {
   if (!object(value)) throw new SimulationError('invalid-data');
   if (value.kind === 'tick') {
     keys(value, ['kind', 'input']);
@@ -398,6 +418,10 @@ function parseAction(value: unknown): Action {
     return { kind: 'choose', upgrade };
   }
   if (value.kind === 'pause' || value.kind === 'resume') { keys(value, ['kind']); return { kind: value.kind }; }
+  if (context === DESERT_SALVAGE_CONTEXT && (value.kind === 'fortify-tower' || value.kind === 'mod-tower')) {
+    keys(value, ['kind']);
+    return { kind: value.kind };
+  }
   throw new SimulationError('invalid-data');
 }
 export function parseActionBuffer(input: unknown): ActionBuffer {
@@ -406,7 +430,7 @@ export function parseActionBuffer(input: unknown): ActionBuffer {
   keys(input, ['version', 'stageId', 'rulesVersion', 'seed', 'actions']);
   const context = resolveStage(input.stageId, input.rulesVersion), seed = parseSeed(input.seed);
   if (!Array.isArray(input.actions)) throw new SimulationError('invalid-data');
-  const actions = Array.from(input.actions, value => Object.freeze(parseAction(value)));
+  const actions = Array.from(input.actions, value => Object.freeze(parseAction(value, context)));
   return { version: VERSION, ...context, seed, actions };
 }
 export function startRecording(world: World): ActionBuffer {

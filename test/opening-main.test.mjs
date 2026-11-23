@@ -7,7 +7,7 @@ import { drawDesertScene } from '../dist/desert-scene.js';
 import { drawRainforestFailure, drawRainforestVictory } from '../dist/rainforest-story-art.js';
 import * as core from '../dist/core.js';
 import { createWorld, normalizeInput, replay, finalChecksum, startRecording } from '../dist/core.js';
-import { DESERT_FOUR_TOWERS_CONTEXT, DESERT_RELAY_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
+import { DESERT_FOUR_TOWERS_CONTEXT, DESERT_RELAY_CONTEXT, DESERT_STASIS_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
 import { assaultObjective } from '../dist/desert-guidance.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play as simulate } from '../scripts/simulate.mjs';
@@ -29,7 +29,7 @@ function memoryStorage(raw = null) {
     setItem(key, value) { this.writes.push([key, value]); this.raw = value; }
   };
 }
-function harness(content = embedded, localStorage = memoryStorage(), fetchStory = async () => ({ ok: true, json: async () => JSON.parse(readFileSync('dist/rainforest.story.json', 'utf8')) }), desertContext = stageContext('desert-base')) {
+function harness(content = embedded, localStorage = memoryStorage(), fetchStory = async () => ({ ok: true, json: async () => JSON.parse(readFileSync('dist/rainforest.story.json', 'utf8')) }), desertContext = DESERT_STASIS_CONTEXT) {
   const listeners = new Map(), logs = [], sessions = [], timers = new Map(), cancelledTimers = [];
   let active, raf, seedCalls = 0, now = 1000, timerNow = 0, nextTimer = 1, audioFailure = false, seedFailure = false, audioActivations = 0;
   const setTimeout = (callback, delay) => { const id = nextTimer++; timers.set(id, { callback, at: timerNow + delay }); return id; };
@@ -45,7 +45,7 @@ function harness(content = embedded, localStorage = memoryStorage(), fetchStory 
   }
   class Element {
     constructor(tag = 'div') { this.tagName = tag.toUpperCase(); this.children = []; this.style = {}; this.dataset = {}; this.attributes = {}; this.hidden = false; this._textContent = ''; this.textWrites = 0; this.id = ''; this.scrollTop = 0; this.captures = new Set(); this.events = new Map(); const classes = new Set(); this.classList = { add: name => classes.add(name), remove: name => classes.delete(name), contains: name => classes.has(name), toggle(name, force = !classes.has(name)) { if (force) classes.add(name); else classes.delete(name); return force; } }; }
-    append(...nodes) { this.children.push(...nodes); for (const node of nodes) node.parentElement = this; }
+    append(...nodes) { for (const node of nodes) { if (node.parentElement) node.remove(); this.children.push(node); node.parentElement = this; } }
     replaceChildren(...nodes) { for (const node of this.children) node.parentElement = null; this.children = []; this.append(...nodes); }
     remove() { this.parentElement.children = this.parentElement.children.filter(node => node !== this); }
     get textContent() { return this._textContent; }
@@ -63,8 +63,8 @@ function harness(content = embedded, localStorage = memoryStorage(), fetchStory 
   class Button extends Element { constructor() { super('button'); } }
   class Canvas extends Element { constructor() { super('canvas'); this.commands = []; } getContext() { const commands = this.commands; return { createImageData(width, height) { return { data: new Uint8ClampedArray(width * height * 4) }; }, putImageData() {}, fillRect(...rect) { commands.push([this.fillStyle, ...rect]); }, save() {}, restore() {}, scale() {}, translate() {}, rotate() {}, beginPath() {}, rect() {}, clip() {}, moveTo() {}, lineTo() {}, closePath() {}, fill() {}, drawImage() {}, ellipse() {}, arc() {}, stroke() {}, strokeRect() {}, setLineDash() {}, createPattern() { return 'terrain'; } }; } }
   const body = new Element('body');
-  for (const id of ['game', 'overlay', 'hud', 'touch', 'armor-cells', 'notice', 'footer-right', 'sound', 'language', 'pause', 'health-label', 'time-label', 'clock', 'sync-fill', 'level', 'kills', 'xp-fill', 'dash', 'footer-left', 'equipment', 'joystick', 'stick', 'desert-content', 'repair-hud', 'repair-inventory', 'repair-status', 'boss-health', 'boss-health-label', 'boss-health-meter', 'boss-health-fill']) {
-    const node = id === 'game' ? new Canvas() : ['sound', 'language', 'pause', 'dash'].includes(id) ? new Button() : new Element('div'); node.id = id; if (id === 'desert-content') node.textContent = content; body.append(node);
+  for (const id of ['game', 'overlay', 'hud', 'touch', 'armor-cells', 'notice', 'footer-right', 'sound', 'language', 'pause', 'health-label', 'time-label', 'clock', 'sync-fill', 'level', 'kills', 'xp-fill', 'dash', 'footer-left', 'equipment', 'joystick', 'stick', 'desert-content', 'mission-hud', 'repair-hud', 'repair-inventory', 'repair-status', 'salvage-module', 'tower-actions', 'fortify-tower', 'mod-tower', 'boss-health', 'boss-health-label', 'boss-health-meter', 'boss-health-fill']) {
+    const node = id === 'game' ? new Canvas() : ['sound', 'language', 'pause', 'dash', 'fortify-tower', 'mod-tower'].includes(id) ? new Button() : new Element('div'); node.id = id; if (id === 'desert-content') node.textContent = content; body.append(node);
   }
   const all = (node = body) => [node, ...node.children.flatMap(child => all(child))];
   const get = id => all().find(node => node.id === id) ?? null;
@@ -575,6 +575,53 @@ test('header focus preserves combat movement, pause and upgrade shortcuts while 
 });
 
 function startLive(app) { app.click('启动任务'); app.click('部署出发'); }
+test('desert salvage teaches enemy drops and records two distinct nearby tower actions', () => {
+  const app = harness(undefined, undefined, undefined, resolveStage('desert-base', 'desert-base-10'));
+  app.click('启动任务');
+  assert.match(app.get('opening-objective').textContent, /击破敌军，回收木材和铁矿/);
+  app.get('language').onclick();
+  assert.match(app.get('opening-objective').textContent, /Defeat enemies to salvage wood and iron/);
+  app.click('Deploy');
+  assert.match(app.get('radio-story').textContent, /Defeat enemies and salvage wood and iron/);
+  assert.match(app.get('repair-status').textContent, /Turrets 0\/4 · Defeat enemies for supplies/);
+  assert.equal(app.get('tower-actions').hidden, true);
+  app.get('pause').onclick();
+  assert.match(app.get('pause-objective').textContent, /Defeat enemies to salvage wood and iron/);
+  app.get('pause-resume').onclick();
+
+  app.frame();
+  const world = app.snapshot().world;
+  const target = world.desertRepair.towers[0];
+  Object.assign(world.player, { x: target.x, y: target.y });
+  world.desertRepair.inventory = { wood: 2, iron: 1 };
+  app.fixtureWorld(world);
+  app.frame(1000 / 60 + .000001);
+  app.get('language').onclick();
+  assert.equal(app.get('tower-actions').hidden, false);
+  assert.equal(app.get('fortify-tower').disabled, true);
+  assert.equal(app.get('mod-tower').disabled, true);
+  assert.match(app.get('repair-status').textContent, /炮塔 1\/4/);
+  app.key('KeyG'); app.release('KeyG');
+  assert.equal(app.snapshot().actions.some(action => action.kind === 'mod-tower'), false);
+
+  const supplied = app.snapshot().world;
+  supplied.desertRepair.inventory = { wood: 2, iron: 1 };
+  supplied.desertSalvage.held = 'electric';
+  app.fixtureWorld(supplied);
+  app.get('language').onclick();
+  assert.equal(app.get('salvage-module').textContent, 'Spare module · Electric');
+  assert.equal(app.get('fortify-tower').disabled, false);
+  assert.equal(app.get('mod-tower').disabled, false);
+  const radioCount = radioStarts(app).length;
+  app.key('KeyF'); app.key('KeyF', true); app.release('KeyF');
+  assert.equal(app.get('fortify-tower').disabled, true);
+  assert.equal(app.get('mod-tower').disabled, false);
+  app.get('mod-tower').onclick();
+  assert.equal(app.get('mod-tower').disabled, true);
+  assert.equal(app.get('salvage-module').textContent, 'Spare module · None');
+  assert.deepEqual(app.snapshot().actions.slice(-2), [{ kind: 'fortify-tower' }, { kind: 'mod-tower' }]);
+  assert.equal(radioStarts(app).length, radioCount);
+});
 test('desert assault guidance advances after dismissal and retains localized HUD when radio is disabled', () => {
   const app = harness(undefined, undefined, undefined, resolveStage('desert-base', 'desert-base-6'));
   startLive(app);

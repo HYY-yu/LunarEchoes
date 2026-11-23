@@ -15,7 +15,14 @@
         <div id="boss-health-meter" role="meter" aria-labelledby="boss-health-label" aria-valuemin="0"><div id="boss-health-fill"></div></div>
       </div>
     </div>
-    <div id="repair-hud" hidden><strong id="repair-inventory"></strong><span id="repair-status" role="status"></span></div>
+    <div id="repair-hud" hidden>
+      <strong id="repair-inventory"></strong><span id="repair-status" role="status"></span>
+      <span id="salvage-module" role="status" hidden></span>
+      <div id="tower-actions" hidden>
+        <button id="fortify-tower" type="button" aria-keyshortcuts="F"></button>
+        <button id="mod-tower" type="button" aria-keyshortcuts="G"></button>
+      </div>
+    </div>
   </div>
   <div class="hud-right"><span id="level"></span><strong id="kills"></strong></div>
   <div class="xp-track"><div id="xp-fill"></div></div>

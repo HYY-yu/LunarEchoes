@@ -1,5 +1,5 @@
 import { DESERT_CONTEXT, stageRules } from '../dist/stage-rules.js';
-import { planDesertAssaultInput } from './desert-assault-pilot.mjs';
+import { planDesertAssaultInput, planDesertSalvageAction } from './desert-assault-pilot.mjs';
 import assert from 'node:assert/strict';
 import { createWorld, dispatch, replay, checksum, startRecording, finishRecording } from '../dist/core.js';
 export function play(seed, context = DESERT_CONTEXT, opening = [], assaultOptions) {
@@ -16,6 +16,8 @@ export function play(seed, context = DESERT_CONTEXT, opening = [], assaultOption
       continue;
     }
     if (world.desertAssault || world.campaignRelay) {
+      const towerAction = planDesertSalvageAction(world, assaultOptions);
+      if (towerAction) act(towerAction);
       act({ kind: 'tick', input: planDesertAssaultInput(world, assaultOptions) });
       continue;
     }
