@@ -1,9 +1,14 @@
 import type { World } from './core.js';
-import { rainforestBroodSites, rainforestBroodWarning } from './rainforest-brood.js';
+import { rainforestBroodSites, rainforestBroodWarning, type RainforestBrood } from './rainforest-brood.js';
 
 const FULL_TURN = Math.PI * 2;
 const BURST_TICKS = 24;
 type BroodSite = ReturnType<typeof rainforestBroodSites>[number];
+
+export function rainforestBroodBurstProgress(release: RainforestBrood, tick: number): number | undefined {
+  const age = tick - release.tick;
+  return age >= 0 && age < BURST_TICKS ? age / BURST_TICKS : undefined;
+}
 
 export function drawRainforestBrood(ctx: CanvasRenderingContext2D, world: World, arena: number): void {
   const progress = rainforestBroodWarning(world.context, world.tick);
@@ -18,10 +23,10 @@ export function drawRainforestBrood(ctx: CanvasRenderingContext2D, world: World,
 
   const release = world.rainforestBrood;
   if (!release) return;
-  const age = world.tick - release.tick;
-  if (age < 0 || age >= BURST_TICKS) return;
+  const burst = rainforestBroodBurstProgress(release, world.tick);
+  if (burst === undefined) return;
   ctx.save();
-  for (const site of release.sites) drawBurst(ctx, site, age / BURST_TICKS);
+  for (const site of release.sites) drawBurst(ctx, site, burst);
   ctx.restore();
 }
 
