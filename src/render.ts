@@ -1,6 +1,6 @@
 import {
   hasDesertRelay, hasRelayBase, LUNAR_RELAY_CONTEXT,
-  RAINFOREST_RELAY_CONTEXT, stageRules
+  stageRules
 } from './stage-rules.js';
 import { ROCKET_WARNING_TICKS, type World } from './core.js';
 import { createAtlas } from './art.js';
@@ -13,6 +13,7 @@ import { createWatchtowerChargeArt } from './watchtower-charge-art.js';
 import { createLunarIsolationArt } from './lunar-isolation-art.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
 import { createRainforestArchiveArt } from './rainforest-archive-art.js';
+import { drawRainforestBrood } from './rainforest-brood-art.js';
 import { createDesertSupplyArt } from './desert-supply-art.js';
 import { createDesertTowerArt } from './desert-tower-art.js';
 import { createFrostGuardArt } from './frost-guard-art.js';
@@ -82,10 +83,11 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     const view = { left: cameraX - vw / 2, top: cameraY - vh / 2, width: vw, height: vh };
     if (world.context.stageId === 'rainforest') {
       drawRainforestTerrain(ctx, view);
-      if (world.context === RAINFOREST_RELAY_CONTEXT) {
+      if (hasRelayBase(world.context)) {
         drawRainforestArchive ??= createRainforestArchiveArt();
         drawRainforestArchive(ctx, world.tick);
       }
+      if (!title) drawRainforestBrood(ctx, world, arena);
     } else if (world.context.stageId === 'desert-base') drawDesertMap(ctx, arena, view);
     else drawCampaignTerrain(ctx, view, world.context.stageId, arena, world.tick, time);
     if (world.context.stageId === 'antarctica' && hasRelayBase(world.context)) {

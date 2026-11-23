@@ -2,6 +2,7 @@ import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEX
 import { createDesertRepair, createDesertFourTowers, desertShipment, RELAY_REPAIR_RAID, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
 import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 import type { MaterialMotion } from './material-motion.js';
+import { rainforestBroodReleases, rainforestBroodSites, type RainforestBrood } from './rainforest-brood.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -40,6 +41,7 @@ export type World = {
   campaignRelay?: { deliveries: number };
   desertTurretShots?: DesertTurretShots;
   materialMotions?: MaterialMotion[];
+  rainforestBrood?: RainforestBrood;
 };
 type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
 export type ActionBuffer = RecordingContext & { actions: Action[] };
@@ -89,10 +91,13 @@ function distance(x: number, y: number, bx: number, by: number): number { return
 function spawn(world: World, kind: EnemyKind, hitPoints?: number, origin: Readonly<{ x: number; y: number }> = world.player): void {
   const angle = random(world) * Math.PI * 2;
   const d = kind === 'boss' ? 350 : 400 + random(world) * 100;
-  const stats = ENEMY_STATS[kind];
-  const hp = hitPoints ?? stats.hp;
   let x = clamp(world, origin.x + Math.cos(angle) * d), y = clamp(world, origin.y + Math.sin(angle) * d);
   if (distance(x, y, origin.x, origin.y) < 250) { x = clamp(world, origin.x - Math.cos(angle) * d); y = clamp(world, origin.y - Math.sin(angle) * d); }
+  addEnemy(world, kind, x, y, hitPoints);
+}
+function addEnemy(world: World, kind: EnemyKind, x: number, y: number, hitPoints?: number): void {
+  const stats = ENEMY_STATS[kind];
+  const hp = hitPoints ?? stats.hp;
   world.enemies.push({ id: world.nextId++, kind, x, y, hp, maxHp: hp, radius: stats.radius, attack: 75 + Math.floor(random(world) * 120), flash: 0 });
 }
 function kill(world: World, enemy: Enemy): void {
@@ -282,6 +287,14 @@ function step(world: World, input: Input): void {
   }
   for (const enemy of world.enemies) if (enemy.hp <= 0) kill(world, enemy);
   world.enemies = world.enemies.filter(enemy => enemy.hp > 0);
+  if (world.phase.kind !== 'lost' && rainforestBroodReleases(world.context, world.tick)) {
+    const mother = world.enemies.find(enemy => enemy.kind === 'boss');
+    if (mother && world.enemies.length < 180) {
+      const sites = rainforestBroodSites(mother.x, mother.y, rules.arenaSize).slice(0, 180 - world.enemies.length);
+      for (const { x, y } of sites) addEnemy(world, 'crawler', x, y);
+      world.rainforestBrood = { tick: world.tick, motherId: mother.id, sites };
+    }
+  }
   world.shots = world.shots.filter(shot => shot.life > 0);
   const pickupRadius = 115 + world.upgrades.magnet * 25;
   for (const crystal of world.crystals) {

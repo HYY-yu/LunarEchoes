@@ -14,6 +14,7 @@ export const DESERT_CONTINUOUS_CONTEXT = context('desert-base', 8);
 export const DESERT_ASSAULT_DURATION_TICKS = 60 * 300;
 export const RAINFOREST_CONTEXT = context('rainforest', 1);
 export const RAINFOREST_RELAY_CONTEXT = context('rainforest', 3);
+export const RAINFOREST_BROOD_CONTEXT = context('rainforest', 4);
 export const ANTARCTICA_CONTEXT = context('antarctica', 1);
 export const ANTARCTIC_RELAY_CONTEXT = context('antarctica', 3);
 export const ANTARCTIC_FROST_CONTEXT = context('antarctica', 4);
@@ -54,6 +55,7 @@ export type StageContext =
   | typeof DESERT_RELAY_CONTEXT
   | typeof DESERT_CONTINUOUS_CONTEXT
   | typeof RAINFOREST_RELAY_CONTEXT
+  | typeof RAINFOREST_BROOD_CONTEXT
   | typeof ANTARCTIC_RELAY_CONTEXT
   | typeof ANTARCTIC_FROST_CONTEXT
   | typeof ELEVATOR_RELAY_CONTEXT
@@ -63,11 +65,13 @@ export type StageContext =
   | typeof LUNAR_RELAY_CONTEXT;
 
 type FourDeliveries = readonly [number, number, number, number];
+const RAINFOREST_DELIVERY_TICKS = Object.freeze([1, 35 * 60, 70 * 60, 108 * 60] as const);
 const ANTARCTIC_DELIVERY_TICKS = Object.freeze([1, 42 * 60, 84 * 60, 126 * 60] as const);
 const ELEVATOR_DELIVERY_TICKS = Object.freeze([1, 29 * 60, 76 * 60, 120 * 60] as const);
 const WATCHTOWER_DELIVERY_TICKS = Object.freeze([1, 42 * 60, 89 * 60, 118 * 60] as const);
 const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rulesVersion'], FourDeliveries>>> = Object.freeze({
-  'rainforest-3': Object.freeze([1, 35 * 60, 70 * 60, 108 * 60] as const),
+  'rainforest-3': RAINFOREST_DELIVERY_TICKS,
+  'rainforest-4': RAINFOREST_DELIVERY_TICKS,
   'antarctica-3': ANTARCTIC_DELIVERY_TICKS,
   'antarctica-4': ANTARCTIC_DELIVERY_TICKS,
   'space-elevator-3': ELEVATOR_DELIVERY_TICKS,
@@ -79,7 +83,7 @@ const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rules
 
 const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object.freeze({
   'desert-base': DESERT_CONTINUOUS_CONTEXT,
-  rainforest: RAINFOREST_RELAY_CONTEXT,
+  rainforest: RAINFOREST_BROOD_CONTEXT,
   antarctica: ANTARCTIC_FROST_CONTEXT,
   'space-elevator': ELEVATOR_SUIT_CONTEXT,
   watchtower: WATCHTOWER_ROCKET_CONTEXT,
@@ -214,6 +218,7 @@ export function resolveStage(stageId: unknown, rulesVersion: unknown): StageCont
   if (!isStageId(stageId)) throw new SimulationError('unavailable-stage');
   const latest = stageContext(stageId);
   if (rulesVersion === latest.rulesVersion) return latest;
+  if (stageId === 'rainforest' && rulesVersion === RAINFOREST_RELAY_CONTEXT.rulesVersion) return RAINFOREST_RELAY_CONTEXT;
   if (stageId === 'antarctica' && rulesVersion === ANTARCTIC_RELAY_CONTEXT.rulesVersion) return ANTARCTIC_RELAY_CONTEXT;
   if (stageId === 'space-elevator' && rulesVersion === ELEVATOR_RELAY_CONTEXT.rulesVersion) return ELEVATOR_RELAY_CONTEXT;
   if (stageId === 'watchtower' && rulesVersion === WATCHTOWER_RELAY_CONTEXT.rulesVersion) return WATCHTOWER_RELAY_CONTEXT;
