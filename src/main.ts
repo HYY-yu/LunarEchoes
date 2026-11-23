@@ -40,7 +40,8 @@ const canvasNode = element('game');
 if (!(canvasNode instanceof HTMLCanvasElement)) throw new Error('Game canvas is unavailable');
 const render = createRenderer(canvasNode), synth = new Synth();
 const overlay = element('overlay'), hud = element('hud'), touch = element('touch');
-const missionHud = element('mission-hud'), towerActions = element('tower-actions');
+const missionHud = element('mission-hud'), repairHud = element('repair-hud'), towerActions = element('tower-actions');
+const equipment = element('equipment');
 const fortifyTowerButton = towerActionButton('fortify-tower'), modTowerButton = towerActionButton('mod-tower');
 let language: Language = 'zh';
 const progressStorage = openProgressStorage({
@@ -571,7 +572,6 @@ function useTowerAction(kind: TowerAction) {
   } catch (error) { fail(error); }
 }
 function updateRepairHud() {
-  const panel = element('repair-hud');
   const { desertRepair: repair, desertSalvage: salvage } = world;
   const radioHost = salvage ? missionHud : document.body;
   if (radio.parentElement !== radioHost) radioHost.append(radio);
@@ -581,8 +581,8 @@ function updateRepairHud() {
   towerActions.hidden = !choices;
   fortifyTowerButton.disabled = !choices?.['fortify-tower'];
   modTowerButton.disabled = !choices?.['mod-tower'];
-  panel.hidden = !repair || (screen !== 'game' && screen !== 'replay') || world.phase.kind !== 'running';
-  if (panel.hidden || !repair) return;
+  repairHud.hidden = !repair || (screen !== 'game' && screen !== 'replay') || world.phase.kind !== 'running';
+  if (repairHud.hidden || !repair) return;
   const t = text();
   if (choices) {
     if (fortifyTowerButton.textContent !== t.fortifyTower) fortifyTowerButton.textContent = t.fortifyTower;
@@ -672,7 +672,7 @@ function updateUi(force = false) {
   if (screen === 'replay') battleObjective = t.replaying;
   if (fieldBattle && screen === 'replay-end') battleObjective = t.replayDone;
   element('footer-left').textContent = menu ? menuLabel : `${battleLabel} · ${t.seed} ${world.seed} · ${battleObjective}`;
-  const equipment = element('equipment'); equipment.replaceChildren();
+  equipment.replaceChildren();
   for (const id of UPGRADE_ORDER) if (world.upgrades[id] > 0) { const node = document.createElement('span'); node.innerHTML = `<i class="module-icon icon-${id}" aria-hidden="true"></i><span>LV ${world.upgrades[id]}</span>`; node.title = upgradeLabel(id, language).title; node.setAttribute('aria-label', `${node.title} · LV ${world.upgrades[id]}`); equipment.append(node); }
   if (!force && signature === lastUi) return;
   lastUi = signature; synth.setSession(menu ? 'menu' : world.phase.kind === 'won' || world.phase.kind === 'lost' ? 'terminal' : world.phase.kind);
@@ -933,7 +933,13 @@ function frame(now: number) {
         }
       }
     } else accumulator = 0;
-    render(world, now, screen === 'title' || screen === 'stages', !compactHud.matches);
+    const compact = compactHud.matches;
+    let inventoryBounds;
+    if (compact && world.desertSalvage && !repairHud.hidden && (screen === 'game' || screen === 'replay')) {
+      const { left, top, width, height } = repairHud.getBoundingClientRect();
+      inventoryBounds = { left, top, width, height, equipment: equipment.getBoundingClientRect() };
+    }
+    render(world, now, screen === 'title' || screen === 'stages', !compact, inventoryBounds);
     if (++uiCounter % 6 === 0) updateUi();
     frames++; if (now - metricTime > 5000) { log('debug', 'render.metrics', { frames, elapsedMs: now - metricTime, enemies: world.enemies.length, shots: world.shots.length, tick: world.tick }); frames = 0; metricTime = now; }
     requestAnimationFrame(frame);
