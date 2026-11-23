@@ -4,7 +4,7 @@ import {
 import { ROCKET_WARNING_TICKS, type Enemy, type Shot, type World } from './core.js';
 import type { StageId } from './stage-contract.js';
 import { createAtlas } from './art.js';
-import { astronautVisorBounds, createAstronautArt } from './astronaut-art.js';
+import { createAstronautFacingArt, directionalVisorBounds } from './astronaut-art.js';
 import { createBossBodyArt, type BossPose } from './boss-body-art.js';
 import { createSecondBossArt } from './boss-atlas-two.js';
 import { createFinalBossArt } from './boss-final-pair.js';
@@ -145,14 +145,14 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   if (!context) throw new Error('Canvas 2D is unavailable');
   const ctx = context;
   const atlas = createAtlas();
-  const drawAstronaut = createAstronautArt();
-  let playerMotion: { world: World; tick: number; x: number; y: number; animationTick: number } | undefined;
+  const drawAstronaut = createAstronautFacingArt();
   let bossMotion: BossMotion | undefined;
   const bossBodyArt = new Map<StageId, DrawBossBody>();
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
   const towerPoses = new Map<TowerDirection, TowerTurnPose>();
+  let towerFrame: { world: World; tick: number } | undefined;
   let drawRocketBot: ReturnType<typeof createRocketBotArt> | undefined;
   let drawInsulatedSuit: ReturnType<typeof createInsulatedSuitArt> | undefined;
   let drawFrostGuard: ReturnType<typeof createFrostGuardArt> | undefined;
@@ -189,12 +189,11 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   }
   return function render(world: World, time: number, title = false, showWorldBossHealth = true) {
     const p = world.player, arena = stageRules(world.context).arenaSize;
-    if (!playerMotion || playerMotion.world !== world || world.tick < playerMotion.tick) {
+    if (towerFrame?.world !== world || world.tick < towerFrame.tick) {
       towerPoses.clear();
-      playerMotion = { world, tick: world.tick, x: p.x, y: p.y, animationTick: 0 };
-    } else if (world.tick > playerMotion.tick) {
-      if (world.phase.kind === 'running') playerMotion.animationTick = p.x !== playerMotion.x || p.y !== playerMotion.y ? world.tick : 0;
-      playerMotion.tick = world.tick; playerMotion.x = p.x; playerMotion.y = p.y;
+      towerFrame = { world, tick: world.tick };
+    } else {
+      towerFrame.tick = world.tick;
     }
     const width = Math.ceil(canvas.clientWidth / 2), height = Math.ceil(canvas.clientHeight / 2);
     if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
@@ -348,17 +347,19 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       drawDesertStasisClock(ctx, p, stasis, world.tick, stasisActive);
     }
     ctx.globalAlpha = p.invincible > 0 && world.tick % 6 < 3 ? .45 : 1;
-    drawAstronaut(ctx, p.x, p.y, playerMotion.animationTick);
+    const facing = drawAstronaut(ctx, world, p.x, p.y, world.tick, world.phase.kind === 'running');
     ctx.globalAlpha = 1;
-    if (!title && world.materialMotions) {
-      const visor = astronautVisorBounds(p.x, p.y);
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(view.left, view.top, view.width, view.height);
-      ctx.rect(visor.x, visor.y, visor.width, visor.height);
-      ctx.clip('evenodd');
+    if (!title && world.materialMotions?.length) {
+      const visor = directionalVisorBounds(p.x, p.y, facing);
+      if (visor) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(view.left, view.top, view.width, view.height);
+        ctx.rect(visor.x, visor.y, visor.width, visor.height);
+        ctx.clip('evenodd');
+      }
       for (const motion of world.materialMotions) drawMaterialMotion(ctx, motion, world.tick, p);
-      ctx.restore();
+      if (visor) ctx.restore();
     }
     for (let i = 0; i < Math.min(4, world.upgrades.orbit); i++) {
       const angle = world.tick * .055 + i * Math.PI * 2 / Math.min(4, world.upgrades.orbit);
