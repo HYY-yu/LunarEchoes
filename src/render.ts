@@ -76,15 +76,38 @@ function drawModulePickup(ctx: CanvasRenderingContext2D, { x, y, module }: NonNu
   }
 }
 
-function drawTowerArmor(ctx: CanvasRenderingContext2D, tower: DirectionalTower) {
+type Bounds = Readonly<{ left: number; top: number; width: number; height: number }>;
+
+type InventoryBounds = Bounds & Readonly<{ equipment?: Bounds }>;
+
+function overlapsBounds(left: number, top: number, width: number, height: number, bounds: Bounds) {
+  return left < bounds.left + bounds.width && left + width > bounds.left
+    && top < bounds.top + bounds.height && top + height > bounds.top;
+}
+
+function drawTowerArmor(ctx: CanvasRenderingContext2D, tower: DirectionalTower, view: Bounds, inventory: InventoryBounds | undefined, gapX: number, gapY: number) {
   if (tower.kind !== 'repaired' || !tower.armor) return;
   const capacity = desertTowerCapacity(tower);
-  const x = Math.round(tower.x - capacity * 4 / 2), y = Math.round(tower.y) - 57;
+  let left = Math.round(tower.x - capacity * 4 / 2) - 2, top = Math.round(tower.y) - 59;
+  const width = capacity * 4 + 3, height = 7;
+  if (inventory && overlapsBounds(left, top, width, height, inventory)) {
+    const leftOfInventory = Math.floor(inventory.left - gapX - width);
+    const belowTower = Math.round(tower.y) + 16;
+    if (leftOfInventory >= view.left) {
+      left = leftOfInventory;
+      const { equipment } = inventory;
+      if (equipment && overlapsBounds(left, top, width, height, equipment)) {
+        top = Math.floor(equipment.top - gapY - height);
+      }
+    } else if (!overlapsBounds(left, belowTower, width, height, inventory) && belowTower + height <= view.top + view.height) {
+      top = belowTower;
+    }
+  }
   ctx.fillStyle = '#102a36';
-  ctx.fillRect(x - 2, y - 2, capacity * 4 + 3, 7);
+  ctx.fillRect(left, top, width, height);
   for (let hit = 0; hit < capacity; hit++) {
     ctx.fillStyle = hit < tower.armor.hits ? (tower.loadout?.reinforced ? '#efbf72' : '#9be5d4') : '#50626a';
-    ctx.fillRect(x + hit * 4, y, 3, 3);
+    ctx.fillRect(left + 2 + hit * 4, top + 2, 3, 3);
   }
 }
 
@@ -188,7 +211,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     }
     drawTower(ctx, tower, pose.angle, pose.flash, reinforced);
   }
-  return function render(world: World, time: number, title = false, showWorldBossHealth = true) {
+  return function render(world: World, time: number, title = false, showWorldBossHealth = true, inventoryBounds?: InventoryBounds) {
     const p = world.player, arena = stageRules(world.context).arenaSize;
     if (previousFrame?.world !== world || world.tick < previousFrame.tick) {
       towerPoses.clear();
@@ -197,7 +220,8 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     } else {
       previousFrame.tick = world.tick;
     }
-    const width = Math.ceil(canvas.clientWidth / 2), height = Math.ceil(canvas.clientHeight / 2);
+    const clientWidth = canvas.clientWidth, clientHeight = canvas.clientHeight;
+    const width = Math.ceil(clientWidth / 2), height = Math.ceil(clientHeight / 2);
     if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
     ctx.imageSmoothingEnabled = false;
     const zoom = Math.max(.8, Math.min(1.2, width / 600));
@@ -207,6 +231,17 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     const vw = width / zoom, vh = height / zoom;
     ctx.translate(vw / 2 - cameraX, vh / 2 - cameraY);
     const view = { left: cameraX - vw / 2, top: cameraY - vh / 2, width: vw, height: vh };
+    const worldPerCssX = vw / clientWidth, worldPerCssY = vh / clientHeight;
+    const toWorldBounds = (bounds?: Bounds) => bounds && bounds.width > 0 && bounds.height > 0
+      ? {
+          left: view.left + bounds.left * worldPerCssX,
+          top: view.top + bounds.top * worldPerCssY,
+          width: bounds.width * worldPerCssX,
+          height: bounds.height * worldPerCssY
+        }
+      : undefined;
+    const inventoryRect = clientWidth > 0 && clientHeight > 0 ? toWorldBounds(inventoryBounds) : undefined;
+    const inventory = inventoryRect && { ...inventoryRect, equipment: toWorldBounds(inventoryBounds?.equipment) };
     if (world.context.stageId === 'rainforest') {
       drawRainforestTerrain(ctx, view);
       if (hasRelayBase(world.context)) {
@@ -247,7 +282,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       if ('towers' in repair) {
         for (const tower of repair.towers) {
           renderTower(tower, world, tower.direction, tower.loadout?.reinforced);
-          drawTowerArmor(ctx, tower);
+          drawTowerArmor(ctx, tower, view, inventory, 4 * worldPerCssX, 4 * worldPerCssY);
         }
       } else {
         renderTower(repair.tower, world, repair.nextTurretShotTick === undefined ? undefined : 'north');
