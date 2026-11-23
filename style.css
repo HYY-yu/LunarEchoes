@@ -29,7 +29,14 @@ body[data-phase="running"]:has(#touch:not([hidden])) #notice.boss-notice{bottom:
 @media(max-width:700px){
   #mission-hud{position:absolute;inset-block-start:calc(max(14px,env(safe-area-inset-top)) + 56px);inset-inline-end:max(14px,env(safe-area-inset-right));display:flex;flex-direction:column;align-items:flex-end;row-gap:6px}
   .timer{position:static;transform:none;min-inline-size:103px;padding:4px 8px}
-  #boss-health{display:grid;gap:3px;margin-block-start:6px;text-align:start;color:var(--amber);font:700 10px var(--mono)}
+  .timer:has(#boss-health:not([hidden])){
+    display:grid;grid-template-columns:minmax(87px,max-content) minmax(38px,max-content);
+    grid-template-areas:"label health" "clock health" "sync health";column-gap:8px
+  }
+  #time-label{grid-area:label}
+  #clock{grid-area:clock}
+  .timer .sync-track{grid-area:sync}
+  #boss-health{display:grid;grid-area:health;align-self:center;gap:3px;text-align:start;color:var(--amber);font:700 10px var(--mono)}
   #boss-health-meter{block-size:4px;background:#263e46}
   #boss-health-fill{block-size:100%;background:var(--amber)}
   #repair-hud{position:static;max-inline-size:min(175px,45vw);font-size:11px}
