@@ -209,6 +209,10 @@ function act(action: Action, record = true) {
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
+    const brood = world.rainforestBrood;
+    if (world.tick !== tickBefore && brood?.tick === world.tick) {
+      log('info', 'session.brood_released', { ...world.context, seed: world.seed, ...brood });
+    }
     if (world.nextId !== nextEnemyId) {
       const rules = stageRules(world.context);
       const reinforcement = rules.kind === 'campaign' ? rules.reinforcement : undefined;
