@@ -204,6 +204,7 @@ function act(action: Action, record = true) {
   const deliveriesBefore = (world.desertAssault ?? world.campaignRelay)?.deliveries;
   const finalBefore = world.desertAssault?.final.kind;
   const bossKilledBefore = world.bossKilled;
+  const strikeBefore = world.watchtowerStrike;
   const armoredBoss = screen === 'game' && world.context.stageId === 'space-elevator' && world.bossSpawned && !world.bossKilled
     ? world.enemies.find(enemy => enemy.armor?.kind === 'active')
     : undefined;
@@ -213,6 +214,16 @@ function act(action: Action, record = true) {
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
+    const strike = world.watchtowerStrike;
+    if (world.tick !== tickBefore && strike !== strikeBefore) {
+      const fields = { ...world.context, seed: world.seed, tick: world.tick };
+      if (strike?.kind === 'warning') log('info', 'session.watchtower_strike_started', { ...fields, ...strike });
+      else if (strike?.kind === 'impact') log('info', 'session.watchtower_strike_resolved', { ...fields, ...strike });
+      else if (strikeBefore?.kind === 'warning') log('info', 'session.watchtower_strike_cancelled', {
+        ...fields, bossId: strikeBefore.bossId, impactTick: strikeBefore.impactTick,
+        reason: world.bossKilled ? 'boss-defeated' : 'player-defeated'
+      });
+    }
     const armor = armoredBoss?.armor;
     if (armoredBoss && armor?.kind === 'spent' && armor.atTick === world.tick && world.tick !== tickBefore) {
       log('info', 'session.boss_armor_ended', { ...world.context, seed: world.seed, tick: world.tick, bossId: armoredBoss.id, reason: armor.reason });

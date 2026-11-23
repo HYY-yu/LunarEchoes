@@ -26,6 +26,7 @@ export const ELEVATOR_ARMOR_CONTEXT = context('space-elevator', 5);
 export const WATCHTOWER_CONTEXT = context('watchtower', 1);
 export const WATCHTOWER_RELAY_CONTEXT = context('watchtower', 3);
 export const WATCHTOWER_ROCKET_CONTEXT = context('watchtower', 4);
+export const WATCHTOWER_STRIKE_CONTEXT = context('watchtower', 5);
 export const LUNAR_ECHOES_CONTEXT = context('lunar-echoes', 1);
 export const LUNAR_RELAY_CONTEXT = context('lunar-echoes', 3);
 
@@ -66,6 +67,7 @@ export type StageContext =
   | typeof ELEVATOR_ARMOR_CONTEXT
   | typeof WATCHTOWER_RELAY_CONTEXT
   | typeof WATCHTOWER_ROCKET_CONTEXT
+  | typeof WATCHTOWER_STRIKE_CONTEXT
   | typeof LUNAR_RELAY_CONTEXT;
 
 type FourDeliveries = readonly [number, number, number, number];
@@ -84,6 +86,7 @@ const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rules
   'space-elevator-5': ELEVATOR_DELIVERY_TICKS,
   'watchtower-3': WATCHTOWER_DELIVERY_TICKS,
   'watchtower-4': WATCHTOWER_DELIVERY_TICKS,
+  'watchtower-5': WATCHTOWER_DELIVERY_TICKS,
   'lunar-echoes-3': Object.freeze([1, 44 * 60, 112 * 60, 142 * 60] as const)
 });
 
@@ -92,7 +95,7 @@ const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object
   rainforest: RAINFOREST_BROOD_CONTEXT,
   antarctica: ANTARCTIC_BARRAGE_CONTEXT,
   'space-elevator': ELEVATOR_ARMOR_CONTEXT,
-  watchtower: WATCHTOWER_ROCKET_CONTEXT,
+  watchtower: WATCHTOWER_STRIKE_CONTEXT,
   'lunar-echoes': LUNAR_RELAY_CONTEXT
 });
 export type SimulationErrorCode = 'invalid-data' | 'incompatible-version' | 'unavailable-stage' | 'incompatible-rules' | 'nonterminal-replay' | 'checksum-mismatch' | 'incomplete-replay';
@@ -191,15 +194,18 @@ const ELEVATOR_SUIT_RULES = Object.freeze({
   reinforcement: Object.freeze({ kind: 'insulated-suit', replaces: 'crawler', startTick: 76 * 60, share: .26 } as const)
 });
 
+const WATCHTOWER_ROCKET_RULES = Object.freeze({
+  ...RULES.watchtower,
+  reinforcement: Object.freeze({ kind: 'rocket-bot', replaces: 'sentry', startTick: 105 * 60, share: .30 } as const)
+});
+
 const REINFORCED_CAMPAIGNS: Readonly<Partial<Record<StageContext['rulesVersion'], CampaignRules>>> = Object.freeze({
   'antarctica-4': ANTARCTIC_FROST_RULES,
   'antarctica-5': ANTARCTIC_FROST_RULES,
   'space-elevator-4': ELEVATOR_SUIT_RULES,
   'space-elevator-5': ELEVATOR_SUIT_RULES,
-  'watchtower-4': Object.freeze({
-    ...RULES.watchtower,
-    reinforcement: Object.freeze({ kind: 'rocket-bot', replaces: 'sentry', startTick: 105 * 60, share: .30 })
-  })
+  'watchtower-4': WATCHTOWER_ROCKET_RULES,
+  'watchtower-5': WATCHTOWER_ROCKET_RULES
 });
 
 function isStageId(stageId: unknown): stageId is StageId {
@@ -235,6 +241,7 @@ export function resolveStage(stageId: unknown, rulesVersion: unknown): StageCont
   if (stageId === 'antarctica' && rulesVersion === ANTARCTIC_RELAY_CONTEXT.rulesVersion) return ANTARCTIC_RELAY_CONTEXT;
   if (stageId === 'space-elevator' && rulesVersion === ELEVATOR_SUIT_CONTEXT.rulesVersion) return ELEVATOR_SUIT_CONTEXT;
   if (stageId === 'space-elevator' && rulesVersion === ELEVATOR_RELAY_CONTEXT.rulesVersion) return ELEVATOR_RELAY_CONTEXT;
+  if (stageId === 'watchtower' && rulesVersion === WATCHTOWER_ROCKET_CONTEXT.rulesVersion) return WATCHTOWER_ROCKET_CONTEXT;
   if (stageId === 'watchtower' && rulesVersion === WATCHTOWER_RELAY_CONTEXT.rulesVersion) return WATCHTOWER_RELAY_CONTEXT;
   if (stageId === DESERT_TURRET_CONTEXT.stageId) {
     if (rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion) return DESERT_RELAY_CONTEXT;
