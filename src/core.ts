@@ -1,4 +1,4 @@
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, RAINFOREST_RELAY_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, resolveStage, stageRules, SimulationError, type GroundReinforcementKind, type StageContext } from './stage-rules.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, RAINFOREST_RELAY_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, resolveStage, stageRules, SimulationError, type CampaignReinforcementKind, type StageContext } from './stage-rules.js';
 import { createDesertRepair, createDesertFourTowers, desertShipment, RELAY_REPAIR_RAID, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
 import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 import type { MaterialMotion } from './material-motion.js';
@@ -11,17 +11,20 @@ export type Upgrade = 'pulse' | 'orbit' | 'nova' | 'boots' | 'hull' | 'magnet';
 export type Phase = { kind: 'running' } | { kind: 'upgrading'; offers: Upgrade[] } | { kind: 'paused'; previous: 'running' } | { kind: 'won' } | { kind: 'lost' };
 export type Input = { x: number; y: number; dash: boolean };
 export type Action = { kind: 'tick'; input: Input } | { kind: 'choose'; upgrade: Upgrade } | { kind: 'pause' } | { kind: 'resume' };
-export type EnemyKind = 'crawler' | 'drone' | 'sentry' | 'boss' | GroundReinforcementKind;
+export type EnemyKind = 'crawler' | 'drone' | 'sentry' | 'boss' | CampaignReinforcementKind;
 const ENEMY_STATS = {
   crawler: { hp: 30, radius: 11, speed: .8, xp: 1 },
   drone: { hp: 22, radius: 11, speed: 1.45, xp: 1 },
   sentry: { hp: 50, radius: 15, speed: .35, xp: 3 },
   boss: { hp: 950, radius: 27, speed: .65, xp: 20 },
   'frost-guard': { hp: 78, radius: 13, speed: .56, xp: 2 },
-  'insulated-suit': { hp: 46, radius: 12, speed: 1.02, xp: 2 }
+  'insulated-suit': { hp: 46, radius: 12, speed: 1.02, xp: 2 },
+  'rocket-bot': { hp: 72, radius: 16, speed: .44, xp: 3 }
 } satisfies Record<EnemyKind, { hp: number; radius: number; speed: number; xp: number }>;
+const ROCKET_BOT = Object.freeze({ stopRange: 245, shotSpeed: 1.85, attackInterval: 220 });
+export const ROCKET_WARNING_TICKS = 48;
 export type Enemy = { id: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number; radius: number; attack: number; flash: number };
-export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean };
+export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean; kind?: 'rocket' };
 export type Crystal = { x: number; y: number; value: number };
 export type Fx = { x: number; y: number; kind: 'hit' | 'kill' | 'nova' | 'dash'; life: number; size: number };
 export type Event = 'enemy-hit' | 'shot' | 'hit' | 'kill' | 'pickup' | 'upgrade' | 'dash' | 'won' | 'lost' | 'boss';
@@ -187,11 +190,13 @@ function step(world: World, input: Input): void {
       }
       const roll = random(world);
       const crawlerThreshold = currentWave.sentryChance + currentWave.droneChance;
-      const reinforcement = rules.groundReinforcement;
-      const groundKind = reinforcement && world.tick >= reinforcement.startTick &&
-        roll < crawlerThreshold + (1 - crawlerThreshold) * reinforcement.crawlerShare ? reinforcement.kind : 'crawler';
-      const kind = roll < currentWave.sentryChance ? 'sentry'
-        : roll < crawlerThreshold ? 'drone' : groundKind;
+      let kind: EnemyKind = roll < currentWave.sentryChance ? 'sentry' : roll < crawlerThreshold ? 'drone' : 'crawler';
+      const reinforcement = rules.reinforcement;
+      if (reinforcement && world.tick >= reinforcement.startTick && kind === reinforcement.replaces) {
+        const cutoff = kind === 'sentry' ? currentWave.sentryChance * reinforcement.share
+          : crawlerThreshold + (1 - crawlerThreshold) * reinforcement.share;
+        if (roll < cutoff) kind = reinforcement.kind;
+      }
       spawn(world, kind, kind === 'crawler' ? rules.crawlerHp : undefined);
       world.spawnCooldown = currentWave.intervalTicks;
     } else {
@@ -236,17 +241,20 @@ function step(world: World, input: Input): void {
     const d = distance(p.x, p.y, enemy.x, enemy.y);
     const boss = enemy.kind === 'boss' ? campaignBoss : undefined;
     const speed = boss?.speed ?? ENEMY_STATS[enemy.kind].speed;
-    if (enemy.kind !== 'sentry' || d > 230) { enemy.x += Math.cos(angle) * speed; enemy.y += Math.sin(angle) * speed; }
+    const rocket = enemy.kind === 'rocket-bot';
+    const stopRange = rocket ? ROCKET_BOT.stopRange : enemy.kind === 'sentry' ? 230 : 0;
+    if (stopRange === 0 || d > stopRange) { enemy.x += Math.cos(angle) * speed; enemy.y += Math.sin(angle) * speed; }
     enemy.attack--;
-    if ((enemy.kind === 'sentry' || enemy.kind === 'boss') && enemy.attack <= 0) {
+    if ((stopRange > 0 || enemy.kind === 'boss') && enemy.attack <= 0) {
       const count = boss?.shotCount ?? (enemy.kind === 'boss' ? 12 : 1);
-      const shotSpeed = boss?.shotSpeed ?? 2.2;
+      const shotSpeed = rocket ? ROCKET_BOT.shotSpeed : boss?.shotSpeed ?? 2.2;
       for (let i = 0; i < count; i++) {
         const a = boss?.aim === 'fan' ? angle + (i - (count - 1) / 2) * boss.fanStep
           : count === 1 ? angle : i / count * Math.PI * 2 + world.tick * .01;
-        world.shots.push({ x: enemy.x, y: enemy.y, vx: Math.cos(a) * shotSpeed, vy: Math.sin(a) * shotSpeed, life: 220, damage: ARMOR_RULES.hpPerCell, hostile: true });
+        world.shots.push({ x: enemy.x, y: enemy.y, vx: Math.cos(a) * shotSpeed, vy: Math.sin(a) * shotSpeed,
+          life: 220, damage: ARMOR_RULES.hpPerCell, hostile: true, ...(rocket ? { kind: 'rocket' } : {}) });
       }
-      enemy.attack = boss?.cooldownTicks ?? (enemy.kind === 'boss' ? 135 : 180);
+      enemy.attack = rocket ? ROCKET_BOT.attackInterval : boss?.cooldownTicks ?? (enemy.kind === 'boss' ? 135 : 180);
     }
     if (d < enemy.radius + 10) damagePlayer(world);
     if (world.upgrades.orbit > 0) {

@@ -1,8 +1,8 @@
 import {
   hasDesertRelay, hasRelayBase, LUNAR_RELAY_CONTEXT,
-  RAINFOREST_RELAY_CONTEXT, stageRules, WATCHTOWER_RELAY_CONTEXT
+  RAINFOREST_RELAY_CONTEXT, stageRules
 } from './stage-rules.js';
-import { type World } from './core.js';
+import { ROCKET_WARNING_TICKS, type World } from './core.js';
 import { createAtlas } from './art.js';
 import { astronautVisorBounds, createAstronautArt } from './astronaut-art.js';
 import { createDesertMap } from './desert-map.js';
@@ -17,6 +17,7 @@ import { createDesertSupplyArt } from './desert-supply-art.js';
 import { createDesertTowerArt } from './desert-tower-art.js';
 import { createFrostGuardArt } from './frost-guard-art.js';
 import { createInsulatedSuitArt } from './insulated-suit-art.js';
+import { createRocketBotArt } from './rocket-bot-art.js';
 import { createDesertRelayArt } from './desert-relay-art.js';
 import { RELAY_CENTER } from './relay-layout.js';
 import { relayObjective, type TowerDirection } from './desert-repair.js';
@@ -38,6 +39,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
+  let drawRocketBot: ReturnType<typeof createRocketBotArt> | undefined;
   let drawInsulatedSuit: ReturnType<typeof createInsulatedSuitArt> | undefined;
   let drawFrostGuard: ReturnType<typeof createFrostGuardArt> | undefined;
   let drawDesertRelay: ReturnType<typeof createDesertRelayArt> | undefined;
@@ -94,7 +96,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       drawOrbitalLift ??= createOrbitalLiftArt();
       drawOrbitalLift(ctx, world.tick);
     }
-    if (world.context.rulesVersion === WATCHTOWER_RELAY_CONTEXT.rulesVersion) {
+    if (world.context.stageId === 'watchtower' && hasRelayBase(world.context)) {
       drawWatchtowerCharge ??= createWatchtowerChargeArt();
       drawWatchtowerCharge(ctx, world.tick);
     }
@@ -121,12 +123,22 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     for (const enemy of world.enemies) {
       const scale = enemy.kind === 'boss' ? 3.8 : enemy.kind === 'sentry' ? 1.8 : 1.5;
       ctx.fillStyle = '#1a2e3b55'; ctx.beginPath(); ctx.ellipse(enemy.x + 3, enemy.y + 9, scale * 6, scale * 3, 0, 0, Math.PI * 2); ctx.fill();
-      if ((enemy.kind === 'sentry' || enemy.kind === 'boss') && enemy.attack < 36) {
-        ctx.strokeStyle = '#ffd499'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.arc(enemy.x, enemy.y, enemy.radius + 10 + (36 - enemy.attack) / 3, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      const rocketBot = enemy.kind === 'rocket-bot';
+      const warningTicks = rocketBot ? ROCKET_WARNING_TICKS : 36;
+      if ((rocketBot || enemy.kind === 'sentry' || enemy.kind === 'boss') && enemy.attack < warningTicks) {
+        ctx.strokeStyle = rocketBot ? '#ffb886' : '#ffd499';
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath();
+        ctx.arc(enemy.x, enemy.y, enemy.radius + 10 + (warningTicks - enemy.attack) / 3, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
       }
       ctx.globalAlpha = enemy.flash > 0 ? .45 : 1;
       const tick = world.tick + enemy.id * 7;
-      if (enemy.kind === 'frost-guard') {
+      if (enemy.kind === 'rocket-bot') {
+        drawRocketBot ??= createRocketBotArt();
+        drawRocketBot(ctx, enemy.x, enemy.y, tick, scale);
+      } else if (enemy.kind === 'frost-guard') {
         drawFrostGuard ??= createFrostGuardArt();
         drawFrostGuard(ctx, enemy.x, enemy.y, tick, scale);
       } else if (enemy.kind === 'insulated-suit') {
@@ -139,8 +151,15 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       if (enemy.kind === 'boss') { ctx.fillStyle = '#172c3d'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60, 3); ctx.fillStyle = '#f5ba78'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60 * Math.max(0, enemy.hp / enemy.maxHp), 3); }
     }
     for (const shot of world.shots) {
-      ctx.fillStyle = shot.hostile ? '#f6b77c' : '#d9fff2';
-      ctx.fillRect(Math.round(shot.x) - 2, Math.round(shot.y) - 2, shot.hostile ? 5 : 3, shot.hostile ? 5 : 3);
+      if (shot.kind === 'rocket') {
+        ctx.fillStyle = '#ffbd75';
+        ctx.fillRect(Math.round(shot.x) - 3, Math.round(shot.y) - 3, 7, 7);
+        ctx.fillStyle = '#fff0b4';
+        ctx.fillRect(Math.round(shot.x) - 1, Math.round(shot.y) - 1, 3, 3);
+      } else {
+        ctx.fillStyle = shot.hostile ? '#f6b77c' : '#d9fff2';
+        ctx.fillRect(Math.round(shot.x) - 2, Math.round(shot.y) - 2, shot.hostile ? 5 : 3, shot.hostile ? 5 : 3);
+      }
       ctx.strokeStyle = shot.hostile ? '#dc916166' : '#8af5e5aa'; ctx.beginPath(); ctx.moveTo(shot.x, shot.y); ctx.lineTo(shot.x - shot.vx * 2, shot.y - shot.vy * 2); ctx.stroke();
     }
     ctx.fillStyle = '#1c344455'; ctx.beginPath(); ctx.ellipse(p.x + 3, p.y + 12, 12, 5, 0, 0, Math.PI * 2); ctx.fill();
