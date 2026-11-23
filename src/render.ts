@@ -125,7 +125,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     }
     drawTower(ctx, tower, pose.angle, pose.flash);
   }
-  return function render(world: World, time: number, title = false) {
+  return function render(world: World, time: number, title = false, showWorldBossHealth = true) {
     const p = world.player, arena = stageRules(world.context).arenaSize;
     if (!playerMotion || playerMotion.world !== world || world.tick < playerMotion.tick) {
       towerPoses.clear();
@@ -250,8 +250,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       ctx.globalAlpha = 1;
       if (enemy.kind === 'boss') {
         if (enemy.armor) drawElevatorBossArmor(ctx, enemy.x, enemy.y, scale, enemy.armor, world.tick);
-        ctx.fillStyle = '#172c3d'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60, 3);
-        ctx.fillStyle = '#f5ba78'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60 * Math.max(0, enemy.hp / enemy.maxHp), 3);
+        if (showWorldBossHealth) {
+          ctx.fillStyle = '#172c3d'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60, 3);
+          ctx.fillStyle = '#f5ba78'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60 * Math.max(0, enemy.hp / enemy.maxHp), 3);
+        }
       }
     }
     for (const shot of world.shots) {
