@@ -1,9 +1,13 @@
 import { ARMOR_RULES, type Upgrade } from './core.js';
+import type { TowerModule } from './desert-repair.js';
 export type Language = 'zh' | 'en';
 const zh = {
   bossHealth: '首领',
   wood: '木材', iron: '铁矿', repairGuide: '拾取木铁，靠近炮塔修复', repairMissing: '修复还缺', repairDone: '炮塔已修复',
   repairProgress: '炮塔', repairFourGuide: '拾取木铁，修复残塔', repairFourDone: '四塔均已修复',
+  salvageGuide: '击破敌军获取补给', salvageHeld: '携带模块', salvageEmpty: '无',
+  towerModules: { fire: '火焰', electric: '电击', powder: '火药' } satisfies Record<TowerModule, string>,
+  fortifyTower: '加固 [F]', modTower: '装模块 [G]',
   stageNames: { 'desert-base': '沙漠基地', rainforest: '雨林深处', antarctica: '寒冻南极', 'space-elevator': '太空电梯', watchtower: '保卫哨塔', 'lunar-echoes': '月面回响' },
   campaignStages: '选择任务', backToTitle: '返回标题', backToStages: '返回选关', stageLocked: '未解锁',
   progressHeading: '本机解锁进度', progressPlayable: '已解锁', progressUnavailable: '已解锁，暂不可游玩',
@@ -28,6 +32,9 @@ const en: typeof zh = {
   bossHealth: 'Boss',
   wood: 'Wood', iron: 'Iron', repairGuide: 'Collect supplies and approach the turret', repairMissing: 'Still needed', repairDone: 'Turret repaired',
   repairProgress: 'Turrets', repairFourGuide: 'Collect supplies to repair', repairFourDone: 'All turrets repaired',
+  salvageGuide: 'Defeat enemies for supplies', salvageHeld: 'Spare module', salvageEmpty: 'None',
+  towerModules: { fire: 'Fire', electric: 'Electric', powder: 'Powder' },
+  fortifyTower: 'Fortify [F]', modTower: 'Fit mod [G]',
   stageNames: { 'desert-base': 'Desert Base', rainforest: 'Deep Rainforest', antarctica: 'Frozen Antarctica', 'space-elevator': 'Space Elevator', watchtower: 'Watchtower Defense', 'lunar-echoes': 'Lunar Echoes' },
   campaignStages: 'Select mission', backToTitle: 'Back to title', backToStages: 'Back to missions', stageLocked: 'Locked',
   progressHeading: 'Local unlock progress', progressPlayable: 'Unlocked', progressUnavailable: 'Unlocked, not yet playable',

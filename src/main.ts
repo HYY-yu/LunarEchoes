@@ -1,4 +1,4 @@
-import { hasContinuousDesertAssault, hasDesertAssault, hasRelayBase, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { DESERT_SALVAGE_CONTEXT, hasContinuousDesertAssault, hasDesertAssault, hasRelayBase, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
@@ -9,9 +9,9 @@ import { applyStageResult, isStageUnlocked } from './progress.js';
 import { openProgressStorage, type ProgressStorageResult } from './progress-storage.js';
 import { DESERT_SCENE_SIZE, drawDesertScene } from './desert-scene.js';
 import { loadLaterOpening } from './campaign-scenes.js';
-import { DESERT_SUPPLY_DIRECTIONS, REPAIR_COST, REPAIR_RADIUS, SUPPLY_CAPACITY, relayObjective } from './desert-repair.js';
+import { DESERT_SUPPLY_DIRECTIONS, REPAIR_COST, REPAIR_RADIUS, SUPPLY_CAPACITY, desertTowerCapacity, nearbySalvageTower, relayObjective } from './desert-repair.js';
 import { DESERT_LATE_REPAIR_TICK, FINAL_BATCH_COUNT } from './desert-assault.js';
-import { assaultLabels, assaultObjective, assaultRadio, supplyDirection, type AssaultRadioBeat } from './desert-guidance.js';
+import { assaultLabels, assaultObjective, assaultRadio, salvageAssaultObjective, supplyDirection, type AssaultRadioBeat } from './desert-guidance.js';
 type Screen = 'title' | 'stages' | 'opening' | 'game' | 'replay' | 'replay-end';
 type RadioBeat = 'firstContact' | 'telemetry' | AssaultRadioBeat;
 type RadioState = Readonly<{ kind: 'inactive' | 'waiting' | 'disabled' }> | Readonly<{ kind: 'active' | 'dismissed'; beat: RadioBeat }>;
@@ -40,6 +40,8 @@ const canvasNode = element('game');
 if (!(canvasNode instanceof HTMLCanvasElement)) throw new Error('Game canvas is unavailable');
 const render = createRenderer(canvasNode), synth = new Synth();
 const overlay = element('overlay'), hud = element('hud'), touch = element('touch');
+const missionHud = element('mission-hud'), towerActions = element('tower-actions');
+const fortifyTowerButton = towerActionButton('fortify-tower'), modTowerButton = towerActionButton('mod-tower');
 let language: Language = 'zh';
 const progressStorage = openProgressStorage({
   getItem: key => window.localStorage.getItem(key),
@@ -173,7 +175,7 @@ function notify(message: string, kind: 'general' | 'boss' = 'general') {
 function fail(error: unknown) { log('error', 'runtime.failure', { message: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : '', seed: world.seed, tick: world.tick }); notify(text().error); }
 async function enableAudio(confirm = false) { try { return await synth.activate(confirm ? 'ui-confirm' : undefined); } catch (error) { log('error', 'audio.activation_failed', { error: String(error) }); notify(language === 'zh' ? '音频启动失败，游戏可继续。' : 'Audio unavailable. You can keep playing.'); return false; } }
 function radioEntry(beat: RadioBeat) {
-  return beat === 'firstContact' || beat === 'telemetry' ? desertContent?.[beat] : assaultRadio(beat);
+  return beat === 'firstContact' || beat === 'telemetry' ? desertContent?.[beat] : assaultRadio(beat, !!world.desertSalvage);
 }
 function setRadio(next: RadioState, reason: string) {
   if (radioState.kind === next.kind && (!('beat' in radioState) || ('beat' in next && radioState.beat === next.beat))) return;
@@ -215,11 +217,25 @@ function act(action: Action, record = true) {
   const armoredBoss = screen === 'game' && world.context.stageId === 'space-elevator' && world.bossSpawned && !world.bossKilled
     ? world.enemies.find(enemy => enemy.armor?.kind === 'active')
     : undefined;
-  const repair = world.desertRepair;
-  const towersBefore = repair && 'towers' in repair ? repair.towers : undefined;
-  const towerBefore = repair && 'tower' in repair ? repair.tower : undefined;
+  const repairBefore = world.desertRepair;
+  const towersBefore = repairBefore && 'towers' in repairBefore ? repairBefore.towers : undefined;
+  const towerBefore = repairBefore && 'tower' in repairBefore ? repairBefore.tower : undefined;
+  const towerAction = action.kind === 'fortify-tower' || action.kind === 'mod-tower';
+  const direction = towerAction && repairBefore && 'towers' in repairBefore ? nearbySalvageTower(repairBefore, world.player)?.direction : undefined;
+  const heldModule = towerAction ? world.desertSalvage?.held : undefined;
   dispatch(world, action);
-  if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
+  const repair = world.desertRepair;
+  if (towerAction) {
+    const event = action.kind === 'fortify-tower' ? 'tower-fortified' : 'tower-modded';
+    const tower = repair && 'towers' in repair ? repair.towers.find(tower => tower.direction === direction) : undefined;
+    const repaired = tower?.kind === 'repaired' ? tower : undefined;
+    const fields = { ...world.context, seed: world.seed, tick: world.tick, direction, ...repair?.inventory,
+      module: action.kind === 'mod-tower' ? heldModule : repaired?.loadout?.module };
+    if (world.events.includes(event)) {
+      log('info', `session.${event.replace('-', '_')}`, { ...fields, reinforced: repaired?.loadout?.reinforced,
+        armorHits: repaired?.armor?.hits, armorCapacity: repaired?.armor && desertTowerCapacity(repaired) });
+    } else log('debug', 'session.tower_action_rejected', { ...fields, action: action.kind, phase: world.phase.kind });
+  } else if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
     const stasis = world.desertStasis;
     if (world.tick !== tickBefore) {
@@ -284,10 +300,16 @@ function act(action: Action, record = true) {
       }
     }
     const assault = world.desertAssault;
+    let repairedTower = false;
     if (repair && 'towers' in repair && towersBefore !== repair.towers) {
       for (const [index, tower] of repair.towers.entries()) {
-        if (towersBefore?.[index]?.kind === 'damaged' && tower.kind === 'repaired') {
+        const previous = towersBefore?.[index];
+        if (previous?.kind === 'damaged' && tower.kind === 'repaired') {
+          repairedTower = true;
           log('info', 'session.turret_repaired', { ...world.context, seed: world.seed, tick: world.tick, direction: tower.direction, ...repair.inventory });
+        } else if (previous?.kind === 'repaired' && tower.kind === 'damaged' && world.events.includes('tower-destroyed')) {
+          log('info', 'session.tower_destroyed', { ...world.context, seed: world.seed, tick: world.tick, direction: tower.direction,
+            ...repair.inventory, reinforced: previous.loadout?.reinforced, module: previous.loadout?.module, armorCapacity: desertTowerCapacity(previous) });
         }
       }
     } else if (towerBefore?.kind === 'damaged' && repair && 'tower' in repair && repair.tower.kind === 'repaired') {
@@ -305,7 +327,6 @@ function act(action: Action, record = true) {
     if (world.phase.kind === 'won' || world.phase.kind === 'lost') setRadio({ kind: 'inactive' }, 'terminal');
     else if (assault) {
       const { deliveries, final } = assault;
-      const repairedTower = repair && 'towers' in repair && towersBefore !== repair.towers;
       const finalStarted = final.kind === 'active' && finalBefore !== 'active';
       const clearing = continuousFinal && world.bossKilled && world.tick >= continuousFinal.reinforcementEnd
         && (!bossKilledBefore || reinforcementsStopped);
@@ -391,7 +412,9 @@ function showOpening(context: StageContext, source: OpeningSource = 'title') {
   openingRequest = null;
   if (context.stageId === 'desert-base') {
     if (!desertContent) throw new Error('Desert content unavailable');
-    presentOpening(context, source, { opening: desertContent.opening, objective: hasDesertAssault(context) ? assaultObjective : desertContent.objective, size: DESERT_SCENE_SIZE, draw: canvas => drawDesertScene(canvas, 'opening') });
+    const objective = context.rulesVersion === DESERT_SALVAGE_CONTEXT.rulesVersion ? salvageAssaultObjective
+      : hasDesertAssault(context) ? assaultObjective : desertContent.objective;
+    presentOpening(context, source, { opening: desertContent.opening, objective, size: DESERT_SCENE_SIZE, draw: canvas => drawDesertScene(canvas, 'opening') });
     return;
   }
   const request = Symbol(), previousScreen = screen;
@@ -523,12 +546,54 @@ function updateBossHealth(label: string) {
   bossHealthMeter.setAttribute('aria-valuemax', maximum);
   bossHealthFill.style.inlineSize = `${boss.hp / boss.maxHp * 100}%`;
 }
+type TowerAction = 'fortify-tower' | 'mod-tower';
+function towerActionButton(kind: TowerAction): HTMLButtonElement {
+  const node = element(kind);
+  if (!(node instanceof HTMLButtonElement)) throw new Error(`Missing tower action button ${kind}`);
+  node.onclick = () => useTowerAction(kind);
+  return node;
+}
+function towerChoices(repair = world.desertRepair) {
+  if (screen !== 'game' || world.phase.kind !== 'running' || !world.desertSalvage || !repair || !('towers' in repair)) return;
+  const tower = nearbySalvageTower(repair, world.player);
+  if (!tower) return;
+  return {
+    'fortify-tower': !tower.loadout?.reinforced && repair.inventory.wood >= REPAIR_COST.wood && repair.inventory.iron >= REPAIR_COST.iron,
+    'mod-tower': !!world.desertSalvage.held && !tower.loadout?.module
+  };
+}
+function useTowerAction(kind: TowerAction) {
+  if (!towerChoices()?.[kind]) return;
+  try {
+    act({ kind });
+    updateRepairHud();
+    void enableAudio();
+  } catch (error) { fail(error); }
+}
 function updateRepairHud() {
   const panel = element('repair-hud');
-  const repair = world.desertRepair;
+  const { desertRepair: repair, desertSalvage: salvage } = world;
+  const radioHost = salvage ? missionHud : document.body;
+  if (radio.parentElement !== radioHost) radioHost.append(radio);
+  const choices = towerChoices(repair);
+  if ((document.activeElement === fortifyTowerButton && !choices?.['fortify-tower'])
+      || (document.activeElement === modTowerButton && !choices?.['mod-tower'])) canvasNode.focus({ preventScroll: true });
+  towerActions.hidden = !choices;
+  fortifyTowerButton.disabled = !choices?.['fortify-tower'];
+  modTowerButton.disabled = !choices?.['mod-tower'];
   panel.hidden = !repair || (screen !== 'game' && screen !== 'replay') || world.phase.kind !== 'running';
   if (panel.hidden || !repair) return;
   const t = text();
+  if (choices) {
+    if (fortifyTowerButton.textContent !== t.fortifyTower) fortifyTowerButton.textContent = t.fortifyTower;
+    if (modTowerButton.textContent !== t.modTower) modTowerButton.textContent = t.modTower;
+  }
+  const moduleNode = element('salvage-module');
+  moduleNode.hidden = !salvage;
+  if (salvage) {
+    const held = `${t.salvageHeld} · ${salvage.held ? t.towerModules[salvage.held] : t.salvageEmpty}`;
+    if (moduleNode.textContent !== held) moduleNode.textContent = held;
+  }
   const { inventory } = repair;
   const fourTowers = 'towers' in repair;
   const towers = fourTowers ? repair.towers : [repair.tower];
@@ -545,10 +610,10 @@ function updateRepairHud() {
   const assault = world.desertAssault;
   const labels = assaultLabels[language];
   const progress = `${t.repairProgress} ${repaired}/${towers.length}`;
-  if (hasRelayBase(world.context) && fourTowers && repaired < towers.length && (!assault || assault.final.kind === 'waiting')) {
+  if ((salvage || hasRelayBase(world.context)) && fourTowers && repaired < towers.length && (!assault || assault.final.kind === 'waiting')) {
     const objective = relayObjective(repair, world.player);
     status = `${progress} · ${objective?.kind === 'repair' ? labels.repair
-      : objective?.kind === 'supply' ? `${labels.find}${t[objective.target.material]}` : labels.awaiting}`;
+      : objective?.kind === 'supply' ? `${labels.find}${t[objective.target.material]}` : salvage ? t.salvageGuide : labels.awaiting}`;
     if (nearby && missing.length) status += ` · ${t.repairMissing} ${missing.join(' · ')}`;
   } else if (assault) {
     if (assault.final.kind === 'active') {
@@ -563,6 +628,7 @@ function updateRepairHud() {
         if (batches === FINAL_BATCH_COUNT) status += ` · ${labels.clear}`;
       }
     } else if (assault.final.kind === 'scheduled') status = `${progress} · ${labels.preparing}`;
+    else if (salvage) status = `${progress} · ${detail}`;
     else if (assault.deliveries === 0) status = `${progress} · ${labels.awaiting}`;
     else {
       const direction = supplyDirection(DESERT_SUPPLY_DIRECTIONS[assault.deliveries - 1], language);
@@ -602,7 +668,7 @@ function updateUi(force = false) {
   const menuLabel = activeStage ? t.stageNames[activeStage] : t.campaignStages;
   const battleLabel = fieldBattle ? t.stageNames[stageId] : t.prototype;
   let battleObjective = stageId === 'rainforest' ? t.rainforestFooterObjective : fieldBattle ? fieldMission?.objective[language] ?? t.missionObjective : t.objective;
-  if (world.desertAssault) battleObjective = assaultObjective[language];
+  if (world.desertAssault) battleObjective = (world.desertSalvage ? salvageAssaultObjective : assaultObjective)[language];
   if (screen === 'replay') battleObjective = t.replaying;
   if (fieldBattle && screen === 'replay-end') battleObjective = t.replayDone;
   element('footer-left').textContent = menu ? menuLabel : `${battleLabel} · ${t.seed} ${world.seed} · ${battleObjective}`;
@@ -743,7 +809,8 @@ function updateUi(force = false) {
     element('victory-retry').textContent = t.restart; element('victory-missions').textContent = t.backToStages;
     return;
   }
-  const pauseObjective = fieldBattle ? fieldMission?.objective : world.desertAssault ? assaultObjective : desertContent?.objective;
+  const pauseObjective = fieldBattle ? fieldMission?.objective : world.desertSalvage ? salvageAssaultObjective
+    : world.desertAssault ? assaultObjective : desertContent?.objective;
   if (screen === 'game' && world.phase.kind === 'paused' && pauseObjective) {
     if (!document.getElementById('pause-panel')) {
       overlay.replaceChildren();
@@ -769,7 +836,9 @@ function updateUi(force = false) {
   overlay.replaceChildren();
   if (screen === 'title') {
     const intro = document.createElement('section'); intro.className = 'intro';
-    intro.innerHTML = `<h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${hasDesertAssault(DESERT_CONTEXT) ? assaultObjective[language] : t.brief}</p>`;
+    const objective = DESERT_CONTEXT.rulesVersion === DESERT_SALVAGE_CONTEXT.rulesVersion ? salvageAssaultObjective[language]
+      : hasDesertAssault(DESERT_CONTEXT) ? assaultObjective[language] : t.brief;
+    intro.innerHTML = `<h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${objective}</p>`;
     const progress = document.createElement('p'); progress.id = 'title-progress'; progress.setAttribute('role', 'status'); intro.append(progress);
     const start = button(t.start, 'primary', () => showOpening(DESERT_CONTEXT)); start.id = 'mission-start';
     const stages = button(t.campaignStages, 'secondary', showStages); stages.id = 'mission-select';
@@ -807,6 +876,10 @@ function handleKey(event: KeyboardEvent, down: boolean) {
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.code)) event.preventDefault();
   keys.add(event.code);
   if (event.repeat) return;
+  if (!event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+    if (event.code === 'KeyF') useTowerAction('fortify-tower');
+    if (event.code === 'KeyG') useTowerAction('mod-tower');
+  }
   if (event.code === 'KeyP' || event.code === 'Escape') pause();
   if (event.code === 'Space' && world.phase.kind === 'running') { dashPressed = true; if (world.player.dashCooldown > 0) synth.play('ui-reject'); }
   if (screen === 'game' && world.phase.kind === 'upgrading') {

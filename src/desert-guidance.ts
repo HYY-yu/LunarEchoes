@@ -17,8 +17,11 @@ const messages = {
 
 export type AssaultRadioBeat = keyof typeof messages | TowerDirection;
 
-export function assaultRadio(beat: AssaultRadioBeat) {
+export function assaultRadio(beat: AssaultRadioBeat, salvage = false) {
   const id = `desert-base.radio.${beat}`;
+  if (beat === 'briefing' && salvage) {
+    return { id, zh: '击破敌军，回收木材和铁矿，修复四座炮塔。', en: 'Defeat enemies and salvage wood and iron to repair all four turrets.' };
+  }
   if (beat === 'north' || beat === 'east' || beat === 'south' || beat === 'west') {
     const direction = directions[beat];
     return { id, zh: `${direction.zh}侧补给到了。带上木材和铁矿，修复一座炮塔。`,
@@ -36,6 +39,11 @@ export const assaultLabels = {
     hold: '敌军攻势增强，守住阵地', defeatBoss: '击败首领', clearAssault: '清剿剩余的攻城敌军', timeout: '未能在时限内完成防守。' },
   en: { awaiting: 'Awaiting supplies', find: 'Find ', repair: 'Materials ready. Approach the marked turret', supply: 'Latest supplies', preparing: 'Assault incoming', waves: 'Assault waves', clear: 'Clear remaining enemies',
     hold: 'Hold against rising pressure', defeatBoss: 'Defeat the boss', clearAssault: 'Clear remaining assault enemies', timeout: 'The defense was not completed in time.' }
+};
+
+export const salvageAssaultObjective = { id: 'desert-base.objective',
+  zh: '击破敌军，回收木材和铁矿。修复四座炮塔，击退最终敌潮。',
+  en: 'Defeat enemies to salvage wood and iron. Repair all four turrets and clear the final assault.'
 };
 
 export function supplyDirection(direction: TowerDirection, language: 'zh' | 'en') {

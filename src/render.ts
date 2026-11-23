@@ -1,7 +1,7 @@
 import {
   hasDesertRelay, hasRelayBase, stageRules
 } from './stage-rules.js';
-import { ROCKET_WARNING_TICKS, type Enemy, type World } from './core.js';
+import { ROCKET_WARNING_TICKS, type Enemy, type Shot, type World } from './core.js';
 import type { StageId } from './stage-contract.js';
 import { createAtlas } from './art.js';
 import { astronautVisorBounds, createAstronautArt } from './astronaut-art.js';
@@ -28,7 +28,7 @@ import { createInsulatedSuitArt } from './insulated-suit-art.js';
 import { createRocketBotArt } from './rocket-bot-art.js';
 import { createDesertRelayArt } from './desert-relay-art.js';
 import { RELAY_CENTER } from './relay-layout.js';
-import { relayObjective, selectTurretTarget, type TowerDirection } from './desert-repair.js';
+import { desertTowerCapacity, relayObjective, selectTurretTarget, type DirectionalTower, type TowerDirection, type TowerModule } from './desert-repair.js';
 import { drawRelayObjective } from './desert-relay-guidance-art.js';
 import { drawMaterialMotion } from './material-motion-art.js';
 import { drawElevatorBossArmor, elevatorArmorImpact } from './elevator-boss-armor-art.js';
@@ -54,6 +54,68 @@ type BossMotion = Pick<Enemy, 'id' | 'x' | 'y'> & { world: World; tick: number; 
 const TURRET_IDLE_ANGLE: Readonly<Record<TowerDirection, number>> = {
   north: -Math.PI / 2, east: 0, south: Math.PI / 2, west: Math.PI
 };
+
+const TOWER_MODULE_STYLE = {
+  fire: { color: '#ff9b65', glyph: ['..#..', '..##.', '.###.', '##.##', '.###.'] },
+  electric: { color: '#9df3ff', glyph: ['..##.', '.##..', '.####', '..##.', '.##..'] },
+  powder: { color: '#f5db9a', glyph: ['..#..', '.....', '#.#.#', '.....', '..#..'] }
+} satisfies Record<TowerModule, { color: string; glyph: readonly string[] }>;
+
+function drawModulePickup(ctx: CanvasRenderingContext2D, { x, y, module }: NonNullable<World['desertSalvage']>['modules'][number]) {
+  const { color, glyph } = TOWER_MODULE_STYLE[module];
+  const left = Math.round(x) - 8, top = Math.round(y) - 13;
+  ctx.fillStyle = '#102a36';
+  ctx.fillRect(left - 1, top - 1, 18, 18);
+  ctx.strokeStyle = color;
+  ctx.strokeRect(left + .5, top + .5, 15, 15);
+  ctx.fillStyle = color;
+  for (const [row, pixels] of glyph.entries()) {
+    for (let col = 0; col < pixels.length; col++) {
+      if (pixels[col] === '#') ctx.fillRect(left + 3 + col * 2, top + 3 + row * 2, 2, 2);
+    }
+  }
+}
+
+function drawTowerArmor(ctx: CanvasRenderingContext2D, tower: DirectionalTower) {
+  if (tower.kind !== 'repaired' || !tower.armor) return;
+  const capacity = desertTowerCapacity(tower);
+  const x = Math.round(tower.x - capacity * 4 / 2), y = Math.round(tower.y) - 43;
+  ctx.fillStyle = '#102a36';
+  ctx.fillRect(x - 2, y - 2, capacity * 4 + 3, 7);
+  for (let hit = 0; hit < capacity; hit++) {
+    ctx.fillStyle = hit < tower.armor.hits ? (tower.loadout?.reinforced ? '#efbf72' : '#9be5d4') : '#50626a';
+    ctx.fillRect(x + hit * 4, y, 3, 3);
+  }
+}
+
+function drawTowerModuleShot(ctx: CanvasRenderingContext2D, shot: Shot): boolean {
+  const { kind, x, y, vx, vy } = shot;
+  if (kind !== 'tower-fire' && kind !== 'tower-electric' && kind !== 'tower-powder') return false;
+  ctx.save();
+  ctx.translate(Math.round(x), Math.round(y));
+  ctx.rotate(Math.atan2(vy, vx));
+  if (kind === 'tower-fire') {
+    ctx.fillStyle = '#d86445';
+    ctx.fillRect(-15, -1, 12, 3);
+    ctx.fillStyle = TOWER_MODULE_STYLE.fire.color;
+    ctx.fillRect(-7, -3, 10, 7);
+    ctx.fillStyle = '#fff0b4';
+    ctx.fillRect(-3, -1, 6, 3);
+  } else if (kind === 'tower-electric') {
+    ctx.strokeStyle = TOWER_MODULE_STYLE.electric.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-16, 2); ctx.lineTo(-10, -3); ctx.lineTo(-7, 3); ctx.lineTo(0, 0);
+    ctx.stroke();
+    ctx.fillStyle = '#f1ffff';
+    ctx.fillRect(-1, -1, 3, 3);
+  } else {
+    ctx.fillStyle = TOWER_MODULE_STYLE.powder.color;
+    ctx.fillRect(-1, -1, 4, 3); ctx.fillRect(-6, -5, 4, 3); ctx.fillRect(-9, 3, 4, 3);
+  }
+  ctx.restore();
+  return true;
+}
 
 function bossSpecialAttack(world: World, enemy: Enemy, title: boolean): boolean {
   if (title) return false;
@@ -184,10 +246,14 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       if ('towers' in repair) {
         for (const tower of repair.towers) {
           renderTower(tower, world, tower.direction);
+          drawTowerArmor(ctx, tower);
         }
       } else {
         renderTower(repair.tower, world, repair.nextTurretShotTick === undefined ? undefined : 'north');
       }
+    }
+    if (!title && world.desertSalvage) {
+      for (const module of world.desertSalvage.modules) drawModulePickup(ctx, module);
     }
     for (const crystal of world.crystals) atlas.draw(ctx, 'crystal', crystal.x, crystal.y + Math.sin(time * .004 + crystal.x) * 2, .9);
     const stasis = title ? undefined : world.desertStasis;
@@ -265,6 +331,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         drawIceShard(ctx, shot);
         continue;
       }
+      if (drawTowerModuleShot(ctx, shot)) continue;
       if (shot.kind === 'rocket') {
         ctx.fillStyle = '#ffbd75';
         ctx.fillRect(Math.round(shot.x) - 3, Math.round(shot.y) - 3, 7, 7);
