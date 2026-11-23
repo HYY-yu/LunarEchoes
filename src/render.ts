@@ -11,6 +11,7 @@ import { createAntarcticBearingArt } from './antarctic-bearing-art.js';
 import { drawAntarcticBarrageWarning, drawIceShard } from './antarctic-barrage-art.js';
 import { createOrbitalLiftArt } from './orbital-lift-art.js';
 import { createWatchtowerChargeArt } from './watchtower-charge-art.js';
+import { drawWatchtowerStrike } from './watchtower-strike-art.js';
 import { createLunarIsolationArt } from './lunar-isolation-art.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
 import { createRainforestArchiveArt } from './rainforest-archive-art.js';
@@ -124,7 +125,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       drawDesertRelay ??= createDesertRelayArt();
       drawDesertRelay(ctx, world.tick);
     }
-    if (!title) drawAntarcticBarrageWarning(ctx, world);
+    if (!title) {
+      drawAntarcticBarrageWarning(ctx, world);
+      if (world.watchtowerStrike) drawWatchtowerStrike(ctx, world.watchtowerStrike, world.tick);
+    }
     const repair = world.desertRepair;
     if (!title && repair) {
       for (const supply of repair.supplies) drawSupply(ctx, supply);

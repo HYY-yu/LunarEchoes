@@ -5,6 +5,7 @@ import type { MaterialMotion } from './material-motion.js';
 import { rainforestBroodReleases, rainforestBroodSites, type RainforestBrood } from './rainforest-brood.js';
 import { stepAntarcticBarrage, type AntarcticBarrage } from './antarctic-barrage.js';
 import { absorbElevatorBossDamage, expireElevatorBossArmor, startElevatorBossArmor, type ElevatorBossArmor } from './elevator-boss-armor.js';
+import { stepWatchtowerStrike, type WatchtowerStrike } from './watchtower-strike.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -45,6 +46,7 @@ export type World = {
   materialMotions?: MaterialMotion[];
   rainforestBrood?: RainforestBrood;
   antarcticBarrage?: AntarcticBarrage;
+  watchtowerStrike?: WatchtowerStrike;
 };
 type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
 export type ActionBuffer = RecordingContext & { actions: Action[] };
@@ -307,6 +309,7 @@ function step(world: World, input: Input): void {
     }
   }
   stepAntarcticBarrage(world, ARMOR_RULES.hpPerCell);
+  stepWatchtowerStrike(world, rules.arenaSize, damagePlayer);
   world.shots = world.shots.filter(shot => shot.life > 0);
   const pickupRadius = 115 + world.upgrades.magnet * 25;
   for (const crystal of world.crystals) {

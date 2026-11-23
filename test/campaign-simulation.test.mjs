@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../dist/core.js';
-import { ANTARCTIC_BARRAGE_CONTEXT, ANTARCTIC_FROST_CONTEXT, ELEVATOR_ARMOR_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { ANTARCTIC_BARRAGE_CONTEXT, ANTARCTIC_FROST_CONTEXT, ELEVATOR_ARMOR_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, WATCHTOWER_STRIKE_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play } from '../scripts/simulation.mjs';
 
 const scenarios = [
   { stageId: 'antarctica', rulesVersion: 'antarctica-5', seed: 101, duration: 210, bossSecond: 162, health: 1050, shots: 7, fan: true },
   { stageId: 'space-elevator', rulesVersion: 'space-elevator-5', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
-  { stageId: 'watchtower', rulesVersion: 'watchtower-4', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
+  { stageId: 'watchtower', rulesVersion: 'watchtower-5', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
   { stageId: 'lunar-echoes', rulesVersion: 'lunar-echoes-3', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
 ];
 
@@ -50,7 +50,7 @@ for (const { stageId, rulesVersion = `${stageId}-2`, seed, duration, bossSecond 
 const relayScenarios = [
   { context: ANTARCTIC_BARRAGE_CONTEXT, seed: 101, duration: 210, bossSecond: 162, shipments: [1, 42 * core.HZ, 84 * core.HZ, 126 * core.HZ] },
   { context: ELEVATOR_ARMOR_CONTEXT, seed: 42, duration: 205, bossSecond: 158, shipments: [1, 29 * core.HZ, 76 * core.HZ, 120 * core.HZ] },
-  { context: WATCHTOWER_ROCKET_CONTEXT, seed: 42, duration: 225, bossSecond: 173, shipments: [1, 42 * core.HZ, 89 * core.HZ, 118 * core.HZ] },
+  { context: WATCHTOWER_STRIKE_CONTEXT, seed: 42, duration: 225, bossSecond: 173, shipments: [1, 42 * core.HZ, 89 * core.HZ, 118 * core.HZ] },
   { context: LUNAR_RELAY_CONTEXT, seed: 42, duration: 240, bossSecond: 185, shipments: [1, 44 * core.HZ, 112 * core.HZ, 142 * core.HZ] }
 ];
 
@@ -88,7 +88,7 @@ for (const { context, seed, duration, bossSecond, shipments } of relayScenarios)
 const reinforcementScenarios = [
   { context: ANTARCTIC_BARRAGE_CONTEXT, enemyKind: 'frost-guard', hp: 78, radius: 13, startSecond: 82, bossSecond: 162 },
   { context: ELEVATOR_ARMOR_CONTEXT, enemyKind: 'insulated-suit', hp: 46, radius: 12, startSecond: 76, bossSecond: 158 },
-  { context: WATCHTOWER_ROCKET_CONTEXT, enemyKind: 'rocket-bot', hp: 72, radius: 16, startSecond: 105, bossSecond: 173 }
+  { context: WATCHTOWER_STRIKE_CONTEXT, enemyKind: 'rocket-bot', hp: 72, radius: 16, startSecond: 105, bossSecond: 173 }
 ];
 
 for (const { context, enemyKind, hp, radius, startSecond, bossSecond } of reinforcementScenarios) {
@@ -302,4 +302,53 @@ test('tower, nova and orbit damage also consume the elevator boss armor', () => 
     assert.equal(boss.armor.hitTick, world.tick);
   }
   assert.equal(tower.world.desertTurretShots.north.tick, tower.world.tick);
+});
+
+test('watchtower strike uses fixed marks, can be avoided and stops if the caller falls', () => {
+  const firstImpact = 176 * core.HZ;
+  function warned(context = WATCHTOWER_STRIKE_CONTEXT) {
+    const world = core.createWorld({ ...context, seed: 42 });
+    world.tick = firstImpact - core.HZ - 1;
+    world.bossSpawned = true;
+    world.spawnCooldown = 1000;
+    world.fireCooldown = 1000;
+    world.enemies.push({ id: world.nextId++, kind: 'boss', x: 470, y: 750, hp: 1100, maxHp: 1100,
+      radius: 27, attack: 1000, flash: 0 });
+    core.dispatch(world, idle);
+    return world;
+  }
+  const standing = warned(), leaving = warned(), defeated = warned(), dashing = warned();
+  const warning = structuredClone(standing.watchtowerStrike);
+  assert.equal(warning.kind, 'warning');
+  assert.equal(warning.impactTick, firstImpact);
+  assert.deepEqual(warning.marks.map(({ y, radius }) => [y, radius]), [[674, 46], [750, 46], [826, 46]]);
+  core.dispatch(standing, { kind: 'pause' });
+  core.dispatch(standing, idle);
+  assert.equal(standing.tick, firstImpact - core.HZ);
+  assert.deepEqual(standing.watchtowerStrike, warning);
+  core.dispatch(standing, { kind: 'resume' });
+  for (let i = 0; i < core.HZ - 1; i++) {
+    for (const world of [standing, defeated, dashing]) core.dispatch(world, idle);
+    core.dispatch(leaving, { kind: 'tick', input: { x: 1, y: 0, dash: false } });
+  }
+  assert.deepEqual(leaving.watchtowerStrike, warning);
+  standing.player.y += 38;
+  const boss = defeated.enemies[0];
+  defeated.shots.push({ x: boss.x, y: boss.y, vx: 0, vy: 0, life: 2, damage: 2000, hostile: false });
+  for (const world of [standing, leaving, defeated]) core.dispatch(world, idle);
+  core.dispatch(dashing, { kind: 'tick', input: { x: 1, y: 0, dash: true } });
+  assert.equal(standing.player.hp, 40);
+  assert.equal(standing.events.filter(event => event === 'hit').length, 1);
+  assert.deepEqual(standing.watchtowerStrike, { ...warning, kind: 'impact', outcome: 'hit' });
+  assert.equal(leaving.player.hp, 50);
+  assert.equal(leaving.watchtowerStrike.outcome, 'avoided');
+  assert.equal(dashing.player.hp, 50);
+  assert.equal(dashing.watchtowerStrike.outcome, 'shielded');
+  assert.equal(defeated.bossKilled, true);
+  assert.equal(defeated.player.hp, 50);
+  assert.equal(defeated.watchtowerStrike, undefined);
+  for (let i = 0; i < 24; i++) core.dispatch(standing, idle);
+  assert.equal(standing.watchtowerStrike, undefined);
+  assert.equal(standing.player.hp, 40);
+  assert.equal(warned(WATCHTOWER_ROCKET_CONTEXT).watchtowerStrike, undefined);
 });
