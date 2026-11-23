@@ -1,7 +1,11 @@
+import { astronautHandOffset } from './astronaut-art.js';
 import { materialMotionDuration, type Material, type MaterialMotion } from './material-motion.js';
 
+type Point = MaterialMotion['source'];
+export type MaterialReleases = WeakMap<MaterialMotion, Point>;
+
 export function drawMaterialMotion(
-  ctx: CanvasRenderingContext2D, motion: MaterialMotion, tick: number, player: MaterialMotion['source']
+  ctx: CanvasRenderingContext2D, motion: MaterialMotion, tick: number, player: Point, facing: number, releases: MaterialReleases
 ): void {
   const age = tick - motion.tick;
   if (age < 0 || age >= materialMotionDuration(motion.kind)) return;
@@ -23,32 +27,40 @@ export function drawMaterialMotion(
     }
   }
 
-  function drawGlove(direction: number, reach: number) {
-    const x = player.x + direction * (8 + reach);
-    pixel(Math.min(x, player.x + direction * 6), player.y + 2, Math.ceil(3 + reach), 3, '#687e87');
-    pixel(x - 2, player.y + 1, 4, 4, '#d4dcd6');
-    pixel(x - 2, player.y + 4, 4, 2, '#465b69');
+  const { source } = motion;
+  const direction = (motion.kind === 'pickup' ? source.x < player.x : motion.tower.x < source.x) ? -1 : 1;
+  const offset = astronautHandOffset(facing, direction);
+  const handX = Math.round(player.x) + offset.x;
+  const handY = Math.round(player.y) + offset.y;
+
+  function drawGlove(reach: number) {
+    const x = handX + Math.sign(offset.x) * reach;
+    pixel(Math.min(x, handX) - 1, handY - 1, Math.ceil(3 + reach), 3, '#687e87');
+    pixel(x - 2, handY - 2, 4, 4, '#d4dcd6');
+    pixel(x - 2, handY + 1, 4, 2, '#465b69');
   }
 
   ctx.save();
-  const { source } = motion;
   if (motion.kind === 'pickup') {
-    const direction = source.x < player.x ? -1 : 1;
     const progress = age / 17;
     const eased = progress * (2 - progress);
-    drawGlove(direction, 4 * (1 - eased));
+    drawGlove(4 * (1 - eased));
     if (age < 15) {
-      const x = source.x + (player.x + direction * 9 - source.x) * eased + direction * 20 * progress * (1 - progress);
-      const y = source.y + (player.y + 3 - source.y) * eased - 28 * progress * (1 - progress);
+      const x = source.x + (handX - source.x) * eased + direction * 20 * progress * (1 - progress);
+      const y = source.y + (handY - source.y) * eased - 28 * progress * (1 - progress);
       drawLoad(x, y, motion.material);
     } else {
-      pixel(player.x + direction * 9 - 1, player.y + 1, 3, 2, '#c9e1c3');
+      pixel(handX - 1, handY - 2, 3, 2, '#c9e1c3');
     }
   } else {
     const { tower } = motion;
-    const direction = tower.x < source.x ? -1 : 1;
-    if (age < 17) drawGlove(direction, 4 * Math.sin(Math.PI * age / 17));
-    const startX = source.x + direction * 9, startY = source.y + 3;
+    if (age < 17) drawGlove(4 * Math.sin(Math.PI * age / 17));
+    let release = releases.get(motion);
+    if (!release) {
+      release = { x: Math.round(source.x) + offset.x, y: Math.round(source.y) + offset.y };
+      releases.set(motion, release);
+    }
+    const { x: startX, y: startY } = release;
     for (let i = 0; i < 3; i++) {
       const progress = (age - i * 4) / 15;
       if (progress < 0 || progress > 1) continue;

@@ -35,6 +35,20 @@ export function directionalVisorBounds(x: number, y: number, direction: number) 
   return { x: Math.round(x) + left, y: Math.round(y) + top, width: right - left, height: bottom - top };
 }
 
+export function astronautHandOffset(facing: number, direction: number) {
+  let side = direction;
+  if (facing === 4) side = -direction;
+  else if (facing === 2 || facing === 3) side = 1;
+  else if (facing === 5 || facing === 6) side = -1;
+  const across = (side < 0 ? -6 : 7) + (facing === 4 ? side * 1.5 : 0);
+  const yaw = facing * DIRECTION_STEP;
+  const cos = Math.cos(yaw), sin = Math.sin(yaw);
+  return {
+    x: (cos * across - sin * 3) * DRAW_BOX.width / FRAME_SIZE.width,
+    y: (29 + .42 * (sin * across + cos * 3) - .907 * 7.5) * DRAW_BOX.height / FRAME_SIZE.height + DRAW_BOX.offsetY
+  };
+}
+
 function drawFrame(ctx: CanvasRenderingContext2D, facing: number, column: number, step: number) {
   const { width, height } = FRAME_SIZE;
   const yaw = facing * DIRECTION_STEP;

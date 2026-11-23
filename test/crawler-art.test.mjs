@@ -8,14 +8,14 @@ import { createRenderer } from '../dist/render.js';
 import { createWorld, dispatch } from '../dist/core.js';
 
 class Canvas {
-  width = 0; height = 0; frames = new Map(); clientWidth = 1280; clientHeight = 720; pixels = new Map(); calls = []; arcs = []; ellipses = []; clips = []; rectangles = [];
+  width = 0; height = 0; frames = new Map(); clientWidth = 1280; clientHeight = 720; pixels = new Map(); calls = []; arcs = []; ellipses = []; clips = []; rectangles = []; gloves = [];
   constructor(rasterize = false) {
     const canvas = this;
     this.context = {
       fillStyle: '', globalAlpha: 1,
       createImageData(width, height) { return { data: new Uint8ClampedArray(width * height * 4) }; },
       putImageData(image, x, y) { canvas.frames.set(`${x},${y}`, image.data); },
-      fillRect(x, y, width, height) { if (!rasterize) return; for (let row = y; row < y + height; row++) for (let col = x; col < x + width; col++) canvas.pixels.set(`${col},${row}`, this.fillStyle); },
+      fillRect(x, y, width, height) { if (this.fillStyle === '#d4dcd6') canvas.gloves.push([x, y, width, height]); if (!rasterize) return; for (let row = y; row < y + height; row++) for (let col = x; col < x + width; col++) canvas.pixels.set(`${col},${row}`, this.fillStyle); },
       drawImage(...args) { canvas.calls.push({ args, alpha: this.globalAlpha }); },
       arc(...args) { canvas.arcs.push(args); },
       createPattern() { return '#707c80'; }, createRadialGradient() { return { addColorStop() {} }; },
@@ -101,7 +101,7 @@ function astronautScene(t) {
   environment(t); const canvas = new Canvas(), render = createRenderer(canvas);
   function fresh() { const world = createWorld({ stageId: 'desert-base', rulesVersion: 'desert-base-1', seed: 42 }); world.fireCooldown = 1000000; world.spawnCooldown = 1000000; return world; }
   function draw(world, time = 0) {
-    canvas.calls.length = 0; canvas.ellipses.length = 0; canvas.clips.length = 0;
+    canvas.calls.length = 0; canvas.ellipses.length = 0; canvas.clips.length = 0; canvas.gloves.length = 0;
     const before = structuredClone(world); render(world, time); assert.deepEqual(world, before);
     const call = canvas.calls.find(call => call.args[7] === 38 && call.args[8] === 43);
     const [atlas, x, y, width, height] = call.args;
@@ -191,4 +191,8 @@ test('astronaut boundary input stays idle and preserves hurt alpha and shadow an
   ticks(world, 1, 0, -1);
   assert.equal(draw(world).facing, 4);
   assert.deepEqual(canvas.clips, []);
+  assert.deepEqual(canvas.gloves, [[Math.round(world.player.x) + 10, Math.round(world.player.y) - 1, 4, 4]]);
+  ticks(world, 1, -1);
+  assert.equal(draw(world).facing, 2);
+  assert.deepEqual(canvas.gloves, [[Math.round(world.player.x) - 9, Math.round(world.player.y) + 4, 4, 4]]);
 });

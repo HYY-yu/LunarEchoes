@@ -30,7 +30,7 @@ import { createDesertRelayArt } from './desert-relay-art.js';
 import { RELAY_CENTER } from './relay-layout.js';
 import { desertTowerCapacity, relayObjective, selectTurretTarget, type DirectionalTower, type TowerDirection, type TowerModule } from './desert-repair.js';
 import { drawRelayObjective } from './desert-relay-guidance-art.js';
-import { drawMaterialMotion } from './material-motion-art.js';
+import { drawMaterialMotion, type MaterialReleases } from './material-motion-art.js';
 import { drawElevatorBossArmor, elevatorArmorImpact } from './elevator-boss-armor-art.js';
 import { isDesertStasisActive } from './desert-stasis.js';
 import {
@@ -152,7 +152,8 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
   const towerPoses = new Map<TowerDirection, TowerTurnPose>();
-  let towerFrame: { world: World; tick: number } | undefined;
+  let materialReleases: MaterialReleases = new WeakMap();
+  let previousFrame: { world: World; tick: number } | undefined;
   let drawRocketBot: ReturnType<typeof createRocketBotArt> | undefined;
   let drawInsulatedSuit: ReturnType<typeof createInsulatedSuitArt> | undefined;
   let drawFrostGuard: ReturnType<typeof createFrostGuardArt> | undefined;
@@ -189,11 +190,12 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   }
   return function render(world: World, time: number, title = false, showWorldBossHealth = true) {
     const p = world.player, arena = stageRules(world.context).arenaSize;
-    if (towerFrame?.world !== world || world.tick < towerFrame.tick) {
+    if (previousFrame?.world !== world || world.tick < previousFrame.tick) {
       towerPoses.clear();
-      towerFrame = { world, tick: world.tick };
+      materialReleases = new WeakMap();
+      previousFrame = { world, tick: world.tick };
     } else {
-      towerFrame.tick = world.tick;
+      previousFrame.tick = world.tick;
     }
     const width = Math.ceil(canvas.clientWidth / 2), height = Math.ceil(canvas.clientHeight / 2);
     if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
@@ -358,7 +360,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         ctx.rect(visor.x, visor.y, visor.width, visor.height);
         ctx.clip('evenodd');
       }
-      for (const motion of world.materialMotions) drawMaterialMotion(ctx, motion, world.tick, p);
+      for (const motion of world.materialMotions) drawMaterialMotion(ctx, motion, world.tick, p, facing, materialReleases);
       if (visor) ctx.restore();
     }
     for (let i = 0; i < Math.min(4, world.upgrades.orbit); i++) {
