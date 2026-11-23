@@ -7,6 +7,7 @@ import { createAtlas } from './art.js';
 import { astronautVisorBounds, createAstronautArt } from './astronaut-art.js';
 import { createBossBodyArt, type BossPose } from './boss-body-art.js';
 import { createSecondBossArt } from './boss-atlas-two.js';
+import { createFinalBossArt } from './boss-final-pair.js';
 import { createDesertMap } from './desert-map.js';
 import { drawCampaignTerrain } from './campaign-maps.js';
 import { createAntarcticBearingArt } from './antarctic-bearing-art.js';
@@ -39,11 +40,13 @@ import { advanceTowerTurn, type TowerTurnPose } from './tower-turn-motion.js';
 
 const BOSS_SCALE = 3.8;
 type DrawBossBody = ReturnType<typeof createBossBodyArt>;
-const BOSS_BODY_FACTORIES: Readonly<Partial<Record<StageId, () => DrawBossBody>>> = {
+const BOSS_BODY_FACTORIES: Readonly<Record<StageId, () => DrawBossBody>> = {
   'desert-base': () => createBossBodyArt('harvester'),
   rainforest: () => createBossBodyArt('matriarch'),
   antarctica: () => createSecondBossArt('glacier'),
-  'space-elevator': () => createSecondBossArt('orbital')
+  'space-elevator': () => createSecondBossArt('orbital'),
+  watchtower: () => createFinalBossArt('siege'),
+  'lunar-echoes': () => createFinalBossArt('lunar')
 };
 
 type BossMotion = Pick<Enemy, 'id' | 'x' | 'y'> & { world: World; tick: number; pose: BossPose };
@@ -68,8 +71,10 @@ function bossSpecialAttack(world: World, enemy: Enemy, title: boolean): boolean 
       return world.antarcticBarrage?.bossId === enemy.id;
     case 'space-elevator':
       return elevatorArmorImpact(enemy.armor, world.tick);
-    default:
-      return false;
+    case 'watchtower':
+      return world.watchtowerStrike?.bossId === enemy.id;
+    case 'lunar-echoes':
+      return world.lunarEchoCast?.bossId === enemy.id;
   }
 }
 
@@ -191,8 +196,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     const stasisBossInView = stasisBoss && desertStasisBossInView(stasisBoss, view);
     if (stasis && stasisBoss && stasisBossInView && stasisActive) drawDesertStasisRipple(ctx, stasisBoss, stasis, world.tick);
     const { stageId } = world.context;
-    const bossBodyFactory = BOSS_BODY_FACTORIES[stageId];
-    const boss = bossBodyFactory && world.enemies.find(enemy => enemy.kind === 'boss' && enemy.hp > 0);
+    const boss = world.enemies.find(enemy => enemy.kind === 'boss' && enemy.hp > 0);
     if (!boss) bossMotion = undefined;
     for (const enemy of world.enemies) {
       if (enemy.kind === 'boss-echo') {
@@ -224,7 +228,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       } else if (enemy.kind === 'insulated-suit') {
         drawInsulatedSuit ??= createInsulatedSuitArt();
         drawInsulatedSuit(ctx, enemy.x, enemy.y, tick, scale);
-      } else if (bossBodyFactory && enemy === boss) {
+      } else if (enemy === boss) {
         let motion = bossMotion?.world === world && bossMotion.id === enemy.id && bossMotion.tick <= world.tick
           ? bossMotion : undefined;
         if (motion?.tick !== world.tick) {
@@ -236,7 +240,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         }
         let drawBossBody = bossBodyArt.get(stageId);
         if (!drawBossBody) {
-          drawBossBody = bossBodyFactory();
+          drawBossBody = BOSS_BODY_FACTORIES[stageId]();
           bossBodyArt.set(stageId, drawBossBody);
         }
         drawBossBody(ctx, enemy.x, enemy.y, motion.pose, world.tick);
