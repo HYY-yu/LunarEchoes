@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { checksum, createWorld, dispatch, finishRecording, replay } from '../dist/core.js';
-import { stepDesertTurret } from '../dist/desert-repair.js';
+import { selectTurretTarget, stepDesertTurret } from '../dist/desert-repair.js';
+import { advanceTowerTurn } from '../dist/tower-turn-motion.js';
 import { DESERT_CONTINUOUS_CONTEXT, DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT } from '../dist/stage-rules.js';
 import { play } from '../scripts/simulation.mjs';
 
@@ -116,6 +117,7 @@ test('turret range and north-facing sector include both edges', () => {
     dispatch(world, idle);
     world.player.y -= 120;
     world.enemies.push(sentry(world, 1, dx, dy));
+    assert.equal(Boolean(selectTurretTarget(world, world.desertRepair.tower, 'north')), fires);
     dispatch(world, idle);
     assert.equal(world.events.includes('shot'), fires, `target offset (${dx}, ${dy})`);
   }
@@ -127,6 +129,11 @@ test('turret picks the nearest living enemy and breaks distance ties by lower id
   world.enemies.push(sentry(world, 1, 0, -140), sentry(world, 9, 60, -80),
     sentry(world, 4, -60, -80), sentry(world, 7, 0, -100), sentry(world, 2, 0, -60, 0));
 
+  const beforeQuery = structuredClone(world);
+  const aim = selectTurretTarget(world, world.desertRepair.tower, 'north');
+  assert.equal(aim.target.id, 4);
+  assert.equal(aim.distanceSquared, 10000);
+  assert.deepEqual(world, beforeQuery);
   dispatch(world, idle);
   assert.equal(world.shots.length, 1);
   const shot = world.shots[0];
@@ -244,6 +251,7 @@ test('v5 towers fire on repair in their own sectors and keep independent cooldow
       world.tick += 54;
       world.shots.length = 0;
       world.enemies = [enemy(1, tower.x + x * forward - y * sideways, tower.y + y * forward + x * sideways)];
+      assert.equal(Boolean(selectTurretTarget(world, tower, tower.direction)), fires);
       stepDesertTurret(world);
       assert.equal(world.shots.length, Number(fires), `${tower.direction}: ${forward}, ${sideways}`);
       const [shot] = world.shots;
@@ -331,4 +339,15 @@ test('material motion records each successful pickup and a same-tick deposit wit
     assert.deepEqual(world.materialMotions, age < 18 ? motions : age < 30 ? motions.slice(3) : undefined);
   }
   assert.equal(createWorld({ ...DESERT_CONTINUOUS_CONTEXT, seed: 43 }).materialMotions, undefined);
+});
+
+test('a skipped rendering frame accounts for the shot flash before turning again', () => {
+  const shot = { tick: 13, vx: 0, vy: 8 };
+  const previous = { tick: 12, angle: 0, flash: false };
+  const target = () => Math.PI;
+  assert.deepEqual(advanceTowerTurn(previous, 20, 0, shot, target), { tick: 20, angle: Math.PI / 2, flash: true });
+  const resumed = advanceTowerTurn(previous, 22, 0, shot, target);
+  assert.equal(resumed.flash, false);
+  assert.equal(resumed.angle, Math.PI / 2 + 2 * Math.PI / 45);
+  assert.deepEqual(advanceTowerTurn(resumed, 22, 0, shot, target), resumed);
 });

@@ -22,12 +22,12 @@ import { createInsulatedSuitArt } from './insulated-suit-art.js';
 import { createRocketBotArt } from './rocket-bot-art.js';
 import { createDesertRelayArt } from './desert-relay-art.js';
 import { RELAY_CENTER } from './relay-layout.js';
-import { relayObjective, type TowerDirection } from './desert-repair.js';
+import { relayObjective, selectTurretTarget, type TowerDirection } from './desert-repair.js';
 import { drawRelayObjective } from './desert-relay-guidance-art.js';
 import { drawMaterialMotion } from './material-motion-art.js';
 import { drawElevatorBossArmor } from './elevator-boss-armor-art.js';
+import { advanceTowerTurn, type TowerTurnPose } from './tower-turn-motion.js';
 
-const TURRET_FLASH_TICKS = 8;
 const TURRET_IDLE_ANGLE: Readonly<Record<TowerDirection, number>> = {
   north: -Math.PI / 2, east: 0, south: Math.PI / 2, west: Math.PI
 };
@@ -42,6 +42,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
+  const towerPoses = new Map<TowerDirection, TowerTurnPose>();
   let drawRocketBot: ReturnType<typeof createRocketBotArt> | undefined;
   let drawInsulatedSuit: ReturnType<typeof createInsulatedSuitArt> | undefined;
   let drawFrostGuard: ReturnType<typeof createFrostGuardArt> | undefined;
@@ -56,18 +57,29 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     ctx.strokeStyle = kind === 'repaired' ? '#7ef5d1' : '#ffe09b';
     ctx.setLineDash(kind === 'damaged' ? [4, 4] : []);
     ctx.beginPath(); ctx.ellipse(x, y, 21, 12, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-    const shot = direction === undefined ? undefined : world.desertTurretShots?.[direction];
-    let angle = direction === undefined ? undefined : TURRET_IDLE_ANGLE[direction];
-    if (shot) angle = Math.atan2(shot.vy, shot.vx);
-    else if (hasRelayBase(world.context)) {
-      angle = Math.atan2(y - RELAY_CENTER.y, x - RELAY_CENTER.x);
+    if (direction === undefined || kind === 'damaged') {
+      if (direction !== undefined) towerPoses.delete(direction);
+      drawTower(ctx, tower, undefined, false);
+      return;
     }
-    const flash = shot !== undefined && world.tick - shot.tick < TURRET_FLASH_TICKS;
-    drawTower(ctx, tower, angle, flash);
+
+    let pose = towerPoses.get(direction);
+    if (pose?.tick !== world.tick) {
+      const rest = hasRelayBase(world.context)
+        ? Math.atan2(y - RELAY_CENTER.y, x - RELAY_CENTER.x)
+        : TURRET_IDLE_ANGLE[direction];
+      pose = advanceTowerTurn(pose, world.tick, rest, world.desertTurretShots?.[direction], () => {
+        const selected = selectTurretTarget(world, tower, direction);
+        if (selected) return Math.atan2(selected.target.y - y, selected.target.x - x);
+      });
+      towerPoses.set(direction, pose);
+    }
+    drawTower(ctx, tower, pose.angle, pose.flash);
   }
   return function render(world: World, time: number, title = false) {
     const p = world.player, arena = stageRules(world.context).arenaSize;
     if (!playerMotion || playerMotion.world !== world || world.tick < playerMotion.tick) {
+      towerPoses.clear();
       playerMotion = { world, tick: world.tick, x: p.x, y: p.y, animationTick: 0 };
     } else if (world.tick > playerMotion.tick) {
       if (world.phase.kind === 'running') playerMotion.animationTick = p.x !== playerMotion.x || p.y !== playerMotion.y ? world.tick : 0;

@@ -21,6 +21,7 @@ export type TowerDirection = 'north' | 'east' | 'south' | 'west';
 export type DesertTurretShot = Readonly<Pick<Shot, 'vx' | 'vy'> & { tick: number }>;
 export type DesertTurretShots = Partial<Record<TowerDirection, DesertTurretShot>>;
 type TurretWorld = Pick<World, 'context' | 'desertRepair' | 'desertTurretShots' | 'enemies' | 'shots' | 'events' | 'tick'>;
+type TurretTargetWorld = Readonly<Pick<TurretWorld, 'context'>> & { readonly enemies: readonly Readonly<Enemy>[] };
 type DirectionalTower = Position & Readonly<{ direction: TowerDirection }> & (
   Readonly<{ kind: 'damaged' }> | { readonly kind: 'repaired'; nextTurretShotTick: number }
 );
@@ -188,10 +189,10 @@ export function stepDesertTurret(world: TurretWorld): void {
   }
 }
 
-function fireTurret(world: TurretWorld, tower: Position, direction: TowerDirection): boolean {
+export function selectTurretTarget(world: TurretTargetWorld, tower: Position, direction: TowerDirection): Readonly<{ target: Readonly<Enemy>; distanceSquared: number }> | undefined {
   const boundaryRoundoff = 2 * Number.EPSILON * Math.max(tower.x, tower.y);
   let nearestDistanceSquared = (TURRET_RANGE + boundaryRoundoff) ** 2;
-  let target: Enemy | undefined;
+  let target: Readonly<Enemy> | undefined;
   const relay = hasRelayBase(world.context);
   const outwardX = Math.sign(tower.x - RELAY_CENTER.x);
   const outwardY = Math.sign(tower.y - RELAY_CENTER.y);
@@ -210,9 +211,14 @@ function fireTurret(world: TurretWorld, tower: Position, direction: TowerDirecti
     target = enemy;
     nearestDistanceSquared = distanceSquared;
   }
-  if (!target) return false;
+  return target ? { target, distanceSquared: nearestDistanceSquared } : undefined;
+}
 
-  const velocityScale = TURRET_SHOT_SPEED / Math.sqrt(nearestDistanceSquared);
+function fireTurret(world: TurretWorld, tower: Position, direction: TowerDirection): boolean {
+  const aim = selectTurretTarget(world, tower, direction);
+  if (!aim) return false;
+  const { target, distanceSquared } = aim;
+  const velocityScale = TURRET_SHOT_SPEED / Math.sqrt(distanceSquared);
   const vx = (target.x - tower.x) * velocityScale;
   const vy = (target.y - tower.y) * velocityScale;
   world.shots.push({
