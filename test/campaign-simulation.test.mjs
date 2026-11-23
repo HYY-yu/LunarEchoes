@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../dist/core.js';
-import { ANTARCTIC_FROST_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { ANTARCTIC_BARRAGE_CONTEXT, ANTARCTIC_FROST_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play } from '../scripts/simulation.mjs';
 
 const scenarios = [
-  { stageId: 'antarctica', rulesVersion: 'antarctica-4', seed: 101, duration: 210, bossSecond: 162, health: 1050, shots: 7, fan: true },
+  { stageId: 'antarctica', rulesVersion: 'antarctica-5', seed: 101, duration: 210, bossSecond: 162, health: 1050, shots: 7, fan: true },
   { stageId: 'space-elevator', rulesVersion: 'space-elevator-4', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
   { stageId: 'watchtower', rulesVersion: 'watchtower-4', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
   { stageId: 'lunar-echoes', rulesVersion: 'lunar-echoes-3', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
@@ -48,7 +48,7 @@ for (const { stageId, rulesVersion = `${stageId}-2`, seed, duration, bossSecond 
 }
 
 const relayScenarios = [
-  { context: ANTARCTIC_FROST_CONTEXT, seed: 101, duration: 210, bossSecond: 162, shipments: [1, 42 * core.HZ, 84 * core.HZ, 126 * core.HZ] },
+  { context: ANTARCTIC_BARRAGE_CONTEXT, seed: 101, duration: 210, bossSecond: 162, shipments: [1, 42 * core.HZ, 84 * core.HZ, 126 * core.HZ] },
   { context: ELEVATOR_SUIT_CONTEXT, seed: 42, duration: 205, bossSecond: 158, shipments: [1, 29 * core.HZ, 76 * core.HZ, 120 * core.HZ] },
   { context: WATCHTOWER_ROCKET_CONTEXT, seed: 42, duration: 225, bossSecond: 173, shipments: [1, 42 * core.HZ, 89 * core.HZ, 118 * core.HZ] },
   { context: LUNAR_RELAY_CONTEXT, seed: 42, duration: 240, bossSecond: 185, shipments: [1, 44 * core.HZ, 112 * core.HZ, 142 * core.HZ] }
@@ -86,7 +86,7 @@ for (const { context, seed, duration, bossSecond, shipments } of relayScenarios)
 }
 
 const reinforcementScenarios = [
-  { context: ANTARCTIC_FROST_CONTEXT, enemyKind: 'frost-guard', hp: 78, radius: 13, startSecond: 82, bossSecond: 162 },
+  { context: ANTARCTIC_BARRAGE_CONTEXT, enemyKind: 'frost-guard', hp: 78, radius: 13, startSecond: 82, bossSecond: 162 },
   { context: ELEVATOR_SUIT_CONTEXT, enemyKind: 'insulated-suit', hp: 46, radius: 12, startSecond: 76, bossSecond: 158 },
   { context: WATCHTOWER_ROCKET_CONTEXT, enemyKind: 'rocket-bot', hp: 72, radius: 16, startSecond: 105, bossSecond: 173 }
 ];
@@ -161,14 +161,71 @@ test('the outer four Bosses fire distinct volleys with their existing attack war
     const boss = world.enemies.find(enemy => enemy.kind === 'boss');
     assert.equal(boss.maxHp, health);
     while (boss.attack > 1) core.dispatch(world, idle);
-    assert.equal(world.shots.length, 0);
+    assert.equal(world.shots.filter(shot => shot.kind !== 'ice-shard').length, 0);
     core.dispatch(world, idle);
-    assert.equal(world.shots.length, shots);
-    assert(world.shots.every(shot => shot.hostile && shot.damage === core.ARMOR_RULES.hpPerCell));
-    const forward = world.shots.filter(shot =>
+    const regular = world.shots.filter(shot => shot.kind !== 'ice-shard');
+    assert.equal(regular.length, shots);
+    assert(regular.every(shot => shot.hostile && shot.damage === core.ARMOR_RULES.hpPerCell));
+    const forward = regular.filter(shot =>
       shot.vx * (world.player.x - boss.x) + shot.vy * (world.player.y - boss.y) > 0
     );
     if (fan) assert.equal(forward.length, shots);
     else assert(forward.length > 0 && forward.length < shots);
   }
+});
+
+test('Antarctic ice lanes lock during warning, deal one cell on impact and can be dodged', () => {
+  const first = 9870;
+  const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
+  const shards = world => world.shots.filter(shot => shot.kind === 'ice-shard');
+  function warned(context = ANTARCTIC_BARRAGE_CONTEXT) {
+    const world = core.createWorld({ ...context, seed: 42 });
+    world.tick = first - 55;
+    world.bossSpawned = true;
+    world.spawnCooldown = 1000;
+    world.fireCooldown = 1000;
+    world.enemies.push({ id: world.nextId++, kind: 'boss', x: 550, y: 750, hp: 1050, maxHp: 1050,
+      radius: 27, attack: 1000, flash: 0 });
+    core.dispatch(world, idle);
+    return world;
+  }
+
+  const standing = warned(), dodging = warned(), defeated = warned(), legacy = warned(ANTARCTIC_FROST_CONTEXT);
+  assert.equal(standing.antarcticBarrage.firstVolleyTick, first);
+  assert.equal(standing.antarcticBarrage.angle, 0);
+  const warning = structuredClone(dodging);
+  core.dispatch(dodging, { kind: 'pause' });
+  core.dispatch(dodging, idle);
+  assert.equal(dodging.tick, warning.tick);
+  assert.deepEqual(dodging.antarcticBarrage, warning.antarcticBarrage);
+  core.dispatch(dodging, { kind: 'resume' });
+  for (let i = 0; i < 53; i++) {
+    core.dispatch(standing, idle);
+    core.dispatch(dodging, { kind: 'tick', input: { x: 0, y: 1, dash: i === 0 } });
+    core.dispatch(defeated, idle);
+    core.dispatch(legacy, idle);
+  }
+  assert.equal(shards(standing).length, 0);
+  assert.deepEqual(dodging.antarcticBarrage, warning.antarcticBarrage);
+  const boss = defeated.enemies[0];
+  defeated.shots.push({ x: boss.x, y: boss.y, vx: 0, vy: 0, life: 2, damage: 2000, hostile: false });
+  for (const world of [standing, dodging, defeated, legacy]) core.dispatch(world, idle);
+  assert.equal(defeated.bossKilled, true);
+  assert.equal(defeated.antarcticBarrage, undefined);
+  assert.equal(shards(defeated).length, 0);
+  assert.equal(legacy.antarcticBarrage, undefined);
+  assert.equal(shards(legacy).length, 0);
+  const lanes = world => shards(world).map(shot => [shot.vx, shot.vy]);
+  assert.equal(lanes(standing).length, 7);
+  assert.deepEqual(lanes(standing), lanes(dodging));
+  assert(shards(standing).every(shot => shot.hostile && shot.damage === core.ARMOR_RULES.hpPerCell));
+  const initial = standing.player.hp;
+  for (let i = 0; i < 85; i++) {
+    core.dispatch(standing, idle);
+    core.dispatch(dodging, idle);
+    if (i === 11) assert.equal(shards(standing).length, 14);
+    if (i === 23) assert.equal(shards(standing).length, 21);
+  }
+  assert.equal(standing.player.hp, initial - core.ARMOR_RULES.hpPerCell);
+  assert.equal(dodging.player.hp, initial);
 });

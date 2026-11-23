@@ -3,6 +3,7 @@ import { createDesertRepair, createDesertFourTowers, desertShipment, RELAY_REPAI
 import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 import type { MaterialMotion } from './material-motion.js';
 import { rainforestBroodReleases, rainforestBroodSites, type RainforestBrood } from './rainforest-brood.js';
+import { stepAntarcticBarrage, type AntarcticBarrage } from './antarctic-barrage.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -25,7 +26,7 @@ const ENEMY_STATS = {
 const ROCKET_BOT = Object.freeze({ stopRange: 245, shotSpeed: 1.85, attackInterval: 220 });
 export const ROCKET_WARNING_TICKS = 48;
 export type Enemy = { id: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number; radius: number; attack: number; flash: number };
-export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean; kind?: 'rocket' };
+export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean; kind?: 'rocket' | 'ice-shard' };
 export type Crystal = { x: number; y: number; value: number };
 export type Fx = { x: number; y: number; kind: 'hit' | 'kill' | 'nova' | 'dash'; life: number; size: number };
 export type Event = 'enemy-hit' | 'shot' | 'hit' | 'kill' | 'pickup' | 'upgrade' | 'dash' | 'won' | 'lost' | 'boss';
@@ -42,6 +43,7 @@ export type World = {
   desertTurretShots?: DesertTurretShots;
   materialMotions?: MaterialMotion[];
   rainforestBrood?: RainforestBrood;
+  antarcticBarrage?: AntarcticBarrage;
 };
 type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
 export type ActionBuffer = RecordingContext & { actions: Action[] };
@@ -295,6 +297,7 @@ function step(world: World, input: Input): void {
       world.rainforestBrood = { tick: world.tick, motherId: mother.id, sites };
     }
   }
+  stepAntarcticBarrage(world, ARMOR_RULES.hpPerCell);
   world.shots = world.shots.filter(shot => shot.life > 0);
   const pickupRadius = 115 + world.upgrades.magnet * 25;
   for (const crystal of world.crystals) {

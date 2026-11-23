@@ -18,6 +18,7 @@ export const RAINFOREST_BROOD_CONTEXT = context('rainforest', 4);
 export const ANTARCTICA_CONTEXT = context('antarctica', 1);
 export const ANTARCTIC_RELAY_CONTEXT = context('antarctica', 3);
 export const ANTARCTIC_FROST_CONTEXT = context('antarctica', 4);
+export const ANTARCTIC_BARRAGE_CONTEXT = context('antarctica', 5);
 export const SPACE_ELEVATOR_CONTEXT = context('space-elevator', 1);
 export const ELEVATOR_RELAY_CONTEXT = context('space-elevator', 3);
 export const ELEVATOR_SUIT_CONTEXT = context('space-elevator', 4);
@@ -58,6 +59,7 @@ export type StageContext =
   | typeof RAINFOREST_BROOD_CONTEXT
   | typeof ANTARCTIC_RELAY_CONTEXT
   | typeof ANTARCTIC_FROST_CONTEXT
+  | typeof ANTARCTIC_BARRAGE_CONTEXT
   | typeof ELEVATOR_RELAY_CONTEXT
   | typeof ELEVATOR_SUIT_CONTEXT
   | typeof WATCHTOWER_RELAY_CONTEXT
@@ -74,6 +76,7 @@ const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rules
   'rainforest-4': RAINFOREST_DELIVERY_TICKS,
   'antarctica-3': ANTARCTIC_DELIVERY_TICKS,
   'antarctica-4': ANTARCTIC_DELIVERY_TICKS,
+  'antarctica-5': ANTARCTIC_DELIVERY_TICKS,
   'space-elevator-3': ELEVATOR_DELIVERY_TICKS,
   'space-elevator-4': ELEVATOR_DELIVERY_TICKS,
   'watchtower-3': WATCHTOWER_DELIVERY_TICKS,
@@ -84,7 +87,7 @@ const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rules
 const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object.freeze({
   'desert-base': DESERT_CONTINUOUS_CONTEXT,
   rainforest: RAINFOREST_BROOD_CONTEXT,
-  antarctica: ANTARCTIC_FROST_CONTEXT,
+  antarctica: ANTARCTIC_BARRAGE_CONTEXT,
   'space-elevator': ELEVATOR_SUIT_CONTEXT,
   watchtower: WATCHTOWER_ROCKET_CONTEXT,
   'lunar-echoes': LUNAR_RELAY_CONTEXT
@@ -175,11 +178,14 @@ const RULES = Object.freeze({
   ], { hp: 1250, speed: .79, shotCount: 15, aim: 'ring', shotSpeed: 2.5, cooldownTicks: 120 })
 } satisfies Record<StageId, typeof DESERT_RULES | typeof RAINFOREST_RULES | CampaignRules>);
 
+const ANTARCTIC_FROST_RULES = Object.freeze({
+  ...RULES.antarctica,
+  reinforcement: Object.freeze({ kind: 'frost-guard', replaces: 'crawler', startTick: 82 * 60, share: .22 } as const)
+});
+
 const REINFORCED_CAMPAIGNS: Readonly<Partial<Record<StageContext['rulesVersion'], CampaignRules>>> = Object.freeze({
-  'antarctica-4': Object.freeze({
-    ...RULES.antarctica,
-    reinforcement: Object.freeze({ kind: 'frost-guard', replaces: 'crawler', startTick: 82 * 60, share: .22 })
-  }),
+  'antarctica-4': ANTARCTIC_FROST_RULES,
+  'antarctica-5': ANTARCTIC_FROST_RULES,
   'space-elevator-4': Object.freeze({
     ...RULES['space-elevator'],
     reinforcement: Object.freeze({ kind: 'insulated-suit', replaces: 'crawler', startTick: 76 * 60, share: .26 })
@@ -219,6 +225,7 @@ export function resolveStage(stageId: unknown, rulesVersion: unknown): StageCont
   const latest = stageContext(stageId);
   if (rulesVersion === latest.rulesVersion) return latest;
   if (stageId === 'rainforest' && rulesVersion === RAINFOREST_RELAY_CONTEXT.rulesVersion) return RAINFOREST_RELAY_CONTEXT;
+  if (stageId === 'antarctica' && rulesVersion === ANTARCTIC_FROST_CONTEXT.rulesVersion) return ANTARCTIC_FROST_CONTEXT;
   if (stageId === 'antarctica' && rulesVersion === ANTARCTIC_RELAY_CONTEXT.rulesVersion) return ANTARCTIC_RELAY_CONTEXT;
   if (stageId === 'space-elevator' && rulesVersion === ELEVATOR_RELAY_CONTEXT.rulesVersion) return ELEVATOR_RELAY_CONTEXT;
   if (stageId === 'watchtower' && rulesVersion === WATCHTOWER_RELAY_CONTEXT.rulesVersion) return WATCHTOWER_RELAY_CONTEXT;
