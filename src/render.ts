@@ -79,7 +79,7 @@ function drawModulePickup(ctx: CanvasRenderingContext2D, { x, y, module }: NonNu
 function drawTowerArmor(ctx: CanvasRenderingContext2D, tower: DirectionalTower) {
   if (tower.kind !== 'repaired' || !tower.armor) return;
   const capacity = desertTowerCapacity(tower);
-  const x = Math.round(tower.x - capacity * 4 / 2), y = Math.round(tower.y) - 43;
+  const x = Math.round(tower.x - capacity * 4 / 2), y = Math.round(tower.y) - 57;
   ctx.fillStyle = '#102a36';
   ctx.fillRect(x - 2, y - 2, capacity * 4 + 3, 7);
   for (let hit = 0; hit < capacity; hit++) {
@@ -163,14 +163,14 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   let drawLunarEcho: ReturnType<typeof createLunarEchoArt> | undefined;
   let drawLunarIsolation: ReturnType<typeof createLunarIsolationArt> | undefined;
   let drawRainforestArchive: ReturnType<typeof createRainforestArchiveArt> | undefined;
-  function renderTower(tower: Parameters<typeof drawTower>[1], world: World, direction?: TowerDirection) {
+  function renderTower(tower: Parameters<typeof drawTower>[1], world: World, direction?: TowerDirection, reinforced = false) {
     const { x, y, kind } = tower;
     ctx.strokeStyle = kind === 'repaired' ? '#7ef5d1' : '#ffe09b';
     ctx.setLineDash(kind === 'damaged' ? [4, 4] : []);
     ctx.beginPath(); ctx.ellipse(x, y, 21, 12, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
     if (direction === undefined || kind === 'damaged') {
       if (direction !== undefined) towerPoses.delete(direction);
-      drawTower(ctx, tower, undefined, false);
+      drawTower(ctx, tower, undefined, false, reinforced);
       return;
     }
 
@@ -185,7 +185,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       });
       towerPoses.set(direction, pose);
     }
-    drawTower(ctx, tower, pose.angle, pose.flash);
+    drawTower(ctx, tower, pose.angle, pose.flash, reinforced);
   }
   return function render(world: World, time: number, title = false, showWorldBossHealth = true) {
     const p = world.player, arena = stageRules(world.context).arenaSize;
@@ -245,7 +245,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       for (const supply of repair.supplies) drawSupply(ctx, supply);
       if ('towers' in repair) {
         for (const tower of repair.towers) {
-          renderTower(tower, world, tower.direction);
+          renderTower(tower, world, tower.direction, tower.loadout?.reinforced);
           drawTowerArmor(ctx, tower);
         }
       } else {
