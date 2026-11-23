@@ -81,12 +81,17 @@ let replayIndex = 0;
 let accumulator = 0, lastFrame = 0, lastUi = '', noticeTimer = 0;
 let noticeEndsWithBoss = false;
 const armorNode = element('armor-cells');
+const bossHealth = element('boss-health');
+const bossHealthLabel = element('boss-health-label');
+const bossHealthMeter = element('boss-health-meter');
+const bossHealthFill = element('boss-health-fill');
 const armorSpans: HTMLSpanElement[] = [];
 let lastArmorCurrent = -1, lastArmorMaximum = -1, lastArmorLanguage: Language | null = null;
 const keys = new Set<string>();
 let stickX = 0, stickY = 0, dashPressed = false;
 let stickPointer: number | null = null;
 const coarse = matchMedia('(pointer: coarse)').matches;
+const compactHud = matchMedia('(max-width: 700px)');
 function text() { return dictionary(language); }
 function logProgressResult(result: ProgressStorageResult) {
   if (result.kind === 'recovery_required') log('warn', 'progress.recovery_required', { phase: result.phase, reason: result.reason });
@@ -503,6 +508,21 @@ function renderStages() {
     }
   });
 }
+function updateBossHealth(label: string) {
+  const activeBattle = (screen === 'game' || screen === 'replay')
+    && (world.phase.kind === 'running' || world.phase.kind === 'paused');
+  const boss = compactHud.matches && activeBattle
+    ? world.enemies.find(enemy => enemy.kind === 'boss' && enemy.hp > 0)
+    : undefined;
+  bossHealth.hidden = !boss;
+  if (!boss) return;
+  if (bossHealthLabel.textContent !== label) bossHealthLabel.textContent = label;
+  const current = String(boss.hp), maximum = String(boss.maxHp);
+  if (bossHealthMeter.getAttribute('aria-valuenow') === current && bossHealthMeter.getAttribute('aria-valuemax') === maximum) return;
+  bossHealthMeter.setAttribute('aria-valuenow', current);
+  bossHealthMeter.setAttribute('aria-valuemax', maximum);
+  bossHealthFill.style.inlineSize = `${boss.hp / boss.maxHp * 100}%`;
+}
 function updateRepairHud() {
   const panel = element('repair-hud');
   const repair = world.desertRepair;
@@ -571,6 +591,7 @@ function updateUi(force = false) {
   element('health-label').textContent = t.health; element('time-label').textContent = screen === 'replay' ? t.replaying : t.countdown;
   updateRadio();
   updateArmor();
+  updateBossHealth(t.bossHealth);
   updateRepairHud();
   const duration = stageRules(world.context).durationTicks;
   const remaining = Math.max(0, duration - world.tick);
@@ -794,6 +815,7 @@ function handleKey(event: KeyboardEvent, down: boolean) {
 }
 window.addEventListener('keydown', event => handleKey(event, true)); window.addEventListener('keyup', event => handleKey(event, false));
 window.addEventListener('blur', () => { clearCombatInput(); if (screen === 'game' && world.phase.kind === 'running') act({ kind: 'pause' }); });
+compactHud.addEventListener('change', () => updateBossHealth(text().bossHealth));
 document.addEventListener('visibilitychange', () => { clearCombatInput(); synth.setHidden(document.hidden); if (document.hidden) { if (screen === 'game' && world.phase.kind === 'running') act({ kind: 'pause' }); } else { updateUi(true); void enableAudio(); } });
 element('language').onclick = () => { language = language === 'zh' ? 'en' : 'zh'; document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en'; updateUi(true); void enableAudio(true); };
 element('sound').onclick = () => { synth.setMuted(!synth.muted); updateUi(true); if (!synth.muted) void enableAudio(true); };
@@ -838,7 +860,7 @@ function frame(now: number) {
         }
       }
     } else accumulator = 0;
-    render(world, now, screen === 'title' || screen === 'stages');
+    render(world, now, screen === 'title' || screen === 'stages', !compactHud.matches);
     if (++uiCounter % 6 === 0) updateUi();
     frames++; if (now - metricTime > 5000) { log('debug', 'render.metrics', { frames, elapsedMs: now - metricTime, enemies: world.enemies.length, shots: world.shots.length, tick: world.tick }); frames = 0; metricTime = now; }
     requestAnimationFrame(frame);

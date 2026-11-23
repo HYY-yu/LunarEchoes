@@ -63,7 +63,7 @@ function harness(content = embedded, localStorage = memoryStorage(), fetchStory 
   class Button extends Element { constructor() { super('button'); } }
   class Canvas extends Element { constructor() { super('canvas'); this.commands = []; } getContext() { const commands = this.commands; return { createImageData(width, height) { return { data: new Uint8ClampedArray(width * height * 4) }; }, putImageData() {}, fillRect(...rect) { commands.push([this.fillStyle, ...rect]); }, save() {}, restore() {}, scale() {}, translate() {}, rotate() {}, beginPath() {}, rect() {}, clip() {}, moveTo() {}, lineTo() {}, closePath() {}, fill() {}, drawImage() {}, ellipse() {}, arc() {}, stroke() {}, strokeRect() {}, setLineDash() {}, createPattern() { return 'terrain'; } }; } }
   const body = new Element('body');
-  for (const id of ['game', 'overlay', 'hud', 'touch', 'armor-cells', 'notice', 'footer-right', 'sound', 'language', 'pause', 'health-label', 'time-label', 'clock', 'sync-fill', 'level', 'kills', 'xp-fill', 'dash', 'footer-left', 'equipment', 'joystick', 'stick', 'desert-content', 'repair-hud', 'repair-inventory', 'repair-status']) {
+  for (const id of ['game', 'overlay', 'hud', 'touch', 'armor-cells', 'notice', 'footer-right', 'sound', 'language', 'pause', 'health-label', 'time-label', 'clock', 'sync-fill', 'level', 'kills', 'xp-fill', 'dash', 'footer-left', 'equipment', 'joystick', 'stick', 'desert-content', 'repair-hud', 'repair-inventory', 'repair-status', 'boss-health', 'boss-health-label', 'boss-health-meter', 'boss-health-fill']) {
     const node = id === 'game' ? new Canvas() : ['sound', 'language', 'pause', 'dash'].includes(id) ? new Button() : new Element('div'); node.id = id; if (id === 'desert-content') node.textContent = content; body.append(node);
   }
   const all = (node = body) => [node, ...node.children.flatMap(child => all(child))];
@@ -79,7 +79,7 @@ function harness(content = embedded, localStorage = memoryStorage(), fetchStory 
     play() {}
     events() {}
   }
-  const context = vm.createContext({ document, localStorage, fetch: fetchStory, HTMLElement: Element, HTMLCanvasElement: Canvas, HTMLButtonElement: Button, matchMedia: () => ({ matches: true }), crypto: { getRandomValues(array) { if (seedFailure) { seedFailure = false; throw new Error('test seed unavailable'); } seedCalls++; array[0] = 41 + seedCalls; } }, requestAnimationFrame: callback => { raf = callback; }, console, location: { search: '' }, URLSearchParams, setTimeout, clearTimeout, addEventListener: (name, handler) => listeners.set(name, handler) });
+  const context = vm.createContext({ document, localStorage, fetch: fetchStory, HTMLElement: Element, HTMLCanvasElement: Canvas, HTMLButtonElement: Button, matchMedia: () => ({ matches: true, addEventListener() {} }), crypto: { getRandomValues(array) { if (seedFailure) { seedFailure = false; throw new Error('test seed unavailable'); } seedCalls++; array[0] = 41 + seedCalls; } }, requestAnimationFrame: callback => { raf = callback; }, console, location: { search: '' }, URLSearchParams, setTimeout, clearTimeout, addEventListener: (name, handler) => listeners.set(name, handler) });
   context.window = context;
   const cache = new Map();
   function load(name) {
