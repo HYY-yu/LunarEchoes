@@ -15,6 +15,7 @@ import { assaultLabels, assaultObjective, assaultRadio, supplyDirection, type As
 type Screen = 'title' | 'stages' | 'opening' | 'game' | 'replay' | 'replay-end';
 type RadioBeat = 'firstContact' | 'telemetry' | AssaultRadioBeat;
 type RadioState = Readonly<{ kind: 'inactive' | 'waiting' | 'disabled' }> | Readonly<{ kind: 'active' | 'dismissed'; beat: RadioBeat }>;
+import { ANTARCTIC_BARRAGE, antarcticBarrageVolleyIndex } from './antarctic-barrage.js';
 const DESERT_CONTEXT = stageContext('desert-base');
 type DesertContent = Readonly<{
   opening: Readonly<{ id: 'desert-base.opening'; zh: string; en: string }>;
@@ -212,6 +213,13 @@ function act(action: Action, record = true) {
     const brood = world.rainforestBrood;
     if (world.tick !== tickBefore && brood?.tick === world.tick) {
       log('info', 'session.brood_released', { ...world.context, seed: world.seed, ...brood });
+    }
+    const barrage = world.antarcticBarrage;
+    if (barrage && world.tick !== tickBefore && world.phase.kind !== 'lost') {
+      const fields = { ...world.context, seed: world.seed, tick: world.tick, ...barrage };
+      if (world.tick === barrage.firstVolleyTick - ANTARCTIC_BARRAGE.warningTicks) log('info', 'session.barrage_started', fields);
+      const volley = antarcticBarrageVolleyIndex(barrage, world.tick);
+      if (volley >= 0) log('info', 'session.barrage_volley', { ...fields, volley, shots: ANTARCTIC_BARRAGE.count });
     }
     if (world.nextId !== nextEnemyId) {
       const rules = stageRules(world.context);

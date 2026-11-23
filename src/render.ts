@@ -8,6 +8,7 @@ import { astronautVisorBounds, createAstronautArt } from './astronaut-art.js';
 import { createDesertMap } from './desert-map.js';
 import { drawCampaignTerrain } from './campaign-maps.js';
 import { createAntarcticBearingArt } from './antarctic-bearing-art.js';
+import { drawAntarcticBarrageWarning, drawIceShard } from './antarctic-barrage-art.js';
 import { createOrbitalLiftArt } from './orbital-lift-art.js';
 import { createWatchtowerChargeArt } from './watchtower-charge-art.js';
 import { createLunarIsolationArt } from './lunar-isolation-art.js';
@@ -110,6 +111,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       drawDesertRelay ??= createDesertRelayArt();
       drawDesertRelay(ctx, world.tick);
     }
+    if (!title) drawAntarcticBarrageWarning(ctx, world);
     const repair = world.desertRepair;
     if (!title && repair) {
       for (const supply of repair.supplies) drawSupply(ctx, supply);
@@ -153,6 +155,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       if (enemy.kind === 'boss') { ctx.fillStyle = '#172c3d'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60, 3); ctx.fillStyle = '#f5ba78'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60 * Math.max(0, enemy.hp / enemy.maxHp), 3); }
     }
     for (const shot of world.shots) {
+      if (shot.kind === 'ice-shard') {
+        drawIceShard(ctx, shot);
+        continue;
+      }
       if (shot.kind === 'rocket') {
         ctx.fillStyle = '#ffbd75';
         ctx.fillRect(Math.round(shot.x) - 3, Math.round(shot.y) - 3, 7, 7);
