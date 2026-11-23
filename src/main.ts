@@ -204,12 +204,19 @@ function act(action: Action, record = true) {
   const deliveriesBefore = (world.desertAssault ?? world.campaignRelay)?.deliveries;
   const finalBefore = world.desertAssault?.final.kind;
   const bossKilledBefore = world.bossKilled;
+  const armoredBoss = screen === 'game' && world.context.stageId === 'space-elevator' && world.bossSpawned && !world.bossKilled
+    ? world.enemies.find(enemy => enemy.armor?.kind === 'active')
+    : undefined;
   const repair = world.desertRepair;
   const towersBefore = repair && 'towers' in repair ? repair.towers : undefined;
   const towerBefore = repair && 'tower' in repair ? repair.tower : undefined;
   dispatch(world, action);
   if (action.kind !== 'tick') log('info', `session.${action.kind}`, { seed: world.seed, tick: world.tick, phase: world.phase.kind });
   if (screen === 'game') {
+    const armor = armoredBoss?.armor;
+    if (armoredBoss && armor?.kind === 'spent' && armor.atTick === world.tick && world.tick !== tickBefore) {
+      log('info', 'session.boss_armor_ended', { ...world.context, seed: world.seed, tick: world.tick, bossId: armoredBoss.id, reason: armor.reason });
+    }
     const brood = world.rainforestBrood;
     if (world.tick !== tickBefore && brood?.tick === world.tick) {
       log('info', 'session.brood_released', { ...world.context, seed: world.seed, ...brood });
@@ -275,6 +282,11 @@ function act(action: Action, record = true) {
   }
   updateRadio();
   if (world.events.includes('boss')) {
+    const boss = screen === 'game' ? world.enemies.find(enemy => enemy.armor) : undefined;
+    if (boss?.armor?.kind === 'active') {
+      log('info', 'session.boss_armor_started', { ...world.context, seed: world.seed, tick: world.tick,
+        bossId: boss.id, capacity: boss.armor.remaining, expiresAt: boss.armor.expiresAt });
+    }
     if (world.context.stageId === 'rainforest') notify(text().rainforestBoss, 'boss');
     else if (world.context.stageId !== 'desert-base') notify(text().campaignBoss[world.context.stageId], 'boss');
     else if (screen === 'game') {

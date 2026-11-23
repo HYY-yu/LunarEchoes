@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../dist/core.js';
-import { ANTARCTIC_BARRAGE_CONTEXT, ANTARCTIC_FROST_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { ANTARCTIC_BARRAGE_CONTEXT, ANTARCTIC_FROST_CONTEXT, ELEVATOR_ARMOR_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play } from '../scripts/simulation.mjs';
 
 const scenarios = [
   { stageId: 'antarctica', rulesVersion: 'antarctica-5', seed: 101, duration: 210, bossSecond: 162, health: 1050, shots: 7, fan: true },
-  { stageId: 'space-elevator', rulesVersion: 'space-elevator-4', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
+  { stageId: 'space-elevator', rulesVersion: 'space-elevator-5', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
   { stageId: 'watchtower', rulesVersion: 'watchtower-4', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
   { stageId: 'lunar-echoes', rulesVersion: 'lunar-echoes-3', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
 ];
@@ -49,7 +49,7 @@ for (const { stageId, rulesVersion = `${stageId}-2`, seed, duration, bossSecond 
 
 const relayScenarios = [
   { context: ANTARCTIC_BARRAGE_CONTEXT, seed: 101, duration: 210, bossSecond: 162, shipments: [1, 42 * core.HZ, 84 * core.HZ, 126 * core.HZ] },
-  { context: ELEVATOR_SUIT_CONTEXT, seed: 42, duration: 205, bossSecond: 158, shipments: [1, 29 * core.HZ, 76 * core.HZ, 120 * core.HZ] },
+  { context: ELEVATOR_ARMOR_CONTEXT, seed: 42, duration: 205, bossSecond: 158, shipments: [1, 29 * core.HZ, 76 * core.HZ, 120 * core.HZ] },
   { context: WATCHTOWER_ROCKET_CONTEXT, seed: 42, duration: 225, bossSecond: 173, shipments: [1, 42 * core.HZ, 89 * core.HZ, 118 * core.HZ] },
   { context: LUNAR_RELAY_CONTEXT, seed: 42, duration: 240, bossSecond: 185, shipments: [1, 44 * core.HZ, 112 * core.HZ, 142 * core.HZ] }
 ];
@@ -87,7 +87,7 @@ for (const { context, seed, duration, bossSecond, shipments } of relayScenarios)
 
 const reinforcementScenarios = [
   { context: ANTARCTIC_BARRAGE_CONTEXT, enemyKind: 'frost-guard', hp: 78, radius: 13, startSecond: 82, bossSecond: 162 },
-  { context: ELEVATOR_SUIT_CONTEXT, enemyKind: 'insulated-suit', hp: 46, radius: 12, startSecond: 76, bossSecond: 158 },
+  { context: ELEVATOR_ARMOR_CONTEXT, enemyKind: 'insulated-suit', hp: 46, radius: 12, startSecond: 76, bossSecond: 158 },
   { context: WATCHTOWER_ROCKET_CONTEXT, enemyKind: 'rocket-bot', hp: 72, radius: 16, startSecond: 105, bossSecond: 173 }
 ];
 
@@ -228,4 +228,78 @@ test('Antarctic ice lanes lock during warning, deal one cell on impact and can b
   }
   assert.equal(standing.player.hp, initial - core.ARMOR_RULES.hpPerCell);
   assert.equal(dodging.player.hp, initial);
+});
+
+const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
+function elevatorBoss(context = ELEVATOR_ARMOR_CONTEXT) {
+  const world = core.createWorld({ ...context, seed: 42 });
+  world.tick = 158 * core.HZ - 1;
+  world.spawnCooldown = 1000;
+  world.fireCooldown = 1000;
+  core.dispatch(world, idle);
+  const boss = world.enemies[0];
+  assert.equal(boss.kind, 'boss');
+  return { world, boss };
+}
+
+test('the elevator boss armor absorbs hits until broken or expired', () => {
+  function fire(world, boss, damage) {
+    world.shots.push({ x: boss.x, y: boss.y, vx: 0, vy: 0, life: 2, damage, hostile: false });
+    core.dispatch(world, idle);
+  }
+  const { world, boss } = elevatorBoss();
+  const first = world.tick;
+  assert.deepEqual(boss.armor, { kind: 'active', remaining: 165, expiresAt: first + 330 });
+  fire(world, boss, 100);
+  assert.equal(boss.hp, 885);
+  assert.deepEqual(boss.armor, { kind: 'active', remaining: 105, expiresAt: first + 330, hitTick: first + 1 });
+  core.dispatch(world, { kind: 'pause' });
+  core.dispatch(world, idle);
+  assert.equal(world.tick, first + 1);
+  assert.equal(boss.armor.remaining, 105);
+  core.dispatch(world, { kind: 'resume' });
+  fire(world, boss, 300);
+  assert.equal(boss.hp, 690);
+  assert.deepEqual(boss.armor, { kind: 'spent', atTick: first + 2, reason: 'broken' });
+  fire(world, boss, 50);
+  assert.equal(boss.hp, 640);
+
+  const expiry = elevatorBoss();
+  expiry.world.tick = expiry.boss.armor.expiresAt - 1;
+  fire(expiry.world, expiry.boss, 100);
+  assert.equal(expiry.boss.hp, 825);
+  assert.deepEqual(expiry.boss.armor, { kind: 'spent', atTick: first + 330, reason: 'expired' });
+
+  const legacy = elevatorBoss(ELEVATOR_SUIT_CONTEXT);
+  fire(legacy.world, legacy.boss, 100);
+  assert.equal(legacy.boss.armor, undefined);
+  assert.equal(legacy.boss.hp, 825);
+});
+
+test('tower, nova and orbit damage also consume the elevator boss armor', () => {
+  const nova = elevatorBoss();
+  const orbit = elevatorBoss();
+  const tower = elevatorBoss();
+
+  nova.boss.x = nova.world.player.x + 90;
+  nova.boss.y = nova.world.player.y;
+  nova.world.upgrades.nova = 1;
+
+  const nextAngle = (orbit.world.tick + 1) * .055;
+  orbit.boss.x = orbit.world.player.x + Math.cos(nextAngle) * 58;
+  orbit.boss.y = orbit.world.player.y + Math.sin(nextAngle) * 58;
+  orbit.world.upgrades.orbit = 1;
+
+  const [north] = tower.world.desertRepair.towers;
+  tower.world.desertRepair.towers[0] = { ...north, kind: 'repaired', nextTurretShotTick: 0 };
+  tower.boss.x = north.x - 22;
+  tower.boss.y = north.y - 22;
+
+  for (const [{ world, boss }, rawDamage] of [[nova, 51], [orbit, 1.6], [tower, 18]]) {
+    core.dispatch(world, idle);
+    assert(Math.abs(boss.hp - (925 - rawDamage * .4)) < 1e-9);
+    assert(Math.abs(boss.armor.remaining - (165 - rawDamage * .6)) < 1e-9);
+    assert.equal(boss.armor.hitTick, world.tick);
+  }
+  assert.equal(tower.world.desertTurretShots.north.tick, tower.world.tick);
 });
