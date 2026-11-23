@@ -79,7 +79,7 @@ function drawModulePickup(ctx: CanvasRenderingContext2D, { x, y, module }: NonNu
 function drawTowerArmor(ctx: CanvasRenderingContext2D, tower: DirectionalTower) {
   if (tower.kind !== 'repaired' || !tower.armor) return;
   const capacity = desertTowerCapacity(tower);
-  const x = Math.round(tower.x - capacity * 4 / 2), y = Math.round(tower.y) - 43;
+  const x = Math.round(tower.x - capacity * 4 / 2), y = Math.round(tower.y) - 57;
   ctx.fillStyle = '#102a36';
   ctx.fillRect(x - 2, y - 2, capacity * 4 + 3, 7);
   for (let hit = 0; hit < capacity; hit++) {
