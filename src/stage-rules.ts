@@ -29,6 +29,7 @@ export const WATCHTOWER_ROCKET_CONTEXT = context('watchtower', 4);
 export const WATCHTOWER_STRIKE_CONTEXT = context('watchtower', 5);
 export const LUNAR_ECHOES_CONTEXT = context('lunar-echoes', 1);
 export const LUNAR_RELAY_CONTEXT = context('lunar-echoes', 3);
+export const LUNAR_ECHO_CONTEXT = context('lunar-echoes', 4);
 
 const LEGACY_CONTEXTS = Object.freeze({
   'desert-base': DESERT_CONTEXT,
@@ -68,13 +69,15 @@ export type StageContext =
   | typeof WATCHTOWER_RELAY_CONTEXT
   | typeof WATCHTOWER_ROCKET_CONTEXT
   | typeof WATCHTOWER_STRIKE_CONTEXT
-  | typeof LUNAR_RELAY_CONTEXT;
+  | typeof LUNAR_RELAY_CONTEXT
+  | typeof LUNAR_ECHO_CONTEXT;
 
 type FourDeliveries = readonly [number, number, number, number];
 const RAINFOREST_DELIVERY_TICKS = Object.freeze([1, 35 * 60, 70 * 60, 108 * 60] as const);
 const ANTARCTIC_DELIVERY_TICKS = Object.freeze([1, 42 * 60, 84 * 60, 126 * 60] as const);
 const ELEVATOR_DELIVERY_TICKS = Object.freeze([1, 29 * 60, 76 * 60, 120 * 60] as const);
 const WATCHTOWER_DELIVERY_TICKS = Object.freeze([1, 42 * 60, 89 * 60, 118 * 60] as const);
+const LUNAR_DELIVERY_TICKS = Object.freeze([1, 44 * 60, 112 * 60, 142 * 60] as const);
 const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rulesVersion'], FourDeliveries>>> = Object.freeze({
   'rainforest-3': RAINFOREST_DELIVERY_TICKS,
   'rainforest-4': RAINFOREST_DELIVERY_TICKS,
@@ -87,7 +90,8 @@ const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rules
   'watchtower-3': WATCHTOWER_DELIVERY_TICKS,
   'watchtower-4': WATCHTOWER_DELIVERY_TICKS,
   'watchtower-5': WATCHTOWER_DELIVERY_TICKS,
-  'lunar-echoes-3': Object.freeze([1, 44 * 60, 112 * 60, 142 * 60] as const)
+  'lunar-echoes-3': LUNAR_DELIVERY_TICKS,
+  'lunar-echoes-4': LUNAR_DELIVERY_TICKS
 });
 
 const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object.freeze({
@@ -96,7 +100,7 @@ const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object
   antarctica: ANTARCTIC_BARRAGE_CONTEXT,
   'space-elevator': ELEVATOR_ARMOR_CONTEXT,
   watchtower: WATCHTOWER_STRIKE_CONTEXT,
-  'lunar-echoes': LUNAR_RELAY_CONTEXT
+  'lunar-echoes': LUNAR_ECHO_CONTEXT
 });
 export type SimulationErrorCode = 'invalid-data' | 'incompatible-version' | 'unavailable-stage' | 'incompatible-rules' | 'nonterminal-replay' | 'checksum-mismatch' | 'incomplete-replay';
 export class SimulationError extends Error {
@@ -243,6 +247,7 @@ export function resolveStage(stageId: unknown, rulesVersion: unknown): StageCont
   if (stageId === 'space-elevator' && rulesVersion === ELEVATOR_RELAY_CONTEXT.rulesVersion) return ELEVATOR_RELAY_CONTEXT;
   if (stageId === 'watchtower' && rulesVersion === WATCHTOWER_ROCKET_CONTEXT.rulesVersion) return WATCHTOWER_ROCKET_CONTEXT;
   if (stageId === 'watchtower' && rulesVersion === WATCHTOWER_RELAY_CONTEXT.rulesVersion) return WATCHTOWER_RELAY_CONTEXT;
+  if (stageId === 'lunar-echoes' && rulesVersion === LUNAR_RELAY_CONTEXT.rulesVersion) return LUNAR_RELAY_CONTEXT;
   if (stageId === DESERT_TURRET_CONTEXT.stageId) {
     if (rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion) return DESERT_RELAY_CONTEXT;
     if (rulesVersion === DESERT_ASSAULT_CONTEXT.rulesVersion) return DESERT_ASSAULT_CONTEXT;
