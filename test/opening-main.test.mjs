@@ -7,7 +7,7 @@ import { drawDesertScene } from '../dist/desert-scene.js';
 import { drawRainforestFailure, drawRainforestVictory } from '../dist/rainforest-story-art.js';
 import * as core from '../dist/core.js';
 import { createWorld, normalizeInput, replay, finalChecksum, startRecording } from '../dist/core.js';
-import { DESERT_FOUR_TOWERS_CONTEXT, DESERT_RELAY_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
+import { DESERT_FOUR_TOWERS_CONTEXT, DESERT_RELAY_CONTEXT, DESERT_STASIS_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
 import { assaultObjective } from '../dist/desert-guidance.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play as simulate } from '../scripts/simulate.mjs';
@@ -29,7 +29,7 @@ function memoryStorage(raw = null) {
     setItem(key, value) { this.writes.push([key, value]); this.raw = value; }
   };
 }
-function harness(content = embedded, localStorage = memoryStorage(), fetchStory = async () => ({ ok: true, json: async () => JSON.parse(readFileSync('dist/rainforest.story.json', 'utf8')) }), desertContext = stageContext('desert-base')) {
+function harness(content = embedded, localStorage = memoryStorage(), fetchStory = async () => ({ ok: true, json: async () => JSON.parse(readFileSync('dist/rainforest.story.json', 'utf8')) }), desertContext = DESERT_STASIS_CONTEXT) {
   const listeners = new Map(), logs = [], sessions = [], timers = new Map(), cancelledTimers = [];
   let active, raf, seedCalls = 0, now = 1000, timerNow = 0, nextTimer = 1, audioFailure = false, seedFailure = false, audioActivations = 0;
   const setTimeout = (callback, delay) => { const id = nextTimer++; timers.set(id, { callback, at: timerNow + delay }); return id; };

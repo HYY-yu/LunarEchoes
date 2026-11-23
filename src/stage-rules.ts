@@ -99,7 +99,7 @@ const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rules
 });
 
 const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object.freeze({
-  'desert-base': DESERT_STASIS_CONTEXT,
+  'desert-base': DESERT_SALVAGE_CONTEXT,
   rainforest: RAINFOREST_BROOD_CONTEXT,
   antarctica: ANTARCTIC_BARRAGE_CONTEXT,
   'space-elevator': ELEVATOR_ARMOR_CONTEXT,
@@ -257,7 +257,7 @@ export function resolveStage(stageId: unknown, rulesVersion: unknown): StageCont
   if (stageId === 'watchtower' && rulesVersion === WATCHTOWER_RELAY_CONTEXT.rulesVersion) return WATCHTOWER_RELAY_CONTEXT;
   if (stageId === 'lunar-echoes' && rulesVersion === LUNAR_RELAY_CONTEXT.rulesVersion) return LUNAR_RELAY_CONTEXT;
   if (stageId === DESERT_TURRET_CONTEXT.stageId) {
-    if (rulesVersion === DESERT_SALVAGE_CONTEXT.rulesVersion) return DESERT_SALVAGE_CONTEXT;
+    if (rulesVersion === DESERT_STASIS_CONTEXT.rulesVersion) return DESERT_STASIS_CONTEXT;
     if (rulesVersion === DESERT_STASIS_CONTEXT.rulesVersion) return DESERT_STASIS_CONTEXT;
     if (rulesVersion === DESERT_CONTINUOUS_CONTEXT.rulesVersion) return DESERT_CONTINUOUS_CONTEXT;
     if (rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion) return DESERT_RELAY_CONTEXT;

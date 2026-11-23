@@ -31,8 +31,9 @@ function repairTower(world, index) {
   return repair.towers[index];
 }
 
-test('desert salvage is opt-in and rolls once per real kill using an independent seed', () => {
-  assert.equal(stageContext('desert-base'), DESERT_STASIS_CONTEXT);
+test('the live desert rolls salvage once per real kill using an independent seed', () => {
+  assert.equal(stageContext('desert-base'), DESERT_SALVAGE_CONTEXT);
+  assert.equal(resolveStage('desert-base', 'desert-base-9'), DESERT_STASIS_CONTEXT);
   assert.equal(resolveStage('desert-base', 'desert-base-10'), DESERT_SALVAGE_CONTEXT);
   const world = quietWorld();
   const repair = world.desertRepair;
