@@ -1,6 +1,6 @@
 import type { StageId } from './stage-contract.js';
 
-function context<const Id extends StageId, const Revision extends 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9>(stageId: Id, revision: Revision): Readonly<{ stageId: Id; rulesVersion: `${Id}-${Revision}` }> {
+function context<const Id extends StageId, const Revision extends 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10>(stageId: Id, revision: Revision): Readonly<{ stageId: Id; rulesVersion: `${Id}-${Revision}` }> {
   return Object.freeze({ stageId, rulesVersion: `${stageId}-${revision}` });
 }
 
@@ -12,6 +12,7 @@ export const DESERT_ASSAULT_CONTEXT = context('desert-base', 6);
 export const DESERT_RELAY_CONTEXT = context('desert-base', 7);
 export const DESERT_CONTINUOUS_CONTEXT = context('desert-base', 8);
 export const DESERT_STASIS_CONTEXT = context('desert-base', 9);
+export const DESERT_SALVAGE_CONTEXT = context('desert-base', 10);
 export const DESERT_ASSAULT_DURATION_TICKS = 60 * 300;
 export const RAINFOREST_CONTEXT = context('rainforest', 1);
 export const RAINFOREST_RELAY_CONTEXT = context('rainforest', 3);
@@ -60,6 +61,7 @@ export type StageContext =
   | typeof DESERT_RELAY_CONTEXT
   | typeof DESERT_CONTINUOUS_CONTEXT
   | typeof DESERT_STASIS_CONTEXT
+  | typeof DESERT_SALVAGE_CONTEXT
   | typeof RAINFOREST_RELAY_CONTEXT
   | typeof RAINFOREST_BROOD_CONTEXT
   | typeof ANTARCTIC_RELAY_CONTEXT
@@ -223,7 +225,7 @@ export function hasDesertRelay(context: StageContext): boolean {
 }
 
 export function hasContinuousDesertAssault(context: StageContext): boolean {
-  return context === DESERT_CONTINUOUS_CONTEXT || context === DESERT_STASIS_CONTEXT;
+  return context === DESERT_CONTINUOUS_CONTEXT || context === DESERT_STASIS_CONTEXT || context === DESERT_SALVAGE_CONTEXT;
 }
 
 export function hasRelayBase(context: StageContext): boolean {
@@ -255,6 +257,8 @@ export function resolveStage(stageId: unknown, rulesVersion: unknown): StageCont
   if (stageId === 'watchtower' && rulesVersion === WATCHTOWER_RELAY_CONTEXT.rulesVersion) return WATCHTOWER_RELAY_CONTEXT;
   if (stageId === 'lunar-echoes' && rulesVersion === LUNAR_RELAY_CONTEXT.rulesVersion) return LUNAR_RELAY_CONTEXT;
   if (stageId === DESERT_TURRET_CONTEXT.stageId) {
+    if (rulesVersion === DESERT_SALVAGE_CONTEXT.rulesVersion) return DESERT_SALVAGE_CONTEXT;
+    if (rulesVersion === DESERT_STASIS_CONTEXT.rulesVersion) return DESERT_STASIS_CONTEXT;
     if (rulesVersion === DESERT_CONTINUOUS_CONTEXT.rulesVersion) return DESERT_CONTINUOUS_CONTEXT;
     if (rulesVersion === DESERT_RELAY_CONTEXT.rulesVersion) return DESERT_RELAY_CONTEXT;
     if (rulesVersion === DESERT_ASSAULT_CONTEXT.rulesVersion) return DESERT_ASSAULT_CONTEXT;
