@@ -92,7 +92,7 @@ export function planDesertAssaultInput(world, { skipFourth = false, fourthRepair
     x = position.x - nearest.x;
     y = position.y - nearest.y;
   }
-  const lastTower = towers.at(-1);
+  const lastTower = salvage && delayFourth ? towers.find(tower => tower.kind === 'damaged') : towers.at(-1);
   if (delayFourth && Math.hypot(position.x - lastTower.x, position.y - lastTower.y) < 105) {
     x = position.x - lastTower.x;
     y = position.y - lastTower.y;
