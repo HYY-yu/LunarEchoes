@@ -5,7 +5,8 @@ import { ROCKET_WARNING_TICKS, type Enemy, type World } from './core.js';
 import type { StageId } from './stage-contract.js';
 import { createAtlas } from './art.js';
 import { astronautVisorBounds, createAstronautArt } from './astronaut-art.js';
-import { createBossBodyArt, type BossBody, type BossPose } from './boss-body-art.js';
+import { createBossBodyArt, type BossPose } from './boss-body-art.js';
+import { createSecondBossArt } from './boss-atlas-two.js';
 import { createDesertMap } from './desert-map.js';
 import { drawCampaignTerrain } from './campaign-maps.js';
 import { createAntarcticBearingArt } from './antarctic-bearing-art.js';
@@ -29,7 +30,7 @@ import { RELAY_CENTER } from './relay-layout.js';
 import { relayObjective, selectTurretTarget, type TowerDirection } from './desert-repair.js';
 import { drawRelayObjective } from './desert-relay-guidance-art.js';
 import { drawMaterialMotion } from './material-motion-art.js';
-import { drawElevatorBossArmor } from './elevator-boss-armor-art.js';
+import { drawElevatorBossArmor, elevatorArmorImpact } from './elevator-boss-armor-art.js';
 import { isDesertStasisActive } from './desert-stasis.js';
 import {
   desertStasisBossInView, drawDesertStasisClock, drawDesertStasisWarning, drawDesertStasisRipple, drawFrozenHostileBolt
@@ -37,8 +38,12 @@ import {
 import { advanceTowerTurn, type TowerTurnPose } from './tower-turn-motion.js';
 
 const BOSS_SCALE = 3.8;
-const BOSS_BODY_BY_STAGE: Readonly<Partial<Record<StageId, BossBody>>> = {
-  'desert-base': 'harvester', rainforest: 'matriarch'
+type DrawBossBody = ReturnType<typeof createBossBodyArt>;
+const BOSS_BODY_FACTORIES: Readonly<Partial<Record<StageId, () => DrawBossBody>>> = {
+  'desert-base': () => createBossBodyArt('harvester'),
+  rainforest: () => createBossBodyArt('matriarch'),
+  antarctica: () => createSecondBossArt('glacier'),
+  'space-elevator': () => createSecondBossArt('orbital')
 };
 
 type BossMotion = Pick<Enemy, 'id' | 'x' | 'y'> & { world: World; tick: number; pose: BossPose };
@@ -46,6 +51,27 @@ type BossMotion = Pick<Enemy, 'id' | 'x' | 'y'> & { world: World; tick: number; 
 const TURRET_IDLE_ANGLE: Readonly<Record<TowerDirection, number>> = {
   north: -Math.PI / 2, east: 0, south: Math.PI / 2, west: Math.PI
 };
+
+function bossSpecialAttack(world: World, enemy: Enemy, title: boolean): boolean {
+  if (title) return false;
+  switch (world.context.stageId) {
+    case 'desert-base': {
+      const stasis = world.desertStasis;
+      return stasis?.bossId === enemy.id && (world.tick < stasis.beginsAt || isDesertStasisActive(stasis, world.tick));
+    }
+    case 'rainforest': {
+      const brood = world.rainforestBrood;
+      return rainforestBroodWarning(world.context, world.tick) !== undefined ||
+        brood?.motherId === enemy.id && rainforestBroodBurstProgress(brood, world.tick) !== undefined;
+    }
+    case 'antarctica':
+      return world.antarcticBarrage?.bossId === enemy.id;
+    case 'space-elevator':
+      return elevatorArmorImpact(enemy.armor, world.tick);
+    default:
+      return false;
+  }
+}
 
 export function createRenderer(canvas: HTMLCanvasElement) {
   const context = canvas.getContext('2d', { alpha: false });
@@ -55,7 +81,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const drawAstronaut = createAstronautArt();
   let playerMotion: { world: World; tick: number; x: number; y: number; animationTick: number } | undefined;
   let bossMotion: BossMotion | undefined;
-  const bossBodyArt = new Map<StageId, ReturnType<typeof createBossBodyArt>>();
+  const bossBodyArt = new Map<StageId, DrawBossBody>();
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
@@ -165,8 +191,8 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     const stasisBossInView = stasisBoss && desertStasisBossInView(stasisBoss, view);
     if (stasis && stasisBoss && stasisBossInView && stasisActive) drawDesertStasisRipple(ctx, stasisBoss, stasis, world.tick);
     const { stageId } = world.context;
-    const bossBody = BOSS_BODY_BY_STAGE[stageId];
-    const boss = bossBody && world.enemies.find(enemy => enemy.kind === 'boss' && enemy.hp > 0);
+    const bossBodyFactory = BOSS_BODY_FACTORIES[stageId];
+    const boss = bossBodyFactory && world.enemies.find(enemy => enemy.kind === 'boss' && enemy.hp > 0);
     if (!boss) bossMotion = undefined;
     for (const enemy of world.enemies) {
       if (enemy.kind === 'boss-echo') {
@@ -198,23 +224,19 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       } else if (enemy.kind === 'insulated-suit') {
         drawInsulatedSuit ??= createInsulatedSuitArt();
         drawInsulatedSuit(ctx, enemy.x, enemy.y, tick, scale);
-      } else if (bossBody && enemy === boss) {
+      } else if (bossBodyFactory && enemy === boss) {
         let motion = bossMotion?.world === world && bossMotion.id === enemy.id && bossMotion.tick <= world.tick
           ? bossMotion : undefined;
         if (motion?.tick !== world.tick) {
-          const brood = world.rainforestBrood;
-          const specialAttack = bossBody === 'harvester'
-            ? stasis !== undefined && stasisBoss === enemy && (world.tick < stasis.beginsAt || stasisActive)
-            : !title && (rainforestBroodWarning(world.context, world.tick) !== undefined ||
-              brood?.motherId === enemy.id && rainforestBroodBurstProgress(brood, world.tick) !== undefined);
           const moved = motion && (motion.x !== enemy.x || motion.y !== enemy.y);
-          const pose = specialAttack || attackWarning ? 'attack' : moved ? 'move' : 'idle';
+          let pose: BossPose = moved ? 'move' : 'idle';
+          if (attackWarning || bossSpecialAttack(world, enemy, title)) pose = 'attack';
           motion = { world, id: enemy.id, tick: world.tick, x: enemy.x, y: enemy.y, pose };
           bossMotion = motion;
         }
         let drawBossBody = bossBodyArt.get(stageId);
         if (!drawBossBody) {
-          drawBossBody = createBossBodyArt(bossBody);
+          drawBossBody = bossBodyFactory();
           bossBodyArt.set(stageId, drawBossBody);
         }
         drawBossBody(ctx, enemy.x, enemy.y, motion.pose, world.tick);
