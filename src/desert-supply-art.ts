@@ -32,14 +32,38 @@ function makeSprite(material: Material) {
     ctx.fillRect(5, 14, 7, 1);
     ctx.fillRect(17, 9, 2, 1);
   } else {
-    const ore = ['#b7c9cf', '#526a79', '#32424e'] as const;
-    block(13, 8, 4, 2, 5, ore);
-    block(7, 5, 5, 2, 8, ore);
-    block(3, 11, 4, 2, 4, ore);
-    block(11, 12, 4, 1, 3, ore);
-    ctx.fillStyle = '#d4dfe2';
-    ctx.fillRect(8, 7, 2, 2);
-    ctx.fillRect(4, 12, 2, 1);
+    const orePalette: Readonly<Partial<Record<string, string>>> = {
+      '#': '#413c37',
+      t: '#57534e',
+      s: '#74716a',
+      m: '#a19e96',
+      l: '#c6c3bc',
+      h: '#e4e2dc',
+    };
+    const oreRows = [
+      '..........##',
+      '.........#l##',
+      '........#lls##',
+      '........#llhs##..###',
+      '.......#mllhms#.#lls#',
+      '.....##.#mllhmss##lms#',
+      '....#lm##mllhms#mlmss#',
+      '...#lms##mlhms#mlmsss#',
+      '...#llms#mmhms#mlmsst#',
+      '...#lmms#mmms#mmmsst#',
+      '...#mmss#mmms##mmsst#',
+      '...#msst##mmss#msst##',
+      '...##sstt#msstt#st##',
+      '....################',
+    ];
+    oreRows.forEach((row, y) => {
+      for (let x = 0; x < row.length; x++) {
+        const color = orePalette[row.charAt(x)];
+        if (color === undefined) continue;
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y + 2, 1, 1);
+      }
+    });
   }
   return sprite;
 }
