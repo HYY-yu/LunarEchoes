@@ -2,13 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createWorld, dispatch, HZ } from '../dist/core.js';
 import { relayObjective } from '../dist/desert-repair.js';
-import { DESERT_ASSAULT_CONTEXT, DESERT_CONTINUOUS_CONTEXT, DESERT_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { DESERT_ASSAULT_CONTEXT, DESERT_CONTINUOUS_CONTEXT, DESERT_RELAY_CONTEXT, DESERT_STASIS_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { play } from '../scripts/simulation.mjs';
 
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
 
 test('v6 desert rules unlock four shipments and spawn exactly one short raid per repair', () => {
-  assert.equal(stageContext('desert-base'), DESERT_CONTINUOUS_CONTEXT);
   const world = createWorld({ ...DESERT_ASSAULT_CONTEXT, seed: 42 });
   const repair = world.desertRepair;
   assert.equal(repair.supplies.length, 0);
@@ -167,4 +166,57 @@ test('v8 keeps the existing spawn clock and enemies when pressure rises, then cl
   dispatch(world, idle);
   assert.equal(world.phase.kind, 'won');
   assert(world.enemies.includes(before));
+});
+
+test('desert boss stasis pauses hostile projectiles while player and friendly shots continue', () => {
+  assert.equal(stageContext('desert-base'), DESERT_STASIS_CONTEXT);
+  function ready(context = DESERT_STASIS_CONTEXT) {
+    const world = createWorld({ ...context, seed: 42 });
+    const arrival = 255 * HZ;
+    world.tick = arrival - 1;
+    world.desertAssault.final = { kind: 'active', firstEnemyId: 1, bossTick: arrival,
+      reinforcementEnd: arrival + 9 * HZ, pressureStart: arrival - 18 * HZ };
+    world.spawnCooldown = 1000;
+    world.fireCooldown = 1000;
+    dispatch(world, idle);
+    const boss = world.enemies.find(enemy => enemy.kind === 'boss');
+    boss.attack = 1000;
+    while (world.tick < arrival + 44) dispatch(world, idle);
+    const hostile = { x: 940, y: 610, vx: 2, vy: 1, life: 90, damage: 10, hostile: true };
+    const friendly = { x: 450, y: 515, vx: 1, vy: 0, life: 100, damage: 5, hostile: false };
+    world.shots.push(hostile, friendly);
+    return { world, boss, hostile, friendly };
+  }
+
+  const first = ready();
+  const stasis = first.world.desertStasis;
+  assert.deepEqual(stasis, { bossId: first.boss.id, beginsAt: 15345, endsAt: 15417 });
+  dispatch(first.world, { kind: 'pause' });
+  dispatch(first.world, idle);
+  assert.equal(first.world.tick, stasis.beginsAt - 1);
+  dispatch(first.world, { kind: 'resume' });
+  const x = first.world.player.x;
+  dispatch(first.world, { kind: 'tick', input: { x: 1, y: 0, dash: false } });
+  assert(first.world.player.x > x);
+  assert.deepEqual([first.hostile.x, first.hostile.y, first.hostile.life], [940, 610, 90]);
+  assert.deepEqual([first.friendly.x, first.friendly.life], [451, 99]);
+  while (first.world.tick < stasis.endsAt - 1) dispatch(first.world, idle);
+  assert.deepEqual([first.hostile.x, first.hostile.y, first.hostile.life], [940, 610, 90]);
+  dispatch(first.world, idle);
+  assert.equal(first.world.desertStasis, undefined);
+  assert.deepEqual([first.hostile.x, first.hostile.y, first.hostile.life], [942, 611, 89]);
+
+  const early = ready();
+  dispatch(early.world, idle);
+  early.world.shots.push({ x: early.boss.x, y: early.boss.y, vx: 0, vy: 0, life: 2, damage: 2000, hostile: false });
+  dispatch(early.world, idle);
+  assert.equal(early.world.bossKilled, true);
+  assert.equal(early.world.desertStasis, undefined);
+  dispatch(early.world, idle);
+  assert.deepEqual([early.hostile.x, early.hostile.life], [942, 89]);
+
+  const old = ready(DESERT_CONTINUOUS_CONTEXT);
+  dispatch(old.world, idle);
+  assert.equal(old.world.desertStasis, undefined);
+  assert.deepEqual([old.hostile.x, old.hostile.life], [942, 89]);
 });

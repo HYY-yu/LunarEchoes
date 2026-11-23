@@ -27,6 +27,10 @@ import { relayObjective, selectTurretTarget, type TowerDirection } from './deser
 import { drawRelayObjective } from './desert-relay-guidance-art.js';
 import { drawMaterialMotion } from './material-motion-art.js';
 import { drawElevatorBossArmor } from './elevator-boss-armor-art.js';
+import { isDesertStasisActive } from './desert-stasis.js';
+import {
+  desertStasisBossInView, drawDesertStasisClock, drawDesertStasisWarning, drawDesertStasisRipple, drawFrozenHostileBolt
+} from './desert-stasis-art.js';
 import { advanceTowerTurn, type TowerTurnPose } from './tower-turn-motion.js';
 
 const BOSS_SCALE = 3.8;
@@ -145,6 +149,11 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       }
     }
     for (const crystal of world.crystals) atlas.draw(ctx, 'crystal', crystal.x, crystal.y + Math.sin(time * .004 + crystal.x) * 2, .9);
+    const stasis = title ? undefined : world.desertStasis;
+    const stasisActive = isDesertStasisActive(stasis, world.tick);
+    const stasisBoss = stasis && world.enemies.find(enemy => enemy.id === stasis.bossId && enemy.kind === 'boss' && enemy.hp > 0);
+    const stasisBossInView = stasisBoss && desertStasisBossInView(stasisBoss, view);
+    if (stasis && stasisBoss && stasisBossInView && stasisActive) drawDesertStasisRipple(ctx, stasisBoss, stasis, world.tick);
     for (const enemy of world.enemies) {
       if (enemy.kind === 'boss-echo') {
         drawLunarEcho ??= createLunarEchoArt(atlas.draw);
@@ -185,6 +194,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       }
     }
     for (const shot of world.shots) {
+      if (stasisActive && shot.hostile) {
+        drawFrozenHostileBolt(ctx, shot);
+        continue;
+      }
       if (shot.kind === 'ice-shard') {
         drawIceShard(ctx, shot);
         continue;
@@ -201,6 +214,9 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       ctx.strokeStyle = shot.hostile ? '#dc916166' : '#8af5e5aa'; ctx.beginPath(); ctx.moveTo(shot.x, shot.y); ctx.lineTo(shot.x - shot.vx * 2, shot.y - shot.vy * 2); ctx.stroke();
     }
     ctx.fillStyle = '#1c344455'; ctx.beginPath(); ctx.ellipse(p.x + 3, p.y + 12, 12, 5, 0, 0, Math.PI * 2); ctx.fill();
+    if (stasis && stasisBoss && !stasisBossInView && (stasisActive || world.tick < stasis.beginsAt)) {
+      drawDesertStasisClock(ctx, p, stasis, world.tick, stasisActive);
+    }
     ctx.globalAlpha = p.invincible > 0 && world.tick % 6 < 3 ? .45 : 1;
     drawAstronaut(ctx, p.x, p.y, playerMotion.animationTick);
     ctx.globalAlpha = 1;
@@ -254,6 +270,12 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     }
     ctx.globalAlpha = 1; ctx.restore();
     const shade = ctx.createRadialGradient(width / 2, height / 2, width * .15, width / 2, height / 2, width * .7); shade.addColorStop(0, '#04141b00'); shade.addColorStop(1, '#06182799'); ctx.fillStyle = shade; ctx.fillRect(0, 0, width, height);
+    if (stasis && stasisBoss && stasisBossInView && world.tick < stasis.beginsAt) {
+      ctx.save();
+      ctx.setTransform(zoom, 0, 0, zoom, -view.left * zoom, -view.top * zoom);
+      drawDesertStasisWarning(ctx, stasisBoss, stasis.beginsAt - world.tick);
+      ctx.restore();
+    }
     if (!title && world.phase.kind === 'running' && hasRelayBase(world.context) && repair && 'towers' in repair) {
       const objective = relayObjective(repair, p);
       if (objective) drawRelayObjective(ctx, objective, view.left, view.top, zoom, width, height);

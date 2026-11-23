@@ -1,4 +1,4 @@
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, RAINFOREST_RELAY_CONTEXT, ELEVATOR_ARMOR_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, resolveStage, stageRules, SimulationError, type CampaignReinforcementKind, type StageContext } from './stage-rules.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_STASIS_CONTEXT, RAINFOREST_RELAY_CONTEXT, ELEVATOR_ARMOR_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, hasContinuousDesertAssault, resolveStage, stageRules, SimulationError, type CampaignReinforcementKind, type StageContext } from './stage-rules.js';
 import { createDesertRepair, createDesertFourTowers, desertShipment, RELAY_REPAIR_RAID, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
 import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 import type { MaterialMotion } from './material-motion.js';
@@ -7,6 +7,7 @@ import { stepAntarcticBarrage, type AntarcticBarrage } from './antarctic-barrage
 import { absorbElevatorBossDamage, expireElevatorBossArmor, startElevatorBossArmor, type ElevatorBossArmor } from './elevator-boss-armor.js';
 import { stepWatchtowerStrike, type WatchtowerStrike } from './watchtower-strike.js';
 import { LUNAR_ECHO_STATS, stepLunarEchoCast, type LunarEchoCast } from './lunar-echo-cast.js';
+import { isDesertStasisActive, planDesertStasis, type DesertStasis } from './desert-stasis.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -51,6 +52,7 @@ export type World = {
   antarcticBarrage?: AntarcticBarrage;
   watchtowerStrike?: WatchtowerStrike;
   lunarEchoCast?: LunarEchoCast;
+  desertStasis?: DesertStasis;
 };
 type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
 export type ActionBuffer = RecordingContext & { actions: Action[] };
@@ -67,7 +69,7 @@ export function createWorld(request: unknown): World {
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
   if (hasDesertAssault(context)) {
     world.desertRepair = createDesertFourTowers([], hasDesertRelay(context));
-    world.desertAssault = context === DESERT_CONTINUOUS_CONTEXT
+    world.desertAssault = hasContinuousDesertAssault(context)
       ? { mode: 'continuous', deliveries: 0, final: { kind: 'waiting' } }
       : { deliveries: 0, final: { kind: 'waiting' } };
   } else if (campaignRelayDeliveryTicks(context)) {
@@ -196,6 +198,10 @@ function step(world: World, input: Input): void {
       if (stepDesertAssault(desertAssault, world.tick, repairedCount, world.nextId, (kind, origin) => spawn(world, kind, undefined, origin))) {
         world.bossSpawned = true;
         world.events.push('boss');
+        if (world.context === DESERT_STASIS_CONTEXT) {
+          const boss = world.enemies.find(enemy => enemy.kind === 'boss');
+          if (boss) world.desertStasis = planDesertStasis(boss.id, world.tick);
+        }
       }
     }
   }
@@ -294,7 +300,9 @@ function step(world: World, input: Input): void {
     }
   }
   stepDesertTurret(world);
+  const frozen = isDesertStasisActive(world.desertStasis, world.tick);
   for (const shot of world.shots) {
+    if (frozen && shot.hostile) continue;
     shot.x += shot.vx; shot.y += shot.vy; shot.life--;
     if (shot.hostile) {
       if (distance(shot.x, shot.y, p.x, p.y) < 12) { damagePlayer(world); shot.life = 0; }
@@ -308,6 +316,10 @@ function step(world: World, input: Input): void {
   }
   for (const enemy of world.enemies) if (enemy.hp <= 0) kill(world, enemy);
   world.enemies = world.enemies.filter(enemy => enemy.hp > 0);
+  const stasis = world.desertStasis;
+  if (stasis && (world.tick >= stasis.endsAt || world.bossKilled || world.phase.kind === 'lost')) {
+    delete world.desertStasis;
+  }
   if (world.phase.kind !== 'lost' && rainforestBroodReleases(world.context, world.tick)) {
     const mother = world.enemies.find(enemy => enemy.kind === 'boss');
     if (mother && world.enemies.length < ENEMY_LIMIT) {
