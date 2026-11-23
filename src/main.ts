@@ -211,7 +211,7 @@ function act(action: Action, record = true) {
   if (screen === 'game') {
     if (world.nextId !== nextEnemyId) {
       const rules = stageRules(world.context);
-      const reinforcement = rules.kind === 'campaign' ? rules.groundReinforcement : undefined;
+      const reinforcement = rules.kind === 'campaign' ? rules.reinforcement : undefined;
       if (reinforcement) {
         const enemy = world.enemies.find(enemy => enemy.kind === reinforcement.kind && enemy.id >= nextEnemyId);
         if (enemy) log('debug', `session.${enemy.kind.replaceAll('-', '_')}_spawned`, { ...world.context, seed: world.seed, tick: world.tick, enemyId: enemy.id });

@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../dist/core.js';
-import { ANTARCTIC_FROST_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { ANTARCTIC_FROST_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play } from '../scripts/simulation.mjs';
 
 const scenarios = [
   { stageId: 'antarctica', rulesVersion: 'antarctica-4', seed: 101, duration: 210, bossSecond: 162, health: 1050, shots: 7, fan: true },
   { stageId: 'space-elevator', rulesVersion: 'space-elevator-4', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
-  { stageId: 'watchtower', rulesVersion: 'watchtower-3', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
+  { stageId: 'watchtower', rulesVersion: 'watchtower-4', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
   { stageId: 'lunar-echoes', rulesVersion: 'lunar-echoes-3', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
 ];
 
@@ -50,7 +50,7 @@ for (const { stageId, rulesVersion = `${stageId}-2`, seed, duration, bossSecond 
 const relayScenarios = [
   { context: ANTARCTIC_FROST_CONTEXT, seed: 101, duration: 210, bossSecond: 162, shipments: [1, 42 * core.HZ, 84 * core.HZ, 126 * core.HZ] },
   { context: ELEVATOR_SUIT_CONTEXT, seed: 42, duration: 205, bossSecond: 158, shipments: [1, 29 * core.HZ, 76 * core.HZ, 120 * core.HZ] },
-  { context: WATCHTOWER_RELAY_CONTEXT, seed: 42, duration: 225, bossSecond: 173, shipments: [1, 42 * core.HZ, 89 * core.HZ, 118 * core.HZ] },
+  { context: WATCHTOWER_ROCKET_CONTEXT, seed: 42, duration: 225, bossSecond: 173, shipments: [1, 42 * core.HZ, 89 * core.HZ, 118 * core.HZ] },
   { context: LUNAR_RELAY_CONTEXT, seed: 42, duration: 240, bossSecond: 185, shipments: [1, 44 * core.HZ, 112 * core.HZ, 142 * core.HZ] }
 ];
 
@@ -87,7 +87,8 @@ for (const { context, seed, duration, bossSecond, shipments } of relayScenarios)
 
 const reinforcementScenarios = [
   { context: ANTARCTIC_FROST_CONTEXT, enemyKind: 'frost-guard', hp: 78, radius: 13, startSecond: 82, bossSecond: 162 },
-  { context: ELEVATOR_SUIT_CONTEXT, enemyKind: 'insulated-suit', hp: 46, radius: 12, startSecond: 76, bossSecond: 158 }
+  { context: ELEVATOR_SUIT_CONTEXT, enemyKind: 'insulated-suit', hp: 46, radius: 12, startSecond: 76, bossSecond: 158 },
+  { context: WATCHTOWER_ROCKET_CONTEXT, enemyKind: 'rocket-bot', hp: 72, radius: 16, startSecond: 105, bossSecond: 173 }
 ];
 
 for (const { context, enemyKind, hp, radius, startSecond, bossSecond } of reinforcementScenarios) {
@@ -114,6 +115,40 @@ for (const { context, enemyKind, hp, radius, startSecond, bossSecond } of reinfo
     assert.deepEqual([...seen].sort(), ['boss', 'crawler', 'drone', enemyKind, 'sentry'].sort());
   });
 }
+
+test('a rocket bot fires after its warning delay and the projectile can be dodged', () => {
+  const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
+  function readyToFire() {
+    const world = core.createWorld({ ...WATCHTOWER_ROCKET_CONTEXT, seed: 42 });
+    world.spawnCooldown = 600;
+    world.fireCooldown = 600;
+    world.enemies.push({ id: world.nextId++, kind: 'rocket-bot', x: 870, y: 750, hp: 72, maxHp: 72,
+      radius: 16, attack: core.ROCKET_WARNING_TICKS, flash: 0 });
+    for (let tick = 1; tick < core.ROCKET_WARNING_TICKS; tick++) core.dispatch(world, idle);
+    assert.equal(world.shots.length, 0);
+    assert.equal(world.enemies[0].attack, 1);
+    core.dispatch(world, { kind: 'pause' });
+    core.dispatch(world, idle);
+    assert.equal(world.enemies[0].attack, 1);
+    core.dispatch(world, { kind: 'resume' });
+    core.dispatch(world, idle);
+    const [rocket] = world.shots;
+    assert.equal(rocket.kind, 'rocket');
+    assert.equal(rocket.hostile, true);
+    assert.equal(rocket.damage, core.ARMOR_RULES.hpPerCell);
+    assert(Math.abs(Math.hypot(rocket.vx, rocket.vy) - 1.85) < 1e-12);
+    return world;
+  }
+  const exposed = readyToFire();
+  const dodged = readyToFire();
+  const initialHp = exposed.player.hp;
+  for (let tick = 0; tick < 75; tick++) {
+    core.dispatch(exposed, idle);
+    core.dispatch(dodged, { kind: 'tick', input: { x: 0, y: 1, dash: tick === 0 } });
+  }
+  assert.equal(exposed.player.hp, initialHp - core.ARMOR_RULES.hpPerCell);
+  assert.equal(dodged.player.hp, initialHp);
+});
 
 test('the outer four Bosses fire distinct volleys with their existing attack warning timer', () => {
   for (const { stageId, seed, bossSecond, health, shots, fan } of scenarios) {

@@ -22,13 +22,14 @@ function bakeInfantryFrames(palette: ReadonlyMap<string, string>, frames: readon
 }
 
 export function createInfantryAtlas(
-  palette: ReadonlyMap<string, string>, frames: readonly (readonly string[])[], layout: 'strip' | 'frames'
+  palette: ReadonlyMap<string, string>, frames: readonly (readonly string[])[], layout: 'strip' | 'frames',
+  frameSequence: readonly number[] = WALK_FRAMES
 ) {
   const atlases = layout === 'frames'
     ? frames.map(rows => bakeInfantryFrames(palette, [rows]))
     : [bakeInfantryFrames(palette, frames)];
   return (ctx: CanvasRenderingContext2D, x: number, y: number, tick: number, scale = 1.5) => {
-    const frame = WALK_FRAMES[Math.floor(tick / 6) % WALK_FRAMES.length];
+    const frame = frameSequence[Math.floor(tick / 6) % frameSequence.length];
     const k = scale * .82;
     const left = Math.round(x - 16 * k), top = Math.round(y + 10 - 29 * k);
     if (layout === 'frames') ctx.drawImage(atlases[frame], left, top, FRAME_WIDTH * k, FRAME_HEIGHT * k);
