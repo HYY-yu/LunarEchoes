@@ -1,9 +1,11 @@
 import {
   hasDesertRelay, hasRelayBase, stageRules
 } from './stage-rules.js';
-import { ROCKET_WARNING_TICKS, type World } from './core.js';
+import { ROCKET_WARNING_TICKS, type Enemy, type World } from './core.js';
+import type { StageId } from './stage-contract.js';
 import { createAtlas } from './art.js';
 import { astronautVisorBounds, createAstronautArt } from './astronaut-art.js';
+import { createBossBodyArt, type BossBody, type BossPose } from './boss-body-art.js';
 import { createDesertMap } from './desert-map.js';
 import { drawCampaignTerrain } from './campaign-maps.js';
 import { createAntarcticBearingArt } from './antarctic-bearing-art.js';
@@ -15,7 +17,8 @@ import { createLunarIsolationArt } from './lunar-isolation-art.js';
 import { createLunarEchoArt, drawLunarEchoDispersal, drawLunarEchoSites } from './lunar-echo-cast-art.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
 import { createRainforestArchiveArt } from './rainforest-archive-art.js';
-import { drawRainforestBrood } from './rainforest-brood-art.js';
+import { drawRainforestBrood, rainforestBroodBurstProgress } from './rainforest-brood-art.js';
+import { rainforestBroodWarning } from './rainforest-brood.js';
 import { createDesertSupplyArt } from './desert-supply-art.js';
 import { createDesertTowerArt } from './desert-tower-art.js';
 import { createFrostGuardArt } from './frost-guard-art.js';
@@ -34,6 +37,11 @@ import {
 import { advanceTowerTurn, type TowerTurnPose } from './tower-turn-motion.js';
 
 const BOSS_SCALE = 3.8;
+const BOSS_BODY_BY_STAGE: Readonly<Partial<Record<StageId, BossBody>>> = {
+  'desert-base': 'harvester', rainforest: 'matriarch'
+};
+
+type BossMotion = Pick<Enemy, 'id' | 'x' | 'y'> & { world: World; tick: number; pose: BossPose };
 
 const TURRET_IDLE_ANGLE: Readonly<Record<TowerDirection, number>> = {
   north: -Math.PI / 2, east: 0, south: Math.PI / 2, west: Math.PI
@@ -46,6 +54,8 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   const atlas = createAtlas();
   const drawAstronaut = createAstronautArt();
   let playerMotion: { world: World; tick: number; x: number; y: number; animationTick: number } | undefined;
+  let bossMotion: BossMotion | undefined;
+  const bossBodyArt = new Map<StageId, ReturnType<typeof createBossBodyArt>>();
   const drawDesertMap = createDesertMap();
   const drawSupply = createDesertSupplyArt();
   const drawTower = createDesertTowerArt();
@@ -154,6 +164,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     const stasisBoss = stasis && world.enemies.find(enemy => enemy.id === stasis.bossId && enemy.kind === 'boss' && enemy.hp > 0);
     const stasisBossInView = stasisBoss && desertStasisBossInView(stasisBoss, view);
     if (stasis && stasisBoss && stasisBossInView && stasisActive) drawDesertStasisRipple(ctx, stasisBoss, stasis, world.tick);
+    const { stageId } = world.context;
+    const bossBody = BOSS_BODY_BY_STAGE[stageId];
+    const boss = bossBody && world.enemies.find(enemy => enemy.kind === 'boss' && enemy.hp > 0);
+    if (!boss) bossMotion = undefined;
     for (const enemy of world.enemies) {
       if (enemy.kind === 'boss-echo') {
         drawLunarEcho ??= createLunarEchoArt(atlas.draw);
@@ -164,7 +178,8 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       ctx.fillStyle = '#1a2e3b55'; ctx.beginPath(); ctx.ellipse(enemy.x + 3, enemy.y + 9, scale * 6, scale * 3, 0, 0, Math.PI * 2); ctx.fill();
       const rocketBot = enemy.kind === 'rocket-bot';
       const warningTicks = rocketBot ? ROCKET_WARNING_TICKS : 36;
-      if ((rocketBot || enemy.kind === 'sentry' || enemy.kind === 'boss') && enemy.attack < warningTicks) {
+      const attackWarning = (rocketBot || enemy.kind === 'sentry' || enemy.kind === 'boss') && enemy.attack < warningTicks;
+      if (attackWarning) {
         ctx.strokeStyle = rocketBot ? '#ffb886' : '#ffd499';
         ctx.setLineDash([3, 4]);
         ctx.beginPath();
@@ -183,6 +198,26 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       } else if (enemy.kind === 'insulated-suit') {
         drawInsulatedSuit ??= createInsulatedSuitArt();
         drawInsulatedSuit(ctx, enemy.x, enemy.y, tick, scale);
+      } else if (bossBody && enemy === boss) {
+        let motion = bossMotion?.world === world && bossMotion.id === enemy.id && bossMotion.tick <= world.tick
+          ? bossMotion : undefined;
+        if (motion?.tick !== world.tick) {
+          const brood = world.rainforestBrood;
+          const specialAttack = bossBody === 'harvester'
+            ? stasis !== undefined && stasisBoss === enemy && (world.tick < stasis.beginsAt || stasisActive)
+            : !title && (rainforestBroodWarning(world.context, world.tick) !== undefined ||
+              brood?.motherId === enemy.id && rainforestBroodBurstProgress(brood, world.tick) !== undefined);
+          const moved = motion && (motion.x !== enemy.x || motion.y !== enemy.y);
+          const pose = specialAttack || attackWarning ? 'attack' : moved ? 'move' : 'idle';
+          motion = { world, id: enemy.id, tick: world.tick, x: enemy.x, y: enemy.y, pose };
+          bossMotion = motion;
+        }
+        let drawBossBody = bossBodyArt.get(stageId);
+        if (!drawBossBody) {
+          drawBossBody = createBossBodyArt(bossBody);
+          bossBodyArt.set(stageId, drawBossBody);
+        }
+        drawBossBody(ctx, enemy.x, enemy.y, motion.pose, world.tick);
       } else {
         atlas.draw(ctx, enemy.kind, enemy.x, enemy.y + (enemy.kind === 'drone' ? Math.sin(time * .006 + enemy.id) * 3 - 5 : 0), scale, tick);
       }
