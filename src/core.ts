@@ -1,9 +1,10 @@
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, RAINFOREST_RELAY_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, resolveStage, stageRules, SimulationError, type CampaignReinforcementKind, type StageContext } from './stage-rules.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_CONTINUOUS_CONTEXT, RAINFOREST_RELAY_CONTEXT, ELEVATOR_ARMOR_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, resolveStage, stageRules, SimulationError, type CampaignReinforcementKind, type StageContext } from './stage-rules.js';
 import { createDesertRepair, createDesertFourTowers, desertShipment, RELAY_REPAIR_RAID, stepDesertRepair, stepDesertTurret, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
 import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 import type { MaterialMotion } from './material-motion.js';
 import { rainforestBroodReleases, rainforestBroodSites, type RainforestBrood } from './rainforest-brood.js';
 import { stepAntarcticBarrage, type AntarcticBarrage } from './antarctic-barrage.js';
+import { absorbElevatorBossDamage, expireElevatorBossArmor, startElevatorBossArmor, type ElevatorBossArmor } from './elevator-boss-armor.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -25,7 +26,7 @@ const ENEMY_STATS = {
 } satisfies Record<EnemyKind, { hp: number; radius: number; speed: number; xp: number }>;
 const ROCKET_BOT = Object.freeze({ stopRange: 245, shotSpeed: 1.85, attackInterval: 220 });
 export const ROCKET_WARNING_TICKS = 48;
-export type Enemy = { id: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number; radius: number; attack: number; flash: number };
+export type Enemy = { id: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number; radius: number; attack: number; flash: number; armor?: ElevatorBossArmor };
 export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean; kind?: 'rocket' | 'ice-shard' };
 export type Crystal = { x: number; y: number; value: number };
 export type Fx = { x: number; y: number; kind: 'hit' | 'kill' | 'nova' | 'dash'; life: number; size: number };
@@ -100,7 +101,14 @@ function spawn(world: World, kind: EnemyKind, hitPoints?: number, origin: Readon
 function addEnemy(world: World, kind: EnemyKind, x: number, y: number, hitPoints?: number): void {
   const stats = ENEMY_STATS[kind];
   const hp = hitPoints ?? stats.hp;
-  world.enemies.push({ id: world.nextId++, kind, x, y, hp, maxHp: hp, radius: stats.radius, attack: 75 + Math.floor(random(world) * 120), flash: 0 });
+  const enemy: Enemy = { id: world.nextId++, kind, x, y, hp, maxHp: hp, radius: stats.radius, attack: 75 + Math.floor(random(world) * 120), flash: 0 };
+  if (kind === 'boss' && world.context === ELEVATOR_ARMOR_CONTEXT) enemy.armor = startElevatorBossArmor(world.tick);
+  world.enemies.push(enemy);
+}
+function damageEnemy(world: World, enemy: Enemy, damage: number, flash: number): void {
+  enemy.hp -= enemy.armor ? absorbElevatorBossDamage(enemy, world.tick, damage) : damage;
+  world.events.push('enemy-hit');
+  enemy.flash = flash;
 }
 function kill(world: World, enemy: Enemy): void {
   world.kills++;
@@ -238,11 +246,12 @@ function step(world: World, input: Input): void {
   world.novaCooldown--;
   if (world.upgrades.nova > 0 && world.novaCooldown <= 0) {
     const radius = 95 + world.upgrades.nova * 18;
-    for (const enemy of world.enemies) if (distance(p.x, p.y, enemy.x, enemy.y) < radius) { enemy.hp -= 35 + world.upgrades.nova * 16; world.events.push('enemy-hit'); enemy.flash = 8; }
+    for (const enemy of world.enemies) if (distance(p.x, p.y, enemy.x, enemy.y) < radius) damageEnemy(world, enemy, 35 + world.upgrades.nova * 16, 8);
     world.effects.push({ x: p.x, y: p.y, kind: 'nova', life: 30, size: radius });
     world.novaCooldown = Math.max(90, 240 - world.upgrades.nova * 15);
   }
   for (const enemy of world.enemies) {
+    if (enemy.armor) expireElevatorBossArmor(enemy, world.tick);
     if (enemy.flash > 0) enemy.flash--;
     const angle = Math.atan2(p.y - enemy.y, p.x - enemy.x);
     const d = distance(p.x, p.y, enemy.x, enemy.y);
@@ -269,7 +278,7 @@ function step(world: World, input: Input): void {
       for (let i = 0; i < count; i++) {
         const a = world.tick * .055 + i * Math.PI * 2 / count;
         if (distance(enemy.x, enemy.y, p.x + Math.cos(a) * 58, p.y + Math.sin(a) * 58) < enemy.radius + 12) {
-          enemy.hp -= 1.3 + world.upgrades.orbit * .3; world.events.push('enemy-hit'); enemy.flash = 3;
+          damageEnemy(world, enemy, 1.3 + world.upgrades.orbit * .3, 3);
         }
       }
     }
@@ -282,7 +291,7 @@ function step(world: World, input: Input): void {
     } else {
       for (const enemy of world.enemies) {
         if (enemy.hp > 0 && distance(shot.x, shot.y, enemy.x, enemy.y) < enemy.radius + 5) {
-          enemy.hp -= shot.damage; world.events.push('enemy-hit'); enemy.flash = 6; shot.life = 0; break;
+          damageEnemy(world, enemy, shot.damage, 6); shot.life = 0; break;
         }
       }
     }

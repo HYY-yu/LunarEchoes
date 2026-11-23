@@ -25,6 +25,7 @@ import { RELAY_CENTER } from './relay-layout.js';
 import { relayObjective, type TowerDirection } from './desert-repair.js';
 import { drawRelayObjective } from './desert-relay-guidance-art.js';
 import { drawMaterialMotion } from './material-motion-art.js';
+import { drawElevatorBossArmor } from './elevator-boss-armor-art.js';
 
 const TURRET_FLASH_TICKS = 8;
 const TURRET_IDLE_ANGLE: Readonly<Record<TowerDirection, number>> = {
@@ -152,7 +153,11 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         atlas.draw(ctx, enemy.kind, enemy.x, enemy.y + (enemy.kind === 'drone' ? Math.sin(time * .006 + enemy.id) * 3 - 5 : 0), scale, tick);
       }
       ctx.globalAlpha = 1;
-      if (enemy.kind === 'boss') { ctx.fillStyle = '#172c3d'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60, 3); ctx.fillStyle = '#f5ba78'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60 * Math.max(0, enemy.hp / enemy.maxHp), 3); }
+      if (enemy.kind === 'boss') {
+        if (enemy.armor) drawElevatorBossArmor(ctx, enemy.x, enemy.y, scale, enemy.armor, world.tick);
+        ctx.fillStyle = '#172c3d'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60, 3);
+        ctx.fillStyle = '#f5ba78'; ctx.fillRect(enemy.x - 30, enemy.y - 39, 60 * Math.max(0, enemy.hp / enemy.maxHp), 3);
+      }
     }
     for (const shot of world.shots) {
       if (shot.kind === 'ice-shard') {
