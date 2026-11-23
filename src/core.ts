@@ -6,6 +6,7 @@ import { rainforestBroodReleases, rainforestBroodSites, type RainforestBrood } f
 import { stepAntarcticBarrage, type AntarcticBarrage } from './antarctic-barrage.js';
 import { absorbElevatorBossDamage, expireElevatorBossArmor, startElevatorBossArmor, type ElevatorBossArmor } from './elevator-boss-armor.js';
 import { stepWatchtowerStrike, type WatchtowerStrike } from './watchtower-strike.js';
+import { LUNAR_ECHO_STATS, stepLunarEchoCast, type LunarEchoCast } from './lunar-echo-cast.js';
 export const VERSION = 'lunar-2';
 export const HZ = 60;
 export const ARMOR_RULES = Object.freeze({ hpPerCell: 10, initialCells: 5, hullCapacityCells: 2, hullRepairCells: 1, repairEveryTicks: HZ * 30 });
@@ -15,12 +16,14 @@ export type Upgrade = 'pulse' | 'orbit' | 'nova' | 'boots' | 'hull' | 'magnet';
 export type Phase = { kind: 'running' } | { kind: 'upgrading'; offers: Upgrade[] } | { kind: 'paused'; previous: 'running' } | { kind: 'won' } | { kind: 'lost' };
 export type Input = { x: number; y: number; dash: boolean };
 export type Action = { kind: 'tick'; input: Input } | { kind: 'choose'; upgrade: Upgrade } | { kind: 'pause' } | { kind: 'resume' };
-export type EnemyKind = 'crawler' | 'drone' | 'sentry' | 'boss' | CampaignReinforcementKind;
+export type EnemyKind = 'crawler' | 'drone' | 'sentry' | 'boss' | 'boss-echo' | CampaignReinforcementKind;
+const ENEMY_LIMIT = 180;
 const ENEMY_STATS = {
   crawler: { hp: 30, radius: 11, speed: .8, xp: 1 },
   drone: { hp: 22, radius: 11, speed: 1.45, xp: 1 },
   sentry: { hp: 50, radius: 15, speed: .35, xp: 3 },
   boss: { hp: 950, radius: 27, speed: .65, xp: 20 },
+  'boss-echo': LUNAR_ECHO_STATS,
   'frost-guard': { hp: 78, radius: 13, speed: .56, xp: 2 },
   'insulated-suit': { hp: 46, radius: 12, speed: 1.02, xp: 2 },
   'rocket-bot': { hp: 72, radius: 16, speed: .44, xp: 3 }
@@ -30,7 +33,7 @@ export const ROCKET_WARNING_TICKS = 48;
 export type Enemy = { id: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number; radius: number; attack: number; flash: number; armor?: ElevatorBossArmor };
 export type Shot = { x: number; y: number; vx: number; vy: number; life: number; damage: number; hostile: boolean; kind?: 'rocket' | 'ice-shard' };
 export type Crystal = { x: number; y: number; value: number };
-export type Fx = { x: number; y: number; kind: 'hit' | 'kill' | 'nova' | 'dash'; life: number; size: number };
+export type Fx = { x: number; y: number; kind: 'hit' | 'kill' | 'nova' | 'dash' | 'echo-dispersal'; life: number; size: number };
 export type Event = 'enemy-hit' | 'shot' | 'hit' | 'kill' | 'pickup' | 'upgrade' | 'dash' | 'won' | 'lost' | 'boss';
 export type World = {
   readonly context: StageContext;
@@ -47,6 +50,7 @@ export type World = {
   rainforestBrood?: RainforestBrood;
   antarcticBarrage?: AntarcticBarrage;
   watchtowerStrike?: WatchtowerStrike;
+  lunarEchoCast?: LunarEchoCast;
 };
 type RecordingContext = StageContext & { version: typeof VERSION; seed: number };
 export type ActionBuffer = RecordingContext & { actions: Action[] };
@@ -113,6 +117,10 @@ function damageEnemy(world: World, enemy: Enemy, damage: number, flash: number):
   enemy.flash = flash;
 }
 function kill(world: World, enemy: Enemy): void {
+  if (enemy.kind === 'boss-echo') {
+    world.effects.push({ x: enemy.x, y: enemy.y, kind: 'echo-dispersal', life: 18, size: enemy.radius });
+    return;
+  }
   world.kills++;
   world.crystals.push({ x: enemy.x, y: enemy.y, value: ENEMY_STATS[enemy.kind].xp });
   world.effects.push({ x: enemy.x, y: enemy.y, kind: 'kill', life: 24, size: enemy.radius });
@@ -193,7 +201,7 @@ function step(world: World, input: Input): void {
   }
   if (world.tick % ARMOR_RULES.repairEveryTicks === 0) p.hp = Math.min(p.maxHp, p.hp + ARMOR_RULES.hpPerCell);
   world.spawnCooldown--;
-  if (world.spawnCooldown <= 0 && world.enemies.length < 180 && desertSpawnsReinforcements(desertAssault, world.tick)) {
+  if (world.spawnCooldown <= 0 && world.enemies.length < ENEMY_LIMIT && desertSpawnsReinforcements(desertAssault, world.tick)) {
     const t = world.tick / HZ;
     if (rules.kind === 'rainforest') {
       const chance = world.tick >= rules.lateWaveTick ? rules.lateSentryChance : rules.sentryChance;
@@ -274,7 +282,7 @@ function step(world: World, input: Input): void {
       }
       enemy.attack = rocket ? ROCKET_BOT.attackInterval : boss?.cooldownTicks ?? (enemy.kind === 'boss' ? 135 : 180);
     }
-    if (d < enemy.radius + 10) damagePlayer(world);
+    if (enemy.kind !== 'boss-echo' && d < enemy.radius + 10) damagePlayer(world);
     if (world.upgrades.orbit > 0) {
       const count = Math.min(4, world.upgrades.orbit);
       for (let i = 0; i < count; i++) {
@@ -302,14 +310,15 @@ function step(world: World, input: Input): void {
   world.enemies = world.enemies.filter(enemy => enemy.hp > 0);
   if (world.phase.kind !== 'lost' && rainforestBroodReleases(world.context, world.tick)) {
     const mother = world.enemies.find(enemy => enemy.kind === 'boss');
-    if (mother && world.enemies.length < 180) {
-      const sites = rainforestBroodSites(mother.x, mother.y, rules.arenaSize).slice(0, 180 - world.enemies.length);
+    if (mother && world.enemies.length < ENEMY_LIMIT) {
+      const sites = rainforestBroodSites(mother.x, mother.y, rules.arenaSize).slice(0, ENEMY_LIMIT - world.enemies.length);
       for (const { x, y } of sites) addEnemy(world, 'crawler', x, y);
       world.rainforestBrood = { tick: world.tick, motherId: mother.id, sites };
     }
   }
   stepAntarcticBarrage(world, ARMOR_RULES.hpPerCell);
   stepWatchtowerStrike(world, rules.arenaSize, damagePlayer);
+  stepLunarEchoCast(world, rules.arenaSize, ENEMY_LIMIT);
   world.shots = world.shots.filter(shot => shot.life > 0);
   const pickupRadius = 115 + world.upgrades.magnet * 25;
   for (const crystal of world.crystals) {

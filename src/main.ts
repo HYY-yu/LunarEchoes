@@ -205,6 +205,7 @@ function act(action: Action, record = true) {
   const finalBefore = world.desertAssault?.final.kind;
   const bossKilledBefore = world.bossKilled;
   const strikeBefore = world.watchtowerStrike;
+  const lunarCastBefore = world.lunarEchoCast;
   const armoredBoss = screen === 'game' && world.context.stageId === 'space-elevator' && world.bossSpawned && !world.bossKilled
     ? world.enemies.find(enemy => enemy.armor?.kind === 'active')
     : undefined;
@@ -223,6 +224,19 @@ function act(action: Action, record = true) {
         ...fields, bossId: strikeBefore.bossId, impactTick: strikeBefore.impactTick,
         reason: world.bossKilled ? 'boss-defeated' : 'player-defeated'
       });
+    }
+    const cast = world.lunarEchoCast;
+    if (world.tick !== tickBefore && cast !== lunarCastBefore) {
+      const fields = { ...world.context, seed: world.seed, tick: world.tick };
+      if (cast?.kind === 'warning') log('info', 'session.lunar_echo_started', { ...fields, ...cast });
+      else if (cast?.kind === 'active') log('info', 'session.lunar_echo_split', {
+        ...fields, ...cast, projections: world.enemies.filter(enemy => enemy.kind === 'boss-echo').length
+      });
+      else if (lunarCastBefore) {
+        const reason = lunarCastBefore.kind === 'warning' ? 'cancelled' : world.bossKilled ? 'boss-defeated'
+          : world.phase.kind === 'lost' ? 'player-defeated' : world.tick >= lunarCastBefore.expiresAt ? 'expired' : 'dispersed';
+        log('info', 'session.lunar_echo_ended', { ...fields, bossId: lunarCastBefore.bossId, reason });
+      }
     }
     const armor = armoredBoss?.armor;
     if (armoredBoss && armor?.kind === 'spent' && armor.atTick === world.tick && world.tick !== tickBefore) {

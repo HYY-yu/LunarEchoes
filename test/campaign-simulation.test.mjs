@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../dist/core.js';
-import { ANTARCTIC_BARRAGE_CONTEXT, ANTARCTIC_FROST_CONTEXT, ELEVATOR_ARMOR_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, WATCHTOWER_STRIKE_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { ANTARCTIC_BARRAGE_CONTEXT, ANTARCTIC_FROST_CONTEXT, ELEVATOR_ARMOR_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_ECHO_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, WATCHTOWER_STRIKE_CONTEXT, stageContext } from '../dist/stage-rules.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play } from '../scripts/simulation.mjs';
 
@@ -9,7 +9,7 @@ const scenarios = [
   { stageId: 'antarctica', rulesVersion: 'antarctica-5', seed: 101, duration: 210, bossSecond: 162, health: 1050, shots: 7, fan: true },
   { stageId: 'space-elevator', rulesVersion: 'space-elevator-5', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
   { stageId: 'watchtower', rulesVersion: 'watchtower-5', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
-  { stageId: 'lunar-echoes', rulesVersion: 'lunar-echoes-3', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
+  { stageId: 'lunar-echoes', rulesVersion: 'lunar-echoes-4', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
 ];
 
 for (const { stageId, rulesVersion = `${stageId}-2`, seed, duration, bossSecond } of scenarios) {
@@ -51,7 +51,7 @@ const relayScenarios = [
   { context: ANTARCTIC_BARRAGE_CONTEXT, seed: 101, duration: 210, bossSecond: 162, shipments: [1, 42 * core.HZ, 84 * core.HZ, 126 * core.HZ] },
   { context: ELEVATOR_ARMOR_CONTEXT, seed: 42, duration: 205, bossSecond: 158, shipments: [1, 29 * core.HZ, 76 * core.HZ, 120 * core.HZ] },
   { context: WATCHTOWER_STRIKE_CONTEXT, seed: 42, duration: 225, bossSecond: 173, shipments: [1, 42 * core.HZ, 89 * core.HZ, 118 * core.HZ] },
-  { context: LUNAR_RELAY_CONTEXT, seed: 42, duration: 240, bossSecond: 185, shipments: [1, 44 * core.HZ, 112 * core.HZ, 142 * core.HZ] }
+  { context: LUNAR_ECHO_CONTEXT, seed: 42, duration: 240, bossSecond: 185, shipments: [1, 44 * core.HZ, 112 * core.HZ, 142 * core.HZ] }
 ];
 
 for (const { context, seed, duration, bossSecond, shipments } of relayScenarios) {
@@ -351,4 +351,69 @@ test('watchtower strike uses fixed marks, can be avoided and stops if the caller
   assert.equal(standing.watchtowerStrike, undefined);
   assert.equal(standing.player.hp, 40);
   assert.equal(warned(WATCHTOWER_ROCKET_CONTEXT).watchtowerStrike, undefined);
+});
+
+
+test('lunar projections draw auto fire without contact damage, rewards or lingering after the boss', () => {
+  const split = 187 * core.HZ;
+  function warned(context = LUNAR_ECHO_CONTEXT) {
+    const world = core.createWorld({ ...context, seed: 42 });
+    world.tick = split - 43;
+    world.bossSpawned = true;
+    world.spawnCooldown = 1000;
+    world.fireCooldown = 1000;
+    world.enemies.push({ id: world.nextId++, kind: 'boss', x: 900, y: 750, hp: 1250, maxHp: 1250,
+      radius: 27, attack: 1000, flash: 0 });
+    core.dispatch(world, idle);
+    return world;
+  }
+  const live = warned(), defeated = warned(), expiry = warned();
+  const warning = structuredClone(live.lunarEchoCast);
+  assert.equal(warning.kind, 'warning');
+  assert.equal(warning.splitTick, split);
+  core.dispatch(live, { kind: 'pause' });
+  core.dispatch(live, idle);
+  assert.equal(live.tick, split - 42);
+  assert.deepEqual(live.lunarEchoCast, warning);
+  core.dispatch(live, { kind: 'resume' });
+  for (let i = 0; i < 41; i++) for (const world of [live, defeated, expiry]) core.dispatch(world, idle);
+  const trueBoss = defeated.enemies[0];
+  defeated.shots.push({ x: trueBoss.x, y: trueBoss.y, vx: 0, vy: 0, life: 2, damage: 2000, hostile: false });
+  for (const world of [live, defeated, expiry]) core.dispatch(world, idle);
+  assert.equal(defeated.bossKilled, true);
+  assert.equal(defeated.lunarEchoCast, undefined);
+  assert(!defeated.enemies.some(enemy => enemy.kind === 'boss-echo'));
+
+  const [boss, target, other] = live.enemies;
+  assert.deepEqual([target,other].map(({x,y})=>({x,y})), warning.sites);
+  assert.equal(target.maxHp, 45);
+  assert.equal(target.kind, 'boss-echo');
+  live.player.x = target.x - 68;
+  live.player.y = target.y;
+  live.fireCooldown = 1;
+  core.dispatch(live, idle);
+  const shot = live.shots.find(shot => !shot.hostile);
+  assert.deepEqual([shot.vx,shot.vy], [8,0]);
+  const progress = [live.kills, live.xp, live.crystals.length];
+  live.shots.push({ ...shot, x: target.x, y: target.y, vx: 0, vy: 0, life: 2, damage: 45 });
+  core.dispatch(live, idle);
+  assert(!live.enemies.includes(target));
+  assert(live.effects.some(effect => effect.kind === 'echo-dispersal'));
+  assert.deepEqual([live.kills, live.xp, live.crystals.length], progress);
+  live.player.x = other.x;
+  live.player.y = other.y;
+  core.dispatch(live, idle);
+  assert.equal(live.player.hp, 50);
+  live.shots.push({ ...shot, x: boss.x, y: boss.y, vx: 0, vy: 0, life: 2, damage: 2000 });
+  core.dispatch(live, idle);
+  assert.equal(live.bossKilled, true);
+  assert.equal(live.lunarEchoCast, undefined);
+  assert(!live.enemies.includes(other));
+  assert.equal(live.kills, progress[0] + 1);
+
+  while (expiry.tick < split + 150) core.dispatch(expiry, idle);
+  assert.equal(expiry.lunarEchoCast, undefined);
+  assert(expiry.enemies.every(enemy => enemy.kind === 'boss'));
+  assert.equal(expiry.kills, 0);
+  assert.equal(warned(LUNAR_RELAY_CONTEXT).lunarEchoCast, undefined);
 });

@@ -1,6 +1,5 @@
 import {
-  hasDesertRelay, hasRelayBase, LUNAR_RELAY_CONTEXT,
-  stageRules
+  hasDesertRelay, hasRelayBase, stageRules
 } from './stage-rules.js';
 import { ROCKET_WARNING_TICKS, type World } from './core.js';
 import { createAtlas } from './art.js';
@@ -13,6 +12,7 @@ import { createOrbitalLiftArt } from './orbital-lift-art.js';
 import { createWatchtowerChargeArt } from './watchtower-charge-art.js';
 import { drawWatchtowerStrike } from './watchtower-strike-art.js';
 import { createLunarIsolationArt } from './lunar-isolation-art.js';
+import { createLunarEchoArt, drawLunarEchoDispersal, drawLunarEchoSites } from './lunar-echo-cast-art.js';
 import { drawRainforestTerrain } from './rainforest-map.js';
 import { createRainforestArchiveArt } from './rainforest-archive-art.js';
 import { drawRainforestBrood } from './rainforest-brood-art.js';
@@ -28,6 +28,8 @@ import { drawRelayObjective } from './desert-relay-guidance-art.js';
 import { drawMaterialMotion } from './material-motion-art.js';
 import { drawElevatorBossArmor } from './elevator-boss-armor-art.js';
 import { advanceTowerTurn, type TowerTurnPose } from './tower-turn-motion.js';
+
+const BOSS_SCALE = 3.8;
 
 const TURRET_IDLE_ANGLE: Readonly<Record<TowerDirection, number>> = {
   north: -Math.PI / 2, east: 0, south: Math.PI / 2, west: Math.PI
@@ -51,6 +53,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   let drawAntarcticBearing: ReturnType<typeof createAntarcticBearingArt> | undefined;
   let drawOrbitalLift: ReturnType<typeof createOrbitalLiftArt> | undefined;
   let drawWatchtowerCharge: ReturnType<typeof createWatchtowerChargeArt> | undefined;
+  let drawLunarEcho: ReturnType<typeof createLunarEchoArt> | undefined;
   let drawLunarIsolation: ReturnType<typeof createLunarIsolationArt> | undefined;
   let drawRainforestArchive: ReturnType<typeof createRainforestArchiveArt> | undefined;
   function renderTower(tower: Parameters<typeof drawTower>[1], world: World, direction?: TowerDirection) {
@@ -117,7 +120,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       drawWatchtowerCharge ??= createWatchtowerChargeArt();
       drawWatchtowerCharge(ctx, world.tick);
     }
-    if (world.context.rulesVersion === LUNAR_RELAY_CONTEXT.rulesVersion) {
+    if (world.context.stageId === 'lunar-echoes' && hasRelayBase(world.context)) {
       drawLunarIsolation ??= createLunarIsolationArt();
       drawLunarIsolation(ctx, world.tick);
     }
@@ -128,6 +131,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     if (!title) {
       drawAntarcticBarrageWarning(ctx, world);
       if (world.watchtowerStrike) drawWatchtowerStrike(ctx, world.watchtowerStrike, world.tick);
+      drawLunarEchoSites(ctx, world);
     }
     const repair = world.desertRepair;
     if (!title && repair) {
@@ -142,7 +146,12 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     }
     for (const crystal of world.crystals) atlas.draw(ctx, 'crystal', crystal.x, crystal.y + Math.sin(time * .004 + crystal.x) * 2, .9);
     for (const enemy of world.enemies) {
-      const scale = enemy.kind === 'boss' ? 3.8 : enemy.kind === 'sentry' ? 1.8 : 1.5;
+      if (enemy.kind === 'boss-echo') {
+        drawLunarEcho ??= createLunarEchoArt(atlas.draw);
+        drawLunarEcho(ctx, enemy.x, enemy.y, BOSS_SCALE, world.tick, enemy.flash);
+        continue;
+      }
+      const scale = enemy.kind === 'boss' ? BOSS_SCALE : enemy.kind === 'sentry' ? 1.8 : 1.5;
       ctx.fillStyle = '#1a2e3b55'; ctx.beginPath(); ctx.ellipse(enemy.x + 3, enemy.y + 9, scale * 6, scale * 3, 0, 0, Math.PI * 2); ctx.fill();
       const rocketBot = enemy.kind === 'rocket-bot';
       const warningTicks = rocketBot ? ROCKET_WARNING_TICKS : 36;
@@ -211,6 +220,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       ctx.strokeStyle = '#a4f8e333'; ctx.beginPath(); ctx.arc(p.x, p.y, 58, 0, Math.PI * 2); ctx.stroke(); atlas.draw(ctx, 'drone', x, y, .9);
     }
     for (const effect of world.effects) {
+      if (effect.kind === 'echo-dispersal') {
+        drawLunarEchoDispersal(ctx, effect);
+        continue;
+      }
       ctx.globalAlpha = Math.min(1, effect.life / 15);
       ctx.strokeStyle = effect.kind === 'hit' ? '#f2a177' : '#b5ffe5'; ctx.fillStyle = ctx.strokeStyle;
       if (effect.kind === 'nova') {
