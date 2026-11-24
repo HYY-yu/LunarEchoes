@@ -30,6 +30,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run verify
+      - name: Install Chromium Headless Shell
+        run: npx --no-install playwright-core install --with-deps --only-shell chromium
+      - name: Verify browser acceptance
+        run: npm run test:browser
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: '24.21.0'

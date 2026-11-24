@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-打开终端给出的本地地址，默认 `http://127.0.0.1:4173`。运行时没有第三方依赖，仅开发工具 TypeScript。
+打开终端给出的本地地址，默认 `http://127.0.0.1:4173`。游戏运行时没有第三方依赖。开发验收使用 TypeScript 和 Playwright。
 
 ## 操作
 
@@ -31,6 +31,16 @@ npm run verify
 ```
 
 `test` 覆盖模拟、六关流程、进度存储、内部回放和音频生命周期。内部回放重新执行录制的输入并核对终局校验值，录制仅保留在当前页面内存。`check` 检查代码注释、模拟边界和构建目录所有文件逐文件 gzip 合计不超过 150 KiB。`verify` 还用三个种子完整模拟沙漠基地，检查回放一致且至少存在一个胜局。浏览器试玩步骤见 [verify-lunar](.agents/skills/verify-lunar/SKILL.md)。
+
+GitHub Actions 在 PR 创建、重开和更新时运行浏览器验收。首次本地复跑时，安装 Chromium Headless Shell，然后构建并运行验收。
+
+```sh
+npx --no-install playwright-core install --only-shell chromium
+npm run build
+npm run test:browser
+```
+
+脚本用中文桌面键盘和中英文窄屏模拟触控验证移动、冲刺、沙漠胜利报告和雨林解锁恢复。主战斗使用固定种子和自动输入。Linux 缺浏览器系统依赖时，在安装命令中加上 `--with-deps`。
 
 命令的输出和终局结果保存在终端显示的 `.audit/runs/run-*/` 目录。若异常退出遗留 `.audit/dist-transaction`，先按其中的 `owner.json` 确认该命令及其子进程均已退出，再删除事务目录并重试。
 
