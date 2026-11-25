@@ -79,15 +79,15 @@ test('actual renderer leaves complete World and checksum untouched across moveme
 });
 
 test('renderer selects terrain by the world stage and keeps shared projectile styles', t => {
-  environment(t);
-  const previous = globalThis.Path2D;
-  globalThis.Path2D = class { rect() {} };
-  t.after(() => { if (previous === undefined) delete globalThis.Path2D; else globalThis.Path2D = previous; });
+  const surfaces = environment(t);
   const ctx = context(), canvas = { width: 0, height: 0, clientWidth: 390, clientHeight: 600, getContext() { return ctx; } };
   ctx.globalAlpha = 1;
   const render = createRenderer(canvas);
+  const desertTile = surfaces.find(surface => surface.width === 128 && surface.height === 128);
+  assert.ok(desertTile);
+  ctx.createPattern = source => source === desertTile ? 'sand-pattern' : source.ctx.calls[0][1];
   const styles = [];
-  for (const [stageId, rulesVersion, background] of [['rainforest', 'rainforest-1', '#283e37'], ['desert-base', 'desert-base-1', 'sand-pattern']]) {
+  for (const [stageId, rulesVersion, background] of [['rainforest', 'rainforest-1', '#253d36'], ['desert-base', 'desert-base-1', 'sand-pattern']]) {
     const world = createWorld({ stageId, rulesVersion, seed: 42 });
     world.shots.push(
       { x: 715, y: 725, vx: 8, vy: 0, life: 10, damage: 1, hostile: false },
