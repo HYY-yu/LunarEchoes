@@ -1,4 +1,5 @@
 import { createLunarMap } from './lunar-map.js';
+import { drawAntarcticaTerrain } from './antarctica-map.js';
 
 export type CampaignTerrainStage = 'antarctica' | 'space-elevator' | 'watchtower' | 'lunar-echoes';
 
@@ -38,63 +39,6 @@ function texture(ctx: CanvasRenderingContext2D, view: View, shades: readonly [st
 
 function floor(ctx: CanvasRenderingContext2D, view: View, color: string) {
   fill(ctx, color, Math.floor(view.left), Math.floor(view.top), Math.ceil(view.width) + 2, Math.ceil(view.height) + 2);
-}
-
-const iceRifts = [
-  [[-90, 440], [105, 490], [204, 472], [301, 535], [425, 520], [498, 552]],
-  [[388, 625], [530, 676], [624, 650], [690, 698], [835, 687], [971, 757], [1106, 741], [1280, 817], [1540, 796]],
-  [[-47, 1122], [172, 1141], [297, 1090], [489, 1119], [610, 1077]],
-  [[982, 1011], [1090, 970], [1237, 998], [1373, 917], [1581, 947]]
-] as const;
-
-function drawAntarcticOutskirts(ctx: CanvasRenderingContext2D, view: View) {
-  floor(ctx, view, '#586f7e');
-  const strideX = 196, strideY = 128;
-  const left = Math.floor((view.left - 52) / strideX) * strideX;
-  const top = Math.floor((view.top - 24) / strideY) * strideY;
-  for (let y = top; y < view.top + view.height; y += strideY) {
-    for (let x = left; x < view.left + view.width; x += strideX) {
-      if (x >= 0 && x + strideX + 52 <= designSize && y >= 0 && y + strideY + 24 <= designSize) continue;
-      const grain = (Math.imul(x + 819, 2654435761) ^ Math.imul(y + 417, 2246822519)) >>> 0;
-      const driftX = x + grain % 63, driftY = y + (grain >>> 9) % 70;
-      polygon(ctx, '#627b89', [[driftX, driftY + 33], [driftX + 41, driftY + 14], [driftX + 110, driftY], [driftX + 160, driftY + 12], [driftX + 128, driftY + 28], [driftX + 46, driftY + 42]]);
-      polygon(ctx, '#718995', [[driftX + 21, driftY + 28], [driftX + 59, driftY + 12], [driftX + 110, driftY + 3], [driftX + 141, driftY + 10], [driftX + 89, driftY + 17]]);
-      for (let fleck = 0; fleck < 10; fleck++) {
-        const bits = Math.imul(grain ^ fleck, 1597334677) >>> 0;
-        fill(ctx, bits & 1 ? '#667e8c' : '#506977', x + (bits >>> 3) % strideX, y + (bits >>> 15) % strideY, 3 + (bits >>> 25) % 10, 2);
-      }
-    }
-  }
-}
-
-function drawAntarctica(ctx: CanvasRenderingContext2D, view: View) {
-  drawAntarcticOutskirts(ctx, view);
-  fill(ctx, '#637b8a', 0, 0, designSize, designSize);
-  for (const [x, y] of [[37, 80], [476, 190], [1059, 438], [147, 870], [579, 1163], [1155, 1200]]) {
-    polygon(ctx, '#6d8592', [[x, y + 100], [x + 64, y + 36], [x + 146, y + 36], [x + 174, y + 11], [x + 264, y], [x + 286, y + 40], [x + 180, y + 104], [x + 126, y + 104], [x + 101, y + 123], [x + 30, y + 123]]);
-    polygon(ctx, '#758c98', [[x + 64, y + 84], [x + 159, y + 49], [x + 219, y + 38], [x + 192, y + 69], [x + 123, y + 87]]);
-  }
-  texture(ctx, view, ['#5d7585', '#718793', '#6a8392'], 23);
-  for (const rift of iceRifts) {
-    for (let point = 1; point < rift.length; point++) {
-      const [x, y] = rift[point - 1];
-      const [nextX, nextY] = rift[point];
-      polygon(ctx, '#4c6677', [[x, y], [nextX, nextY], [nextX, nextY + 5], [x, y + 11]]);
-      polygon(ctx, '#8298a3', [[x, y + 11], [nextX, nextY + 5], [nextX, nextY + 8], [x, y + 14]]);
-    }
-  }
-  fill(ctx, '#5e727b', 667, 596, 166, 72);
-  fill(ctx, '#708592', 673, 600, 154, 62);
-  fill(ctx, '#526a78', 687, 618, 126, 31);
-  for (let x = 697; x < 809; x += 24) {
-    fill(ctx, '#435c6a', x, 623, 19, 19);
-    fill(ctx, '#8da1a8', x + 3, 627, 13, 2);
-    fill(ctx, '#778f9a', x + 3, 633, 13, 5);
-  }
-  fill(ctx, '#455867', 702, -72, 96, 72);
-  fill(ctx, '#84949d', 708, -67, 84, 29);
-  fill(ctx, '#4d6b7e', 719, -57, 62, 8);
-  fill(ctx, '#637c8a', 733, -84, 34, 12);
 }
 
 function drawElevator(ctx: CanvasRenderingContext2D, view: View, tick: number) {
@@ -209,7 +153,7 @@ export function drawCampaignTerrain(ctx: CanvasRenderingContext2D, view: View, s
   ctx.save();
   ctx.scale(scale, scale);
   switch (stageId) {
-    case 'antarctica': drawAntarctica(ctx, mapView); break;
+    case 'antarctica': drawAntarcticaTerrain(ctx, mapView); break;
     case 'space-elevator': drawElevator(ctx, mapView, tick); break;
     case 'watchtower': drawWatchtower(ctx, mapView); break;
   }
