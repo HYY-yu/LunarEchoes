@@ -1,5 +1,6 @@
 import { createLunarMap } from './lunar-map.js';
 import { drawAntarcticaTerrain } from './antarctica-map.js';
+import { drawSpaceElevatorTerrain } from './space-elevator-map.js';
 
 export type CampaignTerrainStage = 'antarctica' | 'space-elevator' | 'watchtower' | 'lunar-echoes';
 
@@ -39,40 +40,6 @@ function texture(ctx: CanvasRenderingContext2D, view: View, shades: readonly [st
 
 function floor(ctx: CanvasRenderingContext2D, view: View, color: string) {
   fill(ctx, color, Math.floor(view.left), Math.floor(view.top), Math.ceil(view.width) + 2, Math.ceil(view.height) + 2);
-}
-
-function drawElevator(ctx: CanvasRenderingContext2D, view: View, tick: number) {
-  floor(ctx, view, '#17252e');
-  fill(ctx, '#31444d', 0, 0, designSize, designSize);
-  fill(ctx, '#354b56', 512, 0, 476, designSize);
-  fill(ctx, '#3c535d', 654, 0, 192, designSize);
-  const row = Math.max(0, Math.floor(view.top / 75) * 75);
-  for (let y = row; y <= Math.min(designSize, view.top + view.height); y += 75) {
-    fill(ctx, '#293c47', 0, y, designSize, 2);
-    fill(ctx, '#48606a', 510, y + 4, 480, 2);
-    fill(ctx, '#6b6862', 651, y + 14, 5, 23);
-    fill(ctx, '#6b6862', 844, y + 14, 5, 23);
-    for (const side of [576, 876]) {
-      fill(ctx, '#263b47', side, y + 14, 48, 42);
-      fill(ctx, '#425662', side + 4, y + 16, 40, 30);
-      for (let grille = 6; grille <= 24; grille += 6) fill(ctx, '#304651', side + 8, y + 16 + grille, 32, 2);
-    }
-  }
-  for (const x of [0, 509, 648, 848, 988, 1497]) fill(ctx, '#51626a', x, 0, 3, designSize);
-  for (const x of [-19, -39, -61, 1514, 1534, 1556]) fill(ctx, '#465765', x, view.top, 5, Math.ceil(view.height) + 2);
-  for (const x of [638, 853]) fill(ctx, '#2a3d48', x, 0, 9, designSize);
-  const phase = Math.floor(tick / 2) % 104;
-  const firstFrame = Math.floor((view.top - phase) / 104) * 104 + phase;
-  for (let y = firstFrame; y < view.top + view.height; y += 104) {
-    if (y >= 0 && y <= designSize - 18) {
-      for (const x of [638, 853]) fill(ctx, '#65737a', x, y, 9, 18);
-    }
-    for (const x of [-95, 1500]) {
-      fill(ctx, '#243742', x, y, 95, 12);
-      fill(ctx, '#5d5960', x + 7, y + 3, 15, 5);
-      fill(ctx, '#4d6269', x + 42, y + 3, 29, 4);
-    }
-  }
 }
 
 function ring(ctx: CanvasRenderingContext2D, radius: number, color: string, gap: number, steps = 48) {
@@ -154,7 +121,7 @@ export function drawCampaignTerrain(ctx: CanvasRenderingContext2D, view: View, s
   ctx.scale(scale, scale);
   switch (stageId) {
     case 'antarctica': drawAntarcticaTerrain(ctx, mapView); break;
-    case 'space-elevator': drawElevator(ctx, mapView, tick); break;
+    case 'space-elevator': drawSpaceElevatorTerrain(ctx, mapView, tick); break;
     case 'watchtower': drawWatchtower(ctx, mapView); break;
   }
   ctx.restore();
