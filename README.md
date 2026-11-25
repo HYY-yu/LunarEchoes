@@ -54,6 +54,6 @@ npm run test:browser
 
 ## 团队协作
 
-- 团队在每个 worktree 根目录的 `公司工作台/` 读写同一份 Obsidian Vault。角色启动时会建立本地软链接。[仓库内的公司手册](体素游戏制作公司/月面回响体素游戏开发公司手册.md) 是迁移前的存档。
+- 团队在每个 worktree 根目录的 `公司工作台/` 读写同一份 Obsidian Vault。角色启动时会建立本地软链接。当前手册位于 `公司工作台/月面回响体素游戏开发公司手册.md`。[迁移前的手册](https://github.com/HYY-yu/LunarEchoes/blob/4dfec7c6e523a814ed3c4d890faebd2d5e33e5b4/%E4%BD%93%E7%B4%A0%E6%B8%B8%E6%88%8F%E5%88%B6%E4%BD%9C%E5%85%AC%E5%8F%B8/%E6%9C%88%E9%9D%A2%E5%9B%9E%E5%93%8D%E4%BD%93%E7%B4%A0%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E5%85%AC%E5%8F%B8%E6%89%8B%E5%86%8C.md) 保留在 Git 历史中。
 - [六关战役路线](docs/campaign-plan.md) 记录关卡顺序、叙事目标和已批准的设计决定。
 - `.codex/agents/` 保存四种角色定义。配置文件不会自行启动常驻团队。
