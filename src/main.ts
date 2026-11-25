@@ -1,4 +1,4 @@
-import { DESERT_SALVAGE_CONTEXT, hasContinuousDesertAssault, hasDesertAssault, hasRelayBase, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
+import { hasContinuousDesertAssault, hasDesertAssault, hasDesertSalvage, hasRelayBase, stageContext, stageRules, SimulationError, type StageContext } from './stage-rules.js';
 import { createWorld, dispatch, finalChecksum, finishRecording, startRecording, prepareReplay, verifyReplay, VERSION, HZ, UPGRADE_ORDER, ARMOR_RULES, type World, type Action, type Recording, type ActionBuffer } from './core.js';
 import { createRenderer } from './render.js';
 import { Synth } from './audio.js';
@@ -413,7 +413,7 @@ function showOpening(context: StageContext, source: OpeningSource = 'title') {
   openingRequest = null;
   if (context.stageId === 'desert-base') {
     if (!desertContent) throw new Error('Desert content unavailable');
-    const objective = context.rulesVersion === DESERT_SALVAGE_CONTEXT.rulesVersion ? salvageAssaultObjective
+    const objective = hasDesertSalvage(context) ? salvageAssaultObjective
       : hasDesertAssault(context) ? assaultObjective : desertContent.objective;
     presentOpening(context, source, { opening: desertContent.opening, objective, size: DESERT_SCENE_SIZE, draw: canvas => drawDesertScene(canvas, 'opening') });
     return;
@@ -836,7 +836,7 @@ function updateUi(force = false) {
   overlay.replaceChildren();
   if (screen === 'title') {
     const intro = document.createElement('section'); intro.className = 'intro';
-    const objective = DESERT_CONTEXT.rulesVersion === DESERT_SALVAGE_CONTEXT.rulesVersion ? salvageAssaultObjective[language]
+    const objective = hasDesertSalvage(DESERT_CONTEXT) ? salvageAssaultObjective[language]
       : hasDesertAssault(DESERT_CONTEXT) ? assaultObjective[language] : t.brief;
     intro.innerHTML = `<h1>${t.name}<em>LUNAR RELAY</em></h1><p class="subtitle">${t.subtitle}</p><p class="brief">${objective}</p>`;
     const progress = document.createElement('p'); progress.id = 'title-progress'; progress.setAttribute('role', 'status'); intro.append(progress);

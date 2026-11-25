@@ -1,5 +1,5 @@
 import type { Enemy, Shot, World } from './core.js';
-import { DESERT_SALVAGE_CONTEXT, hasRelayBase } from './stage-rules.js';
+import { hasDesertSalvage, hasRelayBase } from './stage-rules.js';
 import { RELAY_CENTER, RELAY_CORNERS } from './relay-layout.js';
 import { pulseFireInterval, TOWER_MODULE_AMMO, type TowerAction } from './desert-salvage.js';
 
@@ -166,7 +166,7 @@ export function stepDesertRepair(repair: DesertRepair, world: Pick<World, 'conte
   if ('towers' in repair) {
     repair.towers = repair.towers.map(tower => tower === target
       ? { ...tower, kind: 'repaired', nextTurretShotTick: 0,
-        ...(world.context === DESERT_SALVAGE_CONTEXT && { armor: { hits: desertTowerCapacity(tower) } }) }
+        ...(hasDesertSalvage(world.context) && { armor: { hits: desertTowerCapacity(tower) } }) }
       : tower);
   } else {
     repair.tower = { ...target, kind: 'repaired' };

@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createWorld, dispatch, HZ, parseActionBuffer, startRecording } from '../dist/core.js';
 import { desertTowerCapacity, nearbySalvageTower } from '../dist/desert-repair.js';
-import { DESERT_ASSAULT_DURATION_TICKS, DESERT_SALVAGE_CONTEXT, DESERT_STASIS_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
+import { DESERT_ASSAULT_DURATION_TICKS, DESERT_DROP_RATE_CONTEXT, DESERT_SALVAGE_CONTEXT, DESERT_STASIS_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
 
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
 const fortify = { kind: 'fortify-tower' };
 const mod = { kind: 'mod-tower' };
 
-function quietWorld(context = DESERT_SALVAGE_CONTEXT) {
-  return Object.assign(createWorld({ ...context, seed: 42 }), { spawnCooldown: 100000, fireCooldown: 100000, threshold: 100000 });
+function quietWorld(context = DESERT_DROP_RATE_CONTEXT, seed = 42) {
+  return Object.assign(createWorld({ ...context, seed }), { spawnCooldown: 100000, fireCooldown: 100000, threshold: 100000 });
 }
 
 function enemy(world, x, y, kind = 'sentry', hp = 100) {
@@ -31,11 +31,10 @@ function repairTower(world, index) {
   return repair.towers[index];
 }
 
-test('the live desert rolls salvage once per real kill using an independent seed', () => {
-  assert.equal(stageContext('desert-base'), DESERT_SALVAGE_CONTEXT);
+test('desert v10 keeps its legacy salvage rolls and replay actions', () => {
   assert.equal(resolveStage('desert-base', 'desert-base-9'), DESERT_STASIS_CONTEXT);
   assert.equal(resolveStage('desert-base', 'desert-base-10'), DESERT_SALVAGE_CONTEXT);
-  const world = quietWorld();
+  const world = quietWorld(DESERT_SALVAGE_CONTEXT);
   const repair = world.desertRepair;
   dispatch(world, idle);
   assert.deepEqual(repair.supplies, []);
@@ -55,6 +54,31 @@ test('the live desert rolls salvage once per real kill using an independent seed
   assert.deepEqual(world.desertSalvage.modules, []);
   assert.deepEqual(parseActionBuffer({ ...startRecording(world), actions: [fortify, mod] }).actions, [fortify, mod]);
   assert.throws(() => parseActionBuffer({ ...startRecording(quietWorld(DESERT_STASIS_CONTEXT)), actions: [mod] }), { code: 'invalid-data' });
+});
+
+test('the live desert v11 rolls lower-density salvage once per real kill', () => {
+  assert.equal(stageContext('desert-base'), DESERT_DROP_RATE_CONTEXT);
+  assert.equal(resolveStage('desert-base', 'desert-base-11'), DESERT_DROP_RATE_CONTEXT);
+  const world = quietWorld(DESERT_DROP_RATE_CONTEXT, 152);
+  const repair = world.desertRepair;
+  dispatch(world, idle);
+  assert.deepEqual(repair.supplies, []);
+  assert.equal(world.desertAssault.deliveries, 0);
+  const rng = world.rng;
+  shot(world, enemy(world, 360, 500, 'boss-echo'));
+  const targets = [440, 510, 580, 650, 720, 790, 860, 930].map(x => enemy(world, x, 500));
+  for (const target of targets) shot(world, target);
+  dispatch(world, idle);
+  assert.equal(world.rng, rng);
+  assert.equal(world.kills, 8);
+  const [ironTarget, moduleTarget, firstWood, secondWood] = [targets[1], targets[2], targets[6], targets[7]];
+  assert.deepEqual(repair.supplies, [
+    { x: ironTarget.x, y: ironTarget.y, material: 'iron' },
+    { x: firstWood.x, y: firstWood.y, material: 'wood' },
+    { x: secondWood.x, y: secondWood.y, material: 'wood' },
+  ]);
+  assert.deepEqual(world.desertSalvage.modules, [{ x: moduleTarget.x, y: moduleTarget.y, module: 'electric' }]);
+  assert.deepEqual(parseActionBuffer({ ...startRecording(world), actions: [fortify, mod] }).actions, [fortify, mod]);
 });
 
 test('desert salvage shares pulse cadence, limits contact, and preserves both upgrades on repair', () => {
