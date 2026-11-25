@@ -576,7 +576,7 @@ test('header focus preserves combat movement, pause and upgrade shortcuts while 
 
 function startLive(app) { app.click('启动任务'); app.click('部署出发'); }
 test('desert salvage teaches enemy drops and records two distinct nearby tower actions', () => {
-  const app = harness(undefined, undefined, undefined, resolveStage('desert-base', 'desert-base-10'));
+  const app = harness(undefined, undefined, undefined, stageContext('desert-base'));
   app.click('启动任务');
   assert.match(app.get('opening-objective').textContent, /击破敌军，回收木材和铁矿/);
   app.get('language').onclick();

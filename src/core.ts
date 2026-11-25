@@ -1,4 +1,4 @@
-import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_STASIS_CONTEXT, DESERT_SALVAGE_CONTEXT, RAINFOREST_RELAY_CONTEXT, ELEVATOR_ARMOR_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, hasContinuousDesertAssault, resolveStage, stageRules, SimulationError, type CampaignReinforcementKind, type StageContext } from './stage-rules.js';
+import { DESERT_REPAIR_CONTEXT, DESERT_TURRET_CONTEXT, DESERT_FOUR_TOWERS_CONTEXT, DESERT_STASIS_CONTEXT, RAINFOREST_RELAY_CONTEXT, ELEVATOR_ARMOR_CONTEXT, campaignRelayDeliveryTicks, hasDesertRelay, hasDesertAssault, hasDesertSalvage, hasContinuousDesertAssault, resolveStage, stageRules, SimulationError, type CampaignReinforcementKind, type StageContext } from './stage-rules.js';
 import { applyTowerAction, createDesertRepair, createDesertFourTowers, desertShipment, hitTowerWithShot, RELAY_REPAIR_RAID, stepDesertRepair, stepDesertTurret, stepTowerContact, type DesertRepair, type DesertTurretShots } from './desert-repair.js';
 import { DESERT_RELAY_SUPPLY_TICKS, DESERT_SUPPLY_TICKS, desertAssaultOutcome, desertSpawnInterval, desertSpawnsReinforcements, stepDesertAssault, type DesertAssault } from './desert-assault.js';
 import { createDesertSalvage, dropDesertSalvage, hitWithPlayerSideShot, pulseFireInterval, stepModulePickup, stepTowerBurn, type DesertSalvage, type TowerAction, type TowerAmmo, type TowerBurn } from './desert-salvage.js';
@@ -72,12 +72,12 @@ export function createWorld(request: unknown): World {
     upgrades: { pulse: 1, orbit: 0, nova: 0, boots: 0, hull: 0, magnet: 0 }, fireCooldown: 0, novaCooldown: 0, spawnCooldown: 45, bossSpawned: false, bossKilled: false };
   if (hasDesertAssault(context)) {
     world.desertRepair = createDesertFourTowers([], hasDesertRelay(context));
-    world.desertAssault = context === DESERT_SALVAGE_CONTEXT
+    world.desertAssault = hasDesertSalvage(context)
       ? { mode: 'salvage', deliveries: 0, final: { kind: 'waiting' } }
       : hasContinuousDesertAssault(context)
       ? { mode: 'continuous', deliveries: 0, final: { kind: 'waiting' } }
       : { deliveries: 0, final: { kind: 'waiting' } };
-    if (context === DESERT_SALVAGE_CONTEXT) world.desertSalvage = createDesertSalvage(seed);
+    if (hasDesertSalvage(context)) world.desertSalvage = createDesertSalvage(seed);
   } else if (campaignRelayDeliveryTicks(context)) {
     world.desertRepair = createDesertFourTowers([], true);
     world.campaignRelay = { deliveries: 0 };
@@ -133,7 +133,7 @@ function kill(world: World, enemy: Enemy): void {
   world.crystals.push({ x: enemy.x, y: enemy.y, value: ENEMY_STATS[enemy.kind].xp });
   world.effects.push({ x: enemy.x, y: enemy.y, kind: 'kill', life: 24, size: enemy.radius });
   world.events.push('kill');
-  if (world.desertSalvage && world.desertRepair) dropDesertSalvage(world.desertSalvage, world.desertRepair, enemy);
+  if (world.desertSalvage && world.desertRepair) dropDesertSalvage(world.desertSalvage, world.desertRepair, enemy, world.context);
   if (enemy.kind === 'boss') world.bossKilled = true;
 }
 function damagePlayer(world: World): void {
@@ -418,7 +418,7 @@ function parseAction(value: unknown, context: StageContext): Action {
     return { kind: 'choose', upgrade };
   }
   if (value.kind === 'pause' || value.kind === 'resume') { keys(value, ['kind']); return { kind: value.kind }; }
-  if (context === DESERT_SALVAGE_CONTEXT && (value.kind === 'fortify-tower' || value.kind === 'mod-tower')) {
+  if (hasDesertSalvage(context) && (value.kind === 'fortify-tower' || value.kind === 'mod-tower')) {
     keys(value, ['kind']);
     return { kind: value.kind };
   }

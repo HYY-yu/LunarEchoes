@@ -1,5 +1,6 @@
 import type { Enemy, Shot, World } from './core.js';
 import type { DesertRepair, TowerModule } from './desert-repair.js';
+import { DESERT_DROP_RATE_CONTEXT, type StageContext } from './stage-rules.js';
 
 type Position = Readonly<{ x: number; y: number }>;
 type ModuleDrop = Position & Readonly<{ module: TowerModule }>;
@@ -14,8 +15,8 @@ export type TowerBurn = { nextTick: number; remaining: number };
 type Damage = (enemy: Enemy, damage: number, flash: number) => void;
 
 const MODULES: readonly [TowerModule, TowerModule, TowerModule] = ['fire', 'electric', 'powder'];
-const MATERIAL_DROP_CHANCE = .4;
-const TOTAL_DROP_CHANCE = .5;
+const LEGACY_DROP_RATES = Object.freeze({ material: .4, module: .1 });
+const DESERT_DROP_RATES = Object.freeze({ material: .16, module: .03 });
 const MODULE_PICKUP_RADIUS = 20;
 const BURN_INTERVAL = 20;
 const BURN_PULSES = 3;
@@ -33,14 +34,15 @@ export function createDesertSalvage(seed: number): DesertSalvage {
   return { lootRng: (seed ^ 0x9e3779b9) >>> 0, modules: [] };
 }
 
-export function dropDesertSalvage(salvage: DesertSalvage, repair: DesertRepair, { x, y }: Position): void {
+export function dropDesertSalvage(salvage: DesertSalvage, repair: DesertRepair, { x, y }: Position, context: StageContext): void {
+  const rates = context === DESERT_DROP_RATE_CONTEXT ? DESERT_DROP_RATES : LEGACY_DROP_RATES;
   salvage.lootRng = (Math.imul(salvage.lootRng, 1664525) + 1013904223) >>> 0;
   const roll = salvage.lootRng / 4294967296;
-  if (roll < MATERIAL_DROP_CHANCE) {
-    const material = roll < MATERIAL_DROP_CHANCE * 2 / 3 ? 'wood' : 'iron';
+  if (roll < rates.material) {
+    const material = roll < rates.material * 2 / 3 ? 'wood' : 'iron';
     repair.supplies = [...repair.supplies, { x, y, material }];
-  } else if (roll < TOTAL_DROP_CHANCE) {
-    const module = MODULES[Math.floor((roll - MATERIAL_DROP_CHANCE) * 30)];
+  } else if (roll < rates.material + rates.module) {
+    const module = MODULES[Math.floor((roll - rates.material) * (MODULES.length / rates.module))];
     salvage.modules = [...salvage.modules, { x, y, module }];
   }
 }
