@@ -22,6 +22,12 @@ export type TowerDirection = 'north' | 'east' | 'south' | 'west';
 export type TowerModule = 'fire' | 'electric' | 'powder';
 export type DesertTurretShot = Readonly<Pick<Shot, 'vx' | 'vy'> & { tick: number }>;
 export type DesertTurretShots = Partial<Record<TowerDirection, DesertTurretShot>>;
+export type TowerShotOrigin = Position & Readonly<{ tick: number }>;
+const towerShotOrigins = new WeakMap<Shot, TowerShotOrigin>();
+
+export function towerShotOrigin(shot: Shot): TowerShotOrigin | undefined {
+  return towerShotOrigins.get(shot);
+}
 type TurretWorld = Pick<World, 'context' | 'desertRepair' | 'desertTurretShots' | 'enemies' | 'shots' | 'events' | 'tick' | 'upgrades'>;
 type TurretTargetWorld = Readonly<Pick<TurretWorld, 'context'>> & { readonly enemies: readonly Readonly<Enemy>[] };
 type TowerArmor = { hits: number; lastShotTick?: number };
@@ -313,11 +319,13 @@ function fireTurret(world: TurretWorld, tower: Position, direction: TowerDirecti
   const vy = (target.y - tower.y) * velocityScale;
   const ammo = loadout?.module ? TOWER_MODULE_AMMO[loadout.module] : undefined;
   const damage = (loadout?.reinforced ? REINFORCED_TURRET_DAMAGE : TURRET_SHOT_DAMAGE) + (ammo?.damageDelta ?? 0);
-  world.shots.push({
+  const shot: Shot = {
     x: tower.x, y: tower.y, vx, vy,
     life: TURRET_SHOT_LIFE, damage, hostile: false,
     ...(ammo && { kind: ammo.kind })
-  });
+  };
+  world.shots.push(shot);
+  towerShotOrigins.set(shot, { x: tower.x, y: tower.y, tick: world.tick });
   (world.desertTurretShots ??= {})[direction] = { tick: world.tick, vx, vy };
   world.events.push('shot');
   return true;
