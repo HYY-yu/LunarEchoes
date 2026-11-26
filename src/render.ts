@@ -22,13 +22,13 @@ import { createRainforestArchiveArt } from './rainforest-archive-art.js';
 import { drawRainforestBrood, rainforestBroodBurstProgress } from './rainforest-brood-art.js';
 import { rainforestBroodWarning } from './rainforest-brood.js';
 import { createDesertSupplyArt } from './desert-supply-art.js';
-import { createDesertTowerArt } from './desert-tower-art.js';
+import { createDesertTowerArt, towerMuzzle } from './desert-tower-art.js';
 import { createFrostGuardArt } from './frost-guard-art.js';
 import { createInsulatedSuitArt } from './insulated-suit-art.js';
 import { createRocketBotArt } from './rocket-bot-art.js';
 import { createDesertRelayArt } from './desert-relay-art.js';
 import { RELAY_CENTER } from './relay-layout.js';
-import { desertTowerCapacity, relayObjective, selectTurretTarget, type DirectionalTower, type TowerDirection, type TowerModule } from './desert-repair.js';
+import { desertTowerCapacity, relayObjective, selectTurretTarget, towerShotOrigin, type DirectionalTower, type TowerDirection, type TowerModule, type TowerShotOrigin } from './desert-repair.js';
 import { drawRelayObjective } from './desert-relay-guidance-art.js';
 import { drawMaterialMotion, type MaterialReleases } from './material-motion-art.js';
 import { drawElevatorBossArmor, elevatorArmorImpact } from './elevator-boss-armor-art.js';
@@ -39,6 +39,7 @@ import {
 import { advanceTowerTurn, type TowerTurnPose } from './tower-turn-motion.js';
 
 const BOSS_SCALE = 3.8;
+const TOWER_MUZZLE_BLEND_TICKS = 8;
 type DrawBossBody = ReturnType<typeof createBossBodyArt>;
 const BOSS_BODY_FACTORIES: Readonly<Record<StageId, () => DrawBossBody>> = {
   'desert-base': () => createBossBodyArt('harvester'),
@@ -111,12 +112,28 @@ function drawTowerArmor(ctx: CanvasRenderingContext2D, tower: DirectionalTower, 
   }
 }
 
-function drawTowerModuleShot(ctx: CanvasRenderingContext2D, shot: Shot): boolean {
+function projectTowerShot(shot: Shot, origin: TowerShotOrigin, tick: number): Shot {
+  const muzzleWeight = 1 - (tick - origin.tick) / TOWER_MUZZLE_BLEND_TICKS;
+  if (muzzleWeight <= 0) return shot;
+  const { vx, vy } = shot;
+  const muzzle = towerMuzzle(origin, Math.atan2(vy, vx));
+  const speed = Math.hypot(vx, vy);
+  return {
+    ...shot,
+    x: shot.x + (muzzle.x - origin.x - vx) * muzzleWeight,
+    y: shot.y + (muzzle.y - origin.y - vy) * muzzleWeight,
+    vx: vx + (muzzle.dx * speed - vx) * muzzleWeight,
+    vy: vy + (muzzle.dy * speed - vy) * muzzleWeight
+  };
+}
+
+function drawTowerModuleShot(ctx: CanvasRenderingContext2D, shot: Shot, trail: number): boolean {
   const { kind, x, y, vx, vy } = shot;
   if (kind !== 'tower-fire' && kind !== 'tower-electric' && kind !== 'tower-powder') return false;
   ctx.save();
   ctx.translate(Math.round(x), Math.round(y));
   ctx.rotate(Math.atan2(vy, vx));
+  if (trail < 1) ctx.scale(trail, 1);
   if (kind === 'tower-fire') {
     ctx.fillStyle = '#d86445';
     ctx.fillRect(-15, -1, 12, 3);
@@ -358,7 +375,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         }
       }
     }
-    for (const shot of world.shots) {
+    for (const projectile of world.shots) {
+      const origin = towerShotOrigin(projectile);
+      const shot = origin ? projectTowerShot(projectile, origin, world.tick) : projectile;
+      const trail = origin ? Math.min(1, (world.tick - origin.tick + 1) / 4) : 1;
       if (stasisActive && shot.hostile) {
         drawFrozenHostileBolt(ctx, shot);
         continue;
@@ -367,7 +387,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         drawIceShard(ctx, shot);
         continue;
       }
-      if (drawTowerModuleShot(ctx, shot)) continue;
+      if (drawTowerModuleShot(ctx, shot, trail)) continue;
       if (shot.kind === 'rocket') {
         ctx.fillStyle = '#ffbd75';
         ctx.fillRect(Math.round(shot.x) - 3, Math.round(shot.y) - 3, 7, 7);
@@ -377,7 +397,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         ctx.fillStyle = shot.hostile ? '#f6b77c' : '#d9fff2';
         ctx.fillRect(Math.round(shot.x) - 2, Math.round(shot.y) - 2, shot.hostile ? 5 : 3, shot.hostile ? 5 : 3);
       }
-      ctx.strokeStyle = shot.hostile ? '#dc916166' : '#8af5e5aa'; ctx.beginPath(); ctx.moveTo(shot.x, shot.y); ctx.lineTo(shot.x - shot.vx * 2, shot.y - shot.vy * 2); ctx.stroke();
+      ctx.strokeStyle = shot.hostile ? '#dc916166' : '#8af5e5aa'; ctx.beginPath(); ctx.moveTo(shot.x, shot.y); ctx.lineTo(shot.x - shot.vx * 2 * trail, shot.y - shot.vy * 2 * trail); ctx.stroke();
     }
     ctx.fillStyle = '#1c344455'; ctx.beginPath(); ctx.ellipse(p.x + 3, p.y + 12, 12, 5, 0, 0, Math.PI * 2); ctx.fill();
     if (stasis && stasisBoss && !stasisBossInView && (stasisActive || world.tick < stasis.beginsAt)) {

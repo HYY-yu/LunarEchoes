@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createDesertMap } from '../dist/desert-map.js';
 import { createRenderer } from '../dist/render.js';
+import { towerMuzzle } from '../dist/desert-tower-art.js';
+import { DESERT_DROP_RATE_CONTEXT } from '../dist/stage-rules.js';
 import { createWorld, checksum, dispatch } from '../dist/core.js';
 
 function context() {
@@ -19,7 +21,7 @@ function context() {
     setLineDash(value) { this.dash = value; },
     strokeRect(...args) { calls.push(['outline', ...args]); },
     createRadialGradient() { return { addColorStop() {} }; },
-    scale() {}, translate() {}, clip() {}, beginPath() {}, ellipse() {}, arc() {}, fill() {}, stroke() {}, moveTo() {}, lineTo() {}
+    scale() {}, translate(...args) { calls.push(['translate', ...args]); }, rotate() {}, rect() {}, clip() {}, beginPath() {}, ellipse() {}, arc() {}, fill() {}, stroke() {}, moveTo() {}, lineTo() {}
   };
 }
 function environment(t) {
@@ -105,4 +107,56 @@ test('renderer selects terrain by the world stage and keeps shared projectile st
     ['rect', '#f6b77c', 1, 783, 723, 5, 5]
   ]);
   assert.deepEqual(styles[1], styles[0]);
+});
+
+test('turret flashes and all projectile styles leave the visible bore before joining the simulated path', t => {
+  environment(t);
+  const ctx = context(), canvas = { width: 0, height: 0, clientWidth: 390, clientHeight: 693, getContext() { return ctx; } };
+  const render = createRenderer(canvas);
+  const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
+  for (const module of [undefined, 'fire', 'electric', 'powder']) {
+    const world = createWorld({ ...DESERT_DROP_RATE_CONTEXT, seed: 42 });
+    world.spawnCooldown = 1000;
+    world.fireCooldown = 1000;
+    const repair = world.desertRepair;
+    const [tower] = repair.towers;
+    Object.assign(world.player, { x: tower.x, y: tower.y });
+    Object.assign(repair.inventory, { wood: 2, iron: 1 });
+    dispatch(world, idle);
+    if (module) {
+      Object.assign(repair.inventory, { wood: 2, iron: 1 });
+      dispatch(world, { kind: 'fortify-tower' });
+      world.desertSalvage.held = module;
+      dispatch(world, { kind: 'mod-tower' });
+    }
+
+    world.enemies = [{ id: 99, kind: 'sentry', x: tower.x, y: tower.y - 175, hp: 100, maxHp: 100, radius: 15, attack: 1000, flash: 0 }];
+    dispatch(world, idle);
+    const [projectile] = world.shots;
+    assert.equal(projectile.kind, module ? 'tower-' + module : undefined);
+    assert.equal(projectile.y, tower.y - 8);
+
+    function checkDisplay(point) {
+      ctx.calls.length = 0;
+      const before = structuredClone(world);
+      render(world, 0);
+      assert.deepEqual(world, before);
+      const [x, y] = [Math.round(point.x), Math.round(point.y)];
+      if (module) assert.ok(ctx.calls.some(call => call[0] === 'translate' && call[1] === x && call[2] === y));
+      else assert.ok(ctx.calls.some(call => call[0] === 'rect' && call[1] === '#d9fff2' && call[3] === x - 2 && call[4] === y - 2));
+    }
+
+    const muzzle = towerMuzzle(tower, -Math.PI / 2);
+    checkDisplay(muzzle);
+    const flash = ctx.calls.find(call => call[0] === 'rect' && call[1] === '#fff7d4');
+    const armor = ctx.calls.find(call => call[0] === 'rect' && call[1] === '#102a36' && call[4] === tower.y - 59);
+    assert.ok(flash && armor);
+    assert.ok(Math.abs(flash[3] + flash[5] / 2 - muzzle.x) <= 1);
+    assert.ok(Math.abs(flash[4] + flash[6] / 2 - muzzle.y) <= 2);
+    assert.ok(armor[4] + armor[6] < flash[4]);
+
+    for (let tick = 0; tick < 8; tick++) dispatch(world, idle);
+    checkDisplay(projectile);
+    assert.equal(projectile.y, tower.y - 72);
+  }
 });
