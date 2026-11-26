@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../dist/core.js';
-import { ANTARCTIC_BARRAGE_CONTEXT, ANTARCTIC_FROST_CONTEXT, ELEVATOR_ARMOR_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_ECHO_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, WATCHTOWER_STRIKE_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { ANTARCTIC_BARRAGE_CONTEXT, ANTARCTIC_FROST_CONTEXT, ELEVATOR_ARMOR_CONTEXT, ELEVATOR_SUIT_CONTEXT, LUNAR_ECHO_CONTEXT, LUNAR_RELAY_CONTEXT, WATCHTOWER_ROCKET_CONTEXT, WATCHTOWER_STRIKE_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play } from '../scripts/simulation.mjs';
 
 const scenarios = [
-  { stageId: 'antarctica', rulesVersion: 'antarctica-5', seed: 101, duration: 210, bossSecond: 162, health: 1050, shots: 7, fan: true },
-  { stageId: 'space-elevator', rulesVersion: 'space-elevator-5', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
-  { stageId: 'watchtower', rulesVersion: 'watchtower-5', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
-  { stageId: 'lunar-echoes', rulesVersion: 'lunar-echoes-4', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
+  { stageId: 'antarctica', rulesVersion: 'antarctica-6', seed: 101, duration: 210, bossSecond: 162, health: 1050, shots: 7, fan: true },
+  { stageId: 'space-elevator', rulesVersion: 'space-elevator-6', seed: 42, duration: 205, bossSecond: 158, health: 925, shots: 3, fan: true },
+  { stageId: 'watchtower', rulesVersion: 'watchtower-6', seed: 42, duration: 225, bossSecond: 173, health: 1100, shots: 10, fan: false },
+  { stageId: 'lunar-echoes', rulesVersion: 'lunar-echoes-5', seed: 42, duration: 240, bossSecond: 185, health: 1250, shots: 15, fan: false }
 ];
 
 for (const { stageId, rulesVersion = `${stageId}-2`, seed, duration, bossSecond } of scenarios) {
@@ -57,7 +57,7 @@ const relayScenarios = [
 for (const { context, seed, duration, bossSecond, shipments } of relayScenarios) {
   const { stageId, rulesVersion } = context;
   test(`${rulesVersion} fields four corner towers before the existing boss and victory`, () => {
-    assert.equal(stageContext(stageId), context);
+    assert.equal(resolveStage(stageId, rulesVersion), context);
     const { recording, world: terminal } = play(seed, context);
     const world = core.createWorld({ ...context, seed });
     assert.deepEqual(world.desertRepair.towers.map(({ x, y }) => [x, y]), [[590, 590], [910, 590], [910, 910], [590, 910]]);

@@ -1,5 +1,5 @@
 import type { World } from './core.js';
-import { WATCHTOWER_STRIKE_CONTEXT } from './stage-rules.js';
+import { WATCHTOWER_STRIKE_CONTEXT, stageMechanicContext } from './stage-rules.js';
 
 const IMPACT_TICKS = [176 * 60, 180 * 60];
 const MARK_OFFSETS = [-76, 0, 76];
@@ -15,7 +15,7 @@ export type WatchtowerStrike = StrikeTarget & (
 );
 
 export function stepWatchtowerStrike(world: World, arenaSize: number, damagePlayer: (world: World) => void): void {
-  if (world.context !== WATCHTOWER_STRIKE_CONTEXT) return;
+  if (stageMechanicContext(world.context) !== WATCHTOWER_STRIKE_CONTEXT) return;
   const { player, tick, watchtowerStrike: strike } = world;
   if (strike?.kind === 'warning') {
     if (world.phase.kind === 'lost' || !world.enemies.some(enemy => enemy.id === strike.bossId)) {

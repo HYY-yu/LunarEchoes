@@ -1,4 +1,4 @@
-import { RAINFOREST_BROOD_CONTEXT, type StageContext } from './stage-rules.js';
+import { RAINFOREST_BROOD_CONTEXT, stageMechanicContext, type StageContext } from './stage-rules.js';
 
 const RELEASE_TICKS = [158 * 60, 163 * 60];
 const WARNING_TICKS = 54;
@@ -8,11 +8,11 @@ type Site = Readonly<{ x: number; y: number }>;
 export type RainforestBrood = Readonly<{ tick: number; motherId: number; sites: readonly Site[] }>;
 
 export function rainforestBroodReleases(context: StageContext, tick: number): boolean {
-  return context === RAINFOREST_BROOD_CONTEXT && RELEASE_TICKS.includes(tick);
+  return stageMechanicContext(context) === RAINFOREST_BROOD_CONTEXT && RELEASE_TICKS.includes(tick);
 }
 
 export function rainforestBroodWarning(context: StageContext, tick: number): number | undefined {
-  if (context !== RAINFOREST_BROOD_CONTEXT) return undefined;
+  if (stageMechanicContext(context) !== RAINFOREST_BROOD_CONTEXT) return undefined;
   const release = RELEASE_TICKS.find(end => tick >= end - WARNING_TICKS && tick < end);
   return release === undefined ? undefined : (tick - release + WARNING_TICKS) / WARNING_TICKS;
 }

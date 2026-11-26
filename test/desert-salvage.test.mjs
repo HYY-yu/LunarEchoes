@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createWorld, dispatch, HZ, parseActionBuffer, startRecording } from '../dist/core.js';
 import { desertTowerCapacity, nearbySalvageTower } from '../dist/desert-repair.js';
+import { STAGE_ORDER } from '../dist/stage-contract.js';
 import { DESERT_ASSAULT_DURATION_TICKS, DESERT_DROP_RATE_CONTEXT, DESERT_SALVAGE_CONTEXT, DESERT_STASIS_CONTEXT, resolveStage, stageContext } from '../dist/stage-rules.js';
 
 const idle = { kind: 'tick', input: { x: 0, y: 0, dash: false } };
@@ -56,8 +57,7 @@ test('desert v10 keeps its legacy salvage rolls and replay actions', () => {
   assert.throws(() => parseActionBuffer({ ...startRecording(quietWorld(DESERT_STASIS_CONTEXT)), actions: [mod] }), { code: 'invalid-data' });
 });
 
-test('the live desert v11 rolls lower-density salvage once per real kill', () => {
-  assert.equal(stageContext('desert-base'), DESERT_DROP_RATE_CONTEXT);
+test('desert v11 rolls lower-density salvage once per real kill', () => {
   assert.equal(resolveStage('desert-base', 'desert-base-11'), DESERT_DROP_RATE_CONTEXT);
   const world = quietWorld(DESERT_DROP_RATE_CONTEXT, 152);
   const repair = world.desertRepair;
@@ -79,6 +79,72 @@ test('the live desert v11 rolls lower-density salvage once per real kill', () =>
   ]);
   assert.deepEqual(world.desertSalvage.modules, [{ x: moduleTarget.x, y: moduleTarget.y, module: 'electric' }]);
   assert.deepEqual(parseActionBuffer({ ...startRecording(world), actions: [fortify, mod] }).actions, [fortify, mod]);
+});
+
+test('each mission restores independently suppressed ground drops after pickup', () => {
+  for (const stageId of STAGE_ORDER) {
+    const world = quietWorld(stageContext(stageId));
+    const repair = world.desertRepair;
+    const salvage = world.desertSalvage;
+    dispatch(world, idle);
+    assert.equal(repair.supplies.length, stageId === 'desert-base' ? 0 : 3, stageId);
+    repair.supplies = Array.from({ length: 4 }, (_, i) => ({ x: 300 + i * 40, y: 500, material: 'wood' }));
+    salvage.modules = [{ x: 460, y: 500, module: 'electric' }];
+    const rng = world.rng;
+
+    function killWithRoll(state) {
+      salvage.lootRng = state;
+      shot(world, enemy(world, 1090, 460));
+      dispatch(world, idle);
+    }
+
+    killWithRoll(2382);
+    assert.equal(repair.supplies.length, 5, stageId);
+    assert.equal(repair.supplies.at(-1).material, 'iron', stageId);
+    killWithRoll(2101);
+    assert.equal(repair.supplies.length, 5, stageId);
+    const take = ({ x, y }) => {
+      Object.assign(world.player, { x, y });
+      dispatch(world, idle);
+      Object.assign(world.player, { x: 750, y: 750 });
+    };
+    take(repair.supplies.at(-1));
+    assert.equal(repair.inventory.iron, 1, stageId);
+    assert.equal(repair.supplies.length, 4, stageId);
+
+    killWithRoll(2101);
+    assert.equal(repair.supplies.length, 5, stageId);
+    assert.equal(repair.supplies.at(-1).material, 'wood', stageId);
+    killWithRoll(2098);
+    assert.equal(repair.supplies.length, 6, stageId);
+    assert.equal(repair.supplies.at(-1).material, 'iron', stageId);
+
+    killWithRoll(2385);
+    assert.deepEqual(salvage.modules.map(drop => drop.module), ['electric', 'fire'], stageId);
+    killWithRoll(2459);
+    assert.equal(salvage.modules.length, 2, stageId);
+    take(salvage.modules.at(-1));
+    assert.equal(salvage.held, 'fire', stageId);
+    assert.equal(salvage.modules.length, 1, stageId);
+    killWithRoll(2462);
+    assert.equal(salvage.modules.length, 1, stageId);
+    killWithRoll(2459);
+    assert.deepEqual(salvage.modules.map(drop => drop.module), ['electric', 'powder'], stageId);
+    assert.equal(world.rng, rng, stageId);
+
+    const tower = repairTower(world, 0);
+    assert.equal(tower.kind, 'repaired', stageId);
+    assert.equal(!!tower.armor, stageId === 'desert-base', stageId);
+    dispatch(world, mod);
+    assert.equal(salvage.held, undefined, stageId);
+    assert.deepEqual(world.events, ['tower-modded'], stageId);
+    enemy(world, tower.x - 100, tower.y - 100);
+    dispatch(world, idle);
+    const moduleShot = world.shots.find(projectile => projectile.kind === 'tower-fire');
+    assert(moduleShot, stageId);
+    if (stageId !== 'desert-base') assert.equal(repair.towers[0].nextTurretShotTick, world.tick + 54, stageId);
+    assert.deepEqual(parseActionBuffer({ ...startRecording(world), actions: [mod] }).actions, [mod], stageId);
+  }
 });
 
 test('desert salvage shares pulse cadence, limits contact, and preserves both upgrades on repair', () => {

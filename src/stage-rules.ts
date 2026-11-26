@@ -1,6 +1,6 @@
 import type { StageId } from './stage-contract.js';
 
-function context<const Id extends StageId, const Revision extends 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11>(stageId: Id, revision: Revision): Readonly<{ stageId: Id; rulesVersion: `${Id}-${Revision}` }> {
+function context<const Id extends StageId, const Revision extends 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(stageId: Id, revision: Revision): Readonly<{ stageId: Id; rulesVersion: `${Id}-${Revision}` }> {
   return Object.freeze({ stageId, rulesVersion: `${stageId}-${revision}` });
 }
 
@@ -52,7 +52,17 @@ const CONTEXTS = Object.freeze({
   'lunar-echoes': context('lunar-echoes', 2)
 } satisfies { [Id in StageId]: { stageId: Id; rulesVersion: `${Id}-2` } });
 
+const DYNAMIC_SALVAGE_CONTEXTS = Object.freeze({
+  'desert-base': context('desert-base', 12),
+  rainforest: context('rainforest', 5),
+  antarctica: context('antarctica', 6),
+  'space-elevator': context('space-elevator', 6),
+  watchtower: context('watchtower', 6),
+  'lunar-echoes': context('lunar-echoes', 5)
+} satisfies { [Id in StageId]: { stageId: Id } });
+
 export type StageContext =
+  | typeof DYNAMIC_SALVAGE_CONTEXTS[StageId]
   | typeof CONTEXTS[StageId]
   | typeof LEGACY_CONTEXTS[StageId]
   | typeof DESERT_REPAIR_CONTEXT
@@ -100,14 +110,14 @@ const CAMPAIGN_RELAY_DELIVERY_TICKS: Readonly<Partial<Record<StageContext['rules
   'lunar-echoes-4': LUNAR_DELIVERY_TICKS
 });
 
-const LATEST_CONTEXTS: Readonly<Partial<Record<StageId, StageContext>>> = Object.freeze({
+const PRE_SALVAGE_CONTEXTS = Object.freeze({
   'desert-base': DESERT_DROP_RATE_CONTEXT,
   rainforest: RAINFOREST_BROOD_CONTEXT,
   antarctica: ANTARCTIC_BARRAGE_CONTEXT,
   'space-elevator': ELEVATOR_ARMOR_CONTEXT,
   watchtower: WATCHTOWER_STRIKE_CONTEXT,
   'lunar-echoes': LUNAR_ECHO_CONTEXT
-});
+} satisfies { [Id in StageId]: { stageId: Id } });
 export type SimulationErrorCode = 'invalid-data' | 'incompatible-version' | 'unavailable-stage' | 'incompatible-rules' | 'nonterminal-replay' | 'checksum-mismatch' | 'incomplete-replay';
 export class SimulationError extends Error {
   constructor(readonly code: SimulationErrorCode) { super(code === 'incompatible-version' ? 'Replay version mismatch' : code); this.name = 'SimulationError'; }
@@ -226,8 +236,21 @@ export function hasDesertRelay(context: StageContext): boolean {
   return context === DESERT_RELAY_CONTEXT || hasContinuousDesertAssault(context);
 }
 
+export function hasDynamicSalvage(context: StageContext): boolean {
+  return context === DYNAMIC_SALVAGE_CONTEXTS[context.stageId];
+}
+
+export function stageMechanicContext(context: StageContext): StageContext {
+  return hasDynamicSalvage(context) ? PRE_SALVAGE_CONTEXTS[context.stageId] : context;
+}
+
 export function hasDesertSalvage(context: StageContext): boolean {
-  return context === DESERT_SALVAGE_CONTEXT || context === DESERT_DROP_RATE_CONTEXT;
+  return context === DESERT_SALVAGE_CONTEXT || context === DESERT_DROP_RATE_CONTEXT
+    || context === DYNAMIC_SALVAGE_CONTEXTS['desert-base'];
+}
+
+export function hasSalvage(context: StageContext): boolean {
+  return hasDesertSalvage(context) || hasDynamicSalvage(context);
 }
 
 export function hasContinuousDesertAssault(context: StageContext): boolean {
@@ -239,7 +262,7 @@ export function hasRelayBase(context: StageContext): boolean {
 }
 
 export function campaignRelayDeliveryTicks(context: StageContext): FourDeliveries | undefined {
-  return CAMPAIGN_RELAY_DELIVERY_TICKS[context.rulesVersion];
+  return CAMPAIGN_RELAY_DELIVERY_TICKS[stageMechanicContext(context).rulesVersion];
 }
 
 export function hasDesertAssault(context: StageContext): boolean {
@@ -247,13 +270,15 @@ export function hasDesertAssault(context: StageContext): boolean {
 }
 
 export function stageContext(stageId: StageId): StageContext {
-  return LATEST_CONTEXTS[stageId] ?? CONTEXTS[stageId];
+  return DYNAMIC_SALVAGE_CONTEXTS[stageId];
 }
 
 export function resolveStage(stageId: unknown, rulesVersion: unknown): StageContext {
   if (!isStageId(stageId)) throw new SimulationError('unavailable-stage');
   const latest = stageContext(stageId);
   if (rulesVersion === latest.rulesVersion) return latest;
+  const beforeSalvage = PRE_SALVAGE_CONTEXTS[stageId];
+  if (rulesVersion === beforeSalvage.rulesVersion) return beforeSalvage;
   if (stageId === 'rainforest' && rulesVersion === RAINFOREST_RELAY_CONTEXT.rulesVersion) return RAINFOREST_RELAY_CONTEXT;
   if (stageId === 'antarctica' && rulesVersion === ANTARCTIC_FROST_CONTEXT.rulesVersion) return ANTARCTIC_FROST_CONTEXT;
   if (stageId === 'antarctica' && rulesVersion === ANTARCTIC_RELAY_CONTEXT.rulesVersion) return ANTARCTIC_RELAY_CONTEXT;
@@ -281,5 +306,5 @@ export function resolveStage(stageId: unknown, rulesVersion: unknown): StageCont
 
 export function stageRules(context: StageContext) {
   const resolved = resolveStage(context.stageId, context.rulesVersion);
-  return REINFORCED_CAMPAIGNS[resolved.rulesVersion] ?? (hasDesertAssault(resolved) ? DESERT_ASSAULT_RULES : RULES[resolved.stageId]);
+  return REINFORCED_CAMPAIGNS[stageMechanicContext(resolved).rulesVersion] ?? (hasDesertAssault(resolved) ? DESERT_ASSAULT_RULES : RULES[resolved.stageId]);
 }

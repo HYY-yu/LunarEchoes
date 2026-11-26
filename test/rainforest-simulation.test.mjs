@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../dist/core.js';
-import { DESERT_CONTEXT, RAINFOREST_BROOD_CONTEXT, RAINFOREST_CONTEXT, RAINFOREST_RELAY_CONTEXT, stageContext } from '../dist/stage-rules.js';
+import { DESERT_CONTEXT, RAINFOREST_BROOD_CONTEXT, RAINFOREST_CONTEXT, RAINFOREST_RELAY_CONTEXT, resolveStage } from '../dist/stage-rules.js';
 import { rainforestBroodSites, rainforestBroodWarning } from '../dist/rainforest-brood.js';
 import { playArmorCase } from '../scripts/armor-balance.mjs';
 import { play } from '../scripts/simulation.mjs';
@@ -72,7 +72,7 @@ test('rainforest runs its own enemy composition and pause does not advance battl
 
 test('rainforest recording validation requires the exact rule pair and rejects context substitution', () => {
   const { recording } = playArmorCase(core, seed, 'stationary', 'attack', RAINFOREST_CONTEXT);
-  for (const rulesVersion of ['desert-base-1', 'rainforest-5']) {
+  for (const rulesVersion of ['desert-base-1', 'rainforest-6']) {
     assert.throws(() => core.createWorld({ ...request, rulesVersion }), { code: 'incompatible-rules' });
     assert.throws(() => core.prepareReplay({ ...recording, rulesVersion }), { code: 'incompatible-rules' });
   }
@@ -81,7 +81,7 @@ test('rainforest recording validation requires the exact rule pair and rejects c
 });
 
 test('rainforest v4 retains the four-tower route, outcome and replay', () => {
-  const context = stageContext('rainforest');
+  const context = resolveStage('rainforest', 'rainforest-4');
   assert.equal(context, RAINFOREST_BROOD_CONTEXT);
   const whole = play(42, context);
   const world = core.createWorld({ ...context, seed: 42 });
