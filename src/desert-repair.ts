@@ -198,9 +198,9 @@ function isArmoredTower(tower: DirectionalTower): tower is ArmoredTower {
   return tower.kind === 'repaired' && tower.armor !== undefined;
 }
 
-export function nearbySalvageTower(repair: DesertRepair | undefined, player: Position): ArmoredTower | undefined {
+export function nearbySalvageTower(repair: DesertRepair | undefined, player: Position): (DirectionalTower & RepairedTower) | undefined {
   if (!repair || !('towers' in repair)) return;
-  return repair.towers.find((tower): tower is ArmoredTower => isArmoredTower(tower) && distance(player, tower) <= REPAIR_RADIUS);
+  return repair.towers.find((tower): tower is DirectionalTower & RepairedTower => tower.kind === 'repaired' && distance(player, tower) <= REPAIR_RADIUS);
 }
 
 export function applyTowerAction(world: Pick<World, 'desertRepair' | 'desertSalvage' | 'player' | 'events'>, action: TowerAction): void {
@@ -222,7 +222,8 @@ export function applyTowerAction(world: Pick<World, 'desertRepair' | 'desertSalv
     delete salvage.held;
     world.events.push('tower-modded');
   }
-  replaceTower(repair, tower, { ...tower, loadout, armor: { ...tower.armor, hits: tower.armor.hits + TOWER_UPGRADE_HITS } });
+  replaceTower(repair, tower, { ...tower, loadout,
+    ...(tower.armor && { armor: { ...tower.armor, hits: tower.armor.hits + TOWER_UPGRADE_HITS } }) });
 }
 
 function replaceTower(repair: FourTowerRepair, previous: DirectionalTower, replacement: DirectionalTower): void {
@@ -273,7 +274,7 @@ export function stepDesertTurret(world: TurretWorld): void {
           tower.armor.lastShotTick = world.tick;
           tower.nextTurretShotTick = world.tick + interval;
         }
-      } else if (world.tick >= tower.nextTurretShotTick && fireTurret(world, tower, tower.direction)) {
+      } else if (world.tick >= tower.nextTurretShotTick && fireTurret(world, tower, tower.direction, tower.loadout)) {
         tower.nextTurretShotTick = world.tick + TURRET_CADENCE;
       }
     }

@@ -1,5 +1,5 @@
 import type { World } from './core.js';
-import { LUNAR_ECHO_CONTEXT } from './stage-rules.js';
+import { LUNAR_ECHO_CONTEXT, stageMechanicContext } from './stage-rules.js';
 
 const SPLIT_TICK = 187 * 60;
 const ECHO_FORWARD = 110;
@@ -16,7 +16,7 @@ export type LunarEchoCast = CastOrigin & (
 );
 
 export function stepLunarEchoCast(world: World, arenaSize: number, enemyLimit: number): void {
-  if (world.context !== LUNAR_ECHO_CONTEXT) return;
+  if (stageMechanicContext(world.context) !== LUNAR_ECHO_CONTEXT) return;
   const { player, tick, lunarEchoCast: cast } = world;
   if (!cast && tick !== SPLIT_TICK - LUNAR_ECHO_CAST.warningTicks) return;
   const boss = world.enemies.find(enemy => enemy.kind === 'boss' && (!cast || cast.bossId === enemy.id));

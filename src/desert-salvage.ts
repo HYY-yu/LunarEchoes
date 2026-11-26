@@ -1,6 +1,6 @@
 import type { Enemy, Shot, World } from './core.js';
 import type { DesertRepair, TowerModule } from './desert-repair.js';
-import { DESERT_DROP_RATE_CONTEXT, type StageContext } from './stage-rules.js';
+import { DESERT_DROP_RATE_CONTEXT, hasDynamicSalvage, type StageContext } from './stage-rules.js';
 
 type Position = Readonly<{ x: number; y: number }>;
 type ModuleDrop = Position & Readonly<{ module: TowerModule }>;
@@ -16,7 +16,10 @@ type Damage = (enemy: Enemy, damage: number, flash: number) => void;
 
 const MODULES: readonly [TowerModule, TowerModule, TowerModule] = ['fire', 'electric', 'powder'];
 const LEGACY_DROP_RATES = Object.freeze({ material: .4, module: .1 });
-const DESERT_DROP_RATES = Object.freeze({ material: .16, module: .03 });
+const SALVAGE_DROP_RATES = Object.freeze({ material: .16, module: .03 });
+const DENSE_MATERIAL_RATE = .05;
+const MATERIAL_DENSITY_THRESHOLD = 5;
+const MODULE_DENSITY_THRESHOLD = 2;
 const MODULE_PICKUP_RADIUS = 20;
 const BURN_INTERVAL = 20;
 const BURN_PULSES = 3;
@@ -35,14 +38,17 @@ export function createDesertSalvage(seed: number): DesertSalvage {
 }
 
 export function dropDesertSalvage(salvage: DesertSalvage, repair: DesertRepair, { x, y }: Position, context: StageContext): void {
-  const rates = context === DESERT_DROP_RATE_CONTEXT ? DESERT_DROP_RATES : LEGACY_DROP_RATES;
+  const dynamic = hasDynamicSalvage(context);
+  const rates = dynamic || context === DESERT_DROP_RATE_CONTEXT ? SALVAGE_DROP_RATES : LEGACY_DROP_RATES;
+  const materialRate = dynamic && repair.supplies.length >= MATERIAL_DENSITY_THRESHOLD ? DENSE_MATERIAL_RATE : rates.material;
+  const moduleRate = dynamic && salvage.modules.length >= MODULE_DENSITY_THRESHOLD ? 0 : rates.module;
   salvage.lootRng = (Math.imul(salvage.lootRng, 1664525) + 1013904223) >>> 0;
   const roll = salvage.lootRng / 4294967296;
-  if (roll < rates.material) {
-    const material = roll < rates.material * 2 / 3 ? 'wood' : 'iron';
+  if (roll < materialRate) {
+    const material = roll < materialRate * 2 / 3 ? 'wood' : 'iron';
     repair.supplies = [...repair.supplies, { x, y, material }];
-  } else if (roll < rates.material + rates.module) {
-    const module = MODULES[Math.floor((roll - rates.material) * (MODULES.length / rates.module))];
+  } else if (roll >= rates.material && roll < rates.material + moduleRate) {
+    const module = MODULES[Math.floor((roll - rates.material) * (MODULES.length / moduleRate))];
     salvage.modules = [...salvage.modules, { x, y, module }];
   }
 }

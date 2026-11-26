@@ -1,5 +1,5 @@
 import type { World } from './core.js';
-import { ANTARCTIC_BARRAGE_CONTEXT } from './stage-rules.js';
+import { ANTARCTIC_BARRAGE_CONTEXT, stageMechanicContext } from './stage-rules.js';
 
 const FIRST_VOLLEY_TICKS = [9870, 10110];
 const LANE_STEP = .16;
@@ -22,7 +22,7 @@ export function antarcticBarrageVolleyIndex(barrage: AntarcticBarrage, tick: num
 }
 
 export function stepAntarcticBarrage(world: World, damage: number): void {
-  if (world.context !== ANTARCTIC_BARRAGE_CONTEXT || world.phase.kind === 'lost') return;
+  if (stageMechanicContext(world.context) !== ANTARCTIC_BARRAGE_CONTEXT || world.phase.kind === 'lost') return;
   const { tick } = world;
   const { warningTicks, volleyOffsets, count, shotSpeed, shotLife } = ANTARCTIC_BARRAGE;
   const firstVolleyTick = FIRST_VOLLEY_TICKS.find(first => first - warningTicks === tick);
